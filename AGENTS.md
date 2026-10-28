@@ -1,0 +1,213 @@
+# Clip Engine — what we've learned so far
+
+**These are observations, not laws.** Most come from two reference clips George
+supplied. Where something is measured, the number is given. Where it's one
+creator's habit, it says so. Confidence grows as references accumulate — it does
+not start high.
+
+Only a small set of things are enforced in `engine/gates.py`, and those are
+genuine defects (clipping audio, cuts inside a word, captions under the platform
+UI, missing rights), never matters of taste. Tagged **[checked]** below.
+
+## What you produce
+
+One `edit.json` validated against `schema/edit.schema.json`. A renderer executes
+it. You decide the edit; you don't push pixels.
+
+That split exists so the edit is reviewable before a frame renders, diffable,
+and portable between ffmpeg and Resolve.
+
+## Never
+
+- Never render before running `engine.gates.check` and reading the result.
+- Never invent a timestamp. Every in/out traces to a detector output or a word
+  timestamp.
+- Never build a claim from non-contiguous speech. **[checked]**
+- Never guess a speaker. Uncertain attribution holds. **[checked]**
+- Never identify a person from appearance alone. **[checked]**
+- Never ship a source without a rights basis. **[checked]**
+- Never silently sanitise a master. Mask the caption track; leave the audio.
+- Never claim a clip was exported without reading the file back.
+
+---
+
+## The references
+
+| | **R1** | **R2** |
+|---|---|---|
+| | CS2, renyan, "cheater banned" | VALORANT, Polymarket bracket |
+| Duration | **80.3s** | **20.2s** |
+| Cuts | 8 (6.0/min, mean shot 8.9s) | **0** |
+| Speech coverage | **50%** | **96%** |
+| Speech rate | 119 wpm | **256 wpm** |
+| Loudness | **−11.79 LUFS**, +1.25 dBTP | **−14.26 LUFS**, −0.44 dBTP |
+| Loudness range | 13.70 LU | **1.30 LU** |
+| Seam | **0.418** | **0.4422** |
+| Captions | white + heavy stroke, y≈0.44 | white on blue box, y≈0.747 |
+
+Both are vertical, both are facecam-over-content, both use word-level captions.
+Almost everything else differs — which tells you which choices are structural
+and which are taste.
+
+---
+
+## Three genres
+
+**frag** — tension → release. Few cuts, speech only when it matters.
+**take** — a claim delivered fast. R2: no cuts at all, 96% speech, flat audio.
+**receipts** — a case argued with evidence. R1: half the runtime is deliberate
+silence while the exhibit plays.
+
+The receipts clip is the one my earlier drafts missed entirely, and it's the
+format most of George's material fits.
+
+### Receipts clips, specifically
+R1 held **seven silent stretches of 3.2–9.1s**. That silence is the chat log,
+the scoreboard, the Steam profile, the Match Cancelled banner. **Trimming it
+destroys the format.** Any "remove dead air" instinct is wrong here. **[checked
+— a receipts clip over 85% speech warns]**
+
+Act shape that worked: hook → accusation → exhibit → escalation → exhibit →
+attempt → **failure** → despair → turn → payoff → one-line button. The failure
+act does the real work; without it the payoff means nothing.
+
+---
+
+## Finding the in-point
+
+Anchor on the LAST event and walk backwards to the first irreversible
+commitment. Never a fixed offset — that imports dead air and buries the hook.
+
+| Moment | In-point |
+|---|---|
+| ace | first kill of the streak − 1.5s |
+| 4k / 3k / 2k | first kill − 1.2 / 1.0 / 1.0s |
+| 1vX clutch | the frame the player becomes last alive |
+| flick | the shot − 1.2s |
+| take | the first word of the SETUP, never the claim |
+| receipts | the first word of the accusation |
+
+If the clip runs long, trim from the FRONT. The payoff is at the end.
+
+**Duration is set by the content, not the clock.** The references are 20s and
+80s. The gate warns outside a genre's typical window and rejects only beyond
+5–180s. **[checked]**
+
+---
+
+## Cutting
+
+R1 cut **once per 8.9s**, and every cut landed a median **0.36s** from a
+sentence boundary. R2 never cut at all.
+
+**Cut when the point changes, not to a beat.** No jump cuts to kill pauses, no
+cutting on music. If you're cutting mid-sentence you're following a rhythm the
+format doesn't have.
+
+For frag clips specifically: first-person footage is spatially continuous, so a
+hard cut costs more than the dead air it removes. Cover removals with a speed
+ramp or punch-in. **[checked]** One slow-mo per clip, on the payoff. **[checked]**
+
+Take/receipts cuts land on word boundaries from the transcript. **[checked]**
+
+---
+
+## Framing
+
+VALORANT and CS2 HUDs live at the frame edges — minimap top-left, timer
+top-centre, **killfeed top-right**, abilities bottom-left.
+
+- **L1 blurred pillar** — full 16:9 over a blurred copy. Use when the killfeed
+  or minimap carries meaning, and for broadcast footage.
+- **L2 split** — facecam above, content below. **Seam at 0.42 (measured 0.418
+  and 0.4422 in the two references; George's clip-autopilot independently had
+  0.44).** This is the most solid number we have. No facecam → falls back to
+  L1. **[checked]** A "face" under 2% of frame is a HUD portrait. **[checked]**
+- **L3 crop-to-fill + HUD re-composite** — crop 9:16, then overlay the killfeed
+  and spike timer back. A 9:16 window out of 16:9 keeps full height and crops
+  horizontally, so the killfeed is lost to the *side*; a vertical anchor does
+  nothing unless you also punch in.
+
+**The lower pane is not a gameplay slot.** R1 ran gameplay, a scoreboard, a
+Steam profile, a stats card, a chat log, the report dialog and a banner through
+it. R2 held one static bracket for the whole clip. It's a document viewer.
+
+Safe area at 1080×1920: top 150px, bottom 320px. **[checked]**
+
+---
+
+## Captions
+
+Word-level, 1–3 words, in both references. Changing roughly twice a second.
+
+**Placement has no fixed value.** R1 rides the seam at ~0.44; R2 sits at 0.747,
+in the gap between bracket columns. Both are L2, both are correct. The rule is
+**put the caption where the content isn't** — the gate checks the safe area and
+the killfeed, and otherwise leaves your placement alone. **[checked]**
+
+Phrase-level is for when the written sentence is the product (quote cards).
+Word-level is for when the voice carries the claim and the captions carry
+rhythm. I argued the opposite before seeing R2; R2 was right.
+
+One emphasis colour per card. R1 used white with yellow/red/orange accents;
+R2 used white on a blue box. Pick one system and keep it.
+
+Preserve handle casing, acronyms, map names. **Leviatán, not Leviathan.**
+Whisper garbles these constantly — "paper X" for PRX, "Hanz" for Hent.
+
+Profanity: mask the caption (`F***ING`), leave the audio.
+
+---
+
+## Audio
+
+| | |
+|---|---|
+| Loudness | **−12 LUFS** house default (references: −14.26 and −11.79) |
+| True peak | **−1.0 dBTP**, hard. R1 clips at +1.25 — do not copy that **[checked]** |
+| Duck under speech | 7 dB, 120ms attack, 400ms release |
+| Music | **neither reference has a bed.** Don't add one by default |
+
+Dynamics are a genre choice: R1 swings 13.7 LU between mutter and shout; R2 is
+flat at 1.3 LU because it never stops talking. Match the dial to the format.
+
+Use two-pass loudnorm. Single-pass lands a dB off.
+
+---
+
+## Selection
+
+Detect cheap, understand expensive.
+
+- **Tier 0** Twitch top clips — the crowd already chose.
+- **Tier 1** `detect_audio.py` — vocal RMS plus spectral centroid. A reaction is
+  loud *and* bright; a gunfight is loud and dull. Plus the transcript.
+- **Tier 2** `detect_killfeed.py` — rows by the local player's highlight colour,
+  grouped into rounds.
+- **Tier 3** a vision model, only on a window a lower tier already flagged.
+
+Killfeed detection triggers on the **count of highlighted rows**, not OCR text.
+OCR reads the feed in a minority of frames, and rows differ by a character or
+two so fuzzy matching merges distinct kills. Gating on the player's own-row
+highlight is what prevents kills and deaths being counted together.
+
+**Calibrate before trusting it** — `detect_killfeed.py calibrate` on real
+footage. The ROI in `config/killfeed.yaml` is a guess until you do.
+
+---
+
+## Rights
+
+Client-owned footage is the clean agency model. Reposting a permitted
+streamer's clip to your own channel is one posture; selling edits of
+third-party footage is a riskier one. Keep `permission` on every source.
+
+## Reporting
+
+Exact counts, what was skipped, what wasn't verified. A high score is not a good
+clip, and a server that connects is not a working render.
+
+---
+
+See `STYLE-BASELINE.md` for the full reference measurements and
+`docs/RESOLVE-BUILD.md` for how to build this in Resolve.

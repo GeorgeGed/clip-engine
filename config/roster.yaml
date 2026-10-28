@@ -1,0 +1,42 @@
+# Facecam coordinates are fractions of the SOURCE frame: x,y = top-left of the cam
+# box, w,h = its size. Ported from ~/clip-autopilot/config.yaml, where they were
+# tuned against real streams. A pinned box is used as-is and skips detection.
+#
+# permission: explicit | affiliate | client_owned | none
+#   none is blocked by the rights gate. Keep the proof for explicit.
+
+defaults:
+  facecam: { x: 0.0, y: 0.73, w: 0.23, h: 0.27 }   # fallback only
+  split_ratio: 0.44
+
+streamers:
+  sliggy:
+    permission: explicit
+    facecam: auto
+
+  gofns:                 # FNS
+    permission: explicit
+    # Top-right. Watch-party streams: pin past the watched POV cams.
+    facecam: { x: 0.72, y: 0.26, w: 0.28, h: 0.27 }
+
+  tarik:
+    permission: explicit
+    # Plays looking DOWN while the content he watches has clear frontal faces,
+    # so detection always grabs the wrong one. Pinned corner cam.
+    facecam: { x: 0.755, y: 0.76, w: 0.235, h: 0.235 }
+
+  marved6:
+    permission: explicit
+    # Top-left, alone on screen (ranked) — clean.
+    facecam: { x: 0.0, y: 0.06, w: 0.28, h: 0.26 }
+
+  shanks_ttv:
+    permission: explicit
+    # Top-right, watching-content streams — pin past the on-screen faces.
+    facecam: { x: 0.75, y: 0.19, w: 0.25, h: 0.26 }
+
+  subroza:
+    permission: explicit
+    # Top-left, alone on screen. Looks down, so detection is unreliable, but
+    # there is no competing face — a fixed crop is clean.
+    facecam: { x: 0.07, y: 0.07, w: 0.205, h: 0.26 }

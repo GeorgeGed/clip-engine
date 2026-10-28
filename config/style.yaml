@@ -1,0 +1,49 @@
+# The locked house style. Every number here is enforced by engine/gates.py.
+# Change a value here and the gate changes with it.
+
+canvas: { width: 1080, height: 1920, fps: 60 }
+
+safe_area:
+  top_px: 150
+  bottom_px: 320
+
+layouts:
+  L1: { name: blurred_pillar, blur_sigma: 30, pillar_scale: 1.06 }
+  L2: { name: split_facecam, split_ratio: 0.44, facecam_sharpen: true }
+  L3:
+    name: crop_fill_hud_recomposite
+    anchor_x: 0.5
+    anchor_y: 0.38
+    hud_recomposite:
+      - { element: killfeed,    src: [0.62, 0.05, 0.38, 0.22], dst: [0.44, 0.09], scale: 0.85 }
+      - { element: spike_timer, src: [0.44, 0.02, 0.12, 0.07], dst: [0.42, 0.04], scale: 0.85 }
+
+captions:
+  frag: { style: word,   position_y: 0.64, max_lines: 2, font_size: 76 }
+  take: { style: phrase, position_y: 0.55, max_lines: 2, font_size: 68, words_per_card: 4 }
+  font: fonts/LuckiestGuy-Regular.ttf
+  emphasis_max_per_card: 1
+
+pacing:
+  ramp_frames: 8
+  dead_time_speed: 2.0
+  slowmo_speed: 0.35
+  slowmo_max_source_frames: 30
+  tail_frames: { frag: 72, take: 48 }
+  frag_min_seconds_between_cuts: 4.0
+  take_gap_threshold_ms: 350
+  punch_alternate: [1.0, 1.06]
+
+audio:
+  target_lufs: -14.0
+  true_peak_dbtp: -1.0
+  duck: { amount_db: 7.0, attack_ms: 120, release_ms: 400 }
+  music_lufs: -22.0
+  music_on_frag: false
+
+overlays:
+  credit: { position: top-left, size: 38, margin: 36 }
+
+duration:
+  frag: [12, 35]
+  take: [18, 45]

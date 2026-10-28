@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "davinci-resolve": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/samuelgursky/davinci-resolve-mcp", "davinci-resolve-mcp"],
+      "env": {
+        "RESOLVE_SCRIPT_API": "/Library/Application Support/Blackmagic Design/DaVinci Resolve/Developer/Scripting",
+        "RESOLVE_SCRIPT_LIB": "/Applications/DaVinci Resolve/DaVinci Resolve.app/Contents/Libraries/Fusion/fusionscript.so"
+      }
+    }
+  }
+}
