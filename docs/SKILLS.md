@@ -1,0 +1,127 @@
+# Edit skills — the inventory, ready for Resolve
+
+Every technique observed across the four references, with its measured
+parameters and how to build it. This is what I should be able to execute when
+Resolve opens.
+
+| | R1 | R2 | R3 | **R4** |
+|---|---|---|---|---|
+| | CS2 receipts | VALORANT take | Pause (ad) | **PlatChat podcast** |
+| Duration | 80.3s | 20.2s | 27.8s | **47.1s** |
+| Cuts/min | 6.0 | **0** | 10.8 | **14.0** |
+| Median shot | 7.9s | — | 1.8s | **2.09s** |
+| Loudness | −11.79 | −14.26 | −15.64 | **−20.38** |
+| Layout | split 0.418 | split 0.442 | floating window | **full-frame + replacement** |
+
+Four references, four loudness targets spanning **8.6 LU**. There is no single
+correct level — it is set by format. Podcast clips run quiet.
+
+---
+
+## 1. Multicam speaker cutting *(R4)*
+
+PlatChat cuts **14 times a minute, median shot 2.09s, shortest 0.46s** — to
+whoever is talking. Three participants, each full-frame.
+
+This is the dominant technique in podcast clips and nothing else in the
+reference set uses it. It is also the cheapest energy available: no effects, no
+graphics, just cutting on the speaker change.
+
+**Resolve:** one video track per participant, all synced. Blade at each speaker
+change and disable the inactive ones. With an `edit.json` this is a list of
+`{t, active_track}` and nothing more.
+
+## 2. Full-frame evidence replacement *(R4)*
+
+R1 put evidence in a lower pane. **PlatChat replaces the whole frame with it** —
+VCT partnered-team lists, the 2027 schedule grid, a signing announcement, event
+poster art — then cuts back to the speaker.
+
+Stronger than a split when the graphic is dense and genuinely needs the room.
+Weaker when you want the reaction visible at the same time.
+
+**Resolve:** stills on V2 above the speaker, scaled to fill, hard cut in and
+out. Hold is short — one to three seconds.
+
+## 3. Tilted card overlays *(R4)*
+
+Tweet screenshots dropped over the speaker at an angle, two or three at once,
+not squared to frame. Reads as "receipts" without losing the face.
+
+**Resolve:** PNG on V3, **Transform > Rotation ±4–8°**, drop shadow, scale to
+roughly 60% of frame width. Animate in over 6–8 frames.
+
+## 4. Meme reaction cutout *(R4)*
+
+A face cutout with bold caption dropped in as punctuation — one appears for
+about a second. Use sparingly; one per clip is the ceiling.
+
+## 5. Two-pane split *(R1, R2)*
+
+Facecam above, content below. **Seam at 0.42** — the most reproducible number
+in the whole set (0.418, 0.4422, and clip-autopilot's 0.44 independently).
+
+**Resolve:** facecam V2 zoom 1.322 / Position Y +558; content V1 zoom 1.0 /
+Position Y −147. See `docs/RESOLVE-BUILD.md`.
+
+## 6. Word-level captions *(all four)*
+
+Universal across every reference. Placement and size are not.
+
+| | position_y | glyph height | cadence |
+|---|---|---|---|
+| R1 | 0.44 (on the seam) | 0.052 | ~2.0/s |
+| R2 | 0.747 | 0.039 | ~2.0/s |
+| R3 | 0.897 | 0.110 | 3.14/s |
+| R4 | ~0.62 | ~0.045 | ~2.5/s |
+
+The rule is **put the caption where the content isn't**, not a fixed value.
+
+## 7. Persistent topic banner *(R2, R4)*
+
+R2 held a blue-boxed claim for the whole clip. R4 runs a headline along the
+lower third throughout. Both answer "what am I watching" for someone who
+arrives mid-scroll.
+
+Distinct from R1's hook title, which is on for 1.5s then fades by 2.0s.
+
+## 8. Hook title *(R1)*
+
+Two lines, ALL CAPS, cap height ~140px, one coloured keyword per line, on at
+0.00, holds to 1.5s, 0.5s dissolve out.
+
+## 9. Speed ramps and punch-ins
+
+Not observed in any reference — all four are talking-head formats. Carried from
+the methodology for gameplay: dead time 1.6–2.2x with 8-frame ramps, one
+slow-mo per clip at 0.35x on the payoff.
+
+## 10. Audio
+
+| | target |
+|---|---|
+| Podcast / multi-speaker | **−20 LUFS** (R4) |
+| Talking head | **−14 LUFS** (R2) |
+| Reaction / receipts | **−12 LUFS** (R1, R3) |
+| True peak, always | **−1.0 dBTP** |
+
+Duck game audio 7dB under speech, 120ms attack / 400ms release. Two-pass
+loudnorm — single-pass lands a dB off. **No music bed in any of the four.**
+
+---
+
+## What I can and cannot do yet
+
+**Can, today, headless:** cuts, the two-pane split, L1/L3 layouts with HUD
+re-composite, word captions with emphasis, speed ramps, punch-ins, overlays,
+two-pass loudness, FCPXML export. All in `engine/`, all tested.
+
+**Cannot yet:** multicam speaker cutting (no speaker diarisation — I can't tell
+who is talking), full-frame evidence replacement (no asset library, no way to
+source the right graphic), tilted card overlays (no compositing path), meme
+cutouts, persistent banners.
+
+**The honest gap:** of the ten skills above, the engine does six. The four it
+cannot do are the four that make R4 look expensive — and three of them need
+*assets*, not code. Sourcing the right tweet screenshot at the right second is
+an editorial problem, not a rendering one.
