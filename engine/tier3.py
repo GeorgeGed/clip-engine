@@ -35,6 +35,21 @@ GENRES
 - frag: gameplay tension then release.
 - none: nothing clippable here.
 
+ONE CLIP = ONE NARRATIVE. THIS IS THE RULE THAT MATTERS MOST.
+A clip is about ONE thing, titleable in one line. If the speaker pivots from
+one subject to another, that pivot is a BOUNDARY, not something to clip across.
+
+A region often holds two or three separate topics. Return them as SEPARATE
+clips, each with its own in-point, out-point and narrative. Never return one
+clip that spans a topic change, even if both halves are interesting — a viewer
+who came for the first subject leaves when it turns into the second.
+
+Concretely: a region opened with six seconds about a player transfer and then
+became a long rant about tournament tech problems. That is two clips, or one
+clip of the rant. It is never one clip of both.
+
+A clip that needs "and then he talks about" to describe it is two clips.
+
 THE IN-POINT IS THE HARD PART
 Start at the first word of the SETUP, never at the claim. A claim without its \
 setup is unintelligible. Prefer the moment a NEW topic opens — someone \
@@ -58,11 +73,15 @@ utterances. Never invent one.
 - Names from speech-to-text are often wrong. List any in names_to_verify.
 - If more than one person speaks, say so in risks.
 
-Reply with ONLY a JSON object:
-{"has_clip": bool, "genre": "take|receipts|frag|none", "in_point": number, \
+Reply with ONLY a JSON object. `clips` may hold 0, 1, 2 or 3 entries — one per
+distinct narrative found. Order them strongest first.
+
+{"clips": [{"genre": "take|receipts|frag", "in_point": number, \
 "out_point": number, "setup": str, "claim": str, "consequence": str, \
 "subject": str, "strength": number 0..1, "why": str, \
-"names_to_verify": [str], "risks": [str]}"""
+"names_to_verify": [str], "risks": [str]}]}
+
+Keep setup/claim/consequence to one short line each."""
 
 
 def _api_key() -> str:
@@ -109,7 +128,7 @@ def _snap(t: float | None, starts: list[float], tol: float = 1.5) -> tuple[float
 
 
 def judge(utterances: list[dict], region: tuple[float, float], *,
-          model: str = MODEL_DEFAULT, client=None, pad: float = 60.0) -> Verdict:
+          model: str = MODEL_DEFAULT, client=None, pad: float = 60.0) -> list[Verdict]:
     """`pad` widens the transcript shown to the model beyond the flagged region.
 
     Regions come from acoustic clustering and do not respect where a topic
@@ -124,11 +143,11 @@ def judge(utterances: list[dict], region: tuple[float, float], *,
     lo, hi = region
     inside = [u for u in utterances if lo - pad <= float(u["start"]) <= hi + pad]
     if not inside:
-        return Verdict(False, "none", None, None, why="no transcript in region")
+        return [Verdict(False, "none", None, None, why="no transcript in region")]
 
     lines = "\n".join(f'[{float(u["start"]):.1f}] {u["text"].strip()}' for u in inside)
     msg = client.messages.create(
-        model=model, max_tokens=1200, system=SYSTEM,
+        model=model, max_tokens=4000, system=SYSTEM,
         messages=[{"role": "user", "content":
                    f"A detector flagged {lo:.1f}s to {hi:.1f}s as interesting, but that "
                    f"boundary is acoustic and may cut a topic in half. Transcript below "
@@ -141,31 +160,45 @@ def judge(utterances: list[dict], region: tuple[float, float], *,
     try:
         d = json.loads(raw)
     except json.JSONDecodeError:
-        return Verdict(False, "none", None, None, why=f"unparseable reply: {raw[:120]}")
+        # Distinguish a truncated reply from a malformed one. A low max_tokens
+        # silently cut 24 of 39 regions on the first full run and every one was
+        # reported as "unparseable" — they were valid JSON, just chopped.
+        why = ("reply truncated (stop_reason=%s) — raise max_tokens" % msg.stop_reason
+               if msg.stop_reason == "max_tokens"
+               else f"malformed reply: {raw[:120]}")
+        return [Verdict(False, "none", None, None, why=why)]
 
     starts = [float(u["start"]) for u in inside]
-    notes: list[str] = []
-    in_t, ok_in = _snap(d.get("in_point"), starts)
-    out_t, _ = _snap(d.get("out_point"), starts + [hi])
-    if not ok_in:
-        notes.append(f"in_point {d.get('in_point')} matches no utterance — not trusted")
-    if in_t is not None and not (lo - pad - 2 <= in_t <= hi + pad + 2):
-        notes.append("in_point outside the padded window")
-    if out_t is not None and in_t is not None and out_t <= in_t:
-        notes.append("out_point not after in_point")
+    entries = d.get("clips")
+    if entries is None:                      # tolerate the old single-object shape
+        entries = [d] if d.get("has_clip") else []
+    if not entries:
+        return [Verdict(False, "none", None, None, why="no distinct narrative in region")]
 
-    return Verdict(
-        has_clip=bool(d.get("has_clip")) and not notes,
-        genre=d.get("genre", "none"),
-        in_point=in_t, out_point=out_t,
-        setup=d.get("setup", ""), claim=d.get("claim", ""),
-        consequence=d.get("consequence", ""), subject=d.get("subject", ""),
-        strength=float(d.get("strength") or 0.0),
-        why=d.get("why", ""),
-        names_to_verify=d.get("names_to_verify") or [],
-        risks=d.get("risks") or [],
-        validation=notes,
-    )
+    out: list[Verdict] = []
+    for c in entries[:3]:
+        notes: list[str] = []
+        in_t, ok_in = _snap(c.get("in_point"), starts)
+        out_t, _ = _snap(c.get("out_point"), starts + [hi + pad])
+        if not ok_in:
+            notes.append(f"in_point {c.get('in_point')} matches no utterance — not trusted")
+        if in_t is not None and not (lo - pad - 2 <= in_t <= hi + pad + 2):
+            notes.append("in_point outside the padded window")
+        if out_t is not None and in_t is not None and out_t <= in_t:
+            notes.append("out_point not after in_point")
+        out.append(Verdict(
+            has_clip=not notes,
+            genre=c.get("genre", "none"),
+            in_point=in_t, out_point=out_t,
+            setup=c.get("setup", ""), claim=c.get("claim", ""),
+            consequence=c.get("consequence", ""), subject=c.get("subject", ""),
+            strength=float(c.get("strength") or 0.0),
+            why=c.get("why", ""),
+            names_to_verify=c.get("names_to_verify") or [],
+            risks=c.get("risks") or [],
+            validation=notes,
+        ))
+    return out
 
 
 if __name__ == "__main__":
@@ -178,4 +211,5 @@ if __name__ == "__main__":
     ap.add_argument("--model", default=MODEL_DEFAULT)
     a = ap.parse_args()
     utt = json.loads(pathlib.Path(a.transcript).read_text())
-    print(json.dumps(judge(utt, (a.start, a.end), model=a.model).as_dict(), indent=2))
+    vs = judge(utt, (a.start, a.end), model=a.model)
+    print(json.dumps([v.as_dict() for v in vs], indent=2))

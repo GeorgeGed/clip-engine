@@ -73,6 +73,40 @@ act does the real work; without it the payoff means nothing.
 
 ---
 
+## One clip = one narrative
+
+**The rule George gave after reviewing the first 29 clips, and the one that
+matters most.** A clip is about ONE thing, titleable in one line. When the
+speaker pivots from one subject to another, that pivot is a **boundary**, not
+something to clip across.
+
+A region usually holds two or three separate topics. Return them as separate
+clips, each with its own in-point and out-point. Never one clip spanning a
+topic change, however good both halves are — a viewer who came for the first
+subject leaves when it becomes the second.
+
+**The case that taught it.** Clip 3 of the first delivery ran 0:36:17–0:37:11:
+
+```
+0:36:17  "Sentinels has reached an agreement..."        <- a transfer story
+0:36:23  "...tech issues we'll probably see             <- PIVOT
+          in the new circuit"
+0:36:34  "these open qualifiers are gonna be an         <- the actual clip
+          absolute shit show" ... ping, cheaters,
+          no Riot tech support, delays, controversy
+```
+
+Six seconds of one story, then a rant about something else. With the rule
+applied, Tier 3 returns the rant alone at 0:36:34–0:37:11, 37s instead of 54s,
+and drops the transfer fragment because six seconds cannot carry a clip.
+
+**The test:** if describing the clip needs the words "and then he talks about",
+it is two clips.
+
+Note this is NOT the same problem as over-long clips. Measured on the first 29:
+clips over 100s had *higher* mean strength (0.57) than clips under 70s (0.50).
+Length and multi-narrative are separate defects and need separate fixes.
+
 ## Finding the in-point
 
 Anchor on the LAST event and walk backwards to the first irreversible

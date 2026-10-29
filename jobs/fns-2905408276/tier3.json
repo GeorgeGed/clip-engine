@@ -1,0 +1,103 @@
+[
+  {
+    "region": [
+      5712.7,
+      5855.15
+    ],
+    "audio_rank": 1,
+    "audio_peak": 1.0,
+    "audio_mean": 0.616,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 5668.5,
+    "out_point": 5724.1,
+    "setup": "\"Yeet machine has never been. Okay. This is what happened. All these people like cloudy acts like Sam and shanks...\"",
+    "claim": "\"Cane's era is basically the new Sinatra\", a trendsetter whose mannerisms get copied.",
+    "consequence": "\"people just copy it because they worship him he's the overlord of the young\"",
+    "subject": "Cane's era as the trendsetter that NA streamers imitate",
+    "strength": 0.55,
+    "why": "A named judgement on several creators with a clear thesis and a quotable closing line. It opens at a natural restart of the point.",
+    "names_to_verify": [
+      "Cane's era",
+      "Sinatra",
+      "Yeet machine",
+      "cloudy",
+      "Sam",
+      "shanks",
+      "Nathan"
+    ],
+    "risks": [
+      "Multiple speakers: another voice interjects ('Yeah', 'Okay').",
+      "The opening is somewhat mid-conversation and refers to context before 5668.",
+      "The 5724.1 line begins with the tail of this topic ('Gen Z at least in NA') before the coaching question. The out-point cuts that tail.",
+      "The name list is jumbled by speech-to-text."
+    ],
+    "validation": []
+  },
+  {
+    "region": [
+      5712.7,
+      5855.15
+    ],
+    "audio_rank": 1,
+    "audio_peak": 1.0,
+    "audio_mean": 0.616,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 5724.1,
+    "out_point": 5876.6,
+    "setup": "Chat asks: \"Val your plan on becoming a coach or is it something that just came up\"",
+    "claim": "\"I never actually planned on coaching... a fun thing where I can combine streaming with coaching.\" It's unpaid and he won't coach a big org.",
+    "consequence": "\"Coaching is a very stressful job... you need the exact same passion you have as a player... I don't think that I have that right now.\"",
+    "subject": "Val explains why he is coaching for fun and won't coach full-time",
+    "strength": 0.45,
+    "why": "A real chat exchange where the streamer reveals he is coaching a team (unnamed, 'we'll see soon') and gives his reasons for not going further.",
+    "names_to_verify": [
+      "Val"
+    ],
+    "risks": [
+      "Multiple speakers: a host or co-host asks the questions.",
+      "The in-point line starts with the tail of the Cane's era topic; the coaching question begins partway through that line.",
+      "The out-point at 5876.6 trims the last words 'that right now'. Extend by a few seconds if possible.",
+      "The team is never named, so the payoff is soft.",
+      "A long silence follows the question (5724 to 5752)."
+    ],
+    "validation": []
+  },
+  {
+    "region": [
+      2897.65,
+      3034.9
+    ],
+    "audio_rank": 2,
+    "audio_peak": 0.894,
+    "audio_mean": 0.694,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 2949.4,
+    "out_point": 3090.7,
+    "setup": "\"Sentinels rebuild, hear me out. Rob is cooking for something and we don't know what it is yet.\"",
+    "claim": "\"This is an insane lineup... this is their ideal lineup for sure.\" He backs it with a Real Madrid 2014-2017 super-team comparison.",
+    "consequence": "\"This is literally a super team though. And we know how super teams can go sometimes.\"",
+    "subject": "Sentinels' rumored rebuilt roster as a super team, compared to Real Madrid",
+    "strength": 0.5,
+    "why": "It opens on a clear roster-news topic, gives a hot take and an analogy, and ends on a hedge about how super teams can fail. The Real Madrid tangent is a bit long but supports the same point.",
+    "names_to_verify": [
+      "Sentinels",
+      "Rob",
+      "John QT",
+      "Redux",
+      "oxyduelist",
+      "Bale",
+      "Benzema",
+      "Ronaldo"
+    ],
+    "risks": [
+      "Speech-to-text lineup names are garbled, so the roster may be wrong.",
+      "The sentence at 3070.9 ends with 'Can mods...', which starts a pivot to the coaching/mods topic. Trim the clip there.",
+      "He may be reading chat or reacting to someone else ('are you guys seeing this kid?'), so more than one voice may be involved.",
+      "The Real Madrid tangent in the middle (2987-3058) slows the pace."
+    ],
+    "validation": []
+  }
+]
