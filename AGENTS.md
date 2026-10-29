@@ -203,7 +203,26 @@ Detect cheap, understand expensive.
   loud *and* bright; a gunfight is loud and dull. Plus the transcript.
 - **Tier 2** `detect_killfeed.py` — rows by the local player's highlight colour,
   grouped into rounds.
-- **Tier 3** a vision model, only on a window a lower tier already flagged.
+- **Tier 3** `engine/tier3.py` — a model reads the region transcript and
+  locates the clip. Only on a window a lower tier flagged; it costs per call.
+
+### Why Tier 3 is not optional
+Measured on FNS VOD 2905408276. The reveal line sits at 0:47:16:
+
+| method | in-point | error |
+|---|---|---|
+| loudness peak | 0:48:27 | +71s |
+| regex topic-shift markers | no marker found in 9 of 12 regions | — |
+| crowd (clips) | 0:47:33 | +17s, starts mid-tease |
+| **Tier 3** | **0:47:17** | **+1s** |
+
+**A region is a POINTER, not a boundary.** Regions come from acoustic
+clustering and cut topics in half. Unpadded, the model saw a truncated reveal
+and correctly trimmed before it — a defensible clip of the wrong moment.
+`judge()` pads ±60s and is told it may start outside the flagged window.
+
+**Transcribe the whole VOD once, then slice.** Padded regions overlap heavily;
+transcribing them individually costs several times more audio than the VOD.
 
 Killfeed detection triggers on the **count of highlighted rows**, not OCR text.
 OCR reads the feed in a minority of frames, and rows differ by a character or
