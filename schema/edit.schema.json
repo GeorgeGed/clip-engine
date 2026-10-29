@@ -392,6 +392,20 @@
           },
           "in_fight": {
             "type": "boolean"
+          },
+          "punch_to": {
+            "type": "number",
+            "minimum": 1.0,
+            "maximum": 1.6,
+            "description": "Animate the punch from `punch` to this value across the segment."
+          },
+          "punch_ease": {
+            "enum": [
+              "linear",
+              "in",
+              "out",
+              "in_out"
+            ]
           }
         }
       }
@@ -593,6 +607,22 @@
           },
           "margin": {
             "type": "number"
+          },
+          "in": {
+            "type": "number",
+            "minimum": 0
+          },
+          "out": {
+            "type": "number",
+            "minimum": 0
+          },
+          "ease": {
+            "enum": [
+              "linear",
+              "in",
+              "out",
+              "in_out"
+            ]
           }
         }
       }
@@ -687,6 +717,63 @@
         },
         "audio_codec": {
           "type": "string"
+        }
+      }
+    },
+    "effects": {
+      "description": "Frame-timed visual punctuation: shakes, flashes, glows, whips, zoom punches.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "type",
+          "at"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "enum": [
+              "shake",
+              "flash",
+              "glow",
+              "whip_pan",
+              "zoom_punch",
+              "rgb_split"
+            ]
+          },
+          "at": {
+            "type": "number",
+            "minimum": 0
+          },
+          "duration": {
+            "type": "number",
+            "minimum": 0.02,
+            "maximum": 2.0
+          },
+          "intensity": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "0..1. Flashes are capped lower by the gate."
+          },
+          "ease": {
+            "enum": [
+              "linear",
+              "in",
+              "out",
+              "in_out"
+            ]
+          },
+          "motivation": {
+            "type": "string",
+            "description": "What in the footage this punctuates. Unmotivated effects are decoration."
+          },
+          "asset": {
+            "type": "string"
+          },
+          "rights_basis": {
+            "type": "string"
+          }
         }
       }
     }

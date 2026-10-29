@@ -62,6 +62,13 @@ FACECAM_FRAME_FRACTION_FLOOR = 0.02  # UI faces sit near 1%; a real webcam is se
 WORD_BOUNDARY_TOLERANCE_S = 0.06
 RIGHTS_OK = {"explicit", "affiliate", "client_owned"}
 
+# Photosensitivity. WCAG's general flash threshold is three flashes in any one
+# second; a "juice" layer of flashes and strobes is exactly where this gets
+# broken by accident. Intensity is capped too — a full-brightness white frame
+# is the dangerous case.
+MAX_FLASHES_PER_SECOND = 3
+MAX_FLASH_INTENSITY = 0.8
+
 
 @dataclass
 class GateResult:
@@ -134,6 +141,31 @@ def check(
     for s in (e.get("audio") or {}).get("sfx", []) or []:
         if not s.get("rights_basis"):
             r.held.append(f"sfx {s.get('asset')!r} has no rights basis")
+
+    # ── Effects: motivation, rights, and photosensitivity ─────────────────
+    effects = e.get("effects", []) or []
+    flashes = sorted(float(x["at"]) for x in effects if x.get("type") == "flash")
+    for i in range(len(flashes)):
+        window = [t for t in flashes if flashes[i] <= t < flashes[i] + 1.0]
+        if len(window) > MAX_FLASHES_PER_SECOND:
+            r.rejected.append(
+                f"{len(window)} flashes inside one second at {flashes[i]:.2f}s — "
+                f"over the photosensitivity threshold of {MAX_FLASHES_PER_SECOND}"
+            )
+            break
+    for x in effects:
+        if x.get("type") == "flash" and float(x.get("intensity", 0.5)) > MAX_FLASH_INTENSITY:
+            r.rejected.append(
+                f"flash at {x['at']}s has intensity {x['intensity']} "
+                f"(cap {MAX_FLASH_INTENSITY})"
+            )
+        if x.get("asset") and not x.get("rights_basis"):
+            r.held.append(f"effect asset {x['asset']!r} has no rights basis")
+        if not x.get("motivation"):
+            r.warnings.append(
+                f"{x.get('type')} at {x.get('at')}s has no motivation — "
+                "effects that punctuate nothing are decoration"
+            )
 
     # ── Duration ───────────────────────────────────────────────────────────
     rng = e.get("range", {})

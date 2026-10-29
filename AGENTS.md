@@ -175,6 +175,25 @@ Use two-pass loudnorm. Single-pass lands a dB off.
 
 ---
 
+## Visual punctuation (the "juice" layer)
+
+Added after studying Pause (pausevfx), an AI editing product whose feature list
+is a good checklist. Expressed as `effects[]` in the edit contract:
+`shake`, `flash`, `glow`, `whip_pan`, `zoom_punch`, `rgb_split`.
+
+- **Every effect needs a `motivation`** — what in the footage it punctuates. An
+  effect that punctuates nothing is decoration, and the gate warns on it.
+- **Flashes: max 3 per second, intensity ≤ 0.8.** **[checked — rejects]** This
+  is the WCAG general flash threshold. A juice layer is exactly where
+  photosensitivity problems get introduced by accident.
+- Effect assets need a rights basis like any other. **[checked]**
+- Punch-ins can animate (`punch` → `punch_to`) with an `ease`, and overlays
+  carry `in`/`out` timing.
+
+**Pause's headline feature is "cut the dead air" — do not apply that globally.**
+It is right for reaction content and it would destroy a receipts clip, where
+the silence is the evidence. Genre decides.
+
 ## Selection
 
 Detect cheap, understand expensive.

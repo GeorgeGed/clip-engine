@@ -199,7 +199,62 @@ underneath.
 
 ---
 
-## 7. Open questions for the next references
+## 7. R3 — Pause (pausevfx), and what it actually is
+
+`pausevfx.com` / the 28 Oct launch post. **This is not a reference edit — it is
+a product advertisement**, and the distinction matters before copying anything
+from it.
+
+Pause is an AI video editing product ("1st senior agentic AI content editor",
+founders Dev Monga and Fardan Ali). The launch video is captioned "Introducing
+ChatGPT 6.1 Terra for Video Editing"; the sign-off card carries a **"Not
+affiliated with OpenAI"** disclaimer, so the ChatGPT naming is borrowed brand,
+not a partnership.
+
+**Measured:** 27.75s, **1920×1080 landscape**, 30fps, −15.64 LUFS, −1.42 dBTP,
+LRA 4.90. Five cuts, but clustered — one 16.2s opening take, then four cuts
+inside 1.4s at the end.
+
+**Its own look** is cream-background product marketing: floating rounded video
+windows with drop shadows, kinetic marketing copy, orange and green accents, a
+Premiere timeline screenshot as proof. Copying that style produces adverts, not
+gaming clips. It is not a template for R1/R2-style work.
+
+### What IS worth taking: their technique list
+
+The video and the about page advertise the same checklist, and it's a good one:
+
+| Technique | Clip Engine status |
+|---|---|
+| Cut dead air and filler | `segments` |
+| Reframe the facecam | `layout` L2 + crop |
+| Zoom / punch-in on reactions, eased | `segments[].punch` → now animatable |
+| Word-level captions | `captions` |
+| Music cut to the edit, ducked under VO | `audio.music` + `audio.duck` |
+| Frame-timed SFX on the punchline | `audio.sfx` |
+| Shakes, flashes, glows on separate tracks | **was missing — now `effects`** |
+
+Two things they do that we didn't express at all: a **visual punctuation layer**
+(shake/flash/glow/whip/zoom-punch) and **timed overlays**. Both are now in the
+schema.
+
+### The architecture match
+Pause delivers an **editable Premiere project, not a flat export** — "every
+change stays editable", clips and keyframes as timeline layers. That is
+independently the same bet as `edit.json` → FCPXML: hand over a timeline, not a
+rendered file. Worth noting that a funded competitor reached the same
+conclusion.
+
+### The tension worth naming
+**"Cut the dead air" is their headline feature, and it would destroy an R1
+receipts clip.** Half of R1's runtime is deliberate silence carrying the
+evidence. Pause's defaults are tuned for Roblox/Minecraft/Fortnite reaction
+content, where dead air genuinely is dead. For George's material the rule has to
+be conditional on genre, not global.
+
+---
+
+## 8. Open questions for the next references
 
 1. Does the 0.42–0.44 seam hold, or do some creators go 50/50?
 2. Is the narrator intro common, or just R2?
