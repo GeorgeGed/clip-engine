@@ -44,6 +44,15 @@ def find_in_point(
 ) -> dict | None:
     """Pick the in-point inside a region: the first STRONG topic shift.
 
+    DOES NOT WORK YET. Tested across 12 real regions of FNS VOD 2905408276:
+    9 found no marker at all and fell back to the region start, and the 3 that
+    matched were false positives ("Guys 2014 to 2017", "Also, I don't know...").
+    It was built against one hand-picked example and overfits to it.
+
+    Locating a moment inside a region is a semantic problem, not a regex one —
+    it belongs in the Tier 3 model pass, given the region transcript. Keep this
+    only as the fallback-to-region-start behaviour until that exists.
+
     Falls back to the first utterance in the region, never to a weak marker —
     a weak marker mid-region means you are cutting into a continuing thought.
     """

@@ -119,6 +119,62 @@ def analyse(wav_path: str | Path, *, offset: float = 0.0) -> dict:
     }
 
 
+def regions(events: list[dict], *, join_gap: float = 45.0,
+            min_events: int = 2, max_len: float = 150.0) -> list[dict]:
+    """Group spikes into contiguous elevated stretches.
+
+    The detector finds WHERE something is happening, not WHEN it starts. On FNS
+    VOD 2905408276 the 0:46:30-0:49:30 stretch scored 0.69-0.89 throughout, and
+    its peak sat 54s after the moment. So emit the stretch and let the
+    transcript locate the in-point inside it (candidates.find_in_point).
+    """
+    if not events:
+        return []
+    ev = sorted(events, key=lambda e: e["t"])
+    groups: list[list[dict]] = [[ev[0]]]
+    for e in ev[1:]:
+        if e["t"] - groups[-1][-1]["t"] <= join_gap:
+            groups[-1].append(e)
+        else:
+            groups.append([e])
+
+    # A long elevated run is SPLIT, never trimmed. Trimming to a window around
+    # the peak silently deletes material: on FNS VOD 2905408276 a single run
+    # spanned 0:46:49-0:52:36, and keeping only the peak's 150s threw away the
+    # crowd-validated moment at 0:47:33 entirely.
+    chunks: list[list[dict]] = []
+    for g in groups:
+        if len(g) < min_events:
+            continue
+        if g[-1]["t"] - g[0]["t"] <= max_len:
+            chunks.append(g)
+            continue
+        cur = [g[0]]
+        for e in g[1:]:
+            if e["t"] - cur[0]["t"] > max_len:
+                chunks.append(cur)
+                cur = [e]
+            else:
+                cur.append(e)
+        if len(cur) >= min_events:
+            chunks.append(cur)
+
+    out = []
+    for g in chunks:
+        if len(g) < min_events:
+            continue
+        scores = [reaction_score(e) for e in g]
+        out.append({
+            "start": round(g[0]["t"], 2), "end": round(g[-1]["t"], 2),
+            "n_spikes": len(g),
+            "peak_t": round(max(g, key=lambda e: reaction_score(e))["t"], 2),
+            "peak": round(max(scores), 3),
+            "mean": round(sum(scores) / len(scores), 3),
+        })
+    out.sort(key=lambda r: -(r["peak"] * 0.6 + r["mean"] * 0.4))
+    return out
+
+
 def reaction_score(ev: dict) -> float:
     """0..1. A reaction is loud *and* bright; a gunfight is loud and dull.
 
