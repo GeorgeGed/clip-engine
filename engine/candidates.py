@@ -40,7 +40,7 @@ STAKES_BONUS = {
     "last_alive": 0.15, "thrifty": 0.10, "eco": 0.10, "none": 0.0,
 }
 
-WEIGHTS = {"rarity": 0.45, "stakes": 0.20, "reaction": 0.25, "claim": 0.30}
+WEIGHTS = {"rarity": 0.40, "stakes": 0.18, "reaction": 0.22, "claim": 0.27, "crowd": 0.30}
 REDUNDANCY_PENALTY = 0.35
 
 TAIL_S = {"frag": 1.2, "take": 0.8, "hybrid": 1.0}
@@ -76,8 +76,13 @@ def score_candidate(
     *,
     reaction: float = 0.0,
     claim_strength: float = 0.0,
+    crowd: float = 0.0,
     redundant: bool = False,
 ) -> tuple[float, dict[str, float]]:
+    """`crowd` is the room reacting: a live chat spike (engine/chat_monitor) or
+    clips viewers made at that timestamp (engine/detect_crowd). It is weighted
+    heavily on purpose. On the FNS VOD the vocal-reaction detector put the
+    coaching reveal 54s late; the crowd signal put it on the actual line."""
     rarity = RARITY.get(event, 0.1)
     stake = min(sum(STAKES_BONUS.get(s, 0.0) for s in stakes), 0.4)
     comp = {
@@ -85,6 +90,7 @@ def score_candidate(
         "stakes": round(WEIGHTS["stakes"] * (stake / 0.4 if stake else 0.0), 4),
         "reaction": round(WEIGHTS["reaction"] * max(0.0, min(reaction, 1.0)), 4),
         "claim": round(WEIGHTS["claim"] * max(0.0, min(claim_strength, 1.0)), 4),
+        "crowd": round(WEIGHTS["crowd"] * max(0.0, min(crowd, 1.0)), 4),
     }
     total = sum(comp.values())
     if redundant:
