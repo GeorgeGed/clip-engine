@@ -19,10 +19,36 @@ layouts:
       - { element: spike_timer, src: [0.44, 0.02, 0.12, 0.07], dst: [0.42, 0.04], scale: 0.85 }
 
 captions:
-  frag: { style: word,   position_y: 0.64, max_lines: 2, font_size: 76 }
-  take: { style: phrase, position_y: 0.55, max_lines: 2, font_size: 68, words_per_card: 4 }
   font: fonts/LuckiestGuy-Regular.ttf
   emphasis_max_per_card: 1
+  default_preset: seam
+
+  # Measured off the references. See docs/TECHNIQUE-SPEC.md.
+  presets:
+    seam:          # R1 (CS2 receipts) - rides the facecam/content seam
+      position_y: 0.44
+      glyph_height: 0.052
+      cards_per_sec: 2.0
+      case: as_spoken
+      placement: content_aware
+      treatment: { fill: white, stroke_px: 8, shadow: true }
+
+    boxed:         # R2 (VALORANT take) - white on a solid box, low in the pane
+      position_y: 0.747
+      glyph_height: 0.039
+      cards_per_sec: 2.0
+      case: sentence
+      placement: content_aware
+      treatment: { fill: white, box: "#2B5CE6", stroke_px: 0 }
+
+    bottom_loud:   # R3 (Pause) - big, fast, fixed low. Covers HUD.
+      position_y: 0.897
+      glyph_height: 0.110
+      cards_per_sec: 3.14
+      card_ms: { min: 100, median: 167, max: 700 }
+      case: lowercase_as_spoken
+      placement: fixed
+      treatment: { fill: white, stroke_px: 10, shadow: true }
 
 pacing:
   ramp_frames: 8
