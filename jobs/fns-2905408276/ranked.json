@@ -10,46 +10,37 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 2829.3,
-    "out_point": 2882.1,
-    "setup": "Oh, yeah, I didn't even tell you guys",
-    "claim": "So I'm gonna be coaching in the open qualifier and we're gonna be streaming it chat",
-    "consequence": "it's gonna be obvious soon... you should already have the lineup in your head unless you're done. So we'll see how that goes",
-    "subject": "Streamer reveals they will coach a team in the open qualifier and tease the unnamed lineup",
+    "out_point": 2931.9,
+    "setup": "\"Oh, yeah, I didn't even tell you guys\"",
+    "claim": "\"I'm gonna be coaching in the open qualifier and we're gonna be streaming it\"",
+    "consequence": "Won't name the lineup yet and hints it will be obvious. Then: \"how am I supposed to stream League of Legends worlds if... I have to sit here and make comps\"",
+    "subject": "Speaker reveals he is coaching a team in the open qualifier and streaming it",
     "strength": 0.5,
-    "why": "The reveal opens a new topic with a clear announcement ('I didn't even tell you guys'), then a claim, then a teaser payoff. It is a personal reveal, which is clippable, but the lineup stays unnamed and the delivery is hesitant. The earlier segment (2720-2824, teamless players like knights, demon one, second and oxy, plus the Cryo/Austin contract talk) is a weaker alternative because its answers are hedged. The clip stops at 2882.1, before the 2906 section on how to stream while preparing, which is logistics.",
+    "why": "A personal reveal and chat tease with a stated workload problem (map pool, agents, new meta). The lineup is withheld, which weakens the payoff.",
     "names_to_verify": [
-      "MIBR",
-      "Cryo",
-      "Austin",
-      "knights",
-      "demon one",
-      "second",
-      "oxy",
-      "Victor",
-      "Kane zero",
-      "Chamber"
+      "Chamber",
+      "League of Legends worlds"
     ],
     "risks": [
-      "The lineup is deliberately not named, so the payoff is a tease.",
-      "Mumbled, fragmented lines around 2844-2871, with gaps in the transcript.",
-      "Possible second voice: 'Yeah, yeah, yeah' at 2856.8 may be a co-host or chat.",
-      "Speech-to-text may have garbled names and details."
+      "Gap in the transcript between 2882 and 2906",
+      "The ending at 2931.9 is ragged and shifts toward a map pool note",
+      "Lineup is not named, so the payoff is a tease"
     ],
     "validation": [],
     "crowd_score": 0.812,
     "crowd_views": 3548,
-    "seconds": 52.8,
-    "virality": 0.6972,
+    "seconds": 102.6,
+    "virality": 0.6297,
     "components": {
       "strength": 0.225,
       "crowd": 0.203,
       "reaction": 0.1192,
-      "fit": 0.15
+      "fit": 0.0825
     },
     "flags": [
-      "speaker attribution needs checking before this ships"
+      "103s is long for short-form \u2014 check the out-point"
     ],
-    "file": "01_0h47m09s_streamer-reveals-they-will-coach-a-tea.mp4"
+    "file": "01_0h47m09s_speaker-reveals-he-is-coaching-a-tea.mp4"
   },
   {
     "region": [
@@ -62,29 +53,25 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 3232.6,
-    "out_point": 3276.9,
-    "setup": "Been watching Pedro a little bit here, too. I watched a couple youtube videos of his... How did you and Pedro become friends?",
-    "claim": "I don't think he considers me a friend, but I considered him a friend. I think it's just one-sided... I was obsessed with him... pushed my way in.",
-    "consequence": "Yeah, parasocial. / It's all that happened. I think it's pretty one-sided.",
-    "subject": "Streamer admits their friendship with Pedro is one-sided and parasocial",
+    "out_point": 3274.3,
+    "setup": "\"Been watching Pedro a little bit here, too. I watched a couple YouTube videos of his\" - then asked how they became friends.",
+    "claim": "\"I don't think he considers me a friend, but I considered him a friend. I think it's just one-sided.\"",
+    "consequence": "\"Obsessed with him... pushed my way in.\" The other speaker answers \"Yeah, parasocial\" and she agrees it's pretty one-sided.",
+    "subject": "Her one-sided friendship with Pedro, which she admits is basically parasocial",
     "strength": 0.35,
-    "why": "This is the only self-contained exchange in the region. It opens on the Pedro topic, gets a direct question, a candid self-deprecating answer and a laughing 'parasocial' reaction. The flagged window starts in the middle of Swiss stage scheduling talk, which is logistics, and ends mid-answer, so it would cut this moment in half. The clip is mild and personality-driven rather than a hard take.",
+    "why": "It's a short, self-deprecating exchange with a clear setup, admission and punchline. It is light and depends on knowing who Pedro is. The Swiss stage scheduling before it is logistics, and the League worlds story after it is a different topic, so both are left out.",
     "names_to_verify": [
-      "Pedro",
-      "K drill",
-      "Selena",
-      "Swiss stage dates (Nov 3 vs 23rd)"
+      "Pedro"
     ],
     "risks": [
-      "More than one person speaks (host/co-streamer asks the question and says 'parasocial'), so speaker attribution is unclear.",
-      "The 'Pedro' reference may be a speech-to-text error.",
-      "Low stakes: the content is a casual personal anecdote with no controversy or news.",
-      "Out-point at 3276.9 is where a tangent about watching Worlds begins, so the clip ends right on the pivot. The tangent itself is not worth including."
+      "More than one person speaks; the question and the 'parasocial' line come from the other speaker.",
+      "The 3240.8 line is garbled speech-to-text ('How do you didn't Pedro become friends?').",
+      "Humor is mild and may not land for viewers who don't know Pedro."
     ],
     "validation": [],
     "crowd_score": 0.632,
     "crowd_views": 496,
-    "seconds": 44.3,
+    "seconds": 41.7,
     "virality": 0.5877,
     "components": {
       "strength": 0.1575,
@@ -95,196 +82,93 @@
     "flags": [
       "speaker attribution needs checking before this ships"
     ],
-    "file": "02_0h53m52s_streamer-admits-their-friendship-with.mp4"
+    "file": "02_0h53m52s_her-one-sided-friendship-with-pedro.mp4"
   },
   {
     "region": [
-      2166.5,
-      2182.95
+      2743.65,
+      2883.6
     ],
-    "audio_rank": 31,
-    "audio_peak": 0.882,
-    "audio_mean": 0.7,
+    "audio_rank": 19,
+    "audio_peak": 0.795,
+    "audio_mean": 0.652,
     "has_clip": true,
     "genre": "take",
-    "in_point": 2177.3,
-    "out_point": 2231.5,
-    "setup": "Sentinels has reached an agreement. I saw that I had that up here here. I mean, yeah, we saw this coming",
-    "claim": "in the new circuit i already said this i've said this on every single stream... these open qualifiers are gonna be an absolute shit show ping issues cheaters",
-    "consequence": "they're going to cause delays, which are going to cause massive, massive amounts of problems and a lot of controversy.",
-    "subject": "Open qualifiers in the new Valorant circuit will be plagued by tech issues, with players left to fix their own setups",
-    "strength": 0.6,
-    "why": "The streamer makes a clear, repeated prediction that open qualifiers will be a mess. The setup is the Sentinels news, the claim is the ping, cheater and tech-support argument, and the consequence is delays and controversy. The flagged window only catches the garbled lead-in, so the real claim sits after it. The clip ends before the 'I agree' counterpoint so it closes on the consequence.",
+    "in_point": 2809.2,
+    "out_point": 2824.4,
+    "setup": "\"Cryo and Austin a contract ending. Do you think either of them will leave?\"",
+    "claim": "\"Austin is never gonna leave... I just don't see a world where they leave after the year\"",
+    "consequence": "\"They've had a very successful year... you can't just leave\"",
+    "subject": "Whether Cryo and Austin leave when their contracts end",
+    "strength": 0.3,
+    "why": "Short roster-retention opinion with a clear question, answer and reason. It is mild and not controversial.",
     "names_to_verify": [
-      "Sentinels",
-      "G2",
-      "Sun",
-      "Gov"
+      "Cryo",
+      "Austin"
     ],
     "risks": [
-      "The lines at 2177-2183 are garbled speech-to-text, so the link between the Sentinels news and the tech-issues claim is unclear.",
-      "More than one speaker is present. A second voice agrees at 2231.5, and the clip cuts before it.",
-      "The 'still better than locking players out of franchise forever' nuance is left out.",
-      "The Sentinels agreement is never explained, so the opening may need a caption.",
-      "The 'Gov thank you for the tier one' donation line at 2168.3 is excluded, which is intentional."
+      "Short and low-stakes",
+      "More than one speaker"
     ],
     "validation": [],
-    "crowd_score": 0.0,
-    "crowd_views": 0,
-    "seconds": 54.2,
-    "virality": 0.5523,
+    "crowd_score": 0.812,
+    "crowd_views": 3548,
+    "seconds": 15.2,
+    "virality": 0.5712,
     "components": {
-      "strength": 0.27,
-      "crowd": 0.0,
-      "reaction": 0.1323,
+      "strength": 0.135,
+      "crowd": 0.203,
+      "reaction": 0.1192,
+      "fit": 0.114
+    },
+    "flags": [
+      "15s is tight",
+      "speaker attribution needs checking before this ships"
+    ],
+    "file": "03_0h46m49s_whether-cryo-and-austin-leave-when-t.mp4"
+  },
+  {
+    "region": [
+      3320.3,
+      3458.3
+    ],
+    "audio_rank": 34,
+    "audio_peak": 0.815,
+    "audio_mean": 0.588,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 3276.9,
+    "out_point": 3329.0,
+    "setup": "\"K drill is the only one that I watched for League of Legends when he was watching worlds finals\"",
+    "claim": "\"I like people who explain things because I'm an idiot\" and he was \"glazing him\"",
+    "consequence": "\"He got me so invested into League worlds\" that he stayed for all five maps while Selena fell asleep",
+    "subject": "Why he only watches Worlds finals through K drill's play-by-play co-stream",
+    "strength": 0.3,
+    "why": "A light personal anecdote with a small payoff. It is a complete story, but it is not controversial.",
+    "names_to_verify": [
+      "K drill",
+      "Selena"
+    ],
+    "risks": [
+      "More than one person speaks",
+      "Low stakes, weak standalone value",
+      "Opens mid-conversation on a parasocial joke"
+    ],
+    "validation": [],
+    "crowd_score": 0.632,
+    "crowd_views": 496,
+    "seconds": 52.1,
+    "virality": 0.5652,
+    "components": {
+      "strength": 0.135,
+      "crowd": 0.158,
+      "reaction": 0.1222,
       "fit": 0.15
     },
     "flags": [
       "speaker attribution needs checking before this ships"
     ],
-    "file": "03_0h36m17s_open-qualifiers-in-the-new-valorant-ci.mp4"
-  },
-  {
-    "region": [
-      4788.3,
-      4925.55
-    ],
-    "audio_rank": 23,
-    "audio_peak": 0.801,
-    "audio_mean": 0.574,
-    "has_clip": true,
-    "genre": "take",
-    "in_point": 4762.2,
-    "out_point": 4827.8,
-    "setup": "Everyone on my team is a streamer. I already gave you a hint. ... if the only Champs you won was with the stream team",
-    "claim": "if we won a tournament with this lineup while streaming It would be so bad for the game. I think the game would die right there",
-    "consequence": "That would be genuinely embarrassing ... Likely not [a kickoff]. I don't think you guys understand how good these teams are ... too many good teams in tier two as well that we probably lose to",
-    "subject": "Streamer's all-streamer team: self-deprecating take on winning a tournament and its realistic chances",
-    "strength": 0.6,
-    "why": "It opens with the reveal that the whole team is streamers and answers a chat question. The hyperbolic claim that the game would die if they won follows, then a grounded consequence: they likely won't make kickoff because tier-two teams are too strong. It is a complete setup, claim and consequence arc, with humor and a mild jab at the scene.",
-    "names_to_verify": [
-      "Cloudy",
-      "Mal",
-      "Neon",
-      "Sam"
-    ],
-    "risks": [
-      "The chat question at 4767.6 is garbled by speech-to-text, so the setup may read unclearly.",
-      "The claim is partly sarcastic and could be taken literally out of context.",
-      "There is a 16s gap between 4796.1 and 4812.1 where the transcript is silent or missing.",
-      "Only one main speaker, but he reads chat questions aloud, so voices may blur.",
-      "The Cloudy bit after 4869 is a separate topic and is excluded."
-    ],
-    "validation": [],
-    "crowd_score": 0.0,
-    "crowd_views": 0,
-    "seconds": 65.6,
-    "virality": 0.5402,
-    "components": {
-      "strength": 0.27,
-      "crowd": 0.0,
-      "reaction": 0.1202,
-      "fit": 0.15
-    },
-    "flags": [
-      "speaker attribution needs checking before this ships"
-    ],
-    "file": "04_1h19m22s_streamer-s-all-streamer-team-self-depr.mp4"
-  },
-  {
-    "region": [
-      5869.25,
-      5984.75
-    ],
-    "audio_rank": 24,
-    "audio_peak": 0.783,
-    "audio_mean": 0.653,
-    "has_clip": true,
-    "genre": "take",
-    "in_point": 5978.8,
-    "out_point": 6043.2,
-    "setup": "Global Eastwards will not be in the partnership cycle. Yeah, I saw this already.",
-    "claim": "Non-partner orgs only picking up teams once they qualify is kind of worse for the scene. But I think people are blowing it out of proportion.",
-    "consequence": "It forces you to be exceptional consistently, and even once signed you could be replaced and end up with nothing. You sacrifice a lot.",
-    "subject": "Reaction to the news that the region will not be in the partnership cycle, and what it means for player job security",
-    "strength": 0.6,
-    "why": "A new topic opens with the player reading the news. He gives a measured counter-take that the reaction is overblown and argues that job instability is the point of the system. It then lands on a clear closing line about sacrifice. The flagged window starts mid-Tarek and knife chat, which is unrelated filler. The real topic begins at 5978.8 and runs past the flagged end.",
-    "names_to_verify": [
-      "Global Eastwards",
-      "Tarek",
-      "Sliggy",
-      "Inspire"
-    ],
-    "risks": [
-      "The transcript ends at 6043.2 and the last line may continue past it, so the out-point could clip the final sentence.",
-      "The news item is only partly named by speech-to-text, so the viewer may not know which league or region it refers to.",
-      "The first lines are him reading chat, so the setup depends on that text being clear on screen or in audio.",
-      "Only one speaker is clearly present, but chat and other voices are referenced."
-    ],
-    "validation": [],
-    "crowd_score": 0.0,
-    "crowd_views": 0,
-    "seconds": 64.4,
-    "virality": 0.5374,
-    "components": {
-      "strength": 0.27,
-      "crowd": 0.0,
-      "reaction": 0.1174,
-      "fit": 0.15
-    },
-    "flags": [
-      "speaker attribution needs checking before this ships"
-    ],
-    "file": "05_1h39m38s_reaction-to-the-news-that-the-region-w.mp4"
-  },
-  {
-    "region": [
-      4093.85,
-      4222.55
-    ],
-    "audio_rank": 32,
-    "audio_peak": 0.869,
-    "audio_mean": 0.586,
-    "has_clip": true,
-    "genre": "take",
-    "in_point": 4113.6,
-    "out_point": 4169.5,
-    "setup": "Do you think Dazzlers will be a promising talent for 20 27 season?",
-    "claim": "I think Dazzlers to join crew as a coach. And I really think that just they can put their differences aside.",
-    "consequence": "He'll be a tough coach to deal with but the players will hopefully respect him enough... Dante and heat might have to you know, they got to just figure it out.",
-    "subject": "Dazzlers joining Crew as a coach, and whether the players would accept his criticism",
-    "strength": 0.55,
-    "why": "A chat question opens a new topic, then comes a named roster judgement with reasoning and a consequence about player friction. It ends cleanly before the next chat question about Virus. The take is hedged and the names are muddled, so the strength is moderate.",
-    "names_to_verify": [
-      "Dazzlers",
-      "crew",
-      "Dante",
-      "heat",
-      "Tyson"
-    ],
-    "risks": [
-      "Speech-to-text names are unreliable, especially 'crew', 'Dante and heat' and 'Dazzlers'.",
-      "The streamer hedges ('we'll see though') and the Dante/heat reference is vague.",
-      "The first half of the claim mumbles and restarts ('I think if you joined, I think you should join crew').",
-      "Context for the 'differences' is assumed to be known to the audience.",
-      "The streamer is reading chat, and there may be a second voice in the room."
-    ],
-    "validation": [],
-    "crowd_score": 0.0,
-    "crowd_views": 0,
-    "seconds": 55.9,
-    "virality": 0.5278,
-    "components": {
-      "strength": 0.2475,
-      "crowd": 0.0,
-      "reaction": 0.1303,
-      "fit": 0.15
-    },
-    "flags": [
-      "payoff is a teaser, not news",
-      "speaker attribution needs checking before this ships"
-    ],
-    "file": "06_1h08m33s_dazzlers-joining-crew-as-a-coach-and-w.mp4"
+    "file": "04_0h54m36s_why-he-only-watches-worlds-finals-th.mp4"
   },
   {
     "region": [
@@ -298,280 +182,170 @@
     "genre": "take",
     "in_point": 5668.5,
     "out_point": 5724.1,
-    "setup": "Yeet machine has never been. Okay. This is what happened. All these people like cloudy acts like Sam and shanks. Like these guys are too impressionable.",
-    "claim": "Cane's era is basically the new Sinatra like it just sets these trends... his mannerisms and then people just copy it because they worship him",
-    "consequence": "he's the overlord of the young Jen at least in America's or at least in NA",
-    "subject": "Cane's era as the trendsetter whose mannerisms young NA players copy, compared with Sinatra",
-    "strength": 0.5,
-    "why": "A named-player judgement with a setup (players copying others), a clear claim (Cane's era is the new Sinatra) and a closing line (overlord of the young generation). The take is complete by about 5724. The next block (from 5724.1) is a separate topic, a Q&A about coaching, which is worth less and is cut by the flagged window's start at 5712.7 mid-take.",
+    "setup": "\"Yeet machine has never been. Okay. This is what happened. All these people like cloudy acts like Sam and shanks...\"",
+    "claim": "\"Cane's era is basically the new Sinatra\", a trendsetter whose mannerisms get copied.",
+    "consequence": "\"people just copy it because they worship him he's the overlord of the young\"",
+    "subject": "Cane's era as the trendsetter that NA streamers imitate",
+    "strength": 0.55,
+    "why": "A named judgement on several creators with a clear thesis and a quotable closing line. It opens at a natural restart of the point.",
     "names_to_verify": [
       "Cane's era",
-      "Sinatra (likely Sinatraa)",
+      "Sinatra",
       "Yeet machine",
       "cloudy",
-      "Sam and shanks",
-      "Nathan",
-      "Jen (likely Gen Z / gen)"
+      "Sam",
+      "shanks",
+      "Nathan"
     ],
     "risks": [
-      "Several people appear to speak, with 'Yeah' and 'Okay' interjections, so the exchange may be messy.",
-      "The 5724.1 line holds the tail of the take ('Jen at least in NA') and then the new coaching question, so ending at 5724.1 may clip the last few words and ending later pulls in the next topic.",
-      "The topic starts earlier, around 5655.6 ('same thing with Sinatra'), but that line starts mid-thought, so 5668.5 is the cleaner entry.",
-      "Speech-to-text is garbled around 'Nathan now means nothing' and the 'Jen' phrasing."
+      "Multiple speakers: another voice interjects ('Yeah', 'Okay').",
+      "The opening is somewhat mid-conversation and refers to context before 5668.",
+      "The 5724.1 line begins with the tail of this topic ('Gen Z at least in NA') before the coaching question. The out-point cuts that tail.",
+      "The name list is jumbled by speech-to-text."
     ],
     "validation": [],
     "crowd_score": 0.0,
     "crowd_views": 0,
     "seconds": 55.6,
-    "virality": 0.525,
+    "virality": 0.5475,
     "components": {
-      "strength": 0.225,
+      "strength": 0.2475,
       "crowd": 0.0,
       "reaction": 0.15,
       "fit": 0.15
     },
-    "flags": [],
-    "file": "07_1h34m28s_cane-s-era-as-the-trendsetter-whose-ma.mp4"
+    "flags": [
+      "speaker attribution needs checking before this ships"
+    ],
+    "file": "05_1h34m28s_cane-s-era-as-the-trendsetter-that-n.mp4"
   },
   {
     "region": [
-      785.55,
-      810.35
+      2166.5,
+      2182.95
     ],
-    "audio_rank": 27,
-    "audio_peak": 0.86,
-    "audio_mean": 0.665,
+    "audio_rank": 31,
+    "audio_peak": 0.762,
+    "audio_mean": 0.7,
     "has_clip": true,
     "genre": "take",
-    "in_point": 782.4,
-    "out_point": 851.1,
-    "setup": "these orgs, right here is the orgs he names that are going to start investing less potentially, okay?",
-    "claim": "These orgs weren't paying their players a fucking dumb amount of money anyway.",
-    "consequence": "So these orcs can just wait it out and then just pick up the rosters they feel are gonna do well... you lose like two to three months of salary before you get picked up.",
-    "subject": "Whether orgs pulling back investment will actually hurt players, since the named orgs never overpaid",
-    "strength": 0.5,
-    "why": "It pushes back on a named claim about orgs cutting investment. It gives a clear argument (the orgs didn't overpay, so they can wait and pick up rosters) and a concrete consequence for players (2-3 months without salary). The setup leans on a reference to 'he' and a list of orgs that the clip never shows, which limits standalone clarity.",
+    "in_point": 2194.8,
+    "out_point": 2238.2,
+    "setup": "\"in the new circuit i already said this i've said this on every single stream\"",
+    "claim": "\"these open qualifiers are gonna be an absolute shit show ping issues cheaters\"",
+    "consequence": "Tech problems will cause delays and controversy; a co-speaker agrees but says \"It is still better than locking players out of franchise forever.\"",
+    "subject": "Open qualifiers in the new circuit will be plagued by tech issues, but still beat franchising",
+    "strength": 0.62,
+    "why": "Clear, repeated opinion with specific reasoning (players as their own tech support, no Riot help) and a short counterpoint that closes the topic.",
     "names_to_verify": [
-      "Perry sucker",
-      "Hundred Thieves",
-      "the orgs 'he' names (not in this region)"
+      "Sentinels",
+      "G2",
+      "Sun"
     ],
     "risks": [
-      "Setup refers to an unnamed 'he' and a list of orgs from earlier in the stream, so viewers may need a caption.",
-      "Opens with 'So yeah, I don't,' a slightly mid-thought start.",
-      "The profitability point at 851-865s is cut off mid-sentence, so the clip ends before it.",
-      "Speech-to-text garbled 'orgs' as 'orcs' in places."
+      "Multiple speakers in the last few lines",
+      "Starts right after a garbled line that may be linked (2183.4 mentions tech issues)",
+      "Reliance on prior-stream context for 'I already said this'"
     ],
     "validation": [],
     "crowd_score": 0.0,
     "crowd_views": 0,
-    "seconds": 68.7,
-    "virality": 0.504,
+    "seconds": 43.4,
+    "virality": 0.5433,
     "components": {
-      "strength": 0.225,
+      "strength": 0.279,
       "crowd": 0.0,
-      "reaction": 0.129,
+      "reaction": 0.1143,
       "fit": 0.15
     },
     "flags": [],
-    "file": "08_0h13m02s_whether-orgs-pulling-back-investment-w.mp4"
+    "file": "06_0h36m34s_open-qualifiers-in-the-new-circuit-w.mp4"
   },
   {
     "region": [
-      1751.35,
-      1896.2
+      3638.3,
+      3786.8
     ],
-    "audio_rank": 12,
-    "audio_peak": 0.617,
-    "audio_mean": 0.647,
+    "audio_rank": 9,
+    "audio_peak": 0.804,
+    "audio_mean": 0.687,
     "has_clip": true,
     "genre": "take",
-    "in_point": 1695.8,
-    "out_point": 1858.6,
-    "setup": "Like why wouldn't you want an open qualifier system? ... You want to go back into franchising? Where tier two players are just locked out of tier one forever",
-    "claim": "these fucking kids nowadays are too spoiled by the franchise system and they got paid from the beginning... Brother, in CS I didn't get paid for five years, not a dime.",
-    "consequence": "If you're an exceptional player, you will get there. You can't have everyone getting paid... the pros far outweigh the cons. Long term.",
-    "subject": "Open qualifier system vs franchising, and players being spoiled by franchise pay",
-    "strength": 0.72,
-    "why": "It opens with a rhetorical challenge on open qualifiers, then a blunt controversial claim that franchise-era players are spoiled. He backs it with his own five unpaid years in CS and closes with a clear verdict that the open system's pros outweigh its cons. Setup, claim and consequence are all present. The detector's window started at 1751.3, mid-argument, and would have cut the claim and the personal story.",
-    "names_to_verify": [
-      "Zappa",
-      "C9",
-      "Zelsus",
-      "Rooney",
-      "Jakey",
-      "Vanity",
-      "Zepa"
-    ],
-    "risks": [
-      "The 1755-1793s stretch has sparse transcript lines and may contain rambling or missing speech.",
-      "He addresses a chat user ('Yeah, Zappa'), so the clip may need chat context, although one streamer carries the whole argument.",
-      "The 1838.7-1852.7 lines ('I don't know what we're complaining about') are slightly hedging and could be trimmed.",
-      "The clip is long, about 163s.",
-      "The 'Imagine Zelsus, Rooney...' roster hype after 1859 is a separate topic, so the clip should stop before it."
-    ],
-    "validation": [],
-    "crowd_score": 0.0,
-    "crowd_views": 0,
-    "seconds": 162.8,
-    "virality": 0.499,
-    "components": {
-      "strength": 0.324,
-      "crowd": 0.0,
-      "reaction": 0.0925,
-      "fit": 0.0825
-    },
-    "flags": [
-      "163s is long for short-form \u2014 check the out-point"
-    ],
-    "file": "09_0h28m15s_open-qualifier-system-vs-franchising-a.mp4"
-  },
-  {
-    "region": [
-      4473.35,
-      4619.3
-    ],
-    "audio_rank": 13,
-    "audio_peak": 0.701,
-    "audio_mean": 0.648,
-    "has_clip": true,
-    "genre": "take",
-    "in_point": 4437.8,
-    "out_point": 4524.5,
-    "setup": "Why not remember when you had to pull up on a land when you were hungry nowadays? ... I had to take like five different modes of transportation",
-    "claim": "You guys have it good now, man. I don't want to hear no complaints about oh I'm not gonna get paid for a couple months",
-    "consequence": "They just want the best possible scenario to be able to prove themselves and that's not how life works always ... I will take that freedom and sacrifice a couple months of salary all day",
-    "subject": "Players complaining about delayed pay in the open circuit vs. earlier grind-era hardship",
+    "in_point": 3690.0,
+    "out_point": 3757.6,
+    "setup": "Chat asks \"which free agents are must pickups\"; he lists \"oxy... zek... crash... Valin\" and says it's \"brain dead out there\".",
+    "claim": "\"He will not compete this year. He will not compete on an org this year. I can guarantee you that.\"",
+    "consequence": "\"I would be shocked if Sam joined... a top team... I would be blown away.\"",
+    "subject": "Free agent market and a guarantee that Sam won't join a team this year",
     "strength": 0.6,
-    "why": "A clear, opinionated rant with a personal anecdote as setup, a blunt claim ('you guys have it good now'), and a reasoned follow-up about freedom to build your own roster. The flagged window starts at 4473.4, which cuts off the anecdote and the claim, so the clip begins earlier. It ends where the speaker's own point lands, before the host's 'Tragic' aside and the unrelated chat question.",
+    "why": "A chat question opens the topic, and the answer is a confident, named prediction about a player's future, which is roster news.",
     "names_to_verify": [
-      "land (probably LAN)",
-      "loud (possibly the org LOUD)",
-      "tier one man",
-      "Valorant"
+      "Sam (possibly 'saw me' in the transcript)",
+      "oxy",
+      "zek",
+      "crash",
+      "Valin"
     ],
     "risks": [
-      "The first line (4437.8) reads as a reply to an earlier point, so it may feel slightly mid-thought. Starting at 4443.8 is a cleaner but weaker alternative.",
-      "Speech-to-text garbles 'LAN' as 'land' and 'fast' as 'first'.",
-      "More than one person speaks: the host or co-speaker interjects ('Okay. Tragic. Thank you to the tier one man') right after the end.",
-      "The target of the rant is vague without earlier context (the preceding lines are mid-argument with someone else).",
-      "The 4429.3 line, 'I don't think loud is keeping the same team', is a separate topic and is excluded."
+      "The transcript is garbled in places ('saw me', 'Sam')",
+      "The speaker reads and reacts to chat, so the setup is partly implied",
+      "The first line at 3690.0 is muddled with a jealousy aside",
+      "The Sam claim lands only after the free-agent list, so a viewer may need the opening for context"
     ],
     "validation": [],
     "crowd_score": 0.0,
     "crowd_views": 0,
-    "seconds": 86.7,
-    "virality": 0.4981,
+    "seconds": 67.6,
+    "virality": 0.5406,
     "components": {
       "strength": 0.27,
       "crowd": 0.0,
-      "reaction": 0.1051,
-      "fit": 0.123
-    },
-    "flags": [
-      "87s runs past the comfortable window",
-      "speaker attribution needs checking before this ships",
-      "payoff is a teaser, not news"
-    ],
-    "file": "10_1h13m57s_players-complaining-about-delayed-pay.mp4"
-  },
-  {
-    "region": [
-      1075.55,
-      1217.2
-    ],
-    "audio_rank": 36,
-    "audio_peak": 0.664,
-    "audio_mean": 0.561,
-    "has_clip": true,
-    "genre": "take",
-    "in_point": 1050.9,
-    "out_point": 1081.1,
-    "setup": "So I can't see why any player would be complaining about this unless there are other arguments that I need to be told about... why am I seeing so much pessimism on my timeline about this system?",
-    "claim": "This is a clearly better system than franchise. It's not close.",
-    "consequence": "You were locked out of franchising if you were not a partnered team back then... Now you are not fucked. Now, your own fate is in your own hands.",
-    "subject": "Open qualifier system vs franchise system for players",
-    "strength": 0.55,
-    "why": "The streamer opens by asking why the timeline is pessimistic, makes a blunt claim that the new system beats franchise, and backs it with the lockout argument. The 1081.1 end lands on a clean line before a long gap. The Valin exchange after 1155 is a separate, hedged back-and-forth with chat and doesn't carry the take.",
-    "names_to_verify": [
-      "Valin",
-      "Vora",
-      "Ethan",
-      "Kiko",
-      "kickoff / future cups (event names)"
-    ],
-    "risks": [
-      "The topic opens before the transcript window and the region starts mid-argument. The 'So...' opener implies earlier context.",
-      "The clip leans on the earlier 'guarantee' argument (1017-1045) without including it, so it may feel slightly abrupt.",
-      "The 1081-1097 gap suggests a possible chat message or pause. Another voice may be reading chat, so there may be more than one speaker.",
-      "The later exchange with chat qualifies the take, since partnered teams get advantages and Valin's position is unclear. Cutting at 1081.1 leaves that out."
-    ],
-    "validation": [],
-    "crowd_score": 0.0,
-    "crowd_views": 0,
-    "seconds": 30.2,
-    "virality": 0.4971,
-    "components": {
-      "strength": 0.2475,
-      "crowd": 0.0,
-      "reaction": 0.0996,
+      "reaction": 0.1206,
       "fit": 0.15
     },
-    "flags": [
-      "speaker attribution needs checking before this ships"
-    ],
-    "file": "11_0h17m30s_open-qualifier-system-vs-franchise-sys.mp4"
+    "flags": [],
+    "file": "07_1h01m30s_free-agent-market-and-a-guarantee-th.mp4"
   },
   {
     "region": [
-      5094.6,
-      5238.35
+      5869.25,
+      5984.75
     ],
-    "audio_rank": 18,
-    "audio_peak": 0.8,
-    "audio_mean": 0.65,
+    "audio_rank": 24,
+    "audio_peak": 0.783,
+    "audio_mean": 0.653,
     "has_clip": true,
     "genre": "take",
-    "in_point": 5146.4,
-    "out_point": 5245.4,
-    "setup": "leak oxydamir confirmed it's looking like there's too many reports about this we already had a feeling that oxy was probably gonna go to Sun",
-    "claim": "the oxy one is pretty much set the boy finally gets the bag",
-    "consequence": "Valon maybe goes to MIBR, the only one that makes sense: they need a full IGL and he's a very decorated IGL they'd respect",
-    "subject": "Oxy to Sun and Valon to MIBR transfer speculation",
-    "strength": 0.55,
-    "why": "It is a self-contained roster and transfer segment: a confirmed move, then a named prediction with reasoning. The agent talk before it is a separate topic, and the Sentinels roster joke before it is too inside-joke to stand alone. The 5146.4 line opens mid-sentence (it begins 'leak'), so the clip starts slightly abruptly. I ended it before the 'King and Valorant just swap teams' reaction, which seems to be a new thread.",
+    "in_point": 5978.8,
+    "out_point": 6043.2,
+    "setup": "Reads news: \"Global Eastwards will not be in the partnership cycle.\" Says he's already seen it.",
+    "claim": "Non-partner orgs only signing teams after cups or masters is worse for the scene, but \"people are blowing it out of proportion.\"",
+    "consequence": "Lack of job security \"forces you to be exceptional consistently\"; even signed players can be replaced and end up with nothing.",
+    "subject": "Reaction to a team missing the partnership cycle and what it means for player job security",
+    "strength": 0.6,
+    "why": "A named opinion on a current scene controversy. It has a clear setup, a contrarian claim and a reasoned follow-through. The region ends at 6043.2 and the thought may continue past it.",
     "names_to_verify": [
-      "Oxydamir / Oxy",
-      "Sun",
-      "Valon",
-      "Leon",
-      "MIBR",
-      "Sentinels",
-      "John QT",
-      "King"
+      "Global Eastwards (likely Global Esports)",
+      "partnership cycle"
     ],
     "risks": [
-      "The 5146.4 line begins with 'leak', which looks like the tail of the previous sentence.",
-      "The team and player names come from speech-to-text and may be wrong, especially 'Sun', 'Valon' and 'Leon'.",
-      "Another speaker or chat may be involved, since the reading of reports and the 'No, he would have to move there' exchange suggest a second voice.",
-      "The 5245.4 reaction line about a player trade is cut off and could be a funnier payoff if it belongs with this segment."
+      "Org name is probably mis-transcribed",
+      "The take may run past 6043.2",
+      "Reads from chat or a headline, so the first line is partly quoted"
     ],
     "validation": [],
     "crowd_score": 0.0,
     "crowd_views": 0,
-    "seconds": 99.0,
-    "virality": 0.4905,
+    "seconds": 64.4,
+    "virality": 0.5374,
     "components": {
-      "strength": 0.2475,
+      "strength": 0.27,
       "crowd": 0.0,
-      "reaction": 0.12,
-      "fit": 0.123
+      "reaction": 0.1174,
+      "fit": 0.15
     },
-    "flags": [
-      "99s runs past the comfortable window",
-      "speaker attribution needs checking before this ships"
-    ],
-    "file": "12_1h25m46s_oxy-to-sun-and-valon-to-mibr-transfer.mp4"
+    "flags": [],
+    "file": "08_1h39m38s_reaction-to-a-team-missing-the-partn.mp4"
   },
   {
     "region": [
@@ -585,39 +359,439 @@
     "genre": "take",
     "in_point": 2613.1,
     "out_point": 2655.9,
-    "setup": "But how crazy would it be?",
-    "claim": "If Lev or neon went to loud somehow that is brain dead that should never be allowed",
-    "consequence": "We need to put a cap on that ASAP... that's a man city shit right there... They're breaking financial laws and moral laws at that point 115 charges",
-    "subject": "Hypothetical of Lev or neon moving to LOUD after the roster shakeup, framed as financial-fair-play-style abuse",
-    "strength": 0.5,
-    "why": "A hypothetical transfer escalates into a punchy take, with a Man City 115 charges joke as the payoff. The setup is thin, and the earlier 'on loan' discussion is garbled, so context is partly lost. The topic closes at 2645.4 and the next line moves on to neon and aspas.",
+    "setup": "\"But how crazy would it be?\" if Lev or neon ended up at LOUD",
+    "claim": "\"that is brain dead that should never be allowed... We need to put a cap on that ASAP\"",
+    "consequence": "\"That's a man city shit... 115 charges... We are not accepting that, not a chance\"",
+    "subject": "Joke outrage at the idea of LOUD signing Lev or neon, with a Man City comparison",
+    "strength": 0.6,
+    "why": "A clear hypothetical, a strong opinion, and a funny escalation that ends in a punchline. The 'neon without a team' context starts earlier but is not needed to follow it.",
     "names_to_verify": [
       "Lev",
       "neon",
       "LOUD",
-      "keys in (possibly KEYD)",
-      "aspas / spas",
-      "MIBR"
+      "keys in (KEYSI?)"
     ],
     "risks": [
-      "Multiple speakers talking over each other",
-      "The setup is garbled in the transcript, so the clip may need a caption for context",
-      "Speculation, not confirmed news",
-      "The earlier 'on loan' framing from about 2574-2607 may be needed for full context but is incoherent"
+      "More than one speaker, with overlapping reactions",
+      "Roster-rumor speculation, not confirmed news",
+      "Starting here loses the lead-in about neon being teamless and the loan"
     ],
     "validation": [],
     "crowd_score": 0.0,
     "crowd_views": 0,
     "seconds": 42.8,
-    "virality": 0.4888,
+    "virality": 0.5338,
     "components": {
-      "strength": 0.225,
+      "strength": 0.27,
       "crowd": 0.0,
       "reaction": 0.1138,
       "fit": 0.15
     },
+    "flags": [
+      "speaker attribution needs checking before this ships"
+    ],
+    "file": "09_0h43m33s_joke-outrage-at-the-idea-of-loud-sig.mp4"
+  },
+  {
+    "region": [
+      4093.85,
+      4222.55
+    ],
+    "audio_rank": 32,
+    "audio_peak": 0.869,
+    "audio_mean": 0.586,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 4113.6,
+    "out_point": 4169.5,
+    "setup": "Chat: \"Do you think Dazzlers will be a promising talent for 2027 season?\"",
+    "claim": "\"I think Dazzlers to join crew as a coach\" and \"they can put their differences aside.\"",
+    "consequence": "He'd be a tough coach, but players would respect him enough to take the criticism; Dante and heat \"got to just figure it out.\"",
+    "subject": "Dazzlers as a coach for crew",
+    "strength": 0.55,
+    "why": "A named roster judgement with a concrete proposal, plus the friction it could cause. It is a self-contained chat question and answer.",
+    "names_to_verify": [
+      "Dazzlers",
+      "crew",
+      "Dante",
+      "heat"
+    ],
+    "risks": [
+      "The speaker is vague and hedges (\"I think we'll see though\").",
+      "Player and team names are likely garbled by speech-to-text.",
+      "The ending trails off and the Dante/heat part is unclear."
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 55.9,
+    "virality": 0.5278,
+    "components": {
+      "strength": 0.2475,
+      "crowd": 0.0,
+      "reaction": 0.1303,
+      "fit": 0.15
+    },
+    "flags": [
+      "payoff is a teaser, not news"
+    ],
+    "file": "10_1h08m33s_dazzlers-as-a-coach-for-crew.mp4"
+  },
+  {
+    "region": [
+      4788.3,
+      4925.55
+    ],
+    "audio_rank": 23,
+    "audio_peak": 0.709,
+    "audio_mean": 0.574,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 4767.6,
+    "out_point": 4827.8,
+    "setup": "Chat asks his thoughts on the only champs he won being with the stream team: \"if we win a tournament... with this lineup while streaming\"",
+    "claim": "\"It would be so bad for the game. I think the game would die right there... genuinely embarrassing\"",
+    "consequence": "Asked about making kickoff: \"Likely not. I don't think you guys understand how good these teams are\" and they probably lose to tier two teams, but \"we're gonna try our best\"",
+    "subject": "Streamer's all-streamer team: a win would embarrass the game, and he expects them to lose",
+    "strength": 0.6,
+    "why": "Self-deprecating hot take on a streamer lineup winning, then a realistic expectation check on the same topic. It starts at a chat question and ends on a clean resolution.",
+    "names_to_verify": [
+      "Neon",
+      "Mal",
+      "Cloudy"
+    ],
+    "risks": [
+      "Reads as joking and hyperbolic, and may need context from the unannounced lineup",
+      "Chat questions are read aloud, so more than one voice may be involved",
+      "Transcript has a 16s gap between 4796.1 and 4812.1, so the kickoff question and answer may be partly missing",
+      "Lineup and team name are not revealed in the clip"
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 60.2,
+    "virality": 0.5263,
+    "components": {
+      "strength": 0.27,
+      "crowd": 0.0,
+      "reaction": 0.1063,
+      "fit": 0.15
+    },
+    "flags": [
+      "speaker attribution needs checking before this ships"
+    ],
+    "file": "11_1h19m27s_streamer-s-all-streamer-team-a-win-w.mp4"
+  },
+  {
+    "region": [
+      4473.35,
+      4619.3
+    ],
+    "audio_rank": 13,
+    "audio_peak": 0.701,
+    "audio_mean": 0.648,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 4437.8,
+    "out_point": 4524.5,
+    "setup": "\"Remember when you had to pull up on a LAN when you were hungry... five different modes of transportation\"",
+    "claim": "\"You guys have it good now... I don't want to hear no complaints\" about not getting paid for a couple months",
+    "consequence": "\"You got to just want it... I will take that freedom and sacrifice a couple months of salary all day\"",
+    "subject": "Rant telling complaining players they have it easy and should sacrifice pay for the freedom to pick their own roster",
+    "strength": 0.7,
+    "why": "One continuous opinionated rant with a clear thesis. It opens with a personal-hardship setup, makes a blunt claim, and closes on a punchy conclusion. The detector window cut this off partway through.",
+    "names_to_verify": [],
+    "risks": [
+      "STT garbles 'LAN' as 'land'.",
+      "Opening line 'I don't think loud is keeping the same team' is unclear, so the in-point starts just after it.",
+      "Possibly more than one speaker, with a reply addressed to someone else at the start.",
+      "Opening lines (4419-4437) are mid-thought and excluded; context for who he is addressing is missing."
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 86.7,
+    "virality": 0.5251,
+    "components": {
+      "strength": 0.315,
+      "crowd": 0.0,
+      "reaction": 0.1051,
+      "fit": 0.105
+    },
+    "flags": [
+      "87s runs past the comfortable window",
+      "speaker attribution needs checking before this ships"
+    ],
+    "file": "12_1h13m57s_rant-telling-complaining-players-the.mp4"
+  },
+  {
+    "region": [
+      3797.25,
+      3885.5
+    ],
+    "audio_rank": 11,
+    "audio_peak": 0.82,
+    "audio_mean": 0.694,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 3798.3,
+    "out_point": 3867.3,
+    "setup": "\"What about Mako? ... you got the KRX players that are teamless now\"",
+    "claim": "\"Those guys are available if need be\" while still loving the current lineup, and \"the dictator is the only reason we won the event\"",
+    "consequence": "He could not credit the dictator all year because he was on a different lineup, so the free-agent pickups look real",
+    "subject": "Teamless KRX players as free-agent options, and credit for the dictator in the event win",
+    "strength": 0.55,
+    "why": "Roster and free-agent talk with a named judgement on a player. It opens on a chat-style question and ends on a payoff.",
+    "names_to_verify": [
+      "Mako",
+      "Pat men",
+      "Hyunmin",
+      "KRX",
+      "the dictator"
+    ],
+    "risks": [
+      "The 3847.3 line runs about 20s, so the out-point lands on the start of the next topic.",
+      "Speech-to-text names are likely wrong.",
+      "The cadence suggests more than one speaker (chat reading or a co-host).",
+      "The streamer's own team context is never stated."
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 69.0,
+    "virality": 0.5205,
+    "components": {
+      "strength": 0.2475,
+      "crowd": 0.0,
+      "reaction": 0.123,
+      "fit": 0.15
+    },
+    "flags": [
+      "speaker attribution needs checking before this ships"
+    ],
+    "file": "13_1h03m18s_teamless-krx-players-as-free-agent-o.mp4"
+  },
+  {
+    "region": [
+      785.55,
+      810.35
+    ],
+    "audio_rank": 27,
+    "audio_peak": 0.86,
+    "audio_mean": 0.665,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 782.4,
+    "out_point": 851.1,
+    "setup": "\"these orgs, right here is the orgs he names that are going to start investing less potentially, okay?\"",
+    "claim": "\"These orgs weren't paying their players a fucking dumb amount of money anyway\", so they can wait it out and pick up rosters later.",
+    "consequence": "\"you lose like what two to three months of salary before you get picked up\", even as a top player.",
+    "subject": "Why orgs pulling back investment won't hurt top players much",
+    "strength": 0.5,
+    "why": "One narrative with setup, claim and consequence: a counter-take on org divestment. It is somewhat meandering and the setup line is garbled, but it holds together as a take.",
+    "names_to_verify": [
+      "Hundred Thieves",
+      "Perry (speaker's reference, likely a different name)"
+    ],
+    "risks": [
+      "The setup refers to a list of orgs named earlier, outside this region, so context is partly missing.",
+      "The speaker is rambling and the first line is garbled in the transcript.",
+      "The profitability point from 851s onward is left out; it starts a new thread that is cut off at the end of the region.",
+      "The transcript before 782.4 (Hundred Thieves as a middle-of-the-pack team, in the scene since before release) is a related lead-in but starts mid-thought."
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 68.7,
+    "virality": 0.504,
+    "components": {
+      "strength": 0.225,
+      "crowd": 0.0,
+      "reaction": 0.129,
+      "fit": 0.15
+    },
     "flags": [],
-    "file": "13_0h43m33s_hypothetical-of-lev-or-neon-moving-to.mp4"
+    "file": "14_0h13m02s_why-orgs-pulling-back-investment-won.mp4"
+  },
+  {
+    "region": [
+      1075.55,
+      1217.2
+    ],
+    "audio_rank": 36,
+    "audio_peak": 0.664,
+    "audio_mean": 0.561,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 1050.9,
+    "out_point": 1081.1,
+    "setup": "\"I can't see why any player would be complaining about this... why am I seeing so much pessimism on my timeline about this system?\"",
+    "claim": "\"This is a clearly better system than franchise. It's not close.\"",
+    "consequence": "\"You were locked out of franchising if you were not a partnered team... Now your own fate is in your own hands.\"",
+    "subject": "Open-qualifier system is clearly better than franchise for players",
+    "strength": 0.6,
+    "why": "Clear opinion with a setup (puzzlement at the pessimism), a blunt claim, and a concrete reason. It ends cleanly before the chat Q&A about partner-team seeding.",
+    "names_to_verify": [],
+    "risks": [
+      "Opens mid-argument; the stronger case for players having a path (1017-1050) is cut off",
+      "The streamer may be responding to chat or a co-host",
+      "Game and league context is not stated in the clip"
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 30.2,
+    "virality": 0.5016,
+    "components": {
+      "strength": 0.27,
+      "crowd": 0.0,
+      "reaction": 0.0996,
+      "fit": 0.132
+    },
+    "flags": [],
+    "file": "15_0h17m30s_open-qualifier-system-is-clearly-bet.mp4"
+  },
+  {
+    "region": [
+      1751.35,
+      1896.2
+    ],
+    "audio_rank": 12,
+    "audio_peak": 0.815,
+    "audio_mean": 0.647,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 1906.3,
+    "out_point": 1948.0,
+    "setup": "\"Do you think Loud will split up?\" \"I have no idea what's going to happen with the teams.\"",
+    "claim": "\"Teams that succeed had prior issues as well... sometimes teams are dead going into whole ass events and end up making runs.\"",
+    "consequence": "\"For all you know Vitality was a dead fucking team that just happened to make a run.\"",
+    "subject": "Successful teams often hide internal problems, with Vitality as a speculative example",
+    "strength": 0.5,
+    "why": "It answers a chat question and gives an insider-experience claim, then applies it to a named org as speculation.",
+    "names_to_verify": [
+      "Loud",
+      "Vitality"
+    ],
+    "risks": [
+      "The region ends at 1948.0, so the thought may continue past the transcript.",
+      "The Vitality remark is hedged speculation, not a fact.",
+      "The opening question may come from chat rather than the speaker."
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 41.7,
+    "virality": 0.4972,
+    "components": {
+      "strength": 0.225,
+      "crowd": 0.0,
+      "reaction": 0.1222,
+      "fit": 0.15
+    },
+    "flags": [],
+    "file": "16_0h31m46s_successful-teams-often-hide-internal.mp4"
+  },
+  {
+    "region": [
+      5245.15,
+      5380.8
+    ],
+    "audio_rank": 25,
+    "audio_peak": 0.8,
+    "audio_mean": 0.63,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 5212.4,
+    "out_point": 5265.0,
+    "setup": "\"he have had to move with Leon as well. So he's obviously willing to move.\"",
+    "claim": "\"might go to MIBR as the only one that makes sense to me here. They need an IGL like a full IGL.\"",
+    "consequence": "\"So what, King and Valorant just swap teams?... The first player trade in history?\"",
+    "subject": "Valin as an IGL move to MIBR, and a possible player swap",
+    "strength": 0.5,
+    "why": "This is roster speculation with a named reason (MIBR need a full IGL) and a live reaction to the swap idea. The in-point is mid-thought because the transcript window starts there. The last utterance (5265.0) ends on the topic and then pivots to John QT, so the cut needs a trim.",
+    "names_to_verify": [
+      "Valin",
+      "Leon",
+      "MIBR",
+      "King",
+      "Zekin",
+      "John QT"
+    ],
+    "risks": [
+      "Starts mid-sentence at the edge of the transcript",
+      "The out-point utterance at 5265.0 pivots into a new topic (John QT at NC), so trim after 'A Valorant?'",
+      "Speech-to-text names are unreliable, e.g. 'Lev' and 'King'",
+      "Speaker is partly reading chat, possibly more than one voice"
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 52.6,
+    "virality": 0.495,
+    "components": {
+      "strength": 0.225,
+      "crowd": 0.0,
+      "reaction": 0.12,
+      "fit": 0.15
+    },
+    "flags": [
+      "speaker attribution needs checking before this ships"
+    ],
+    "file": "17_1h26m52s_valin-as-an-igl-move-to-mibr-and-a-p.mp4"
+  },
+  {
+    "region": [
+      3938.35,
+      4087.25
+    ],
+    "audio_rank": 6,
+    "audio_peak": 0.789,
+    "audio_mean": 0.646,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 3892.1,
+    "out_point": 3969.6,
+    "setup": "Sentinels likely with this kind of lineup is gonna be insane... G2. They have King Sato",
+    "claim": "G2 is gonna be good no matter what; 100 Thieves are very solid; Crew only have Lotus in their map pool",
+    "consequence": "Nats is LFT. That's fucking bad. It's crazy since Valens leaked org didn't make it.",
+    "subject": "Team-by-team rundown of how the new rosters look",
+    "strength": 0.55,
+    "why": "Named judgments on several orgs and rosters, ending on a free-agent reaction. It is the most clippable roster-news material in the region.",
+    "names_to_verify": [
+      "Sentinels",
+      "G2",
+      "King Sato",
+      "Oxy",
+      "100 Thieves",
+      "Loud",
+      "Lev/Leviatan",
+      "Neon",
+      "Crew",
+      "Nats",
+      "Valens"
+    ],
+    "risks": [
+      "The region starts mid-topic, so there is no clean opening line.",
+      "The rundown is loose and hedged, with 'fuck if I know' on Crew.",
+      "The 'one more team left' bit at 3945-3960 is rambling.",
+      "Speech-to-text names are unreliable, e.g. 'Crew', 'Nats', 'Valens leaked org'."
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 77.5,
+    "virality": 0.4888,
+    "components": {
+      "strength": 0.2475,
+      "crowd": 0.0,
+      "reaction": 0.1183,
+      "fit": 0.123
+    },
+    "flags": [
+      "78s runs past the comfortable window"
+    ],
+    "file": "18_1h04m52s_team-by-team-rundown-of-how-the-new.mp4"
   },
   {
     "region": [
@@ -631,27 +805,23 @@
     "genre": "take",
     "in_point": 2568.4,
     "out_point": 2628.8,
-    "setup": "Damn neon is without a tea. Oh my god neon is that? ... what if he leaves and then neon joins but now you need to keys in this guy",
-    "claim": "If Lev or neon went to loud somehow that is brain dead that should never be allowed",
-    "consequence": "We need to put a cap on that ASAP ... We cannot allow that's a man city shit right there",
-    "subject": "Hypothetical transfer of Lev or neon to LOUD, framed as a super-team problem",
+    "setup": "\"Damn neon is without a tea. Oh my god\" - then the loan situation and what happens if the loaned player leaves.",
+    "claim": "\"If Lev or neon went to loud somehow that is brain dead that should never be allowed\"",
+    "consequence": "\"We need to put a cap on that ASAP... that's a man city shit right there\"",
+    "subject": "Speaker wants a cap on a rich org like LOUD stacking top free agents like neon",
     "strength": 0.5,
-    "why": "The flagged window is mostly the streamer reading a roster tracker and thinking aloud, which is not clippable. The real take comes at the end. A free-agent player prompts a hypothetical, then a clear judgement (a LOUD move would be 'brain dead', needs a cap) and a punchline comparing it to Man City. The in-point is where the neon topic opens, not at the loud claim.",
+    "why": "It has a clear escalation and a quotable punchline with a strong opinion. The setup is a bit rambly, and the loan details are muddled.",
     "names_to_verify": [
       "neon",
       "Lev",
       "LOUD",
-      "keys in (KEYD / Keyd?)",
-      "darker (possibly 'drkr' or another player)",
-      "MIBR",
-      "spasino / spas"
+      "keys in / Keyd",
+      "darker"
     ],
     "risks": [
-      "The middle (2574-2602) is garbled and fragmentary, and the speech-to-text names are unreliable.",
-      "The clip is about 60s and partly rambling. A tighter cut could start at 2602.0, but that line opens mid-thought.",
-      "The transcript ends at 2628.8, so the take may continue past the out-point.",
-      "The streamer is reacting to on-screen roster info the viewer can't see.",
-      "Only one speaker is evident, but chat questions are implied."
+      "Transcript is messy mid-section, with garbled loan/team names and an unclear 'on loan' referent",
+      "Reacting live to a roster tracker, so the viewer lacks visual context",
+      "Speculation, not confirmed news"
     ],
     "validation": [],
     "crowd_score": 0.0,
@@ -665,7 +835,56 @@
       "fit": 0.15
     },
     "flags": [],
-    "file": "14_0h42m48s_hypothetical-transfer-of-lev-or-neon-t.mp4"
+    "file": "19_0h42m48s_speaker-wants-a-cap-on-a-rich-org-li.mp4"
+  },
+  {
+    "region": [
+      2743.65,
+      2883.6
+    ],
+    "audio_rank": 19,
+    "audio_peak": 0.782,
+    "audio_mean": 0.652,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 2713.5,
+    "out_point": 2788.2,
+    "setup": "\"So where are you slotting in second here?\"",
+    "claim": "\"I think second stays in MIBR. Maybe I don't think so though.\" Then: \"all the teamless players that are still available... Knights, Demon1, Second, Oxy.\"",
+    "consequence": "\"America's is already stacked as is and now you're gonna stack it even more... it is crazy out there, man\"",
+    "subject": "Where the big teamless players (Second, Knights, Demon1, Oxy) land, and how stacked the Americas are",
+    "strength": 0.55,
+    "why": "Roster speculation with named players and a clear arc from the question to the free-agent pool to the stacked-region conclusion. The opening answer on Second is hedged and the rest is loose.",
+    "names_to_verify": [
+      "Second",
+      "Knights",
+      "Demon1",
+      "Oxy",
+      "MIBR",
+      "Victor",
+      "Kane zero"
+    ],
+    "risks": [
+      "More than one speaker, so it reads as a host and co-host exchange",
+      "The answer on Second is hedged",
+      "The closing list of names is thin"
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 74.7,
+    "virality": 0.4878,
+    "components": {
+      "strength": 0.2475,
+      "crowd": 0.0,
+      "reaction": 0.1173,
+      "fit": 0.123
+    },
+    "flags": [
+      "75s runs past the comfortable window",
+      "speaker attribution needs checking before this ships"
+    ],
+    "file": "20_0h45m13s_where-the-big-teamless-players-secon.mp4"
   },
   {
     "region": [
@@ -679,12 +898,12 @@
     "genre": "take",
     "in_point": 2318.0,
     "out_point": 2389.7,
-    "setup": "You think that oxy, second and redox can work together in a team? ... Where's second in all this is that going to stay at MIBR?",
+    "setup": "You think that oxy, second and redox can work together in a team?",
     "claim": "I can almost guarantee he's not gonna stay at MIBR.",
-    "consequence": "Those are the only two teams you'd look at for actually qualifying, the org is huge, and \"Oxy's new contract is probably brain dead... I don't wanna say a number because I'm probably gonna be right.\"",
-    "subject": "Second leaving MIBR and roster/contract speculation around Oxy, Redox and Sentinels",
+    "consequence": "Oxy's new contract is probably brain dead... That's fucked.",
+    "subject": "Roster speculation: where Second goes from MIBR and whether Oxy, Second and Redox fit together",
     "strength": 0.55,
-    "why": "The topic shifts from the open-circuit debate to roster and transfer speculation at 2318.0, which opens with a question. It then gives a named prediction (Second leaves MIBR) and reasoning about synergy and money, and ends on a reaction beat (\"That's fucked.\"). The detector window starting at 2304.2 would clip the tail of the previous open-qualifier topic, and its end at 2370.2 would cut off the consequence.",
+    "why": "This opens on a chat question, makes a named roster prediction and ends on a reaction to the contract money. The transcript has gaps, so the middle is partly missing.",
     "names_to_verify": [
       "Oxy",
       "Second",
@@ -693,10 +912,9 @@
       "Sentinels"
     ],
     "risks": [
-      "The transcript has gaps (2333-2350, 2354-2366) where the team Second might go to is not captured. \"Those are the only two teams\" has no clear referent.",
-      "The questions may come from chat or a co-host, so more than one voice may be present.",
-      "The Second prediction is speculation with no stated source.",
-      "The roster names come from speech-to-text and may be wrong."
+      "Transcript has gaps at 2333-2350 and 2354-2366, so the answers to the questions may be missing",
+      "More than one speaker, since the host is reading chat",
+      "The 'only two teams' line is ambiguous about which teams are meant"
     ],
     "validation": [],
     "crowd_score": 0.0,
@@ -713,7 +931,138 @@
       "72s runs past the comfortable window",
       "speaker attribution needs checking before this ships"
     ],
-    "file": "15_0h38m38s_second-leaving-mibr-and-roster-contrac.mp4"
+    "file": "21_0h38m38s_roster-speculation-where-second-goes.mp4"
+  },
+  {
+    "region": [
+      1751.35,
+      1896.2
+    ],
+    "audio_rank": 12,
+    "audio_peak": 0.617,
+    "audio_mean": 0.647,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 1694.4,
+    "out_point": 1856.3,
+    "setup": "\"Why wouldn't you want an open qualifier system? ... You want to go back into franchising?\"",
+    "claim": "\"These fucking kids nowadays are too spoiled by the franchise system and they got paid from the beginning.\"",
+    "consequence": "\"If you're an exceptional player, you will get there... the pros far outweigh the cons. Long term.\"",
+    "subject": "Defending the open qualifier system and arguing that players spoiled by franchise pay are the ones complaining",
+    "strength": 0.72,
+    "why": "It is one continuous argument with a clear opener, a spicy named judgement of the younger generation, a personal 'five years unpaid in CS' anecdote, and a closing verdict.",
+    "names_to_verify": [],
+    "risks": [
+      "The first line, 'What's going on here?', may be a reaction to chat or a prior topic, so the true start could be slightly earlier.",
+      "Several gaps of 10-20s with no transcript at 1755-1766, 1776-1793 and 1819-1838 may hide pauses or other speakers.",
+      "Strong language and a generalisation about players that could draw backlash.",
+      "Chat or another voice may be involved; the 'Zappa' address suggests someone is being replied to."
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 161.9,
+    "virality": 0.481,
+    "components": {
+      "strength": 0.324,
+      "crowd": 0.0,
+      "reaction": 0.0925,
+      "fit": 0.0645
+    },
+    "flags": [
+      "162s is long for short-form \u2014 check the out-point",
+      "speaker attribution needs checking before this ships"
+    ],
+    "file": "22_0h28m14s_defending-the-open-qualifier-system.mp4"
+  },
+  {
+    "region": [
+      861.45,
+      980.75
+    ],
+    "audio_rank": 15,
+    "audio_peak": 0.841,
+    "audio_mean": 0.601,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 929.5,
+    "out_point": 1036.0,
+    "setup": "\"I'm not trying to say SR shouldn't be in it. Fly quest shouldn't be in it. There's just not enough slots.\"",
+    "claim": "Missing the league doesn't mean orgs give up on Val. Orgless players should just grind the open qualifiers, and the speaker doesn't see what anyone is complaining about.",
+    "consequence": "\"One result is all it takes and org will pick you up... Multiple orgs will fight for you,\" and you can leverage those offers for maximum salary.",
+    "subject": "Players who missed out on the league can just grind open qualifiers and orgs will pick them up",
+    "strength": 0.6,
+    "why": "A clear, opinionated take on a hot community issue, with a sarcastic bit about mommy bringing dinner. It has setup, claim and payoff in one narrative.",
+    "names_to_verify": [
+      "SR",
+      "Fly quest",
+      "orcs (likely 'orgs')",
+      "Val/Valorant",
+      "champs"
+    ],
+    "risks": [
+      "Starts slightly mid-thought on the 'four teams / narratives' line",
+      "Opinion could read as dismissive of players' financial hardship",
+      "Speech-to-text wrote 'orcs' for 'orgs'",
+      "Earlier profitability talk (806-904) is left out, so org economics context is missing"
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 106.5,
+    "virality": 0.4786,
+    "components": {
+      "strength": 0.27,
+      "crowd": 0.0,
+      "reaction": 0.1261,
+      "fit": 0.0825
+    },
+    "flags": [
+      "106s is long for short-form \u2014 check the out-point"
+    ],
+    "file": "23_0h15m29s_players-who-missed-out-on-the-league.mp4"
+  },
+  {
+    "region": [
+      1233.35,
+      1379.6
+    ],
+    "audio_rank": 21,
+    "audio_peak": 0.757,
+    "audio_mean": 0.62,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 1283.7,
+    "out_point": 1401.2,
+    "setup": "\"The reason I got on is to figure out what everyone is crying about with this open qualifier shit.\"",
+    "claim": "\"I don't think this is the end of the world.\" Open qualifiers might be disastrous, but they give outside players a real shot at tier one.",
+    "consequence": "Players have to earn qualification by beating org teams. He concedes the fast turnaround is a fair complaint: \"It's too little for sure, but what can you do?\"",
+    "subject": "Open qualifiers are overblown as a controversy, though the turnaround time is a fair complaint",
+    "strength": 0.62,
+    "why": "It opens on a clear new topic, takes a stance against the community backlash, and adds a concession and a chat-driven counterpoint. It stays on one narrative through the turnaround complaint.",
+    "names_to_verify": [
+      "Paper X Wendler"
+    ],
+    "risks": [
+      "There is a ~16s gap at 1357-1373 where he is likely reading chat, with no speech.",
+      "The chat question at 1373.3 starts mid-sentence and the transcript is garbled there.",
+      "The streamer is arguing against a community consensus, so it may need context on what the backlash was."
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 117.5,
+    "virality": 0.475,
+    "components": {
+      "strength": 0.279,
+      "crowd": 0.0,
+      "reaction": 0.1135,
+      "fit": 0.0825
+    },
+    "flags": [
+      "118s is long for short-form \u2014 check the out-point"
+    ],
+    "file": "24_0h21m23s_open-qualifiers-are-overblown-as-a-c.mp4"
   },
   {
     "region": [
@@ -727,24 +1076,20 @@
     "genre": "take",
     "in_point": 4366.1,
     "out_point": 4475.3,
-    "setup": "people complaining if you play from your parents house you got no rent to pay... a lot of these people are grown ass men and don't live in their parents house",
-    "claim": "I don't empathize with it that much. I had to do the same thing for years",
-    "consequence": "I don't want to hear it... sit there and make a fucking team, stay humble and be good. That's it.",
-    "subject": "Streamer's reaction to players complaining about going unpaid for a couple of months in the open qualifier format",
+    "setup": "\"people complaining if you play from your parents house you got no rent to pay\" - players grumbling about months without salary in open qualifiers",
+    "claim": "\"I don't empathize with it that much. I had to do the same thing for years\"",
+    "consequence": "\"You guys have it good now... I don't want to hear it, sit there and make a team, stay humble and be good\"",
+    "subject": "Rant against players complaining about unpaid months in the open circuit",
     "strength": 0.6,
-    "why": "This is a clear gripe with a strong stance. It opens with the complaint (players skipping salary), moves to the 'I had to do worse' claim, and closes on a blunt 'I don't want to hear it'. The earlier part of the region (4261-4315) is the general case for building your own lineup. It leads into a Fanatic/Vitality tangent at 4318-4362 that breaks the thread, so starting at 4366.1 gives a tighter self-contained clip.",
+    "why": "A strong, opinionated rant with a clear setup, claim and escalation, plus a banter exchange with another voice. It is a clear stance on how entitled today's players are.",
     "names_to_verify": [
-      "Nats",
-      "Fanatic",
-      "Vitality",
-      "stick spree",
-      "Loud"
+      "Loud",
+      "eat machine (likely a person's handle, garbled)"
     ],
     "risks": [
-      "More than one person speaks: the 4396-4429 lines ('You don't know what gas is... You are a child') read like banter with a co-host or someone else.",
-      "The setup line at 4366.1 is garbled ('for a wide people complaining'), so check the transcript against the audio.",
-      "A brief tangent at 4429-4437 ('I don't think loud is keeping the same team') interrupts the rant.",
-      "The detector's window started at 4313.9 and cut the topic in half, so the real setup starts later at 4366.1."
+      "Another speaker interjects around 4396-4429 about gas prices and the 'child' jab, so it's partly a two-person exchange",
+      "The start at 4366.1 is garbled by speech-to-text",
+      "A short tangent at 4429 about Loud's roster is a mild topic drift"
     ],
     "validation": [],
     "crowd_score": 0.0,
@@ -758,158 +1103,52 @@
       "fit": 0.0825
     },
     "flags": [
-      "109s is long for short-form \u2014 check the out-point",
-      "speaker attribution needs checking before this ships"
+      "109s is long for short-form \u2014 check the out-point"
     ],
-    "file": "16_1h12m46s_streamer-s-reaction-to-players-complai.mp4"
+    "file": "25_1h12m46s_rant-against-players-complaining-abo.mp4"
   },
   {
     "region": [
-      5245.15,
-      5380.8
+      2587.9,
+      2735.8
     ],
-    "audio_rank": 25,
-    "audio_peak": 0.787,
-    "audio_mean": 0.63,
+    "audio_rank": 26,
+    "audio_peak": 0.76,
+    "audio_mean": 0.627,
     "has_clip": true,
     "genre": "take",
-    "in_point": 5344.0,
-    "out_point": 5424.8,
-    "setup": "Valin cannot join MIBR if a current player is substituted or replaced, it must be with someone from their respective region, therefore MIBR needs to sign a Brazilian player.",
-    "claim": "So you need 3 Brazilian 2 imports. Well, assuming Zekin's gone... Zekin can be replaced by Valin.",
-    "consequence": "Why can't we get the old optic back? ... I'm 34 years old. You cannot get the old optic back... We're literally old. It's over.",
-    "subject": "MIBR roster rules around a Valin/Zekin swap, ending in a joke about the old OpTic roster not coming back",
-    "strength": 0.5,
-    "why": "This is the most coherent topic in the region. It opens on a roster-rule explanation, reaches a concrete roster conclusion, then lands a reaction beat about old OpTic. The earlier part of the window is chat tangents (Denial eSports, coaching, a donation shout-out) and a mid-thought roster aside, so it makes a weaker clip. The out point is the start of the next question about Yay, which is a new topic.",
+    "in_point": 2663.8,
+    "out_point": 2702.6,
+    "setup": "\"The South Americans are gonna cook\" as the MIBR roster is discussed",
+    "claim": "\"This roster is just completely nuclear bombed out of existence... Mazzini was going to be the only one left standing\"",
+    "consequence": "\"One of the most unfortunate years for a roster... not qualifying for a single event while being that close every time. That is fucked.\"",
+    "subject": "MIBR's roster falling apart after a year of near-misses",
+    "strength": 0.45,
+    "why": "A named judgement on MIBR's year with a sympathetic conclusion. It is weaker because it is mostly commentary with little that is new.",
     "names_to_verify": [
-      "Valin",
-      "Zekin",
-      "Aspass",
       "MIBR",
-      "optic",
-      "Leon",
-      "Yay",
-      "John QT"
+      "Mazzini"
     ],
     "risks": [
-      "The 5380.1 line runs about 22s and the 'Why can't we' sentence is cut off at 5402.3, so the transcript may be missing a word or two.",
-      "The old-OpTic exchange may involve a second voice (chat or a co-streamer), so the speaker is unclear.",
-      "The roster-rule claim is read aloud and may be second-hand or unverified.",
-      "The setup begins mid-argument. The swap premise (who is trading where) was introduced earlier, around 5245, and is not in the clip."
+      "More than one speaker",
+      "The start is abrupt and needs the preceding roster context",
+      "Speculation about a roster that may not be final"
     ],
     "validation": [],
     "crowd_score": 0.0,
     "crowd_views": 0,
-    "seconds": 80.8,
-    "virality": 0.4661,
+    "seconds": 38.8,
+    "virality": 0.4665,
     "components": {
-      "strength": 0.225,
+      "strength": 0.2025,
       "crowd": 0.0,
-      "reaction": 0.1181,
-      "fit": 0.123
+      "reaction": 0.114,
+      "fit": 0.15
     },
     "flags": [
-      "81s runs past the comfortable window",
       "speaker attribution needs checking before this ships"
     ],
-    "file": "17_1h29m04s_mibr-roster-rules-around-a-valin-zekin.mp4"
-  },
-  {
-    "region": [
-      1233.35,
-      1379.6
-    ],
-    "audio_rank": 21,
-    "audio_peak": 0.757,
-    "audio_mean": 0.62,
-    "has_clip": true,
-    "genre": "take",
-    "in_point": 1283.7,
-    "out_point": 1408.3,
-    "setup": "The reason I got on is to figure out what everyone is crying about With this open qualifier shit",
-    "claim": "I don't think this is the end of the world. I think the open qualifiers might end up being absolutely disastrous... But again, you allow all of these other players that were waiting for their chance to get into tier one",
-    "consequence": "They basically have to earn their qualification by beating some of these org teams... I agree that the turnaround time is too fast... but again, not the end of the world, right? You just got to play",
-    "subject": "Streamer's take on the open qualifier format and the community backlash against it",
-    "strength": 0.6,
-    "why": "It opens as a new topic with a clear reason for the take (what is everyone crying about). It gives a contrarian stance that concedes the cons (cheaters, ping, fast turnaround), then argues the upside for non-partnered players, and ends with a resigned wrap-up. The earlier Valin roster speculation is a different topic and is left out. The next topic starts at 1408.3 (partnered teams having time).",
-    "names_to_verify": [
-      "Valin",
-      "Valon",
-      "Vora",
-      "Ethan",
-      "Kiko",
-      "Paper X Wendler"
-    ],
-    "risks": [
-      "The transcript has gaps (1357.3 to 1373.3), so something may have been skipped, possibly a chat read. The 'Even paper X Wendler events...' line reads as a response to chat or a quote and starts mid-thought.",
-      "The clip assumes the viewer knows the partnered-team and open-qualifier context.",
-      "The speaker hedges ('might', 'not the end of the world'), so it is a mild take rather than a hot one.",
-      "Only one speaker appears to be talking, but the lines may be responses to chat that is not in the transcript."
-    ],
-    "validation": [],
-    "crowd_score": 0.0,
-    "crowd_views": 0,
-    "seconds": 124.6,
-    "virality": 0.466,
-    "components": {
-      "strength": 0.27,
-      "crowd": 0.0,
-      "reaction": 0.1135,
-      "fit": 0.0825
-    },
-    "flags": [
-      "125s is long for short-form \u2014 check the out-point"
-    ],
-    "file": "18_0h21m23s_streamer-s-take-on-the-open-qualifier.mp4"
-  },
-  {
-    "region": [
-      861.45,
-      980.75
-    ],
-    "audio_rank": 15,
-    "audio_peak": 0.755,
-    "audio_mean": 0.601,
-    "has_clip": true,
-    "genre": "take",
-    "in_point": 818.1,
-    "out_point": 1036.0,
-    "setup": "So these orcs can just wait it out and then just pick up the rosters they feel are gonna do well this year.",
-    "claim": "I don't really see why what anyone is complaining about. You literally just have to fucking grind.",
-    "consequence": "one result is all it takes and org will pick you up. That's a guarantee... Multiple orgs will fight for you.",
-    "subject": "Orgless Valorant players after partnership cuts: the speaker argues they can grind open qualifiers and get picked up, so there is nothing to complain about",
-    "strength": 0.6,
-    "why": "It is a clear, opinionated take on the orgless-player discourse. The setup is that orgs wait and pick up rosters, the claim is that nobody should be complaining, and the payoff is that one good result gets multiple org offers. The detector window starts at 861.5 and misses the setup. The first line at 806.8 is mid-thought, so 818.1 is the first clean opening of the argument.",
-    "names_to_verify": [
-      "orcs (almost certainly 'orgs')",
-      "SR (possibly Shopify Rebellion)",
-      "Fly quest (FlyQuest)",
-      "Val (Valorant)",
-      "champs"
-    ],
-    "risks": [
-      "Long, about 218s, and a trim may be needed",
-      "A 21s gap at 865-886 may be a cut or pause, and the 'why do orgs invest' aside slows the middle",
-      "The 886-923 stretch is a tangent on sponsors and long-term investment",
-      "The last line at 1036.0 trails off, so the clip ends on 'Multiple orgs will fight for you'",
-      "The talk of mommy and girlfriend bringing food is sarcastic and could be read as mocking players",
-      "Speech-to-text garbles 'orgs' as 'orcs' throughout, so captions need fixing"
-    ],
-    "validation": [],
-    "crowd_score": 0.0,
-    "crowd_views": 0,
-    "seconds": 217.9,
-    "virality": 0.4657,
-    "components": {
-      "strength": 0.27,
-      "crowd": 0.0,
-      "reaction": 0.1132,
-      "fit": 0.0825
-    },
-    "flags": [
-      "218s is long for short-form \u2014 check the out-point"
-    ],
-    "file": "19_0h13m38s_orgless-valorant-players-after-partner.mp4"
+    "file": "26_0h44m23s_mibr-s-roster-falling-apart-after-a.mp4"
   },
   {
     "region": [
@@ -922,34 +1161,31 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 1958.0,
-    "out_point": 2083.0,
-    "setup": "People just love to be pessimistic this format is literally million times better for everyone. I agree",
-    "claim": "every player has the freedom to do whatever the fuck they want and have the same chances of qualifying as anybody else. It is a literal even playing field",
-    "consequence": "The speaker backs it with their own path: 'we did that shit on envy... we had to beat TSM... only then did an org decide to pick us up.' A rebuttal follows: 'Those were early days when no one knew the game... that's a horrible argument.'",
-    "subject": "Open-circuit qualifier format: even playing field vs. grinding from the bottom",
+    "out_point": 2081.5,
+    "setup": "\"this format is literally million times better for everyone. I agree\"",
+    "claim": "The open circuit is an even playing field: you grind from the bottom and everyone has the same shot at qualifying.",
+    "consequence": "He backs it with his own Envy and CLG climbs, then pushes back on a counter that 'those were early days': \"that's a horrible argument\".",
+    "subject": "Defending the open-qualifier circuit format with his own come-up stories",
     "strength": 0.6,
-    "why": "It is a clear, opinionated defense of the open qualifier path with personal evidence (Envy, CLG), and it ends in a pushback from another speaker. The chat tangent about the 57-minute final (2114s onward) is off-topic, so the clip stops before it. The later 'open qualifiers are gonna be a shit show' segment (2194s) is a separate topic and is cut off by the end of the region.",
+    "why": "A clear opinion on the new circuit with personal evidence and a live pushback exchange. The in-point is the earliest line available, so the topic may have opened before the transcript starts.",
     "names_to_verify": [
       "Envy",
+      "CLG",
       "TSM",
       "T1",
-      "CLG",
       "Complexity",
-      "Fes",
-      "Joseph",
-      "Valorant"
+      "Joseph"
     ],
     "risks": [
-      "More than one person speaks (the main speaker, plus a rebuttal and a reaction around 2058-2083), so attribution is unclear",
-      "The opener starts mid-conversation and the topic may have begun before 1958s",
-      "A gap in the transcript between 2041.7s and 2058.6s may hide missing context",
-      "The speaker's later view that open qualifiers will be a 'shit show' seems to contradict this pro-format stance; it is a different topic but could confuse viewers",
-      "The rebuttal ('horrible argument') may be aimed at the speaker, which makes the ending ambiguous"
+      "More than one person speaks (host, co-streamer or chat voice)",
+      "Starts mid-discussion, so the original prompt may be missing",
+      "Gap in the transcript between 2041.7 and 2058.6",
+      "Speech-to-text oddities such as 'to fear terrific' and 'I buy power'"
     ],
     "validation": [],
     "crowd_score": 0.0,
     "crowd_views": 0,
-    "seconds": 125.0,
+    "seconds": 123.5,
     "virality": 0.4644,
     "components": {
       "strength": 0.27,
@@ -958,59 +1194,50 @@
       "fit": 0.0825
     },
     "flags": [
-      "125s is long for short-form \u2014 check the out-point",
+      "124s is long for short-form \u2014 check the out-point",
       "speaker attribution needs checking before this ships"
     ],
-    "file": "20_0h32m38s_open-circuit-qualifier-format-even-pla.mp4"
+    "file": "27_0h32m38s_defending-the-open-qualifier-circuit.mp4"
   },
   {
     "region": [
-      2897.65,
-      3034.9
+      4944.6,
+      5048.05
     ],
-    "audio_rank": 2,
-    "audio_peak": 0.894,
-    "audio_mean": 0.694,
+    "audio_rank": 35,
+    "audio_peak": 0.728,
+    "audio_mean": 0.545,
     "has_clip": true,
     "genre": "take",
-    "in_point": 2949.4,
-    "out_point": 3090.7,
-    "setup": "Sentinels rebuild hear me out. Rob is cooking for something and we don't know what it is yet.",
-    "claim": "I mean, yeah, this is their best. This is an insane lineup.",
-    "consequence": "Real Madrid 2014-2017 'brain dead lineup' Champions League treble comparison, then 'this is literally a super team though. And we know how super teams can go sometimes.'",
-    "subject": "Rumored Sentinels rebuild lineup as a super team",
-    "strength": 0.55,
-    "why": "A new topic opens at 2949.4 with a rumored Sentinels roster and the streamer's reaction. He calls it an insane lineup, argues the point with a Real Madrid analogy, and lands on a hedge about super teams. The earlier part is open-qualifier coaching logistics and the later part is mod housekeeping, so both are left out. The 3070.9 line ends with a stray 'Can mods' that leads into the next topic, so the cut at 3090.7 carries a few seconds of that.",
+    "in_point": 5032.4,
+    "out_point": 5085.2,
+    "setup": "Chat asks: \"How much do you think the new agent will affect the meta right now.\"",
+    "claim": "\"She has too much supportive util to be a pure duelist.\"",
+    "consequence": "Likes the kit anyway: the throw ability that displaces a player and stuns them on a wall hit is \"pretty good\".",
+    "subject": "Streamer's read on the new Valorant agent: too much support util to be a solo duelist",
+    "strength": 0.45,
+    "why": "Clear chat question, a stated judgement and a reason for it. It ends before the pivot to the Sentinels roster. It is a fairly standard meta opinion, so the strength is moderate.",
     "names_to_verify": [
-      "Rob",
-      "John QT",
-      "Redux",
-      "oxyduelist",
-      "Sentinels",
-      "Chamber"
+      "new agent (name not said)"
     ],
     "risks": [
-      "The lineup is read off a chat or screen post, so the roster details are spoken in fragments and the speech-to-text names may be wrong.",
-      "The Real Madrid tangent is long, with repeated 'come on guys' lines that drag the middle.",
-      "More than one voice may be present, since he reads chat and reacts to it.",
-      "The ending is soft: the 'super teams' line trails into 'Can mods...' before the topic changes."
+      "The in-point utterance opens with the tail of 'Thank you for the prime' before the question.",
+      "Streamer admits he can't remember the ability name.",
+      "Only one speaker, reading chat."
     ],
     "validation": [],
     "crowd_score": 0.0,
     "crowd_views": 0,
-    "seconds": 141.3,
-    "virality": 0.4641,
+    "seconds": 52.8,
+    "virality": 0.4617,
     "components": {
-      "strength": 0.2475,
+      "strength": 0.2025,
       "crowd": 0.0,
-      "reaction": 0.1341,
-      "fit": 0.0825
+      "reaction": 0.1092,
+      "fit": 0.15
     },
-    "flags": [
-      "141s is long for short-form \u2014 check the out-point",
-      "speaker attribution needs checking before this ships"
-    ],
-    "file": "21_0h49m09s_rumored-sentinels-rebuild-lineup-as-a.mp4"
+    "flags": [],
+    "file": "28_1h23m52s_streamer-s-read-on-the-new-valorant.mp4"
   },
   {
     "region": [
@@ -1024,23 +1251,19 @@
     "genre": "take",
     "in_point": 3424.2,
     "out_point": 3514.7,
-    "setup": "So yeah chat because we're gonna be coaching I got to start watching VODs",
-    "claim": "I'm gonna be live while watching while coaching... I'm not gonna have chat up because I don't want to... have you guys rage bait me",
-    "consequence": "There's gonna be a three-minute delay, so I can't respond anyway... This is gonna be my first time ever like coaching or trying to coach",
-    "subject": "Streamer announces they are starting as a coach, will stream the coaching live, and will keep chat off to avoid 'L coach' rage bait",
+    "setup": "\"because we're gonna be coaching I got to start watching VODs\"",
+    "claim": "\"I'm gonna be live while coaching... I'm not gonna have chat up\" so chat can't rage bait him with \"L coach\"",
+    "consequence": "\"three-minute delay\" so he can't respond anyway; \"first time ever... trying to coach\"",
+    "subject": "Streamer announces he'll livestream while coaching, with chat off and a delay",
     "strength": 0.5,
-    "why": "This is a new topic: a coaching reveal, a stream format decision, and a reason for it. It starts at 3424.2 with 'So yeah chat', after the Selena flight chatter. The flagged window starts at 3320, in the worlds and time-zone talk, which is a different topic. It ends on a self-aware 'first time ever coaching' line that rounds the topic off. The material is more casual announcement than hot take, so strength is moderate.",
+    "why": "This is a reveal about a new coaching role and a stream format, with a clear reason for turning chat off. It has a natural start and end. The tone is casual and the stakes are low.",
     "names_to_verify": [
-      "Selena",
-      "K drill",
-      "Sinatra"
+      "Selena"
     ],
     "risks": [
-      "More than one person seems to speak. Selena's flight and a side voice are audible just before the in-point.",
-      "The last timestamp, 3514.7, is the start of the final line and it is also the end of the supplied transcript. The clip may need a few seconds of padding to finish the sentence.",
-      "The team and org being coached are never named, so context is thin.",
-      "'Not gonna have chat up' is cut against 'I'm in the sky. I got you' at 3447 and could confuse viewers.",
-      "The transcript contains an offensive slur-like phrase, but it falls before the in-point."
+      "More than one person speaks (side chatter with a co-host)",
+      "Doesn't say which team he's coaching",
+      "Ends on a soft, rambling note"
     ],
     "validation": [],
     "crowd_score": 0.0,
@@ -1057,159 +1280,133 @@
       "90s runs past the comfortable window",
       "speaker attribution needs checking before this ships"
     ],
-    "file": "22_0h57m04s_streamer-announces-they-are-starting-a.mp4"
+    "file": "29_0h57m04s_streamer-announces-he-ll-livestream.mp4"
   },
   {
     "region": [
-      6.0,
-      148.4
+      4313.9,
+      4420.25
     ],
-    "audio_rank": 37,
-    "audio_peak": 0.691,
-    "audio_mean": 0.517,
+    "audio_rank": 20,
+    "audio_peak": 0.709,
+    "audio_mean": 0.63,
     "has_clip": true,
     "genre": "take",
-    "in_point": 150.7,
-    "out_point": 205.5,
-    "setup": "All these upcoming players will have passports will not have passports in time. Okay... If a team that's in the open qualifier that isn't sponsored at all",
-    "claim": "Like a passport should not stop you from literally living out your dream.",
-    "consequence": "You can expedite it... you're going to get org backing no matter what, most orgs are waiting for teams",
-    "subject": "Whether missing passports will keep open-qualifier teams out of the events",
+    "in_point": 4261.1,
+    "out_point": 4314.7,
+    "setup": "\"I think with this new format a lot of these players can just take their time... they don't have to join a partner team\"",
+    "claim": "\"If I was as young as Nats, I would probably create my own lineup... you decide your own fate\"",
+    "consequence": "\"You lose a couple of months of salary for sure... but if you're good enough, you will get paid eventually\"",
+    "subject": "Why building your own roster through open qualifiers beats joining a partner team",
     "strength": 0.45,
-    "why": "The streamer restates the passport worry and works through the scenario: an unsponsored team beats top-eight teams, orgs sponsor it, and the passport gets sorted. It ends on a clear opinion that passports are no excuse. Starting at 150.7 skips the earlier rambling, the mic-level interruption (83-95s) and the chat chatter. The original reply attribution at 38-46s is lost, but the restatement at 150.7 works as a self-contained setup.",
+    "why": "A coherent opinion on the new format, with personal experience and a recommendation for young players. The delivery is less punchy than the rant.",
     "names_to_verify": [
-      "trick (the person whose reply is read at 38.1)",
-      "Mars",
-      "Twilight"
+      "Nats"
     ],
     "risks": [
-      "The transcript ends mid-sentence at 205.5, so the last line is cut off and the real out-point is probably later.",
-      "The earlier version of this argument (38-120s) is interrupted by a mic issue and chat reading.",
-      "Chat users are quoted, and the 'tier one' and '30% open' pushback at 130-139 is never answered cleanly.",
-      "The opinion is mild and mostly reassurance, not a hot take."
+      "Opens mid-conversation and may lack context for the new format",
+      "Ends on a mild conclusion, not a punchline"
     ],
     "validation": [],
     "crowd_score": 0.0,
     "crowd_views": 0,
-    "seconds": 54.8,
-    "virality": 0.4561,
+    "seconds": 53.6,
+    "virality": 0.4588,
     "components": {
       "strength": 0.2025,
       "crowd": 0.0,
-      "reaction": 0.1036,
+      "reaction": 0.1063,
       "fit": 0.15
     },
     "flags": [],
-    "file": "23_0h02m30s_whether-missing-passports-will-keep-op.mp4"
+    "file": "30_1h11m01s_why-building-your-own-roster-through.mp4"
   },
   {
     "region": [
-      1385.9,
-      1509.9
+      4627.45,
+      4747.25
     ],
-    "audio_rank": 30,
-    "audio_peak": 0.815,
-    "audio_mean": 0.566,
+    "audio_rank": 17,
+    "audio_peak": 0.813,
+    "audio_mean": 0.649,
     "has_clip": true,
     "genre": "take",
-    "in_point": 1373.3,
-    "out_point": 1565.6,
-    "setup": "\"Even paper X Wendler events about the qualifiers not having. I agree that I think the turnaround time is too fast.\"",
-    "claim": "\"The partnered teams... still have plenty of time to be able to figure out their rosters\", and \"isn't C9 big enough for partnership? It's just in comparison to teams like Sen, Hundred Thieves.\"",
-    "consequence": "\"Orgs like EG, orgs like Cloud9 have been around forever... I'm not here trying to bash them... it's more can they replace rosters like Hundred Thieves, Sentinels, G2 and NRG\", then a reaction to KRX and Nongshim missing out.",
-    "subject": "Offseason timing and partnership picks: open qualifier turnaround, and whether Cloud9 and EG deserved a partner slot over bigger orgs",
-    "strength": 0.55,
-    "why": "The topic opens at 1373.3 when a complaint about qualifier turnaround is raised. It runs through the fairness argument for partnered and non-partnered teams, then lands on a named judgement about C9 and EG versus Sen, 100T, Sentinels, G2 and NRG. The flagged window starts at 1385.9, which is mid-answer and drops the setup. The claim is spread over a long stretch and is hedged (\"not here to bash them\"), so it is a moderate take rather than a hot one.",
+    "in_point": 4627.0,
+    "out_point": 4693.7,
+    "setup": "\"the amount of open qualifier teams that aren't sponsored right away. I want to see who ends up beating one of these partnered teams\"",
+    "claim": "\"Imagine it's our stream team... we're going to stop trying at a certain point just cause we don't want to actually qualify\"",
+    "consequence": "\"If we can't make it past the first game, that is very bad... with the lineup that we have\"",
+    "subject": "What his stream team would do in the open qualifier, and the pressure of the lineup",
+    "strength": 0.45,
+    "why": "A banter segment about the open qualifier and his own team's expectations. It has a setup, a joke and a reversal, but it is loose.",
+    "names_to_verify": [],
+    "risks": [
+      "Starts mid-sentence at 4627.0",
+      "Another voice interjects around 4648 (\"bro thinks he's going to make it past the first round\")",
+      "Slight self-contradiction between not trying and expecting to win",
+      "Rambling rather than a tight claim"
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 66.7,
+    "virality": 0.4564,
+    "components": {
+      "strength": 0.2025,
+      "crowd": 0.0,
+      "reaction": 0.1219,
+      "fit": 0.132
+    },
+    "flags": [
+      "speaker attribution needs checking before this ships"
+    ],
+    "file": "31_1h17m07s_what-his-stream-team-would-do-in-the.mp4"
+  },
+  {
+    "region": [
+      1075.55,
+      1217.2
+    ],
+    "audio_rank": 36,
+    "audio_peak": 0.674,
+    "audio_mean": 0.561,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 1155.0,
+    "out_point": 1216.7,
+    "setup": "\"It is fucked for people released from franchise teams that are not franchised anymore. Let's say Valin.\"",
+    "claim": "\"It's not fucked to the degree that you think it is... Valin is a terrible example because he's already made enough money.\"",
+    "consequence": "\"Valin is guaranteed on a partnered team. Who knows? ... you replace Vora with Valin? Do you replace Ethan?\"",
+    "subject": "Whether released franchise players like Valin get hurt by the new system",
+    "strength": 0.45,
+    "why": "A named-player rebuttal to a chat objection that speculates about roster fit. It is a separate narrative from the general system take.",
     "names_to_verify": [
-      "Paper X Wendler",
-      "baby Bay",
       "Valin",
-      "Cloud9",
-      "EG",
-      "Nongshim",
-      "KRX",
-      "Sen",
-      "Hundred Thieves",
-      "Sentinels",
-      "G2",
-      "NRG",
-      "crazy raccoons"
+      "Vora",
+      "Ethan",
+      "Kiko"
     ],
     "risks": [
-      "More than one speaker: the 1470.7 line (\"No, but they did not know...\") sounds like a reply from a second person.",
-      "The 1373.3 opener is garbled by speech-to-text, so the exact complaint being answered is unclear.",
-      "Long clip at about 190s with large timestamp gaps, so it may need trimming, for example to start at 1409.3.",
-      "The last line at 1565.6 shifts to KRX and Nongshim and is cut at its start. The topic is loosely related, so the out-point may need adjusting.",
-      "The take is hedged and spread out rather than punchy."
+      "Multiple voices: the objection is probably read from chat or said by a co-host",
+      "The speaker's own line, 'guaranteed on a partnered team', is shaky",
+      "Ends on open speculation without a firm conclusion",
+      "The later Valin follow-up (1263-1276) is separated by a partner-seeding digression"
     ],
     "validation": [],
     "crowd_score": 0.0,
     "crowd_views": 0,
-    "seconds": 192.3,
-    "virality": 0.4522,
+    "seconds": 61.7,
+    "virality": 0.4536,
     "components": {
-      "strength": 0.2475,
+      "strength": 0.2025,
       "crowd": 0.0,
-      "reaction": 0.1222,
-      "fit": 0.0825
+      "reaction": 0.1011,
+      "fit": 0.15
     },
     "flags": [
-      "192s is long for short-form \u2014 check the out-point",
       "speaker attribution needs checking before this ships"
     ],
-    "file": "24_0h22m53s_offseason-timing-and-partnership-picks.mp4"
-  },
-  {
-    "region": [
-      3797.25,
-      3885.5
-    ],
-    "audio_rank": 11,
-    "audio_peak": 0.82,
-    "audio_mean": 0.694,
-    "has_clip": true,
-    "genre": "take",
-    "in_point": 3798.3,
-    "out_point": 3910.0,
-    "setup": "What about Mako? ... Yeah, you got the the KRX players that are teamless now",
-    "claim": "Don't get the dictator the dictator is the only reason we won the event by the way",
-    "consequence": "Building America's super team can be any player. I think the guy already built it for us. ... G2 ... The lineup is broken",
-    "subject": "Teamless Valorant players available for an Americas super team, plus a credit to a player ('the dictator') for the event win and a roster rundown",
-    "strength": 0.5,
-    "why": "The topic opens with a chat question about teamless players. That leads to roster news (KRX players available), a named judgement crediting one player for the event win, and a quick read on the Americas teams. The WoW complaint before it is a separate, personal thread and the earlier context is missing. After 3910 the rundown turns into generic list-reading with 'fuck if I know' hedging.",
-    "names_to_verify": [
-      "Mako",
-      "Pat men / Hyunmin (KRX players)",
-      "the dictator (likely a player handle)",
-      "KRX / paper X lineup",
-      "King Sato / Sato",
-      "oxy",
-      "Lev",
-      "Neon"
-    ],
-    "risks": [
-      "Speaker is reacting to chat or other voices ('Say it ain't so mummy'), so more than one person may be speaking",
-      "Speech-to-text player and team names are unreliable",
-      "The 'dictator' line is cut off mid-thought, with a gap between 3847 and 3867",
-      "The roster rundown in the second half is loose and could feel generic",
-      "The WoW complaint just before 3798 gives context for why they are scouting, but it is a separate topic"
-    ],
-    "validation": [],
-    "crowd_score": 0.0,
-    "crowd_views": 0,
-    "seconds": 111.7,
-    "virality": 0.4305,
-    "components": {
-      "strength": 0.225,
-      "crowd": 0.0,
-      "reaction": 0.123,
-      "fit": 0.0825
-    },
-    "flags": [
-      "112s is long for short-form \u2014 check the out-point",
-      "speaker attribution needs checking before this ships"
-    ],
-    "file": "25_1h03m18s_teamless-valorant-players-available-fo.mp4"
+    "file": "32_0h19m15s_whether-released-franchise-players-l.mp4"
   },
   {
     "region": [
@@ -1222,96 +1419,646 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 1512.4,
-    "out_point": 1680.7,
-    "setup": "isn't C9 big enough for partnership? It's just in comparison to teams like Sen, Hundred Thieves.",
-    "claim": "I think players are complaining for non-partnered orgs. They don't get the bundle sales. So it's much harder to be profitable",
-    "consequence": "you have way more freedom next year whether you're an org or a player... to create the team that you think will succeed... you end up getting an org anyway",
-    "subject": "Valorant partnership: who missed out (Cloud9, Nongshim, KRX) and whether non-partnered status is a downside",
-    "strength": 0.5,
-    "why": "A real topic runs from the partnership question, through who missed the cut and the bundle-revenue downside, to a contrarian take that non-partnered status gives roster freedom. The flagged window starts mid-list and ends before the payoff, so the clip is widened on both sides. The final line is cut off at the end of the transcript, so the out point lands on the last full thought.",
+    "out_point": 1678.8,
+    "setup": "\"isn't C9 big enough for partnership\" / \"It's just in comparison to teams like Sen, Hundred Thieves.\"",
+    "claim": "Missing partnership hurts through lost bundle sales, but next year gives non-partnered orgs and players far more freedom.",
+    "consequence": "\"if that team does end up succeeding... you end up getting an org anyway.\"",
+    "subject": "Who missed out on Valorant partnership and whether being non-partnered is actually better",
+    "strength": 0.55,
+    "why": "It opens with a clear question about which orgs got partnered, takes in a named judgement on C9, KRX, Nongshim and Crazy Raccoon, then ends on a firm opinion about the long-term upside.",
     "names_to_verify": [
       "Nongshim",
-      "KRX",
+      "C9 / Cloud9",
       "Crazy Raccoons",
-      "Cloud9/C9",
-      "Sen",
+      "KRX",
+      "Sentinels",
       "Hundred Thieves",
+      "G2",
       "NRG",
       "EG",
       "Kimmy"
     ],
     "risks": [
-      "Multiple speakers: a question, a back-and-forth about bundles, then one speaker's monologue",
-      "The 1543-1583 stretch is a fragmented list of orgs that missed out and is weak on its own",
-      "The final line at 1680.7 is cut off by the end of the transcript",
-      "Speech-to-text may have mangled org names"
+      "Several speakers are involved, including chat questions and replies.",
+      "Possible topic drift at 1636.8, where it moves from bundle money to roster freedom; both halves still follow from non-partnered status.",
+      "The speaker's point about \"long-term benefits\" is only partly landed, so the clip ends just before the line that cuts off.",
+      "The speech-to-text transcript is messy between 1543 and 1620."
     ],
     "validation": [],
     "crowd_score": 0.0,
     "crowd_views": 0,
-    "seconds": 168.3,
-    "virality": 0.4303,
+    "seconds": 166.4,
+    "virality": 0.4528,
     "components": {
-      "strength": 0.225,
+      "strength": 0.2475,
       "crowd": 0.0,
       "reaction": 0.1228,
       "fit": 0.0825
     },
     "flags": [
-      "168s is long for short-form \u2014 check the out-point"
+      "166s is long for short-form \u2014 check the out-point"
     ],
-    "file": "26_0h25m12s_valorant-partnership-who-missed-out-cl.mp4"
+    "file": "33_0h25m12s_who-missed-out-on-valorant-partnersh.mp4"
   },
   {
     "region": [
-      3638.3,
-      3786.8
+      1385.9,
+      1509.9
     ],
-    "audio_rank": 9,
-    "audio_peak": 0.804,
-    "audio_mean": 0.687,
+    "audio_rank": 30,
+    "audio_peak": 0.815,
+    "audio_mean": 0.566,
     "has_clip": true,
     "genre": "take",
-    "in_point": 3690.0,
-    "out_point": 3798.3,
-    "setup": "which free agents are must pickups ... you got oxy you got zek and you go crash these you got you you potentially have Valin yeah it's brain dead out there the amount of good players",
-    "claim": "Sam isn't gonna play ... He will not compete on an org this year. I can guarantee you that I would be shocked if Sam joined the team",
-    "consequence": "I would be blown away if he joined a top team ... now I have to sit here and look at vods and like create comps ... now I can't even grind Wow anymore. How disgusting is that?",
-    "subject": "Free agent pickups and the prediction that Sam won't compete on an org this year",
-    "strength": 0.5,
-    "why": "It opens on a chat question about free agents and gets a named judgement with a guarantee about Sam. It lands on a self-deprecating WoW punchline, so it has setup, claim and consequence. The next line (3798.3) switches to Mako and the KRX players, so the clip ends before that. Strength is moderate because the speaker is partly riffing and the Sam context is thin.",
+    "in_point": 1373.3,
+    "out_point": 1485.5,
+    "setup": "\"I agree that I think the turnaround time is too fast... open qualifiers are starting immediately.\"",
+    "claim": "The short turnaround is a fair complaint but not the end of the world: partnered teams already have kickoff slots, and the non-qualifiers had all of champs to sort out rosters.",
+    "consequence": "\"You could assume though, if you have like half a brain that you're not going to get in there.\"",
+    "subject": "Is the open qualifier turnaround too short for roster building after Champs?",
+    "strength": 0.55,
+    "why": "A clear, balanced stance on a live community complaint, argued step by step, with the rumor example (baby Bay and Valin possibly leaving) as evidence.",
     "names_to_verify": [
-      "Sam",
-      "Oxy",
-      "Zek",
+      "Paper X Wendler (garbled)",
+      "baby Bay",
       "Valin",
-      "Mako",
-      "KRX",
-      "Pat men",
-      "Hyunmin"
+      "Cloud9",
+      "EG"
     ],
     "risks": [
-      "The first lines (3690.0-3708.6) are garbled and partly about a bag or jealousy, so the setup is slightly muddled.",
-      "More than one voice appears, including a co-streamer or chat reader and the main speaker.",
-      "The 'Sam' claim depends on context, such as who Sam is, that the clip does not give.",
-      "The WoW tangent dilutes the take; a tighter cut could end at 3736.5-3753.1, but that loses the consequence."
+      "Several speakers or chat replies are mixed in (1470.7 sounds like a reply).",
+      "1373.3 is garbled, so the setup is unclear.",
+      "Timestamp gaps between 1459.8 and 1503.3 suggest missing audio.",
+      "The earlier segment (1326-1357) about giving new teams a chance is a different topic and is excluded."
     ],
     "validation": [],
     "crowd_score": 0.0,
     "crowd_views": 0,
-    "seconds": 108.3,
-    "virality": 0.4281,
+    "seconds": 112.2,
+    "virality": 0.4522,
     "components": {
-      "strength": 0.225,
+      "strength": 0.2475,
       "crowd": 0.0,
-      "reaction": 0.1206,
+      "reaction": 0.1222,
       "fit": 0.0825
     },
     "flags": [
-      "108s is long for short-form \u2014 check the out-point",
+      "112s is long for short-form \u2014 check the out-point"
+    ],
+    "file": "34_0h22m53s_is-the-open-qualifier-turnaround-too.mp4"
+  },
+  {
+    "region": [
+      5245.15,
+      5380.8
+    ],
+    "audio_rank": 25,
+    "audio_peak": 0.787,
+    "audio_mean": 0.63,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 5380.1,
+    "out_point": 5424.8,
+    "setup": "\"Assuming Zekin is gone and Aspass stays. Zekin can be replaced by Valin.\"",
+    "claim": "\"Why can't we get the old optic back?\" / \"I'm 34 years old. You cannot get the old optic back.\"",
+    "consequence": "\"We're literally old. I can barely make it out of fucking ascendant... It's over.\"",
+    "subject": "Streamer shoots down the idea of reuniting old Optic",
+    "strength": 0.4,
+    "why": "It is a self-contained joke reaction: a chat suggestion, a nostalgic wish, then a self-deprecating shutdown. It works as a short banter clip.",
+    "names_to_verify": [
+      "Zekin",
+      "Aspass",
+      "Valin",
+      "optic"
+    ],
+    "risks": [
+      "More than one voice, since the streamer and chat or a co-host trade lines",
+      "The final utterance (5424.8) also starts a new question about yay, so trim after 'It's over'",
+      "Depends on the MIBR roster-rule context just before it (5344\u20135380)"
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 44.7,
+    "virality": 0.4481,
+    "components": {
+      "strength": 0.18,
+      "crowd": 0.0,
+      "reaction": 0.1181,
+      "fit": 0.15
+    },
+    "flags": [
       "speaker attribution needs checking before this ships"
     ],
-    "file": "27_1h01m30s_free-agent-pickups-and-the-prediction.mp4"
+    "file": "35_1h29m40s_streamer-shoots-down-the-idea-of-reu.mp4"
+  },
+  {
+    "region": [
+      4093.85,
+      4222.55
+    ],
+    "audio_rank": 32,
+    "audio_peak": 0.779,
+    "audio_mean": 0.586,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 4169.5,
+    "out_point": 4206.1,
+    "setup": "Chat: \"You think it's virus ever gonna get picked up again?\"",
+    "claim": "He's a \"solid sentinel player in terms of... pure skill.\"",
+    "consequence": "Intangibles are unknown, but if he's a good teammate he'll get trials; \"I think it's [he's] good as fuck.\"",
+    "subject": "Whether Virus gets signed again",
+    "strength": 0.4,
+    "why": "A named player judgement with a conditional prediction, but it is hedged.",
+    "names_to_verify": [
+      "Virus",
+      "Buyers"
+    ],
+    "risks": [
+      "The name is inconsistent in the transcript (\"virus\" and \"buyers\").",
+      "The \"Bro's trying not to laugh\" line suggests a second person is present."
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 36.6,
+    "virality": 0.4468,
+    "components": {
+      "strength": 0.18,
+      "crowd": 0.0,
+      "reaction": 0.1168,
+      "fit": 0.15
+    },
+    "flags": [],
+    "file": "36_1h09m29s_whether-virus-gets-signed-again.mp4"
+  },
+  {
+    "region": [
+      4093.85,
+      4222.55
+    ],
+    "audio_rank": 32,
+    "audio_peak": 0.74,
+    "audio_mean": 0.586,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 4206.1,
+    "out_point": 4251.6,
+    "setup": "Chat: \"Can you please tell us something... is your team all streamers or maybe X pro join?\"",
+    "claim": "\"Everyone that is on my team currently streams. It's about the only hint I can give.\"",
+    "consequence": "Asked if an announcement is coming: \"Probably pretty soon... next couple days.\"",
+    "subject": "Teasing his own team's roster and announcement timing",
+    "strength": 0.45,
+    "why": "A roster tease with an announcement timeline, and a real exchange with chat.",
+    "names_to_verify": [],
+    "risks": [
+      "Little substance beyond the hint.",
+      "Part of the middle seems to be missing from the transcript (gap between 4227.9 and 4250.2).",
+      "Possibly more than one voice, since the speaker reads the chat questions aloud."
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 45.5,
+    "virality": 0.4455,
+    "components": {
+      "strength": 0.2025,
+      "crowd": 0.0,
+      "reaction": 0.111,
+      "fit": 0.132
+    },
+    "flags": [
+      "speaker attribution needs checking before this ships"
+    ],
+    "file": "37_1h10m06s_teasing-his-own-team-s-roster-and-an.mp4"
+  },
+  {
+    "region": [
+      2897.65,
+      3034.9
+    ],
+    "audio_rank": 2,
+    "audio_peak": 0.894,
+    "audio_mean": 0.694,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 2949.4,
+    "out_point": 3090.7,
+    "setup": "\"Sentinels rebuild, hear me out. Rob is cooking for something and we don't know what it is yet.\"",
+    "claim": "\"This is an insane lineup... this is their ideal lineup for sure.\" He backs it with a Real Madrid 2014-2017 super-team comparison.",
+    "consequence": "\"This is literally a super team though. And we know how super teams can go sometimes.\"",
+    "subject": "Sentinels' rumored rebuilt roster as a super team, compared to Real Madrid",
+    "strength": 0.5,
+    "why": "It opens on a clear roster-news topic, gives a hot take and an analogy, and ends on a hedge about how super teams can fail. The Real Madrid tangent is a bit long but supports the same point.",
+    "names_to_verify": [
+      "Sentinels",
+      "Rob",
+      "John QT",
+      "Redux",
+      "oxyduelist",
+      "Bale",
+      "Benzema",
+      "Ronaldo"
+    ],
+    "risks": [
+      "Speech-to-text lineup names are garbled, so the roster may be wrong.",
+      "The sentence at 3070.9 ends with 'Can mods...', which starts a pivot to the coaching/mods topic. Trim the clip there.",
+      "He may be reading chat or reacting to someone else ('are you guys seeing this kid?'), so more than one voice may be involved.",
+      "The Real Madrid tangent in the middle (2987-3058) slows the pace."
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 141.3,
+    "virality": 0.4416,
+    "components": {
+      "strength": 0.225,
+      "crowd": 0.0,
+      "reaction": 0.1341,
+      "fit": 0.0825
+    },
+    "flags": [
+      "141s is long for short-form \u2014 check the out-point",
+      "speaker attribution needs checking before this ships"
+    ],
+    "file": "38_0h49m09s_sentinels-rumored-rebuilt-roster-as.mp4"
+  },
+  {
+    "region": [
+      3938.35,
+      4087.25
+    ],
+    "audio_rank": 6,
+    "audio_peak": 0.738,
+    "audio_mean": 0.646,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 3983.1,
+    "out_point": 4033.3,
+    "setup": "What do you think about SR not getting a spot in partnership?",
+    "claim": "I'm not even slightly surprised; it would be very hard to replace the current partnered teams with SR.",
+    "consequence": "I don't know what Riot looks at, so I can't say one team deserved it over the other.",
+    "subject": "SR missing out on Riot partnership",
+    "strength": 0.4,
+    "why": "A real chat exchange on a controversial partnership decision, but the answer is heavily hedged.",
+    "names_to_verify": [
+      "SR"
+    ],
+    "risks": [
+      "The answer is long-winded and non-committal.",
+      "There is a long pause between 3983 and 4003, so the question and answer may need trimming."
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 50.2,
+    "virality": 0.4407,
+    "components": {
+      "strength": 0.18,
+      "crowd": 0.0,
+      "reaction": 0.1107,
+      "fit": 0.15
+    },
+    "flags": [],
+    "file": "39_1h06m23s_sr-missing-out-on-riot-partnership.mp4"
+  },
+  {
+    "region": [
+      5712.7,
+      5855.15
+    ],
+    "audio_rank": 1,
+    "audio_peak": 1.0,
+    "audio_mean": 0.616,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 5724.1,
+    "out_point": 5876.6,
+    "setup": "Chat asks: \"Val your plan on becoming a coach or is it something that just came up\"",
+    "claim": "\"I never actually planned on coaching... a fun thing where I can combine streaming with coaching.\" It's unpaid and he won't coach a big org.",
+    "consequence": "\"Coaching is a very stressful job... you need the exact same passion you have as a player... I don't think that I have that right now.\"",
+    "subject": "Val explains why he is coaching for fun and won't coach full-time",
+    "strength": 0.45,
+    "why": "A real chat exchange where the streamer reveals he is coaching a team (unnamed, 'we'll see soon') and gives his reasons for not going further.",
+    "names_to_verify": [
+      "Val"
+    ],
+    "risks": [
+      "Multiple speakers: a host or co-host asks the questions.",
+      "The in-point line starts with the tail of the Cane's era topic; the coaching question begins partway through that line.",
+      "The out-point at 5876.6 trims the last words 'that right now'. Extend by a few seconds if possible.",
+      "The team is never named, so the payoff is soft.",
+      "A long silence follows the question (5724 to 5752)."
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 152.5,
+    "virality": 0.435,
+    "components": {
+      "strength": 0.2025,
+      "crowd": 0.0,
+      "reaction": 0.15,
+      "fit": 0.0825
+    },
+    "flags": [
+      "152s is long for short-form \u2014 check the out-point"
+    ],
+    "file": "40_1h35m24s_val-explains-why-he-is-coaching-for.mp4"
+  },
+  {
+    "region": [
+      4473.35,
+      4619.3
+    ],
+    "audio_rank": 13,
+    "audio_peak": 0.813,
+    "audio_mean": 0.648,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 4537.7,
+    "out_point": 4562.7,
+    "setup": "Chat asks: \"Do you ever consider sponsoring a team in qualifiers who you think deserves to be paid?\"",
+    "claim": "\"It would be a loan. I'm not just giving away money. Pay that shit back.\"",
+    "consequence": "\"You have a year plus interest, unless it's someone I know very personally.\"",
+    "subject": "Would he sponsor a qualifier team? Only as a loan with interest",
+    "strength": 0.4,
+    "why": "A direct chat question with a short, funny, blunt answer. It stands alone but is brief and low-stakes.",
+    "names_to_verify": [],
+    "risks": [
+      "Multiple speakers: a second voice jokes 'He's been yapping for an hour lately' at the end.",
+      "Short clip."
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 25.0,
+    "virality": 0.4339,
+    "components": {
+      "strength": 0.18,
+      "crowd": 0.0,
+      "reaction": 0.1219,
+      "fit": 0.132
+    },
+    "flags": [
+      "speaker attribution needs checking before this ships"
+    ],
+    "file": "41_1h15m37s_would-he-sponsor-a-qualifier-team-on.mp4"
+  },
+  {
+    "region": [
+      2304.2,
+      2370.25
+    ],
+    "audio_rank": 28,
+    "audio_peak": 0.778,
+    "audio_mean": 0.665,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 2255.5,
+    "out_point": 2302.1,
+    "setup": "If they do this as they go, and the rules aren't set beforehand, this is gonna be a shit show no matter what.",
+    "claim": "This is the only circuit everyone should want. If you're bitching about it, give me a real reason.",
+    "consequence": "You have to outweigh the pros and cons; CS and Dota do it, it's doable.",
+    "subject": "Defending the open qualifier circuit format and the need for a solid rule book",
+    "strength": 0.4,
+    "why": "It makes a clear argument for open qualifiers and challenges critics. It starts mid-conversation, so the original topic is not visible.",
+    "names_to_verify": [],
+    "risks": [
+      "More than one speaker, with 'I agree' as a handoff",
+      "The topic is only implied (open quali for a new circuit)",
+      "The end trails into a gap at 2302-2318"
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 46.6,
+    "virality": 0.4287,
+    "components": {
+      "strength": 0.18,
+      "crowd": 0.0,
+      "reaction": 0.1167,
+      "fit": 0.132
+    },
+    "flags": [
+      "speaker attribution needs checking before this ships"
+    ],
+    "file": "42_0h37m35s_defending-the-open-qualifier-circuit.mp4"
+  },
+  {
+    "region": [
+      2423.4,
+      2572.0
+    ],
+    "audio_rank": 16,
+    "audio_peak": 0.803,
+    "audio_mean": 0.657,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 2391.2,
+    "out_point": 2416.9,
+    "setup": "Chat asks: \"What changes could you see NRG making?\"",
+    "claim": "\"The only player that might end up leaving on his own accord... is Kiko simply because he's an EMEA player\"",
+    "consequence": "\"He may want to go back... It didn't come from anything. I don't have any extra information\"",
+    "subject": "Prediction that Kiko might leave NRG to return to EMEA",
+    "strength": 0.35,
+    "why": "It is a real chat exchange with a named player prediction. The speaker explicitly says it has no inside info, which weakens it, and the clip is short.",
+    "names_to_verify": [
+      "Kiko",
+      "NRG",
+      "EMEA"
+    ],
+    "risks": [
+      "Speaker disclaims any inside info, so it is not a real reveal",
+      "Short, low-energy delivery",
+      "Name spellings from speech-to-text may be wrong"
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 25.7,
+    "virality": 0.428,
+    "components": {
+      "strength": 0.1575,
+      "crowd": 0.0,
+      "reaction": 0.1205,
+      "fit": 0.15
+    },
+    "flags": [],
+    "file": "43_0h39m51s_prediction-that-kiko-might-leave-nrg.mp4"
+  },
+  {
+    "region": [
+      4627.45,
+      4747.25
+    ],
+    "audio_rank": 17,
+    "audio_peak": 0.801,
+    "audio_mean": 0.649,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 4709.5,
+    "out_point": 4742.6,
+    "setup": "\"That's the other perk about having an open qualifier system... if you're not on a partnered team\"",
+    "claim": "\"look at how many young players have already made it... that's got to be so motivating for more young players\"",
+    "consequence": "\"you have more players to choose from that could be the next Erday or the next Neon\" and a shout-out to Mal",
+    "subject": "The open qualifier as a pipeline for rookies",
+    "strength": 0.35,
+    "why": "A positive counterpoint to the pessimism about the open circuit, tied to named players. It is fairly generic.",
+    "names_to_verify": [
+      "Erday",
+      "Neon",
+      "Mal"
+    ],
+    "risks": [
+      "Multiple speakers or chat read-outs",
+      "Starts after a chat question about underrated players",
+      "Generic opinion"
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 33.1,
+    "virality": 0.4277,
+    "components": {
+      "strength": 0.1575,
+      "crowd": 0.0,
+      "reaction": 0.1202,
+      "fit": 0.15
+    },
+    "flags": [],
+    "file": "44_1h18m29s_the-open-qualifier-as-a-pipeline-for.mp4"
+  },
+  {
+    "region": [
+      5094.6,
+      5238.35
+    ],
+    "audio_rank": 18,
+    "audio_peak": 0.8,
+    "audio_mean": 0.65,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 5146.4,
+    "out_point": 5166.9,
+    "setup": "\"leak oxydamir confirmed it's looking like there's too many reports about this\"",
+    "claim": "\"I think the oxy one is pretty much set\" \u2013 he's going to Sun.",
+    "consequence": "\"the boy finally gets the bag\"",
+    "subject": "Oxy's reported move to Sun",
+    "strength": 0.35,
+    "why": "A short piece of roster news with a reaction. It is thin and somewhat entangled with the Valon topic after it.",
+    "names_to_verify": [
+      "Oxydamir / Oxy",
+      "Sun"
+    ],
+    "risks": [
+      "Very short",
+      "The leak is a report, not confirmed",
+      "The 5146.4 line may start mid-joke from the previous segment"
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 20.5,
+    "virality": 0.4275,
+    "components": {
+      "strength": 0.1575,
+      "crowd": 0.0,
+      "reaction": 0.12,
+      "fit": 0.15
+    },
+    "flags": [],
+    "file": "45_1h25m46s_oxy-s-reported-move-to-sun.mp4"
+  },
+  {
+    "region": [
+      5403.3,
+      5549.2
+    ],
+    "audio_rank": 14,
+    "audio_peak": 0.766,
+    "audio_mean": 0.629,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 5502.8,
+    "out_point": 5537.6,
+    "setup": "\"Get zix as an assistant coach\"",
+    "claim": "\"He may want to just watch party if I'm coaching... I feel like he would want to be on a way more serious team\"",
+    "consequence": "Zix wants to do content creation and maybe coach later in the year, and the speaker would happily work with him.",
+    "subject": "Whether Zix could become an assistant coach",
+    "strength": 0.35,
+    "why": "It is a chat suggestion with a direct answer and a small reveal about Zix's plans, but it is low stakes and tentative.",
+    "names_to_verify": [
+      "zix",
+      "six"
+    ],
+    "risks": [
+      "The speaker is hedging throughout.",
+      "More than one person speaks.",
+      "The name is spelled inconsistently ('zix' and 'six'), so confirm it is the same person."
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 34.8,
+    "virality": 0.4224,
+    "components": {
+      "strength": 0.1575,
+      "crowd": 0.0,
+      "reaction": 0.1149,
+      "fit": 0.15
+    },
+    "flags": [
+      "speaker attribution needs checking before this ships"
+    ],
+    "file": "46_1h31m42s_whether-zix-could-become-an-assistan.mp4"
+  },
+  {
+    "region": [
+      6.0,
+      148.4
+    ],
+    "audio_rank": 37,
+    "audio_peak": 0.691,
+    "audio_mean": 0.517,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 95.3,
+    "out_point": 205.5,
+    "setup": "\"I just wanted to discuss this scenario because there's a lot of pessimism... about this open circuit\"",
+    "claim": "\"A passport should not stop you from literally living out your dream.\" Teams that qualify should already be getting passports.",
+    "consequence": "\"You can expedite it... you're going to get org backing no matter what\"",
+    "subject": "Passport worries about the open circuit are overblown; qualifying teams will get sponsors and can sort it out",
+    "strength": 0.5,
+    "why": "It opens with a clear topic announcement, takes on a chat objection, then argues one point to a conclusion. The earlier part (38-95s) is a false start with a mic-level problem, so it was left out.",
+    "names_to_verify": [
+      "trick",
+      "Mars",
+      "Twilight"
+    ],
+    "risks": [
+      "The transcript ends mid-sentence at 205.5 (\"most orgs are waiting for teams\"), so the out-point may need extending past the supplied text.",
+      "Chat replies at 120-139 interrupt the flow briefly.",
+      "The speaker restates the same claim at 150.7, so the middle is somewhat repetitive.",
+      "The detector's 148.4 end cut the argument off before its conclusion.",
+      "The streamer reads out others' replies; 'trick' and 'Mars' are chat or viewer names, so more than one voice is involved."
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 110.2,
+    "virality": 0.4111,
+    "components": {
+      "strength": 0.225,
+      "crowd": 0.0,
+      "reaction": 0.1036,
+      "fit": 0.0825
+    },
+    "flags": [
+      "110s is long for short-form \u2014 check the out-point",
+      "speaker attribution needs checking before this ships"
+    ],
+    "file": "47_0h01m35s_passport-worries-about-the-open-circ.mp4"
   },
   {
     "region": [
@@ -1319,46 +2066,81 @@
       5048.05
     ],
     "audio_rank": 35,
-    "audio_peak": 0.837,
+    "audio_peak": 0.728,
     "audio_mean": 0.545,
     "has_clip": true,
     "genre": "take",
-    "in_point": 4920.9,
-    "out_point": 4973.3,
-    "setup": "Is there a name for a team? No, not yet",
-    "claim": "we'll be announcing it pretty shortly here probably at the very latest in the next four days",
-    "consequence": "maybe we'll call it the kittens... if I opened Valorant right now and started playing ranked I would lose at least three times the viewership",
-    "subject": "Streamer teases a new team's name announcement within four days, then jokes about his viewership",
+    "in_point": 4998.9,
+    "out_point": 5032.4,
+    "setup": "Chat asks whether he already knows when the team's first game is, then whether the team has people who actually want to win and try.",
+    "claim": "\"I don't know yet. We'll see. I think we're going to be trying. But I'm not 100% sure.\"",
+    "consequence": "Moves straight on to thanking a viewer for the prime and taking the next question.",
+    "subject": "Streamer unsure whether his new team will really try to win",
     "strength": 0.3,
-    "why": "The topic opens at 4920.9 with a chat question about the team name, not at the flagged 4944.6, which lands mid-thank-you after the claim. It runs through the team-name tease and the self-deprecating ranked joke, which closes the beat. The team news is only a tease with no names or details, so the clip is marginal. The later 'not 100% sure we're trying' answer (4998.9-5032.4) is thinner. The 5041+ agent talk is generic explanation, and the Sentinels roster bit is cut off.",
-    "names_to_verify": [
-      "Cloudy",
-      "Sam",
-      "Sentinels",
-      "kittens (team name)"
-    ],
+    "why": "A mildly candid answer about the new team's seriousness. It is brief, has little consequence and the team is still unnamed.",
+    "names_to_verify": [],
     "risks": [
-      "The window opens mid-reaction ('What the fuck are you talking about?') to something said before 4920.9, which is not supplied",
-      "Mostly chatter, with no concrete roster or team reveal",
-      "Chat questions are read aloud, so there are implied multiple voices",
-      "The 'I'm kidding' jokes dilute the claim",
-      "The 4962.0 line has a long gap before the next timestamp, so the out-point may include dead air"
+      "The setup is garbled speech-to-text ('What? No? Okay,').",
+      "Thin payoff, and no team name or roster context.",
+      "The chat questions are read aloud, so the exchange is partly one-sided."
     ],
     "validation": [],
     "crowd_score": 0.0,
     "crowd_views": 0,
-    "seconds": 52.4,
-    "virality": 0.4105,
+    "seconds": 33.5,
+    "virality": 0.3762,
     "components": {
       "strength": 0.135,
       "crowd": 0.0,
-      "reaction": 0.1255,
-      "fit": 0.15
+      "reaction": 0.1092,
+      "fit": 0.132
+    },
+    "flags": [],
+    "file": "48_1h23m18s_streamer-unsure-whether-his-new-team.mp4"
+  },
+  {
+    "region": [
+      3051.1,
+      3188.35
+    ],
+    "audio_rank": 4,
+    "audio_peak": 0.897,
+    "audio_mean": 0.646,
+    "has_clip": true,
+    "genre": "take",
+    "in_point": 3090.7,
+    "out_point": 3226.3,
+    "setup": "\"to get juice on who you're coaching y'all I'll tell the mods you guys gotta keep it to yourselves\"",
+    "claim": "\"I'm gonna be coaching in the open qualifiers... I don't think I could watch worlds\"",
+    "consequence": "\"on days we have off we'll watch league... but if we're cracking it's going to be tough.\"",
+    "subject": "Streamer is coaching in the open qualifiers, hiding which team, and will miss most of Worlds Swiss stage",
+    "strength": 0.35,
+    "why": "A mild reveal that he is coaching in the open qualifiers and a clash with Worlds. It comes with a hidden-team tease and some date confusion, so it is weak as a standalone clip.",
+    "names_to_verify": [
+      "Pedro"
+    ],
+    "risks": [
+      "The Swiss stage start date is muddled (23rd vs 3rd, then playoffs vs knockout), which makes the ending messy",
+      "The team being coached is never named, so the payoff is thin",
+      "The opening is mid-sentence, right after a football-lineup tangent that ends around 3070",
+      "Chat or mod lines are read aloud, so more than one voice may be present"
+    ],
+    "validation": [],
+    "crowd_score": 0.0,
+    "crowd_views": 0,
+    "seconds": 135.6,
+    "virality": 0.3746,
+    "components": {
+      "strength": 0.1575,
+      "crowd": 0.0,
+      "reaction": 0.1346,
+      "fit": 0.0825
     },
     "flags": [
+      "136s is long for short-form \u2014 check the out-point",
       "speaker attribution needs checking before this ships"
     ],
-    "file": "28_1h22m00s_streamer-teases-a-new-team-s-name-anno.mp4"
+    "file": "49_0h51m30s_streamer-is-coaching-in-the-open-qua.mp4"
   },
   {
     "region": [
@@ -1372,33 +2154,29 @@
     "genre": "take",
     "in_point": 443.9,
     "out_point": 553.4,
-    "setup": "Realistically speaking this is pretty to me normal. All right, you're not always gonna get org backing",
-    "claim": "So forget orgs orgs will come in whenever they fucking want and they'll come in when they find the top team",
-    "consequence": "So fuck orcs they can do whatever they want the play it's on the players to start creating their line ups... and grind that's it",
-    "subject": "Whether tier-two players need org backing, in the context of the partner program decisions",
-    "strength": 0.6,
-    "why": "One continuous argument: orgs only invest in proven top teams, tier-two players just have to form a team and win, and orgs rarely profit anyway. It closes with a hedge ('I see what he's saying') before moving on to which orgs missed partner status. The flagged window of 501.7-520.1s starts mid-argument and ends before the 'fuck orgs' conclusion, so the clip is extended on both sides.",
+    "setup": "\"Realistically speaking this is pretty normal... you're not always gonna get org backing\"",
+    "claim": "\"Forget orgs\": orgs only invest in proven top teams, so tier two players should just form teams, grind open qualifiers and win.",
+    "consequence": "\"Orgs have never made money in this game\"; he doesn't see the change as a deal breaker, though he \"sees what he's saying\".",
+    "subject": "Tier two players shouldn't wait for org backing; just be good and win open qualifiers",
+    "strength": 0.55,
+    "why": "One continuous argument with a clear stance and a reason (org ROI). It ends when he moves on to which orgs will lose partner status.",
     "names_to_verify": [
-      "orcs (transcribed for orgs)",
-      "SR",
-      "C9",
-      "EG",
-      "FlyQuest",
-      "partner (program name unclear)"
+      "he (the person being responded to at 547s)"
     ],
     "risks": [
-      "The opening 'this is pretty... normal' reacts to something said before 443.9, probably a tweet or a person ('he'), so the topic is not fully introduced.",
-      "The clip runs about 110s, which is long, and there is filler and stammering from 465-485s.",
-      "Contains profanity.",
-      "The 'he' in 'I see what he's saying' is unidentified, and it is unclear whether other speakers are present."
+      "The opening \"this\" refers to something said before 443.9, so the clip starts slightly mid-context.",
+      "The ending reacts to an unnamed \"he\" whose argument isn't in the transcript.",
+      "The speaker's stance is hedged (\"don't necessarily agree... not a deal breaker\"), so the take is less punchy.",
+      "The flagged window (501.7-520.1) covers only the middle of this argument.",
+      "The region after 553.4 (C9, SR, FlyQuest partner status) is a separate topic and is excluded."
     ],
     "validation": [],
     "crowd_score": 0.0,
     "crowd_views": 0,
     "seconds": 109.5,
-    "virality": 0.3958,
+    "virality": 0.3733,
     "components": {
-      "strength": 0.27,
+      "strength": 0.2475,
       "crowd": 0.0,
       "reaction": 0.0433,
       "fit": 0.0825
@@ -1406,6 +2184,6 @@
     "flags": [
       "110s is long for short-form \u2014 check the out-point"
     ],
-    "file": "29_0h07m23s_whether-tier-two-players-need-org-back.mp4"
+    "file": "50_0h07m23s_tier-two-players-shouldn-t-wait-for.mp4"
   }
 ]

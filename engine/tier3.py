@@ -50,6 +50,25 @@ clip of the rant. It is never one clip of both.
 
 A clip that needs "and then he talks about" to describe it is two clips.
 
+THREE RULES FROM REVIEW. Breaking any of these makes the clip unusable.
+
+1. FINISH THE SENTENCE. The out-point lands where a sentence ENDS. Never cut
+   mid-clause. If the last utterance in your window trails off ("...you can't
+   just"), extend to where it completes or pull the out-point back to the
+   previous completed sentence. An abrupt stop reads as a broken clip.
+
+2. INCLUDE THE PROMPT. If the clip is a RESPONSE — to a chat question, a
+   co-host, a comment — start at the prompt, not at the answer. A question and
+   its answer are ONE narrative, not two. The sentence that introduces a new
+   topic belongs to that new topic: when someone pivots mid-sentence, the pivot
+   line is the new clip's SETUP, not the old clip's tail.
+
+3. THE CLIP MUST EXPLAIN ITSELF. Every person, team and thing referred to has
+   to be identifiable from inside the clip. If it opens mid-comparison with a
+   name the viewer has not been introduced to, there is no clip there however
+   strong the opinion is. Ask: could someone who joined at the in-point follow
+   this? If no, move the in-point back or return no clip.
+
 THE IN-POINT IS THE HARD PART
 Start at the first word of the SETUP, never at the claim. A claim without its \
 setup is unintelligible. Prefer the moment a NEW topic opens — someone \

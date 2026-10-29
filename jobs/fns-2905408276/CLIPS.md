@@ -1,538 +1,637 @@
-# FNS VOD 2905408276 — 29 raw clips, ranked
+# FNS VOD 2905408276 — 50 raw clips, ranked (v2)
 
-Source: `twitch.tv/videos/2905408276`, 1h43m. Rights basis: `permission: explicit` (roster.yaml).
+Second pass, with your one-clip-one-narrative rule applied. Raw cuts, no styling.
 
-**Raw cuts. No reframe, no captions, no styling** — so you can judge where each one
-starts and stops without anything hiding it. Cut points are exactly what Tier 3 chose;
-I have not trimmed anything to fit.
+| | v1 | v2 |
+|---|---|---|
+| clips | 29 | **50** |
+| median length | 81s | **60s** |
+| under 70s | 13 | **32** |
+| over 100s | 11 | 13 |
 
-## What I need from you
+Regions now split into separate clips instead of one spanning a topic change.
+The length problem is improved, not solved — 13 still run past 100s and the
+longest is 166s. Those out-points are still wrong.
 
-1. **Does the clip work at all** — is there a clip here?
-2. **Is the in-point right** — does it open where the moment opens?
-3. **Is the out-point right** — 11 of 29 run past 100s and I think most are too long.
-
+Only clips 1 and 2 have crowd evidence. The rest are ranked on Tier 3's
+judgement, which is unvalidated against real view counts.
 ---
 
-## The honest state of the ranking
-
-Only clip 1 and 2 have crowd evidence (3548 and 496 views on viewer-made clips).
-The other 27 are ranked on Tier 3's strength score plus loudness and shape, none of
-which is validated against real view counts. **Treat the order below as a hypothesis.**
-
-This is also a talking stream, so all 29 are takes. Nothing here tests the frag path.
-
----
-
-| # | in | len | viral | strength | crowd | subject |
+| # | in | len | viral | str | crowd | subject |
 |---|---|---|---|---|---|---|
-| 1 | `0:47:09` | 53s | 0.697 | 0.50 | 3548 | Streamer reveals they will coach a team in the open qual |
-| 2 | `0:53:52` | 44s | 0.588 | 0.35 | 496 | Streamer admits their friendship with Pedro is one-sided |
-| 3 | `0:36:17` | 54s | 0.552 | 0.60 | — | Open qualifiers in the new Valorant circuit will be plag |
-| 4 | `1:19:22` | 66s | 0.540 | 0.60 | — | Streamer's all-streamer team: self-deprecating take on w |
-| 5 | `1:39:38` | 64s | 0.537 | 0.60 | — | Reaction to the news that the region will not be in the  |
-| 6 | `1:08:33` | 56s | 0.528 | 0.55 | — | Dazzlers joining Crew as a coach, and whether the player |
-| 7 | `1:34:28` | 56s | 0.525 | 0.50 | — | Cane's era as the trendsetter whose mannerisms young NA  |
-| 8 | `0:13:02` | 69s | 0.504 | 0.50 | — | Whether orgs pulling back investment will actually hurt  |
-| 9 | `0:28:15` | 163s | 0.499 | 0.72 | — | Open qualifier system vs franchising, and players being  |
-| 10 | `1:13:57` | 87s | 0.498 | 0.60 | — | Players complaining about delayed pay in the open circui |
-| 11 | `0:17:30` | 30s | 0.497 | 0.55 | — | Open qualifier system vs franchise system for players |
-| 12 | `1:25:46` | 99s | 0.490 | 0.55 | — | Oxy to Sun and Valon to MIBR transfer speculation |
-| 13 | `0:43:33` | 43s | 0.489 | 0.50 | — | Hypothetical of Lev or neon moving to LOUD after the ros |
-| 14 | `0:42:48` | 60s | 0.489 | 0.50 | — | Hypothetical transfer of Lev or neon to LOUD, framed as  |
-| 15 | `0:38:38` | 72s | 0.487 | 0.55 | — | Second leaving MIBR and roster/contract speculation arou |
-| 16 | `1:12:46` | 109s | 0.474 | 0.60 | — | Streamer's reaction to players complaining about going u |
-| 17 | `1:29:04` | 81s | 0.466 | 0.50 | — | MIBR roster rules around a Valin/Zekin swap, ending in a |
-| 18 | `0:21:23` | 125s | 0.466 | 0.60 | — | Streamer's take on the open qualifier format and the com |
-| 19 | `0:13:38` | 218s | 0.466 | 0.60 | — | Orgless Valorant players after partnership cuts: the spe |
-| 20 | `0:32:38` | 125s | 0.464 | 0.60 | — | Open-circuit qualifier format: even playing field vs. gr |
-| 21 | `0:49:09` | 141s | 0.464 | 0.55 | — | Rumored Sentinels rebuild lineup as a super team |
-| 22 | `0:57:04` | 90s | 0.461 | 0.50 | — | Streamer announces they are starting as a coach, will st |
-| 23 | `0:02:30` | 55s | 0.456 | 0.45 | — | Whether missing passports will keep open-qualifier teams |
-| 24 | `0:22:53` | 192s | 0.452 | 0.55 | — | Offseason timing and partnership picks: open qualifier t |
-| 25 | `1:03:18` | 112s | 0.430 | 0.50 | — | Teamless Valorant players available for an Americas supe |
-| 26 | `0:25:12` | 168s | 0.430 | 0.50 | — | Valorant partnership: who missed out (Cloud9, Nongshim,  |
-| 27 | `1:01:30` | 108s | 0.428 | 0.50 | — | Free agent pickups and the prediction that Sam won't com |
-| 28 | `1:22:00` | 52s | 0.410 | 0.30 | — | Streamer teases a new team's name announcement within fo |
-| 29 | `0:07:23` | 110s | 0.396 | 0.60 | — | Whether tier-two players need org backing, in the contex |
+| 1 | `0:47:09` | 103s | 0.630 | 0.50 | 3548 | Speaker reveals he is coaching a team in the open qu |
+| 2 | `0:53:52` | 42s | 0.588 | 0.35 | 496 | Her one-sided friendship with Pedro, which she admit |
+| 3 | `0:46:49` | 15s | 0.571 | 0.30 | 3548 | Whether Cryo and Austin leave when their contracts e |
+| 4 | `0:54:36` | 52s | 0.565 | 0.30 | 496 | Why he only watches Worlds finals through K drill's  |
+| 5 | `1:34:28` | 56s | 0.547 | 0.55 | — | Cane's era as the trendsetter that NA streamers imit |
+| 6 | `0:36:34` | 43s | 0.543 | 0.62 | — | Open qualifiers in the new circuit will be plagued b |
+| 7 | `1:01:30` | 68s | 0.541 | 0.60 | — | Free agent market and a guarantee that Sam won't joi |
+| 8 | `1:39:38` | 64s | 0.537 | 0.60 | — | Reaction to a team missing the partnership cycle and |
+| 9 | `0:43:33` | 43s | 0.534 | 0.60 | — | Joke outrage at the idea of LOUD signing Lev or neon |
+| 10 | `1:08:33` | 56s | 0.528 | 0.55 | — | Dazzlers as a coach for crew |
+| 11 | `1:19:27` | 60s | 0.526 | 0.60 | — | Streamer's all-streamer team: a win would embarrass  |
+| 12 | `1:13:57` | 87s | 0.525 | 0.70 | — | Rant telling complaining players they have it easy a |
+| 13 | `1:03:18` | 69s | 0.520 | 0.55 | — | Teamless KRX players as free-agent options, and cred |
+| 14 | `0:13:02` | 69s | 0.504 | 0.50 | — | Why orgs pulling back investment won't hurt top play |
+| 15 | `0:17:30` | 30s | 0.502 | 0.60 | — | Open-qualifier system is clearly better than franchi |
+| 16 | `0:31:46` | 42s | 0.497 | 0.50 | — | Successful teams often hide internal problems, with  |
+| 17 | `1:26:52` | 53s | 0.495 | 0.50 | — | Valin as an IGL move to MIBR, and a possible player  |
+| 18 | `1:04:52` | 78s | 0.489 | 0.55 | — | Team-by-team rundown of how the new rosters look |
+| 19 | `0:42:48` | 60s | 0.489 | 0.50 | — | Speaker wants a cap on a rich org like LOUD stacking |
+| 20 | `0:45:13` | 75s | 0.488 | 0.55 | — | Where the big teamless players (Second, Knights, Dem |
+| 21 | `0:38:38` | 72s | 0.487 | 0.55 | — | Roster speculation: where Second goes from MIBR and  |
+| 22 | `0:28:14` | 162s | 0.481 | 0.72 | — | Defending the open qualifier system and arguing that |
+| 23 | `0:15:29` | 106s | 0.479 | 0.60 | — | Players who missed out on the league can just grind  |
+| 24 | `0:21:23` | 118s | 0.475 | 0.62 | — | Open qualifiers are overblown as a controversy, thou |
+| 25 | `1:12:46` | 109s | 0.474 | 0.60 | — | Rant against players complaining about unpaid months |
+| 26 | `0:44:23` | 39s | 0.467 | 0.45 | — | MIBR's roster falling apart after a year of near-mis |
+| 27 | `0:32:38` | 124s | 0.464 | 0.60 | — | Defending the open-qualifier circuit format with his |
+| 28 | `1:23:52` | 53s | 0.462 | 0.45 | — | Streamer's read on the new Valorant agent: too much  |
+| 29 | `0:57:04` | 90s | 0.461 | 0.50 | — | Streamer announces he'll livestream while coaching,  |
+| 30 | `1:11:01` | 54s | 0.459 | 0.45 | — | Why building your own roster through open qualifiers |
+| 31 | `1:17:07` | 67s | 0.456 | 0.45 | — | What his stream team would do in the open qualifier, |
+| 32 | `0:19:15` | 62s | 0.454 | 0.45 | — | Whether released franchise players like Valin get hu |
+| 33 | `0:25:12` | 166s | 0.453 | 0.55 | — | Who missed out on Valorant partnership and whether b |
+| 34 | `0:22:53` | 112s | 0.452 | 0.55 | — | Is the open qualifier turnaround too short for roste |
+| 35 | `1:29:40` | 45s | 0.448 | 0.40 | — | Streamer shoots down the idea of reuniting old Optic |
+| 36 | `1:09:29` | 37s | 0.447 | 0.40 | — | Whether Virus gets signed again |
+| 37 | `1:10:06` | 46s | 0.446 | 0.45 | — | Teasing his own team's roster and announcement timin |
+| 38 | `0:49:09` | 141s | 0.442 | 0.50 | — | Sentinels' rumored rebuilt roster as a super team, c |
+| 39 | `1:06:23` | 50s | 0.441 | 0.40 | — | SR missing out on Riot partnership |
+| 40 | `1:35:24` | 152s | 0.435 | 0.45 | — | Val explains why he is coaching for fun and won't co |
+| 41 | `1:15:37` | 25s | 0.434 | 0.40 | — | Would he sponsor a qualifier team? Only as a loan wi |
+| 42 | `0:37:35` | 47s | 0.429 | 0.40 | — | Defending the open qualifier circuit format and the  |
+| 43 | `0:39:51` | 26s | 0.428 | 0.35 | — | Prediction that Kiko might leave NRG to return to EM |
+| 44 | `1:18:29` | 33s | 0.428 | 0.35 | — | The open qualifier as a pipeline for rookies |
+| 45 | `1:25:46` | 20s | 0.427 | 0.35 | — | Oxy's reported move to Sun |
+| 46 | `1:31:42` | 35s | 0.422 | 0.35 | — | Whether Zix could become an assistant coach |
+| 47 | `0:01:35` | 110s | 0.411 | 0.50 | — | Passport worries about the open circuit are overblow |
+| 48 | `1:23:18` | 34s | 0.376 | 0.30 | — | Streamer unsure whether his new team will really try |
+| 49 | `0:51:30` | 136s | 0.375 | 0.35 | — | Streamer is coaching in the open qualifiers, hiding  |
+| 50 | `0:07:23` | 110s | 0.373 | 0.55 | — | Tier two players shouldn't wait for org backing; jus |
 
 ---
 ## Each clip
 
-### 1. `0:47:09` – `0:48:02` (53s) — virality 0.697
-`01_0h47m09s_streamer-reveals-they-will-coach-a-tea.mp4`
+### 1. `0:47:09`–`0:48:51` (103s) — 0.630
+`01_0h47m09s_speaker-reveals-he-is-coaching-a-tea.mp4`
 
-**Streamer reveals they will coach a team in the open qualifier and tease the unnamed lineup**
+**Speaker reveals he is coaching a team in the open qualifier and streaming it**
 
-- setup: Oh, yeah, I didn't even tell you guys
-- claim: So I'm gonna be coaching in the open qualifier and we're gonna be streaming it chat
-- payoff: it's gonna be obvious soon... you should already have the lineup in your head unless you're done. So we'll see how that goes
+- setup: "Oh, yeah, I didn't even tell you guys"
+- claim: "I'm gonna be coaching in the open qualifier and we're gonna be streaming it"
+- payoff: Won't name the lineup yet and hints it will be obvious. Then: "how am I supposed to stream League of Legends worlds if... I have to sit here
 
-*why Tier 3 picked it:* The reveal opens a new topic with a clear announcement ('I didn't even tell you guys'), then a claim, then a teaser payoff. It is a personal reveal, which is clippable, but the lineup stays unnamed and the delivery is he
+- ⚠ **103s — out-point likely wrong**
+- ⚠ 103s is long for short-form — check the out-point
+- verify: Chamber, League of Legends worlds
 
+### 2. `0:53:52`–`0:54:34` (42s) — 0.588
+`02_0h53m52s_her-one-sided-friendship-with-pedro.mp4`
+
+**Her one-sided friendship with Pedro, which she admits is basically parasocial**
+
+- setup: "Been watching Pedro a little bit here, too. I watched a couple YouTube videos of his" - then asked how they became friends.
+- claim: "I don't think he considers me a friend, but I considered him a friend. I think it's just one-sided."
+- payoff: "Obsessed with him... pushed my way in." The other speaker answers "Yeah, parasocial" and she agrees it's pretty one-sided.
 - ⚠ speaker attribution needs checking before this ships
-- names to verify: MIBR, Cryo, Austin, knights, demon one, second, oxy, Victor
-- risk: The lineup is deliberately not named, so the payoff is a tease.
-- risk: Mumbled, fragmented lines around 2844-2871, with gaps in the transcript.
+- verify: Pedro
 
-### 2. `0:53:52` – `0:54:36` (44s) — virality 0.588
-`02_0h53m52s_streamer-admits-their-friendship-with.mp4`
+### 3. `0:46:49`–`0:47:04` (15s) — 0.571
+`03_0h46m49s_whether-cryo-and-austin-leave-when-t.mp4`
 
-**Streamer admits their friendship with Pedro is one-sided and parasocial**
+**Whether Cryo and Austin leave when their contracts end**
 
-- setup: Been watching Pedro a little bit here, too. I watched a couple youtube videos of his... How did you and Pedro become friends?
-- claim: I don't think he considers me a friend, but I considered him a friend. I think it's just one-sided... I was obsessed with him... pushed my way in.
-- payoff: Yeah, parasocial. / It's all that happened. I think it's pretty one-sided.
-
-*why Tier 3 picked it:* This is the only self-contained exchange in the region. It opens on the Pedro topic, gets a direct question, a candid self-deprecating answer and a laughing 'parasocial' reaction. The flagged window starts in the middle 
-
+- setup: "Cryo and Austin a contract ending. Do you think either of them will leave?"
+- claim: "Austin is never gonna leave... I just don't see a world where they leave after the year"
+- payoff: "They've had a very successful year... you can't just leave"
+- ⚠ 15s is tight
 - ⚠ speaker attribution needs checking before this ships
-- names to verify: Pedro, K drill, Selena, Swiss stage dates (Nov 3 vs 23rd)
-- risk: More than one person speaks (host/co-streamer asks the question and says 'parasocial'), so speaker attribution is unclear.
-- risk: The 'Pedro' reference may be a speech-to-text error.
+- verify: Cryo, Austin
 
-### 3. `0:36:17` – `0:37:11` (54s) — virality 0.552
-`03_0h36m17s_open-qualifiers-in-the-new-valorant-ci.mp4`
+### 4. `0:54:36`–`0:55:29` (52s) — 0.565
+`04_0h54m36s_why-he-only-watches-worlds-finals-th.mp4`
 
-**Open qualifiers in the new Valorant circuit will be plagued by tech issues, with players left to fix their own setups**
+**Why he only watches Worlds finals through K drill's play-by-play co-stream**
 
-- setup: Sentinels has reached an agreement. I saw that I had that up here here. I mean, yeah, we saw this coming
-- claim: in the new circuit i already said this i've said this on every single stream... these open qualifiers are gonna be an absolute shit show ping issues c
-- payoff: they're going to cause delays, which are going to cause massive, massive amounts of problems and a lot of controversy.
-
-*why Tier 3 picked it:* The streamer makes a clear, repeated prediction that open qualifiers will be a mess. The setup is the Sentinels news, the claim is the ping, cheater and tech-support argument, and the consequence is delays and controvers
-
+- setup: "K drill is the only one that I watched for League of Legends when he was watching worlds finals"
+- claim: "I like people who explain things because I'm an idiot" and he was "glazing him"
+- payoff: "He got me so invested into League worlds" that he stayed for all five maps while Selena fell asleep
 - ⚠ speaker attribution needs checking before this ships
-- names to verify: Sentinels, G2, Sun, Gov
-- risk: The lines at 2177-2183 are garbled speech-to-text, so the link between the Sentinels news and the tech-issues claim is unclear.
-- risk: More than one speaker is present. A second voice agrees at 2231.5, and the clip cuts before it.
+- verify: K drill, Selena
 
-### 4. `1:19:22` – `1:20:27` (66s) — virality 0.540
-`04_1h19m22s_streamer-s-all-streamer-team-self-depr.mp4`
+### 5. `1:34:28`–`1:35:24` (56s) — 0.547
+`05_1h34m28s_cane-s-era-as-the-trendsetter-that-n.mp4`
 
-**Streamer's all-streamer team: self-deprecating take on winning a tournament and its realistic chances**
+**Cane's era as the trendsetter that NA streamers imitate**
 
-- setup: Everyone on my team is a streamer. I already gave you a hint. ... if the only Champs you won was with the stream team
-- claim: if we won a tournament with this lineup while streaming It would be so bad for the game. I think the game would die right there
-- payoff: That would be genuinely embarrassing ... Likely not [a kickoff]. I don't think you guys understand how good these teams are ... too many good teams in
-
-*why Tier 3 picked it:* It opens with the reveal that the whole team is streamers and answers a chat question. The hyperbolic claim that the game would die if they won follows, then a grounded consequence: they likely won't make kickoff because
-
+- setup: "Yeet machine has never been. Okay. This is what happened. All these people like cloudy acts like Sam and shanks..."
+- claim: "Cane's era is basically the new Sinatra", a trendsetter whose mannerisms get copied.
+- payoff: "people just copy it because they worship him he's the overlord of the young"
 - ⚠ speaker attribution needs checking before this ships
-- names to verify: Cloudy, Mal, Neon, Sam
-- risk: The chat question at 4767.6 is garbled by speech-to-text, so the setup may read unclearly.
-- risk: The claim is partly sarcastic and could be taken literally out of context.
+- verify: Cane's era, Sinatra, Yeet machine, cloudy, Sam, shanks
 
-### 5. `1:39:38` – `1:40:43` (64s) — virality 0.537
-`05_1h39m38s_reaction-to-the-news-that-the-region-w.mp4`
+### 6. `0:36:34`–`0:37:18` (43s) — 0.543
+`06_0h36m34s_open-qualifiers-in-the-new-circuit-w.mp4`
 
-**Reaction to the news that the region will not be in the partnership cycle, and what it means for player job security**
+**Open qualifiers in the new circuit will be plagued by tech issues, but still beat franchising**
 
-- setup: Global Eastwards will not be in the partnership cycle. Yeah, I saw this already.
-- claim: Non-partner orgs only picking up teams once they qualify is kind of worse for the scene. But I think people are blowing it out of proportion.
-- payoff: It forces you to be exceptional consistently, and even once signed you could be replaced and end up with nothing. You sacrifice a lot.
+- setup: "in the new circuit i already said this i've said this on every single stream"
+- claim: "these open qualifiers are gonna be an absolute shit show ping issues cheaters"
+- payoff: Tech problems will cause delays and controversy; a co-speaker agrees but says "It is still better than locking players out of franchise fore
+- verify: Sentinels, G2, Sun
 
-*why Tier 3 picked it:* A new topic opens with the player reading the news. He gives a measured counter-take that the reaction is overblown and argues that job instability is the point of the system. It then lands on a clear closing line about 
+### 7. `1:01:30`–`1:02:37` (68s) — 0.541
+`07_1h01m30s_free-agent-market-and-a-guarantee-th.mp4`
 
+**Free agent market and a guarantee that Sam won't join a team this year**
+
+- setup: Chat asks "which free agents are must pickups"; he lists "oxy... zek... crash... Valin" and says it's "brain dead out there".
+- claim: "He will not compete this year. He will not compete on an org this year. I can guarantee you that."
+- payoff: "I would be shocked if Sam joined... a top team... I would be blown away."
+- verify: Sam (possibly 'saw me' in the transcript), oxy, zek, crash, Valin
+
+### 8. `1:39:38`–`1:40:43` (64s) — 0.537
+`08_1h39m38s_reaction-to-a-team-missing-the-partn.mp4`
+
+**Reaction to a team missing the partnership cycle and what it means for player job security**
+
+- setup: Reads news: "Global Eastwards will not be in the partnership cycle." Says he's already seen it.
+- claim: Non-partner orgs only signing teams after cups or masters is worse for the scene, but "people are blowing it out of proportion."
+- payoff: Lack of job security "forces you to be exceptional consistently"; even signed players can be replaced and end up with nothing.
+- verify: Global Eastwards (likely Global Esports), partnership cycle
+
+### 9. `0:43:33`–`0:44:15` (43s) — 0.534
+`09_0h43m33s_joke-outrage-at-the-idea-of-loud-sig.mp4`
+
+**Joke outrage at the idea of LOUD signing Lev or neon, with a Man City comparison**
+
+- setup: "But how crazy would it be?" if Lev or neon ended up at LOUD
+- claim: "that is brain dead that should never be allowed... We need to put a cap on that ASAP"
+- payoff: "That's a man city shit... 115 charges... We are not accepting that, not a chance"
 - ⚠ speaker attribution needs checking before this ships
-- names to verify: Global Eastwards, Tarek, Sliggy, Inspire
-- risk: The transcript ends at 6043.2 and the last line may continue past it, so the out-point could clip the final sentence.
-- risk: The news item is only partly named by speech-to-text, so the viewer may not know which league or region it refers to.
+- verify: Lev, neon, LOUD, keys in (KEYSI?)
 
-### 6. `1:08:33` – `1:09:29` (56s) — virality 0.528
-`06_1h08m33s_dazzlers-joining-crew-as-a-coach-and-w.mp4`
+### 10. `1:08:33`–`1:09:29` (56s) — 0.528
+`10_1h08m33s_dazzlers-as-a-coach-for-crew.mp4`
 
-**Dazzlers joining Crew as a coach, and whether the players would accept his criticism**
+**Dazzlers as a coach for crew**
 
-- setup: Do you think Dazzlers will be a promising talent for 20 27 season?
-- claim: I think Dazzlers to join crew as a coach. And I really think that just they can put their differences aside.
-- payoff: He'll be a tough coach to deal with but the players will hopefully respect him enough... Dante and heat might have to you know, they got to just figur
-
-*why Tier 3 picked it:* A chat question opens a new topic, then comes a named roster judgement with reasoning and a consequence about player friction. It ends cleanly before the next chat question about Virus. The take is hedged and the names a
-
+- setup: Chat: "Do you think Dazzlers will be a promising talent for 2027 season?"
+- claim: "I think Dazzlers to join crew as a coach" and "they can put their differences aside."
+- payoff: He'd be a tough coach, but players would respect him enough to take the criticism; Dante and heat "got to just figure it out."
 - ⚠ payoff is a teaser, not news
+- verify: Dazzlers, crew, Dante, heat
+
+### 11. `1:19:27`–`1:20:27` (60s) — 0.526
+`11_1h19m27s_streamer-s-all-streamer-team-a-win-w.mp4`
+
+**Streamer's all-streamer team: a win would embarrass the game, and he expects them to lose**
+
+- setup: Chat asks his thoughts on the only champs he won being with the stream team: "if we win a tournament... with this lineup while streaming"
+- claim: "It would be so bad for the game. I think the game would die right there... genuinely embarrassing"
+- payoff: Asked about making kickoff: "Likely not. I don't think you guys understand how good these teams are" and they probably lose to tier two team
 - ⚠ speaker attribution needs checking before this ships
-- names to verify: Dazzlers, crew, Dante, heat, Tyson
-- risk: Speech-to-text names are unreliable, especially 'crew', 'Dante and heat' and 'Dazzlers'.
-- risk: The streamer hedges ('we'll see though') and the Dante/heat reference is vague.
+- verify: Neon, Mal, Cloudy
 
-### 7. `1:34:28` – `1:35:24` (56s) — virality 0.525
-`07_1h34m28s_cane-s-era-as-the-trendsetter-whose-ma.mp4`
+### 12. `1:13:57`–`1:15:24` (87s) — 0.525
+`12_1h13m57s_rant-telling-complaining-players-the.mp4`
 
-**Cane's era as the trendsetter whose mannerisms young NA players copy, compared with Sinatra**
+**Rant telling complaining players they have it easy and should sacrifice pay for the freedom to pick their own roster**
 
-- setup: Yeet machine has never been. Okay. This is what happened. All these people like cloudy acts like Sam and shanks. Like these guys are too impressionabl
-- claim: Cane's era is basically the new Sinatra like it just sets these trends... his mannerisms and then people just copy it because they worship him
-- payoff: he's the overlord of the young Jen at least in America's or at least in NA
-
-*why Tier 3 picked it:* A named-player judgement with a setup (players copying others), a clear claim (Cane's era is the new Sinatra) and a closing line (overlord of the young generation). The take is complete by about 5724. The next block (fro
-- names to verify: Cane's era, Sinatra (likely Sinatraa), Yeet machine, cloudy, Sam and shanks, Nathan, Jen (likely Gen Z / gen)
-- risk: Several people appear to speak, with 'Yeah' and 'Okay' interjections, so the exchange may be messy.
-- risk: The 5724.1 line holds the tail of the take ('Jen at least in NA') and then the new coaching question, so ending at 5724.1 may clip the last 
-
-### 8. `0:13:02` – `0:14:11` (69s) — virality 0.504
-`08_0h13m02s_whether-orgs-pulling-back-investment-w.mp4`
-
-**Whether orgs pulling back investment will actually hurt players, since the named orgs never overpaid**
-
-- setup: these orgs, right here is the orgs he names that are going to start investing less potentially, okay?
-- claim: These orgs weren't paying their players a fucking dumb amount of money anyway.
-- payoff: So these orcs can just wait it out and then just pick up the rosters they feel are gonna do well... you lose like two to three months of salary before
-
-*why Tier 3 picked it:* It pushes back on a named claim about orgs cutting investment. It gives a clear argument (the orgs didn't overpay, so they can wait and pick up rosters) and a concrete consequence for players (2-3 months without salary).
-- names to verify: Perry sucker, Hundred Thieves, the orgs 'he' names (not in this region)
-- risk: Setup refers to an unnamed 'he' and a list of orgs from earlier in the stream, so viewers may need a caption.
-- risk: Opens with 'So yeah, I don't,' a slightly mid-thought start.
-
-### 9. `0:28:15` – `0:30:58` (163s) — virality 0.499
-`09_0h28m15s_open-qualifier-system-vs-franchising-a.mp4`
-
-**Open qualifier system vs franchising, and players being spoiled by franchise pay**
-
-- setup: Like why wouldn't you want an open qualifier system? ... You want to go back into franchising? Where tier two players are just locked out of tier one 
-- claim: these fucking kids nowadays are too spoiled by the franchise system and they got paid from the beginning... Brother, in CS I didn't get paid for five 
-- payoff: If you're an exceptional player, you will get there. You can't have everyone getting paid... the pros far outweigh the cons. Long term.
-
-*why Tier 3 picked it:* It opens with a rhetorical challenge on open qualifiers, then a blunt controversial claim that franchise-era players are spoiled. He backs it with his own five unpaid years in CS and closes with a clear verdict that the 
-
-- ⚠ 163s is long for short-form — check the out-point
-- ⚠ **163s — too long for short-form, out-point is probably wrong**
-- names to verify: Zappa, C9, Zelsus, Rooney, Jakey, Vanity, Zepa
-- risk: The 1755-1793s stretch has sparse transcript lines and may contain rambling or missing speech.
-- risk: He addresses a chat user ('Yeah, Zappa'), so the clip may need chat context, although one streamer carries the whole argument.
-
-### 10. `1:13:57` – `1:15:24` (87s) — virality 0.498
-`10_1h13m57s_players-complaining-about-delayed-pay.mp4`
-
-**Players complaining about delayed pay in the open circuit vs. earlier grind-era hardship**
-
-- setup: Why not remember when you had to pull up on a land when you were hungry nowadays? ... I had to take like five different modes of transportation
-- claim: You guys have it good now, man. I don't want to hear no complaints about oh I'm not gonna get paid for a couple months
-- payoff: They just want the best possible scenario to be able to prove themselves and that's not how life works always ... I will take that freedom and sacrifi
-
-*why Tier 3 picked it:* A clear, opinionated rant with a personal anecdote as setup, a blunt claim ('you guys have it good now'), and a reasoned follow-up about freedom to build your own roster. The flagged window starts at 4473.4, which cuts o
-
+- setup: "Remember when you had to pull up on a LAN when you were hungry... five different modes of transportation"
+- claim: "You guys have it good now... I don't want to hear no complaints" about not getting paid for a couple months
+- payoff: "You got to just want it... I will take that freedom and sacrifice a couple months of salary all day"
 - ⚠ 87s runs past the comfortable window
 - ⚠ speaker attribution needs checking before this ships
-- ⚠ payoff is a teaser, not news
-- names to verify: land (probably LAN), loud (possibly the org LOUD), tier one man, Valorant
-- risk: The first line (4437.8) reads as a reply to an earlier point, so it may feel slightly mid-thought. Starting at 4443.8 is a cleaner but weake
-- risk: Speech-to-text garbles 'LAN' as 'land' and 'fast' as 'first'.
 
-### 11. `0:17:30` – `0:18:01` (30s) — virality 0.497
-`11_0h17m30s_open-qualifier-system-vs-franchise-sys.mp4`
+### 13. `1:03:18`–`1:04:27` (69s) — 0.520
+`13_1h03m18s_teamless-krx-players-as-free-agent-o.mp4`
 
-**Open qualifier system vs franchise system for players**
+**Teamless KRX players as free-agent options, and credit for the dictator in the event win**
 
-- setup: So I can't see why any player would be complaining about this unless there are other arguments that I need to be told about... why am I seeing so much
-- claim: This is a clearly better system than franchise. It's not close.
-- payoff: You were locked out of franchising if you were not a partnered team back then... Now you are not fucked. Now, your own fate is in your own hands.
-
-*why Tier 3 picked it:* The streamer opens by asking why the timeline is pessimistic, makes a blunt claim that the new system beats franchise, and backs it with the lockout argument. The 1081.1 end lands on a clean line before a long gap. The V
-
+- setup: "What about Mako? ... you got the KRX players that are teamless now"
+- claim: "Those guys are available if need be" while still loving the current lineup, and "the dictator is the only reason we won the event"
+- payoff: He could not credit the dictator all year because he was on a different lineup, so the free-agent pickups look real
 - ⚠ speaker attribution needs checking before this ships
-- names to verify: Valin, Vora, Ethan, Kiko, kickoff / future cups (event names)
-- risk: The topic opens before the transcript window and the region starts mid-argument. The 'So...' opener implies earlier context.
-- risk: The clip leans on the earlier 'guarantee' argument (1017-1045) without including it, so it may feel slightly abrupt.
+- verify: Mako, Pat men, Hyunmin, KRX, the dictator
 
-### 12. `1:25:46` – `1:27:25` (99s) — virality 0.490
-`12_1h25m46s_oxy-to-sun-and-valon-to-mibr-transfer.mp4`
+### 14. `0:13:02`–`0:14:11` (69s) — 0.504
+`14_0h13m02s_why-orgs-pulling-back-investment-won.mp4`
 
-**Oxy to Sun and Valon to MIBR transfer speculation**
+**Why orgs pulling back investment won't hurt top players much**
 
-- setup: leak oxydamir confirmed it's looking like there's too many reports about this we already had a feeling that oxy was probably gonna go to Sun
-- claim: the oxy one is pretty much set the boy finally gets the bag
-- payoff: Valon maybe goes to MIBR, the only one that makes sense: they need a full IGL and he's a very decorated IGL they'd respect
+- setup: "these orgs, right here is the orgs he names that are going to start investing less potentially, okay?"
+- claim: "These orgs weren't paying their players a fucking dumb amount of money anyway", so they can wait it out and pick up rosters later.
+- payoff: "you lose like what two to three months of salary before you get picked up", even as a top player.
+- verify: Hundred Thieves, Perry (speaker's reference, likely a different name)
 
-*why Tier 3 picked it:* It is a self-contained roster and transfer segment: a confirmed move, then a named prediction with reasoning. The agent talk before it is a separate topic, and the Sentinels roster joke before it is too inside-joke to st
+### 15. `0:17:30`–`0:18:01` (30s) — 0.502
+`15_0h17m30s_open-qualifier-system-is-clearly-bet.mp4`
 
-- ⚠ 99s runs past the comfortable window
+**Open-qualifier system is clearly better than franchise for players**
+
+- setup: "I can't see why any player would be complaining about this... why am I seeing so much pessimism on my timeline about this system?"
+- claim: "This is a clearly better system than franchise. It's not close."
+- payoff: "You were locked out of franchising if you were not a partnered team... Now your own fate is in your own hands."
+
+### 16. `0:31:46`–`0:32:28` (42s) — 0.497
+`16_0h31m46s_successful-teams-often-hide-internal.mp4`
+
+**Successful teams often hide internal problems, with Vitality as a speculative example**
+
+- setup: "Do you think Loud will split up?" "I have no idea what's going to happen with the teams."
+- claim: "Teams that succeed had prior issues as well... sometimes teams are dead going into whole ass events and end up making runs."
+- payoff: "For all you know Vitality was a dead fucking team that just happened to make a run."
+- verify: Loud, Vitality
+
+### 17. `1:26:52`–`1:27:45` (53s) — 0.495
+`17_1h26m52s_valin-as-an-igl-move-to-mibr-and-a-p.mp4`
+
+**Valin as an IGL move to MIBR, and a possible player swap**
+
+- setup: "he have had to move with Leon as well. So he's obviously willing to move."
+- claim: "might go to MIBR as the only one that makes sense to me here. They need an IGL like a full IGL."
+- payoff: "So what, King and Valorant just swap teams?... The first player trade in history?"
 - ⚠ speaker attribution needs checking before this ships
-- names to verify: Oxydamir / Oxy, Sun, Valon, Leon, MIBR, Sentinels, John QT, King
-- risk: The 5146.4 line begins with 'leak', which looks like the tail of the previous sentence.
-- risk: The team and player names come from speech-to-text and may be wrong, especially 'Sun', 'Valon' and 'Leon'.
+- verify: Valin, Leon, MIBR, King, Zekin, John QT
 
-### 13. `0:43:33` – `0:44:15` (43s) — virality 0.489
-`13_0h43m33s_hypothetical-of-lev-or-neon-moving-to.mp4`
+### 18. `1:04:52`–`1:06:09` (78s) — 0.489
+`18_1h04m52s_team-by-team-rundown-of-how-the-new.mp4`
 
-**Hypothetical of Lev or neon moving to LOUD after the roster shakeup, framed as financial-fair-play-style abuse**
+**Team-by-team rundown of how the new rosters look**
 
-- setup: But how crazy would it be?
-- claim: If Lev or neon went to loud somehow that is brain dead that should never be allowed
-- payoff: We need to put a cap on that ASAP... that's a man city shit right there... They're breaking financial laws and moral laws at that point 115 charges
+- setup: Sentinels likely with this kind of lineup is gonna be insane... G2. They have King Sato
+- claim: G2 is gonna be good no matter what; 100 Thieves are very solid; Crew only have Lotus in their map pool
+- payoff: Nats is LFT. That's fucking bad. It's crazy since Valens leaked org didn't make it.
+- ⚠ 78s runs past the comfortable window
+- verify: Sentinels, G2, King Sato, Oxy, 100 Thieves, Loud
 
-*why Tier 3 picked it:* A hypothetical transfer escalates into a punchy take, with a Man City 115 charges joke as the payoff. The setup is thin, and the earlier 'on loan' discussion is garbled, so context is partly lost. The topic closes at 264
-- names to verify: Lev, neon, LOUD, keys in (possibly KEYD), aspas / spas, MIBR
-- risk: Multiple speakers talking over each other
-- risk: The setup is garbled in the transcript, so the clip may need a caption for context
+### 19. `0:42:48`–`0:43:48` (60s) — 0.489
+`19_0h42m48s_speaker-wants-a-cap-on-a-rich-org-li.mp4`
 
-### 14. `0:42:48` – `0:43:48` (60s) — virality 0.489
-`14_0h42m48s_hypothetical-transfer-of-lev-or-neon-t.mp4`
+**Speaker wants a cap on a rich org like LOUD stacking top free agents like neon**
 
-**Hypothetical transfer of Lev or neon to LOUD, framed as a super-team problem**
+- setup: "Damn neon is without a tea. Oh my god" - then the loan situation and what happens if the loaned player leaves.
+- claim: "If Lev or neon went to loud somehow that is brain dead that should never be allowed"
+- payoff: "We need to put a cap on that ASAP... that's a man city shit right there"
+- verify: neon, Lev, LOUD, keys in / Keyd, darker
 
-- setup: Damn neon is without a tea. Oh my god neon is that? ... what if he leaves and then neon joins but now you need to keys in this guy
-- claim: If Lev or neon went to loud somehow that is brain dead that should never be allowed
-- payoff: We need to put a cap on that ASAP ... We cannot allow that's a man city shit right there
+### 20. `0:45:13`–`0:46:28` (75s) — 0.488
+`20_0h45m13s_where-the-big-teamless-players-secon.mp4`
 
-*why Tier 3 picked it:* The flagged window is mostly the streamer reading a roster tracker and thinking aloud, which is not clippable. The real take comes at the end. A free-agent player prompts a hypothetical, then a clear judgement (a LOUD mo
-- names to verify: neon, Lev, LOUD, keys in (KEYD / Keyd?), darker (possibly 'drkr' or another player), MIBR, spasino / spas
-- risk: The middle (2574-2602) is garbled and fragmentary, and the speech-to-text names are unreliable.
-- risk: The clip is about 60s and partly rambling. A tighter cut could start at 2602.0, but that line opens mid-thought.
+**Where the big teamless players (Second, Knights, Demon1, Oxy) land, and how stacked the Americas are**
 
-### 15. `0:38:38` – `0:39:49` (72s) — virality 0.487
-`15_0h38m38s_second-leaving-mibr-and-roster-contrac.mp4`
+- setup: "So where are you slotting in second here?"
+- claim: "I think second stays in MIBR. Maybe I don't think so though." Then: "all the teamless players that are still available... Knights, Demon1, 
+- payoff: "America's is already stacked as is and now you're gonna stack it even more... it is crazy out there, man"
+- ⚠ 75s runs past the comfortable window
+- ⚠ speaker attribution needs checking before this ships
+- verify: Second, Knights, Demon1, Oxy, MIBR, Victor
 
-**Second leaving MIBR and roster/contract speculation around Oxy, Redox and Sentinels**
+### 21. `0:38:38`–`0:39:49` (72s) — 0.487
+`21_0h38m38s_roster-speculation-where-second-goes.mp4`
 
-- setup: You think that oxy, second and redox can work together in a team? ... Where's second in all this is that going to stay at MIBR?
+**Roster speculation: where Second goes from MIBR and whether Oxy, Second and Redox fit together**
+
+- setup: You think that oxy, second and redox can work together in a team?
 - claim: I can almost guarantee he's not gonna stay at MIBR.
-- payoff: Those are the only two teams you'd look at for actually qualifying, the org is huge, and "Oxy's new contract is probably brain dead... I don't wanna s
-
-*why Tier 3 picked it:* The topic shifts from the open-circuit debate to roster and transfer speculation at 2318.0, which opens with a question. It then gives a named prediction (Second leaves MIBR) and reasoning about synergy and money, and en
-
+- payoff: Oxy's new contract is probably brain dead... That's fucked.
 - ⚠ 72s runs past the comfortable window
 - ⚠ speaker attribution needs checking before this ships
-- names to verify: Oxy, Second, Redox, MIBR, Sentinels
-- risk: The transcript has gaps (2333-2350, 2354-2366) where the team Second might go to is not captured. "Those are the only two teams" has no clea
-- risk: The questions may come from chat or a co-host, so more than one voice may be present.
+- verify: Oxy, Second, Redox, MIBR, Sentinels
 
-### 16. `1:12:46` – `1:14:35` (109s) — virality 0.474
-`16_1h12m46s_streamer-s-reaction-to-players-complai.mp4`
+### 22. `0:28:14`–`0:30:56` (162s) — 0.481
+`22_0h28m14s_defending-the-open-qualifier-system.mp4`
 
-**Streamer's reaction to players complaining about going unpaid for a couple of months in the open qualifier format**
+**Defending the open qualifier system and arguing that players spoiled by franchise pay are the ones complaining**
 
-- setup: people complaining if you play from your parents house you got no rent to pay... a lot of these people are grown ass men and don't live in their paren
-- claim: I don't empathize with it that much. I had to do the same thing for years
-- payoff: I don't want to hear it... sit there and make a fucking team, stay humble and be good. That's it.
+- setup: "Why wouldn't you want an open qualifier system? ... You want to go back into franchising?"
+- claim: "These fucking kids nowadays are too spoiled by the franchise system and they got paid from the beginning."
+- payoff: "If you're an exceptional player, you will get there... the pros far outweigh the cons. Long term."
 
-*why Tier 3 picked it:* This is a clear gripe with a strong stance. It opens with the complaint (players skipping salary), moves to the 'I had to do worse' claim, and closes on a blunt 'I don't want to hear it'. The earlier part of the region (
+- ⚠ **162s — out-point likely wrong**
+- ⚠ 162s is long for short-form — check the out-point
+- ⚠ speaker attribution needs checking before this ships
 
+### 23. `0:15:29`–`0:17:16` (106s) — 0.479
+`23_0h15m29s_players-who-missed-out-on-the-league.mp4`
+
+**Players who missed out on the league can just grind open qualifiers and orgs will pick them up**
+
+- setup: "I'm not trying to say SR shouldn't be in it. Fly quest shouldn't be in it. There's just not enough slots."
+- claim: Missing the league doesn't mean orgs give up on Val. Orgless players should just grind the open qualifiers, and the speaker doesn't see what
+- payoff: "One result is all it takes and org will pick you up... Multiple orgs will fight for you," and you can leverage those offers for maximum sal
+
+- ⚠ **106s — out-point likely wrong**
+- ⚠ 106s is long for short-form — check the out-point
+- verify: SR, Fly quest, orcs (likely 'orgs'), Val/Valorant, champs
+
+### 24. `0:21:23`–`0:23:21` (118s) — 0.475
+`24_0h21m23s_open-qualifiers-are-overblown-as-a-c.mp4`
+
+**Open qualifiers are overblown as a controversy, though the turnaround time is a fair complaint**
+
+- setup: "The reason I got on is to figure out what everyone is crying about with this open qualifier shit."
+- claim: "I don't think this is the end of the world." Open qualifiers might be disastrous, but they give outside players a real shot at tier one.
+- payoff: Players have to earn qualification by beating org teams. He concedes the fast turnaround is a fair complaint: "It's too little for sure, but
+
+- ⚠ **118s — out-point likely wrong**
+- ⚠ 118s is long for short-form — check the out-point
+- verify: Paper X Wendler
+
+### 25. `1:12:46`–`1:14:35` (109s) — 0.474
+`25_1h12m46s_rant-against-players-complaining-abo.mp4`
+
+**Rant against players complaining about unpaid months in the open circuit**
+
+- setup: "people complaining if you play from your parents house you got no rent to pay" - players grumbling about months without salary in open qual
+- claim: "I don't empathize with it that much. I had to do the same thing for years"
+- payoff: "You guys have it good now... I don't want to hear it, sit there and make a team, stay humble and be good"
+
+- ⚠ **109s — out-point likely wrong**
 - ⚠ 109s is long for short-form — check the out-point
+- verify: Loud, eat machine (likely a person's handle, garbled)
+
+### 26. `0:44:23`–`0:45:02` (39s) — 0.467
+`26_0h44m23s_mibr-s-roster-falling-apart-after-a.mp4`
+
+**MIBR's roster falling apart after a year of near-misses**
+
+- setup: "The South Americans are gonna cook" as the MIBR roster is discussed
+- claim: "This roster is just completely nuclear bombed out of existence... Mazzini was going to be the only one left standing"
+- payoff: "One of the most unfortunate years for a roster... not qualifying for a single event while being that close every time. That is fucked."
 - ⚠ speaker attribution needs checking before this ships
-- ⚠ **109s — too long for short-form, out-point is probably wrong**
-- names to verify: Nats, Fanatic, Vitality, stick spree, Loud
-- risk: More than one person speaks: the 4396-4429 lines ('You don't know what gas is... You are a child') read like banter with a co-host or someon
-- risk: The setup line at 4366.1 is garbled ('for a wide people complaining'), so check the transcript against the audio.
+- verify: MIBR, Mazzini
 
-### 17. `1:29:04` – `1:30:24` (81s) — virality 0.466
-`17_1h29m04s_mibr-roster-rules-around-a-valin-zekin.mp4`
+### 27. `0:32:38`–`0:34:41` (124s) — 0.464
+`27_0h32m38s_defending-the-open-qualifier-circuit.mp4`
 
-**MIBR roster rules around a Valin/Zekin swap, ending in a joke about the old OpTic roster not coming back**
+**Defending the open-qualifier circuit format with his own come-up stories**
 
-- setup: Valin cannot join MIBR if a current player is substituted or replaced, it must be with someone from their respective region, therefore MIBR needs to s
-- claim: So you need 3 Brazilian 2 imports. Well, assuming Zekin's gone... Zekin can be replaced by Valin.
-- payoff: Why can't we get the old optic back? ... I'm 34 years old. You cannot get the old optic back... We're literally old. It's over.
+- setup: "this format is literally million times better for everyone. I agree"
+- claim: The open circuit is an even playing field: you grind from the bottom and everyone has the same shot at qualifying.
+- payoff: He backs it with his own Envy and CLG climbs, then pushes back on a counter that 'those were early days': "that's a horrible argument".
 
-*why Tier 3 picked it:* This is the most coherent topic in the region. It opens on a roster-rule explanation, reaches a concrete roster conclusion, then lands a reaction beat about old OpTic. The earlier part of the window is chat tangents (Den
-
-- ⚠ 81s runs past the comfortable window
+- ⚠ **124s — out-point likely wrong**
+- ⚠ 124s is long for short-form — check the out-point
 - ⚠ speaker attribution needs checking before this ships
-- names to verify: Valin, Zekin, Aspass, MIBR, optic, Leon, Yay, John QT
-- risk: The 5380.1 line runs about 22s and the 'Why can't we' sentence is cut off at 5402.3, so the transcript may be missing a word or two.
-- risk: The old-OpTic exchange may involve a second voice (chat or a co-streamer), so the speaker is unclear.
+- verify: Envy, CLG, TSM, T1, Complexity, Joseph
 
-### 18. `0:21:23` – `0:23:28` (125s) — virality 0.466
-`18_0h21m23s_streamer-s-take-on-the-open-qualifier.mp4`
+### 28. `1:23:52`–`1:24:45` (53s) — 0.462
+`28_1h23m52s_streamer-s-read-on-the-new-valorant.mp4`
 
-**Streamer's take on the open qualifier format and the community backlash against it**
+**Streamer's read on the new Valorant agent: too much support util to be a solo duelist**
 
-- setup: The reason I got on is to figure out what everyone is crying about With this open qualifier shit
-- claim: I don't think this is the end of the world. I think the open qualifiers might end up being absolutely disastrous... But again, you allow all of these 
-- payoff: They basically have to earn their qualification by beating some of these org teams... I agree that the turnaround time is too fast... but again, not t
+- setup: Chat asks: "How much do you think the new agent will affect the meta right now."
+- claim: "She has too much supportive util to be a pure duelist."
+- payoff: Likes the kit anyway: the throw ability that displaces a player and stuns them on a wall hit is "pretty good".
+- verify: new agent (name not said)
 
-*why Tier 3 picked it:* It opens as a new topic with a clear reason for the take (what is everyone crying about). It gives a contrarian stance that concedes the cons (cheaters, ping, fast turnaround), then argues the upside for non-partnered pl
+### 29. `0:57:04`–`0:58:34` (90s) — 0.461
+`29_0h57m04s_streamer-announces-he-ll-livestream.mp4`
 
-- ⚠ 125s is long for short-form — check the out-point
-- ⚠ **125s — too long for short-form, out-point is probably wrong**
-- names to verify: Valin, Valon, Vora, Ethan, Kiko, Paper X Wendler
-- risk: The transcript has gaps (1357.3 to 1373.3), so something may have been skipped, possibly a chat read. The 'Even paper X Wendler events...' l
-- risk: The clip assumes the viewer knows the partnered-team and open-qualifier context.
+**Streamer announces he'll livestream while coaching, with chat off and a delay**
 
-### 19. `0:13:38` – `0:17:16` (218s) — virality 0.466
-`19_0h13m38s_orgless-valorant-players-after-partner.mp4`
-
-**Orgless Valorant players after partnership cuts: the speaker argues they can grind open qualifiers and get picked up, so there is nothing to complain about**
-
-- setup: So these orcs can just wait it out and then just pick up the rosters they feel are gonna do well this year.
-- claim: I don't really see why what anyone is complaining about. You literally just have to fucking grind.
-- payoff: one result is all it takes and org will pick you up. That's a guarantee... Multiple orgs will fight for you.
-
-*why Tier 3 picked it:* It is a clear, opinionated take on the orgless-player discourse. The setup is that orgs wait and pick up rosters, the claim is that nobody should be complaining, and the payoff is that one good result gets multiple org o
-
-- ⚠ 218s is long for short-form — check the out-point
-- ⚠ **218s — too long for short-form, out-point is probably wrong**
-- names to verify: orcs (almost certainly 'orgs'), SR (possibly Shopify Rebellion), Fly quest (FlyQuest), Val (Valorant), champs
-- risk: Long, about 218s, and a trim may be needed
-- risk: A 21s gap at 865-886 may be a cut or pause, and the 'why do orgs invest' aside slows the middle
-
-### 20. `0:32:38` – `0:34:43` (125s) — virality 0.464
-`20_0h32m38s_open-circuit-qualifier-format-even-pla.mp4`
-
-**Open-circuit qualifier format: even playing field vs. grinding from the bottom**
-
-- setup: People just love to be pessimistic this format is literally million times better for everyone. I agree
-- claim: every player has the freedom to do whatever the fuck they want and have the same chances of qualifying as anybody else. It is a literal even playing f
-- payoff: The speaker backs it with their own path: 'we did that shit on envy... we had to beat TSM... only then did an org decide to pick us up.' A rebuttal fo
-
-*why Tier 3 picked it:* It is a clear, opinionated defense of the open qualifier path with personal evidence (Envy, CLG), and it ends in a pushback from another speaker. The chat tangent about the 57-minute final (2114s onward) is off-topic, so
-
-- ⚠ 125s is long for short-form — check the out-point
-- ⚠ speaker attribution needs checking before this ships
-- ⚠ **125s — too long for short-form, out-point is probably wrong**
-- names to verify: Envy, TSM, T1, CLG, Complexity, Fes, Joseph, Valorant
-- risk: More than one person speaks (the main speaker, plus a rebuttal and a reaction around 2058-2083), so attribution is unclear
-- risk: The opener starts mid-conversation and the topic may have begun before 1958s
-
-### 21. `0:49:09` – `0:51:30` (141s) — virality 0.464
-`21_0h49m09s_rumored-sentinels-rebuild-lineup-as-a.mp4`
-
-**Rumored Sentinels rebuild lineup as a super team**
-
-- setup: Sentinels rebuild hear me out. Rob is cooking for something and we don't know what it is yet.
-- claim: I mean, yeah, this is their best. This is an insane lineup.
-- payoff: Real Madrid 2014-2017 'brain dead lineup' Champions League treble comparison, then 'this is literally a super team though. And we know how super teams
-
-*why Tier 3 picked it:* A new topic opens at 2949.4 with a rumored Sentinels roster and the streamer's reaction. He calls it an insane lineup, argues the point with a Real Madrid analogy, and lands on a hedge about super teams. The earlier part
-
-- ⚠ 141s is long for short-form — check the out-point
-- ⚠ speaker attribution needs checking before this ships
-- ⚠ **141s — too long for short-form, out-point is probably wrong**
-- names to verify: Rob, John QT, Redux, oxyduelist, Sentinels, Chamber
-- risk: The lineup is read off a chat or screen post, so the roster details are spoken in fragments and the speech-to-text names may be wrong.
-- risk: The Real Madrid tangent is long, with repeated 'come on guys' lines that drag the middle.
-
-### 22. `0:57:04` – `0:58:34` (90s) — virality 0.461
-`22_0h57m04s_streamer-announces-they-are-starting-a.mp4`
-
-**Streamer announces they are starting as a coach, will stream the coaching live, and will keep chat off to avoid 'L coach' rage bait**
-
-- setup: So yeah chat because we're gonna be coaching I got to start watching VODs
-- claim: I'm gonna be live while watching while coaching... I'm not gonna have chat up because I don't want to... have you guys rage bait me
-- payoff: There's gonna be a three-minute delay, so I can't respond anyway... This is gonna be my first time ever like coaching or trying to coach
-
-*why Tier 3 picked it:* This is a new topic: a coaching reveal, a stream format decision, and a reason for it. It starts at 3424.2 with 'So yeah chat', after the Selena flight chatter. The flagged window starts at 3320, in the worlds and time-z
-
+- setup: "because we're gonna be coaching I got to start watching VODs"
+- claim: "I'm gonna be live while coaching... I'm not gonna have chat up" so chat can't rage bait him with "L coach"
+- payoff: "three-minute delay" so he can't respond anyway; "first time ever... trying to coach"
 - ⚠ 90s runs past the comfortable window
 - ⚠ speaker attribution needs checking before this ships
-- names to verify: Selena, K drill, Sinatra
-- risk: More than one person seems to speak. Selena's flight and a side voice are audible just before the in-point.
-- risk: The last timestamp, 3514.7, is the start of the final line and it is also the end of the supplied transcript. The clip may need a few second
+- verify: Selena
 
-### 23. `0:02:30` – `0:03:25` (55s) — virality 0.456
-`23_0h02m30s_whether-missing-passports-will-keep-op.mp4`
+### 30. `1:11:01`–`1:11:54` (54s) — 0.459
+`30_1h11m01s_why-building-your-own-roster-through.mp4`
 
-**Whether missing passports will keep open-qualifier teams out of the events**
+**Why building your own roster through open qualifiers beats joining a partner team**
 
-- setup: All these upcoming players will have passports will not have passports in time. Okay... If a team that's in the open qualifier that isn't sponsored at
-- claim: Like a passport should not stop you from literally living out your dream.
-- payoff: You can expedite it... you're going to get org backing no matter what, most orgs are waiting for teams
+- setup: "I think with this new format a lot of these players can just take their time... they don't have to join a partner team"
+- claim: "If I was as young as Nats, I would probably create my own lineup... you decide your own fate"
+- payoff: "You lose a couple of months of salary for sure... but if you're good enough, you will get paid eventually"
+- verify: Nats
 
-*why Tier 3 picked it:* The streamer restates the passport worry and works through the scenario: an unsponsored team beats top-eight teams, orgs sponsor it, and the passport gets sorted. It ends on a clear opinion that passports are no excuse. 
-- names to verify: trick (the person whose reply is read at 38.1), Mars, Twilight
-- risk: The transcript ends mid-sentence at 205.5, so the last line is cut off and the real out-point is probably later.
-- risk: The earlier version of this argument (38-120s) is interrupted by a mic issue and chat reading.
+### 31. `1:17:07`–`1:18:13` (67s) — 0.456
+`31_1h17m07s_what-his-stream-team-would-do-in-the.mp4`
 
-### 24. `0:22:53` – `0:26:05` (192s) — virality 0.452
-`24_0h22m53s_offseason-timing-and-partnership-picks.mp4`
+**What his stream team would do in the open qualifier, and the pressure of the lineup**
 
-**Offseason timing and partnership picks: open qualifier turnaround, and whether Cloud9 and EG deserved a partner slot over bigger orgs**
-
-- setup: "Even paper X Wendler events about the qualifiers not having. I agree that I think the turnaround time is too fast."
-- claim: "The partnered teams... still have plenty of time to be able to figure out their rosters", and "isn't C9 big enough for partnership? It's just in comp
-- payoff: "Orgs like EG, orgs like Cloud9 have been around forever... I'm not here trying to bash them... it's more can they replace rosters like Hundred Thieve
-
-*why Tier 3 picked it:* The topic opens at 1373.3 when a complaint about qualifier turnaround is raised. It runs through the fairness argument for partnered and non-partnered teams, then lands on a named judgement about C9 and EG versus Sen, 10
-
-- ⚠ 192s is long for short-form — check the out-point
+- setup: "the amount of open qualifier teams that aren't sponsored right away. I want to see who ends up beating one of these partnered teams"
+- claim: "Imagine it's our stream team... we're going to stop trying at a certain point just cause we don't want to actually qualify"
+- payoff: "If we can't make it past the first game, that is very bad... with the lineup that we have"
 - ⚠ speaker attribution needs checking before this ships
-- ⚠ **192s — too long for short-form, out-point is probably wrong**
-- names to verify: Paper X Wendler, baby Bay, Valin, Cloud9, EG, Nongshim, KRX, Sen
-- risk: More than one speaker: the 1470.7 line ("No, but they did not know...") sounds like a reply from a second person.
-- risk: The 1373.3 opener is garbled by speech-to-text, so the exact complaint being answered is unclear.
 
-### 25. `1:03:18` – `1:05:10` (112s) — virality 0.430
-`25_1h03m18s_teamless-valorant-players-available-fo.mp4`
+### 32. `0:19:15`–`0:20:16` (62s) — 0.454
+`32_0h19m15s_whether-released-franchise-players-l.mp4`
 
-**Teamless Valorant players available for an Americas super team, plus a credit to a player ('the dictator') for the event win and a roster rundown**
+**Whether released franchise players like Valin get hurt by the new system**
 
-- setup: What about Mako? ... Yeah, you got the the KRX players that are teamless now
-- claim: Don't get the dictator the dictator is the only reason we won the event by the way
-- payoff: Building America's super team can be any player. I think the guy already built it for us. ... G2 ... The lineup is broken
+- setup: "It is fucked for people released from franchise teams that are not franchised anymore. Let's say Valin."
+- claim: "It's not fucked to the degree that you think it is... Valin is a terrible example because he's already made enough money."
+- payoff: "Valin is guaranteed on a partnered team. Who knows? ... you replace Vora with Valin? Do you replace Ethan?"
+- ⚠ speaker attribution needs checking before this ships
+- verify: Valin, Vora, Ethan, Kiko
 
-*why Tier 3 picked it:* The topic opens with a chat question about teamless players. That leads to roster news (KRX players available), a named judgement crediting one player for the event win, and a quick read on the Americas teams. The WoW co
+### 33. `0:25:12`–`0:27:58` (166s) — 0.453
+`33_0h25m12s_who-missed-out-on-valorant-partnersh.mp4`
 
+**Who missed out on Valorant partnership and whether being non-partnered is actually better**
+
+- setup: "isn't C9 big enough for partnership" / "It's just in comparison to teams like Sen, Hundred Thieves."
+- claim: Missing partnership hurts through lost bundle sales, but next year gives non-partnered orgs and players far more freedom.
+- payoff: "if that team does end up succeeding... you end up getting an org anyway."
+
+- ⚠ **166s — out-point likely wrong**
+- ⚠ 166s is long for short-form — check the out-point
+- verify: Nongshim, C9 / Cloud9, Crazy Raccoons, KRX, Sentinels, Hundred Thieves
+
+### 34. `0:22:53`–`0:24:45` (112s) — 0.452
+`34_0h22m53s_is-the-open-qualifier-turnaround-too.mp4`
+
+**Is the open qualifier turnaround too short for roster building after Champs?**
+
+- setup: "I agree that I think the turnaround time is too fast... open qualifiers are starting immediately."
+- claim: The short turnaround is a fair complaint but not the end of the world: partnered teams already have kickoff slots, and the non-qualifiers ha
+- payoff: "You could assume though, if you have like half a brain that you're not going to get in there."
+
+- ⚠ **112s — out-point likely wrong**
 - ⚠ 112s is long for short-form — check the out-point
+- verify: Paper X Wendler (garbled), baby Bay, Valin, Cloud9, EG
+
+### 35. `1:29:40`–`1:30:24` (45s) — 0.448
+`35_1h29m40s_streamer-shoots-down-the-idea-of-reu.mp4`
+
+**Streamer shoots down the idea of reuniting old Optic**
+
+- setup: "Assuming Zekin is gone and Aspass stays. Zekin can be replaced by Valin."
+- claim: "Why can't we get the old optic back?" / "I'm 34 years old. You cannot get the old optic back."
+- payoff: "We're literally old. I can barely make it out of fucking ascendant... It's over."
 - ⚠ speaker attribution needs checking before this ships
-- ⚠ **112s — too long for short-form, out-point is probably wrong**
-- names to verify: Mako, Pat men / Hyunmin (KRX players), the dictator (likely a player handle), KRX / paper X lineup, King Sato / Sato, oxy, Lev, Neon
-- risk: Speaker is reacting to chat or other voices ('Say it ain't so mummy'), so more than one person may be speaking
-- risk: Speech-to-text player and team names are unreliable
+- verify: Zekin, Aspass, Valin, optic
 
-### 26. `0:25:12` – `0:28:00` (168s) — virality 0.430
-`26_0h25m12s_valorant-partnership-who-missed-out-cl.mp4`
+### 36. `1:09:29`–`1:10:06` (37s) — 0.447
+`36_1h09m29s_whether-virus-gets-signed-again.mp4`
 
-**Valorant partnership: who missed out (Cloud9, Nongshim, KRX) and whether non-partnered status is a downside**
+**Whether Virus gets signed again**
 
-- setup: isn't C9 big enough for partnership? It's just in comparison to teams like Sen, Hundred Thieves.
-- claim: I think players are complaining for non-partnered orgs. They don't get the bundle sales. So it's much harder to be profitable
-- payoff: you have way more freedom next year whether you're an org or a player... to create the team that you think will succeed... you end up getting an org a
+- setup: Chat: "You think it's virus ever gonna get picked up again?"
+- claim: He's a "solid sentinel player in terms of... pure skill."
+- payoff: Intangibles are unknown, but if he's a good teammate he'll get trials; "I think it's [he's] good as fuck."
+- verify: Virus, Buyers
 
-*why Tier 3 picked it:* A real topic runs from the partnership question, through who missed the cut and the bundle-revenue downside, to a contrarian take that non-partnered status gives roster freedom. The flagged window starts mid-list and end
+### 37. `1:10:06`–`1:10:51` (46s) — 0.446
+`37_1h10m06s_teasing-his-own-team-s-roster-and-an.mp4`
 
-- ⚠ 168s is long for short-form — check the out-point
-- ⚠ **168s — too long for short-form, out-point is probably wrong**
-- names to verify: Nongshim, KRX, Crazy Raccoons, Cloud9/C9, Sen, Hundred Thieves, NRG, EG
-- risk: Multiple speakers: a question, a back-and-forth about bundles, then one speaker's monologue
-- risk: The 1543-1583 stretch is a fragmented list of orgs that missed out and is weak on its own
+**Teasing his own team's roster and announcement timing**
 
-### 27. `1:01:30` – `1:03:18` (108s) — virality 0.428
-`27_1h01m30s_free-agent-pickups-and-the-prediction.mp4`
-
-**Free agent pickups and the prediction that Sam won't compete on an org this year**
-
-- setup: which free agents are must pickups ... you got oxy you got zek and you go crash these you got you you potentially have Valin yeah it's brain dead out 
-- claim: Sam isn't gonna play ... He will not compete on an org this year. I can guarantee you that I would be shocked if Sam joined the team
-- payoff: I would be blown away if he joined a top team ... now I have to sit here and look at vods and like create comps ... now I can't even grind Wow anymore
-
-*why Tier 3 picked it:* It opens on a chat question about free agents and gets a named judgement with a guarantee about Sam. It lands on a self-deprecating WoW punchline, so it has setup, claim and consequence. The next line (3798.3) switches t
-
-- ⚠ 108s is long for short-form — check the out-point
+- setup: Chat: "Can you please tell us something... is your team all streamers or maybe X pro join?"
+- claim: "Everyone that is on my team currently streams. It's about the only hint I can give."
+- payoff: Asked if an announcement is coming: "Probably pretty soon... next couple days."
 - ⚠ speaker attribution needs checking before this ships
-- ⚠ **108s — too long for short-form, out-point is probably wrong**
-- names to verify: Sam, Oxy, Zek, Valin, Mako, KRX, Pat men, Hyunmin
-- risk: The first lines (3690.0-3708.6) are garbled and partly about a bag or jealousy, so the setup is slightly muddled.
-- risk: More than one voice appears, including a co-streamer or chat reader and the main speaker.
 
-### 28. `1:22:00` – `1:22:53` (52s) — virality 0.410
-`28_1h22m00s_streamer-teases-a-new-team-s-name-anno.mp4`
+### 38. `0:49:09`–`0:51:30` (141s) — 0.442
+`38_0h49m09s_sentinels-rumored-rebuilt-roster-as.mp4`
 
-**Streamer teases a new team's name announcement within four days, then jokes about his viewership**
+**Sentinels' rumored rebuilt roster as a super team, compared to Real Madrid**
 
-- setup: Is there a name for a team? No, not yet
-- claim: we'll be announcing it pretty shortly here probably at the very latest in the next four days
-- payoff: maybe we'll call it the kittens... if I opened Valorant right now and started playing ranked I would lose at least three times the viewership
+- setup: "Sentinels rebuild, hear me out. Rob is cooking for something and we don't know what it is yet."
+- claim: "This is an insane lineup... this is their ideal lineup for sure." He backs it with a Real Madrid 2014-2017 super-team comparison.
+- payoff: "This is literally a super team though. And we know how super teams can go sometimes."
 
-*why Tier 3 picked it:* The topic opens at 4920.9 with a chat question about the team name, not at the flagged 4944.6, which lands mid-thank-you after the claim. It runs through the team-name tease and the self-deprecating ranked joke, which cl
-
+- ⚠ **141s — out-point likely wrong**
+- ⚠ 141s is long for short-form — check the out-point
 - ⚠ speaker attribution needs checking before this ships
-- names to verify: Cloudy, Sam, Sentinels, kittens (team name)
-- risk: The window opens mid-reaction ('What the fuck are you talking about?') to something said before 4920.9, which is not supplied
-- risk: Mostly chatter, with no concrete roster or team reveal
+- verify: Sentinels, Rob, John QT, Redux, oxyduelist, Bale
 
-### 29. `0:07:23` – `0:09:13` (110s) — virality 0.396
-`29_0h07m23s_whether-tier-two-players-need-org-back.mp4`
+### 39. `1:06:23`–`1:07:13` (50s) — 0.441
+`39_1h06m23s_sr-missing-out-on-riot-partnership.mp4`
 
-**Whether tier-two players need org backing, in the context of the partner program decisions**
+**SR missing out on Riot partnership**
 
-- setup: Realistically speaking this is pretty to me normal. All right, you're not always gonna get org backing
-- claim: So forget orgs orgs will come in whenever they fucking want and they'll come in when they find the top team
-- payoff: So fuck orcs they can do whatever they want the play it's on the players to start creating their line ups... and grind that's it
+- setup: What do you think about SR not getting a spot in partnership?
+- claim: I'm not even slightly surprised; it would be very hard to replace the current partnered teams with SR.
+- payoff: I don't know what Riot looks at, so I can't say one team deserved it over the other.
+- verify: SR
 
-*why Tier 3 picked it:* One continuous argument: orgs only invest in proven top teams, tier-two players just have to form a team and win, and orgs rarely profit anyway. It closes with a hedge ('I see what he's saying') before moving on to which
+### 40. `1:35:24`–`1:37:56` (152s) — 0.435
+`40_1h35m24s_val-explains-why-he-is-coaching-for.mp4`
 
+**Val explains why he is coaching for fun and won't coach full-time**
+
+- setup: Chat asks: "Val your plan on becoming a coach or is it something that just came up"
+- claim: "I never actually planned on coaching... a fun thing where I can combine streaming with coaching." It's unpaid and he won't coach a big org.
+- payoff: "Coaching is a very stressful job... you need the exact same passion you have as a player... I don't think that I have that right now."
+
+- ⚠ **152s — out-point likely wrong**
+- ⚠ 152s is long for short-form — check the out-point
+- verify: Val
+
+### 41. `1:15:37`–`1:16:02` (25s) — 0.434
+`41_1h15m37s_would-he-sponsor-a-qualifier-team-on.mp4`
+
+**Would he sponsor a qualifier team? Only as a loan with interest**
+
+- setup: Chat asks: "Do you ever consider sponsoring a team in qualifiers who you think deserves to be paid?"
+- claim: "It would be a loan. I'm not just giving away money. Pay that shit back."
+- payoff: "You have a year plus interest, unless it's someone I know very personally."
+- ⚠ speaker attribution needs checking before this ships
+
+### 42. `0:37:35`–`0:38:22` (47s) — 0.429
+`42_0h37m35s_defending-the-open-qualifier-circuit.mp4`
+
+**Defending the open qualifier circuit format and the need for a solid rule book**
+
+- setup: If they do this as they go, and the rules aren't set beforehand, this is gonna be a shit show no matter what.
+- claim: This is the only circuit everyone should want. If you're bitching about it, give me a real reason.
+- payoff: You have to outweigh the pros and cons; CS and Dota do it, it's doable.
+- ⚠ speaker attribution needs checking before this ships
+
+### 43. `0:39:51`–`0:40:16` (26s) — 0.428
+`43_0h39m51s_prediction-that-kiko-might-leave-nrg.mp4`
+
+**Prediction that Kiko might leave NRG to return to EMEA**
+
+- setup: Chat asks: "What changes could you see NRG making?"
+- claim: "The only player that might end up leaving on his own accord... is Kiko simply because he's an EMEA player"
+- payoff: "He may want to go back... It didn't come from anything. I don't have any extra information"
+- verify: Kiko, NRG, EMEA
+
+### 44. `1:18:29`–`1:19:02` (33s) — 0.428
+`44_1h18m29s_the-open-qualifier-as-a-pipeline-for.mp4`
+
+**The open qualifier as a pipeline for rookies**
+
+- setup: "That's the other perk about having an open qualifier system... if you're not on a partnered team"
+- claim: "look at how many young players have already made it... that's got to be so motivating for more young players"
+- payoff: "you have more players to choose from that could be the next Erday or the next Neon" and a shout-out to Mal
+- verify: Erday, Neon, Mal
+
+### 45. `1:25:46`–`1:26:06` (20s) — 0.427
+`45_1h25m46s_oxy-s-reported-move-to-sun.mp4`
+
+**Oxy's reported move to Sun**
+
+- setup: "leak oxydamir confirmed it's looking like there's too many reports about this"
+- claim: "I think the oxy one is pretty much set" – he's going to Sun.
+- payoff: "the boy finally gets the bag"
+- verify: Oxydamir / Oxy, Sun
+
+### 46. `1:31:42`–`1:32:17` (35s) — 0.422
+`46_1h31m42s_whether-zix-could-become-an-assistan.mp4`
+
+**Whether Zix could become an assistant coach**
+
+- setup: "Get zix as an assistant coach"
+- claim: "He may want to just watch party if I'm coaching... I feel like he would want to be on a way more serious team"
+- payoff: Zix wants to do content creation and maybe coach later in the year, and the speaker would happily work with him.
+- ⚠ speaker attribution needs checking before this ships
+- verify: zix, six
+
+### 47. `0:01:35`–`0:03:25` (110s) — 0.411
+`47_0h01m35s_passport-worries-about-the-open-circ.mp4`
+
+**Passport worries about the open circuit are overblown; qualifying teams will get sponsors and can sort it out**
+
+- setup: "I just wanted to discuss this scenario because there's a lot of pessimism... about this open circuit"
+- claim: "A passport should not stop you from literally living out your dream." Teams that qualify should already be getting passports.
+- payoff: "You can expedite it... you're going to get org backing no matter what"
+
+- ⚠ **110s — out-point likely wrong**
 - ⚠ 110s is long for short-form — check the out-point
-- ⚠ **110s — too long for short-form, out-point is probably wrong**
-- names to verify: orcs (transcribed for orgs), SR, C9, EG, FlyQuest, partner (program name unclear)
-- risk: The opening 'this is pretty... normal' reacts to something said before 443.9, probably a tweet or a person ('he'), so the topic is not fully
-- risk: The clip runs about 110s, which is long, and there is filler and stammering from 465-485s.
+- ⚠ speaker attribution needs checking before this ships
+- verify: trick, Mars, Twilight
+
+### 48. `1:23:18`–`1:23:52` (34s) — 0.376
+`48_1h23m18s_streamer-unsure-whether-his-new-team.mp4`
+
+**Streamer unsure whether his new team will really try to win**
+
+- setup: Chat asks whether he already knows when the team's first game is, then whether the team has people who actually want to win and try.
+- claim: "I don't know yet. We'll see. I think we're going to be trying. But I'm not 100% sure."
+- payoff: Moves straight on to thanking a viewer for the prime and taking the next question.
+
+### 49. `0:51:30`–`0:53:46` (136s) — 0.375
+`49_0h51m30s_streamer-is-coaching-in-the-open-qua.mp4`
+
+**Streamer is coaching in the open qualifiers, hiding which team, and will miss most of Worlds Swiss stage**
+
+- setup: "to get juice on who you're coaching y'all I'll tell the mods you guys gotta keep it to yourselves"
+- claim: "I'm gonna be coaching in the open qualifiers... I don't think I could watch worlds"
+- payoff: "on days we have off we'll watch league... but if we're cracking it's going to be tough."
+
+- ⚠ **136s — out-point likely wrong**
+- ⚠ 136s is long for short-form — check the out-point
+- ⚠ speaker attribution needs checking before this ships
+- verify: Pedro
+
+### 50. `0:07:23`–`0:09:13` (110s) — 0.373
+`50_0h07m23s_tier-two-players-shouldn-t-wait-for.mp4`
+
+**Tier two players shouldn't wait for org backing; just be good and win open qualifiers**
+
+- setup: "Realistically speaking this is pretty normal... you're not always gonna get org backing"
+- claim: "Forget orgs": orgs only invest in proven top teams, so tier two players should just form teams, grind open qualifiers and win.
+- payoff: "Orgs have never made money in this game"; he doesn't see the change as a deal breaker, though he "sees what he's saying".
+
+- ⚠ **110s — out-point likely wrong**
+- ⚠ 110s is long for short-form — check the out-point
+- verify: he (the person being responded to at 547s)

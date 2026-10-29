@@ -107,6 +107,45 @@ Note this is NOT the same problem as over-long clips. Measured on the first 29:
 clips over 100s had *higher* mean strength (0.57) than clips under 70s (0.50).
 Length and multi-narrative are separate defects and need separate fixes.
 
+## Three rules from review
+
+**Status: stated, NOT enforced.** Three approaches were tried against the three
+clips George flagged, and all three failed:
+
+| approach | result |
+|---|---|
+| put the rules in the Tier 3 prompt | applied 1 of 3 |
+| text heuristics (punctuation, question detection) | caught 0 of 3 — whisper punctuates only 38% of utterances, and a "prompt" is often a statement, not a question |
+| pause length after the out-point | does not separate good from bad: a correct out-point had a 0.46s pause, a flagged one 0.60s |
+
+So these are editorial standards a human still has to check. Do not report a
+clip as boundary-clean on the strength of `engine/boundaries.py` — it returns
+"inconclusive" far more often than it returns an answer, by design.
+
+Next thing to try: a narrow VERIFICATION pass — show the model one finished
+clip's transcript and ask the single question "does this end mid-sentence?"
+rather than carrying the rule through generation alongside everything else.
+
+From George reviewing the v2 top 10. Each one came from a specific broken clip.
+
+**1. Finish the sentence.** The out-point lands where a sentence ends, never
+mid-clause. *Clip 3 ended on "...you can't just" and stopped.* An abrupt stop
+reads as a broken file, not a stylistic choice.
+
+**2. Include the prompt.** When the clip is a response, start at the question,
+not the answer. *Clip 6 opened mid-rant; the co-host line that triggered it sat
+one utterance earlier at 0:36:23.* A question and its answer are ONE narrative.
+
+This refines the one-narrative rule: **the pivot sentence belongs to the NEW
+topic.** When a speaker turns from one subject to another mid-sentence, that
+line is the next clip's setup, not the previous clip's tail.
+
+**3. The clip must explain itself.** Every person or team referenced has to be
+identifiable from inside the clip. *Clip 5 opened mid-comparison on a name the
+viewer had never been introduced to — George's note was "not really too sure
+what it's referring to, no real substance".* The test: could someone who joined
+at the in-point follow it? If not, move the in-point back or drop the clip.
+
 ## Finding the in-point
 
 Anchor on the LAST event and walk backwards to the first irreversible
