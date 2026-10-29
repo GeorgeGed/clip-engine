@@ -16,6 +16,48 @@ from dataclasses import dataclass, asdict, field
 from pathlib import Path
 from typing import Any
 
+# ─── Finding the in-point in a region ─────────────────────────────────────
+#
+# Validated against FNS VOD 2905408276. The audio detector correctly found the
+# 0:46:30-0:49:30 region (top 13% of 427 spikes), but the loudness trace there
+# is uniformly elevated 0.69-0.89, so neither its peak (0:48:27) nor an onset
+# heuristic lands on the moment. The crowd clipped 0:47:33; the actual reveal
+# line is at 0:47:16 and is only visible in the transcript.
+#
+# Conclusion: audio finds the REGION, the transcript finds the IN-POINT.
+
+import re as _re
+
+# Someone announcing a new disclosure. These are the real topic shifts.
+STRONG_MARKERS = _re.compile(
+    r"^(i didn'?t even (tell|say)|i forgot to (tell|say|mention)|oh yeah|oh wait|"
+    r"wait|by the way|real quick|guys[,.]? |here'?s the thing|"
+    r"can i (tell|say)|speaking of|funny story|also[,.]? )", _re.I)
+
+# Continuations. These LOOK like markers and are not — "so" in particular
+# usually resumes the previous thought.
+WEAK_MARKERS = _re.compile(r"^(so |actually|anyway|alright|okay|and |but |i mean)", _re.I)
+
+
+def find_in_point(
+    utterances: list[dict], *, region: tuple[float, float] | None = None
+) -> dict | None:
+    """Pick the in-point inside a region: the first STRONG topic shift.
+
+    Falls back to the first utterance in the region, never to a weak marker —
+    a weak marker mid-region means you are cutting into a continuing thought.
+    """
+    lo, hi = region or (float("-inf"), float("inf"))
+    inside = [u for u in utterances if lo <= float(u["start"]) <= hi]
+    if not inside:
+        return None
+    for u in inside:
+        if STRONG_MARKERS.match(u["text"].strip()):
+            return {"t": float(u["start"]), "text": u["text"].strip(), "why": "strong topic shift"}
+    return {"t": float(inside[0]["start"]), "text": inside[0]["text"].strip(),
+            "why": "region start (no topic shift found)"}
+
+
 # ─── Anchor rules: seconds of pre-roll before the first qualifying event ───
 PREROLL = {
     "ace": 1.5,
