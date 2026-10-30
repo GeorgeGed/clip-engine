@@ -142,9 +142,93 @@ Step 5 is the one that can't be skipped. Everything before it is opinion.
 
 ---
 
+## How you keep it right every time
+
+Resolve cannot be the answer to this. It is a GUI; consistency comes from
+measurement, and there are four layers of it. Three are mechanical. The fourth
+isn't, and pretending otherwise is how a pipeline ships forty broken clips.
+
+### 1. Gate the plan — `engine/gates.check`
+Reads `edit.json` before a frame renders. Rejects genuine defects (a cut inside
+a word, no rights basis, a flash rate above the WCAG threshold), warns on
+taste. 53 tests. **Built.**
+
+### 2. Measure the artifact — `engine/qc.check`
+Reads the rendered mp4. This is the one that was missing, and it closes the
+project's own rule: *never claim a clip was exported without reading the file
+back.* A clip can pass the gate and still be broken, because nothing in an
+`edit.json` guarantees ffmpeg did what it was told.
+
+Measures canvas, fps, codecs, duration against the plan, integrated loudness,
+true peak, loudness range, leading/trailing silence, black frames. 18 tests.
+**Built this turn.**
+
+Rejects a missing audio track, a wrong canvas, a clipping master, a render that
+drifted from its plan. Warns on loudness outside the house band and on a clip
+that opens on silence.
+
+### 3. Regression against a golden master
+Once the first hand edit is approved, keep it. Re-render its `edit.json` after
+every renderer change and compare frames and audio against the approved
+output. This is what stops clip 500 drifting from clip 1 — a renderer change
+that quietly shifts the seam by 20px is invisible per-clip and obvious against
+a golden master. **Not built — needs the hand edit first.**
+
+### 4. Sampled human review
+The editorial faults are not mechanisable. Measured, not assumed: five
+approaches at detecting George's three boundary rules reached 4 of 6 twice,
+with *different* errors each time. "Ends abruptly" is prosodic — it reads as a
+complete sentence in text. So a fixed sample gets watched, and the review
+produces rules, not vibes. Every rule in `AGENTS.md` came out of exactly that.
+
+**What this buys you:** every clip is technically clean and on-style, and the
+editorial faults are flagged advisory and caught by sampling. Not "perfect each
+time" — that is not purchasable. "Never broken, and measurably close to the
+reference" is, and it is the honest target.
+
+---
+
+## What the first QC run found
+
+All 50 raw clips from FNS VOD 2905408276, measured. None rejected — they are
+raw cuts, so only the container and audio checks apply. Four things fell out:
+
+| | measured |
+|---|---|
+| Resolution | **1280×720 on all 50** |
+| Integrated loudness | median **−19.45 LUFS**, range −22.13 to −18.36 |
+| In the house band (−16 to −10.5) | **0 of 50** |
+| True peak | median **−6.30 dBTP**, max −5.40 |
+| Loudness range | 1.50 to 14.00 LU |
+| Opens on ≥0.35s of silence | **13 of 50** |
+| Over 100s | **13 of 50**, max 166.4s |
+
+**The source is 720p, not 1080p.** A 1080×1920 master built from it is
+upscaled. Fix the download before the look is signed off, or the hand edit gets
+tuned against softer footage than production will have.
+
+**Everything is ~7 dB quiet.** Raw Twitch VOD audio sits around −19.5 LUFS
+against a −12 house target. Every clip George has reviewed so far he reviewed
+quiet. The headroom is there — median true peak −6.30 dBTP means a +7.5 dB lift
+does not clip — so this is a normalisation step that simply isn't applied yet,
+not a problem with the material.
+
+**13 of 50 open on silence**, 0.40s to 1.87s. Worth separating from the
+boundary-rule work: this is *mechanically* detectable from the audio, which is
+why five text-based attempts never saw it. It is not the same fault as rule 2
+("include the prompt") — a clip can open on speech and still be missing its
+prompt — but dead air at the in-point is its own defect and now gets caught
+deterministically.
+
+**13 of 50 run over 100s.** The known out-point problem, now with a number on
+it. Still no rule from George on where to stop.
+
+---
+
 ## Honest state
 
 - ffmpeg renderer: built, 417 lines, never run against a hand-built reference.
+- Render QC: built, 18 tests, run against 50 real clips.
 - FCPXML emitter: built, never imported into Resolve.
 - Resolve driver: built, never connected.
 - `edit.json` schema and gates: 53 tests passing, exercised only on synthetic

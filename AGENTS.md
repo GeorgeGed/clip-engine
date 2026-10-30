@@ -20,6 +20,9 @@ and portable between ffmpeg and Resolve.
 ## Never
 
 - Never render before running `engine.gates.check` and reading the result.
+- Never ship after rendering without running `engine.qc.check` on the file.
+  Gates judge the plan; QC judges the artifact. Passing one says nothing
+  about the other.
 - Never invent a timestamp. Every in/out traces to a detector output or a word
   timestamp.
 - Never build a claim from non-contiguous speech. **[checked]**
@@ -27,7 +30,7 @@ and portable between ffmpeg and Resolve.
 - Never identify a person from appearance alone. **[checked]**
 - Never ship a source without a rights basis. **[checked]**
 - Never silently sanitise a master. Mask the caption track; leave the audio.
-- Never claim a clip was exported without reading the file back.
+- Never claim a clip was exported without reading the file back. `engine.qc.check` is how you read it back. **[checked]**
 
 ---
 
@@ -245,6 +248,14 @@ Dynamics are a genre choice: R1 swings 13.7 LU between mutter and shout; R2 is
 flat at 1.3 LU because it never stops talking. Match the dial to the format.
 
 Use two-pass loudnorm. Single-pass lands a dB off.
+
+**Raw VOD audio is ~7 dB under target.** Measured across 50 clips from FNS VOD
+2905408276: median −19.45 LUFS, and **0 of 50** inside the −16 to −10.5 band.
+Median true peak was −6.30 dBTP, so the lift to −12 has headroom and will not
+clip. Normalisation is not optional polish; without it every clip ships quiet.
+
+**The VOD downloads at 1280×720.** All 50 measured 720p. A 1080×1920 master
+built from that is upscaled — fix the download before tuning a look against it.
 
 ---
 
