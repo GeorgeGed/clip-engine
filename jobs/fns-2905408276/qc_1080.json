@@ -1,17 +1,15 @@
 [
   {
     "path": "jobs/fns-2905408276/clips_1080/01_0h47m09s_speaker-reveals-he-is-coaching-a-tea.mp4",
-    "passed": false,
-    "rejected": [
-      "ends on 1.1s of absent audio"
-    ],
+    "passed": true,
+    "rejected": [],
     "warnings": [
-      "-19.23 LUFS is outside the house band -16.0 to -10.5",
-      "43.2s of the audio is digital zero (42%), in 22 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.17 LUFS is outside the house band -16.0 to -10.5",
+      "42.1s of the audio is digital zero (42%), in 21 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 8848533,
-      "duration": 102.6,
+      "size_bytes": 8802416,
+      "duration": 101.35,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -20,9 +18,9 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.23,
+      "lufs": -19.17,
       "true_peak": -6.32,
-      "lra": 9.0,
+      "lra": 9.4,
       "silences": [
         [
           0.171814,
@@ -151,15 +149,11 @@
         [
           95.336032,
           96.114036
-        ],
-        [
-          101.291678,
-          102.6
         ]
       ],
       "blacks": [],
-      "dead_audio_total": 43.179,
-      "dead_audio_fraction": 0.4208,
+      "dead_audio_total": 42.063,
+      "dead_audio_fraction": 0.4151,
       "dead_audio_runs": [
         [
           0.373,
@@ -244,27 +238,21 @@
         [
           95.544,
           96.111
-        ],
-        [
-          101.484,
-          102.6
         ]
       ]
     }
   },
   {
     "path": "jobs/fns-2905408276/clips_1080/02_0h53m52s_her-one-sided-friendship-with-pedro.mp4",
-    "passed": false,
-    "rejected": [
-      "ends on 0.5s of absent audio"
-    ],
+    "passed": true,
+    "rejected": [],
     "warnings": [
-      "-20.13 LUFS is outside the house band -16.0 to -10.5",
-      "18.1s of the audio is digital zero (43%), in 10 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-20.03 LUFS is outside the house band -16.0 to -10.5",
+      "18.4s of the audio is digital zero (42%), in 10 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 3177492,
-      "duration": 41.7,
+      "size_bytes": 3376596,
+      "duration": 43.983,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -273,9 +261,9 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -20.13,
+      "lufs": -20.03,
       "true_peak": -6.4,
-      "lra": 8.4,
+      "lra": 7.4,
       "silences": [
         [
           0.0,
@@ -335,12 +323,12 @@
         ],
         [
           40.934399,
-          41.7
+          41.977234
         ]
       ],
       "blacks": [],
-      "dead_audio_total": 18.088,
-      "dead_audio_fraction": 0.4338,
+      "dead_audio_total": 18.363,
+      "dead_audio_fraction": 0.4175,
       "dead_audio_runs": [
         [
           5.014,
@@ -380,7 +368,7 @@
         ],
         [
           41.154,
-          41.7
+          41.975
         ]
       ]
     }
@@ -390,11 +378,11 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.83 LUFS is outside the house band -16.0 to -10.5"
+      "-20.39 LUFS is outside the house band -16.0 to -10.5"
     ],
     "measured": {
-      "size_bytes": 1343311,
-      "duration": 15.2,
+      "size_bytes": 1713609,
+      "duration": 20.1,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -403,9 +391,9 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.83,
+      "lufs": -20.39,
       "true_peak": -6.98,
-      "lra": 1.5,
+      "lra": 5.6,
       "silences": [
         [
           3.284444,
@@ -422,6 +410,14 @@
         [
           10.980998,
           11.209365
+        ],
+        [
+          16.212086,
+          16.672698
+        ],
+        [
+          18.073583,
+          18.59941
         ]
       ],
       "blacks": [],
@@ -431,19 +427,16 @@
     }
   },
   {
-    "path": "jobs/fns-2905408276/clips_1080/04_0h54m36s_why-he-only-watches-worlds-finals-th.mp4",
-    "passed": false,
-    "rejected": [
-      "opens on 1.9s of absent audio"
-    ],
+    "path": "jobs/fns-2905408276/clips_1080/04_0h54m41s_why-he-only-watches-worlds-finals-th.mp4",
+    "passed": true,
+    "rejected": [],
     "warnings": [
-      "-19.28 LUFS is outside the house band -16.0 to -10.5",
-      "opens on 1.87s of silence \u2014 buries the hook",
-      "7.4s of the audio is digital zero (14%), in 2 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.49 LUFS is outside the house band -16.0 to -10.5",
+      "6.3s of the audio is digital zero (13%), in 2 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 4518488,
-      "duration": 52.1,
+      "size_bytes": 4382954,
+      "duration": 50.183,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -452,82 +445,74 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.28,
-      "true_peak": -6.13,
-      "lra": 6.0,
+      "lufs": -19.49,
+      "true_peak": -6.26,
+      "lra": 4.3,
       "silences": [
         [
-          0.0,
-          1.86644
+          0.389819,
+          0.658481
         ],
         [
-          2.415397,
-          2.964626
+          10.62381,
+          11.130476
         ],
         [
-          3.139501,
-          3.677664
+          14.332902,
+          14.733878
         ],
         [
-          5.389819,
-          5.658481
+          15.894807,
+          16.344444
         ],
         [
-          15.62381,
-          16.130476
+          21.463764,
+          21.903991
         ],
         [
-          19.332902,
-          19.734558
+          24.396893,
+          24.779841
         ],
         [
-          20.89483,
-          21.344444
+          26.432063,
+          26.853469
         ],
         [
-          26.463764,
-          26.903991
+          27.517415,
+          33.319592
         ],
         [
-          29.396893,
-          29.780136
+          37.126961,
+          37.552313
         ],
         [
-          31.423265,
-          31.853469
+          40.592449,
+          41.076644
         ],
         [
-          32.517415,
-          38.319592
+          42.454649,
+          42.875465
         ],
         [
-          42.126939,
-          42.552313
+          44.105828,
+          44.400454
         ],
         [
-          45.592449,
-          46.076667
-        ],
-        [
-          47.454649,
-          47.875465
-        ],
-        [
-          49.105805,
-          49.400454
+          46.936531,
+          47.874898
         ]
       ],
       "blacks": [],
-      "dead_audio_total": 7.446,
-      "dead_audio_fraction": 0.1429,
+      "dead_audio_total": 6.311,
+      "dead_audio_fraction": 0.1258,
       "dead_audio_runs": [
         [
-          0.0,
-          1.864
+          27.735,
+          33.316
         ],
         [
-          32.734,
-          38.316
+          47.142,
+          47.872
         ]
       ]
     }
@@ -541,8 +526,8 @@
       "17.7s of the audio is digital zero (32%), in 8 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 5300684,
-      "duration": 55.6,
+      "size_bytes": 5340538,
+      "duration": 56.183,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -610,7 +595,7 @@
       ],
       "blacks": [],
       "dead_audio_total": 17.735,
-      "dead_audio_fraction": 0.319,
+      "dead_audio_fraction": 0.3157,
       "dead_audio_runs": [
         [
           8.004,
@@ -652,12 +637,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.26 LUFS is outside the house band -16.0 to -10.5",
-      "2.5s of the audio is digital zero (6%), in 3 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.25 LUFS is outside the house band -16.0 to -10.5",
+      "2.5s of the audio is digital zero (5%), in 3 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 4990674,
-      "duration": 43.4,
+      "size_bytes": 5419120,
+      "duration": 47.083,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -666,9 +651,9 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.26,
+      "lufs": -19.25,
       "true_peak": -5.44,
-      "lra": 4.5,
+      "lra": 3.5,
       "silences": [
         [
           11.146145,
@@ -705,11 +690,15 @@
         [
           41.994717,
           43.304626
+        ],
+        [
+          44.341043,
+          44.681179
         ]
       ],
       "blacks": [],
       "dead_audio_total": 2.484,
-      "dead_audio_fraction": 0.0572,
+      "dead_audio_fraction": 0.0528,
       "dead_audio_runs": [
         [
           36.086,
@@ -735,8 +724,8 @@
       "28.1s of the audio is digital zero (42%), in 8 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 6234570,
-      "duration": 67.6,
+      "size_bytes": 6210976,
+      "duration": 67.333,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -812,15 +801,11 @@
         [
           64.169229,
           65.210227
-        ],
-        [
-          67.258753,
-          67.6
         ]
       ],
       "blacks": [],
       "dead_audio_total": 28.065,
-      "dead_audio_fraction": 0.4152,
+      "dead_audio_fraction": 0.4168,
       "dead_audio_runs": [
         [
           0.266,
@@ -862,12 +847,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-20.08 LUFS is outside the house band -16.0 to -10.5",
+      "-20.11 LUFS is outside the house band -16.0 to -10.5",
       "12.5s of the audio is digital zero (19%), in 7 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 5891017,
-      "duration": 64.4,
+      "size_bytes": 6181838,
+      "duration": 67.1,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -876,9 +861,9 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -20.08,
+      "lufs": -20.11,
       "true_peak": -6.38,
-      "lra": 6.0,
+      "lra": 5.8,
       "silences": [
         [
           3.092766,
@@ -955,11 +940,15 @@
         [
           63.746984,
           64.326009
+        ],
+        [
+          65.55356,
+          65.815964
         ]
       ],
       "blacks": [],
       "dead_audio_total": 12.515,
-      "dead_audio_fraction": 0.1943,
+      "dead_audio_fraction": 0.1865,
       "dead_audio_runs": [
         [
           3.304,
@@ -993,21 +982,16 @@
     }
   },
   {
-    "path": "jobs/fns-2905408276/clips_1080/09_0h43m33s_joke-outrage-at-the-idea-of-loud-sig.mp4",
-    "passed": false,
-    "rejected": [
-      "opens on 4.2s of absent audio",
-      "ends on 1.9s of absent audio"
-    ],
+    "path": "jobs/fns-2905408276/clips_1080/09_0h43m37s_joke-outrage-at-the-idea-of-loud-sig.mp4",
+    "passed": true,
+    "rejected": [],
     "warnings": [
-      "-20.63 LUFS is outside the house band -16.0 to -10.5",
-      "opens on 4.36s of silence \u2014 buries the hook",
-      "ends on 2.09s of silence",
-      "18.4s of the audio is digital zero (43%), in 5 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-20.51 LUFS is outside the house band -16.0 to -10.5",
+      "12.2s of the audio is digital zero (34%), in 3 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 3367307,
-      "duration": 42.8,
+      "size_bytes": 2863084,
+      "duration": 36.3,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -1016,82 +1000,66 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -20.63,
+      "lufs": -20.51,
       "true_peak": -6.99,
-      "lra": 14.0,
+      "lra": 7.3,
       "silences": [
         [
-          0.0,
-          4.360454
+          1.495873,
+          2.242426
         ],
         [
-          5.955873,
-          6.702404
+          3.269229,
+          3.514331
         ],
         [
-          7.729592,
-          7.974331
+          5.676009,
+          5.993741
         ],
         [
-          10.136009,
-          10.453741
+          6.9639,
+          7.472381
         ],
         [
-          11.4239,
-          11.932381
+          8.539184,
+          8.980476
         ],
         [
-          12.999161,
-          13.440476
+          10.990748,
+          18.317007
         ],
         [
-          15.450771,
-          22.777007
+          24.788549,
+          25.122358
         ],
         [
-          29.248549,
-          29.582358
+          26.231247,
+          26.700454
         ],
         [
-          30.691315,
-          31.160454
+          27.632177,
+          32.430975
         ],
         [
-          32.092177,
-          36.890998
-        ],
-        [
-          37.560431,
-          37.933628
-        ],
-        [
-          40.711315,
-          42.8
+          33.100431,
+          33.472993
         ]
       ],
       "blacks": [],
-      "dead_audio_total": 18.363,
-      "dead_audio_fraction": 0.429,
+      "dead_audio_total": 12.232,
+      "dead_audio_fraction": 0.337,
       "dead_audio_runs": [
         [
-          0.114,
-          4.354
+          1.704,
+          2.239
         ],
         [
-          6.164,
-          6.698
+          11.216,
+          18.313
         ],
         [
-          15.676,
-          22.773
-        ],
-        [
-          32.286,
-          36.885
-        ],
-        [
-          40.907,
-          42.8
+          27.826,
+          32.426
         ]
       ]
     }
@@ -1101,12 +1069,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.28 LUFS is outside the house band -16.0 to -10.5",
-      "24.0s of the audio is digital zero (43%), in 10 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.29 LUFS is outside the house band -16.0 to -10.5",
+      "24.0s of the audio is digital zero (39%), in 10 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 4059461,
-      "duration": 55.9,
+      "size_bytes": 4620780,
+      "duration": 61.8,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -1115,9 +1083,9 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.28,
+      "lufs": -19.29,
       "true_peak": -6.19,
-      "lra": 6.7,
+      "lra": 6.1,
       "silences": [
         [
           3.495125,
@@ -1170,11 +1138,19 @@
         [
           50.663401,
           55.251202
+        ],
+        [
+          55.872902,
+          56.349569
+        ],
+        [
+          61.298821,
+          61.8
         ]
       ],
       "blacks": [],
       "dead_audio_total": 24.031,
-      "dead_audio_fraction": 0.4299,
+      "dead_audio_fraction": 0.3889,
       "dead_audio_runs": [
         [
           3.698,
@@ -1221,17 +1197,15 @@
   },
   {
     "path": "jobs/fns-2905408276/clips_1080/11_1h19m27s_streamer-s-all-streamer-team-a-win-w.mp4",
-    "passed": false,
-    "rejected": [
-      "ends on 1.1s of absent audio"
-    ],
+    "passed": true,
+    "rejected": [],
     "warnings": [
-      "-20.05 LUFS is outside the house band -16.0 to -10.5",
-      "18.6s of the audio is digital zero (31%), in 5 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-20.07 LUFS is outside the house band -16.0 to -10.5",
+      "17.5s of the audio is digital zero (30%), in 4 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 5324892,
-      "duration": 60.2,
+      "size_bytes": 5254939,
+      "duration": 59.0,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -1240,9 +1214,9 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -20.05,
+      "lufs": -20.07,
       "true_peak": -6.41,
-      "lra": 6.3,
+      "lra": 4.4,
       "silences": [
         [
           0.0,
@@ -1311,15 +1285,11 @@
         [
           57.634649,
           58.002132
-        ],
-        [
-          58.930499,
-          60.2
         ]
       ],
       "blacks": [],
-      "dead_audio_total": 18.567,
-      "dead_audio_fraction": 0.3084,
+      "dead_audio_total": 17.503,
+      "dead_audio_fraction": 0.2967,
       "dead_audio_runs": [
         [
           14.851,
@@ -1336,10 +1306,6 @@
         [
           28.734,
           42.81
-        ],
-        [
-          59.136,
-          60.2
         ]
       ]
     }
@@ -1349,12 +1315,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.42 LUFS is outside the house band -16.0 to -10.5",
-      "13.6s of the audio is digital zero (16%), in 7 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.41 LUFS is outside the house band -16.0 to -10.5",
+      "13.6s of the audio is digital zero (15%), in 7 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 7943184,
-      "duration": 86.7,
+      "size_bytes": 8101156,
+      "duration": 87.7,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -1363,7 +1329,7 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.42,
+      "lufs": -19.41,
       "true_peak": -6.66,
       "lra": 3.7,
       "silences": [
@@ -1450,11 +1416,15 @@
         [
           84.302744,
           84.767868
+        ],
+        [
+          86.783288,
+          87.377664
         ]
       ],
       "blacks": [],
       "dead_audio_total": 13.577,
-      "dead_audio_fraction": 0.1566,
+      "dead_audio_fraction": 0.1548,
       "dead_audio_runs": [
         [
           18.737,
@@ -1488,19 +1458,16 @@
     }
   },
   {
-    "path": "jobs/fns-2905408276/clips_1080/13_1h03m18s_teamless-krx-players-as-free-agent-o.mp4",
-    "passed": false,
-    "rejected": [
-      "opens on 2.0s of absent audio"
-    ],
+    "path": "jobs/fns-2905408276/clips_1080/13_1h03m24s_teamless-krx-players-as-free-agent-o.mp4",
+    "passed": true,
+    "rejected": [],
     "warnings": [
-      "-19.08 LUFS is outside the house band -16.0 to -10.5",
-      "opens on 1.98s of silence \u2014 buries the hook",
-      "41.4s of the audio is digital zero (60%), in 10 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.18 LUFS is outside the house band -16.0 to -10.5",
+      "39.4s of the audio is digital zero (58%), in 9 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 5911028,
-      "duration": 69.0,
+      "size_bytes": 5905813,
+      "duration": 67.683,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -1509,110 +1476,102 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.08,
-      "true_peak": -6.62,
-      "lra": 10.9,
+      "lufs": -19.18,
+      "true_peak": -6.51,
+      "lra": 9.9,
       "silences": [
         [
           0.0,
-          1.975556
+          0.463197
         ],
         [
-          3.543197,
-          4.091293
+          1.027846,
+          6.414921
         ],
         [
-          6.460952,
-          6.963197
+          7.453084,
+          11.247302
         ],
         [
-          7.527846,
-          12.914921
+          12.815692,
+          14.801565
         ],
         [
-          13.953061,
-          17.747302
+          15.366984,
+          16.378889
         ],
         [
-          19.315692,
-          21.301565
+          17.935578,
+          18.199955
         ],
         [
-          21.867234,
-          22.878889
+          19.881791,
+          22.606417
         ],
         [
-          24.435578,
-          24.699955
+          23.793537,
+          24.019773
         ],
         [
-          26.36424,
-          29.10771
+          25.784535,
+          26.526213
         ],
         [
-          30.293537,
-          30.519751
+          29.762358,
+          39.442358
         ],
         [
-          32.284512,
-          33.026213
+          43.009002,
+          43.922948
         ],
         [
-          36.262336,
-          45.942336
+          47.361474,
+          62.312086
         ],
         [
-          49.509002,
-          50.422948
-        ],
-        [
-          53.861497,
-          68.812086
+          66.740907,
+          67.291723
         ]
       ],
       "blacks": [],
-      "dead_audio_total": 41.366,
-      "dead_audio_fraction": 0.5995,
+      "dead_audio_total": 39.391,
+      "dead_audio_fraction": 0.5821,
       "dead_audio_runs": [
         [
-          0.0,
-          1.972
+          1.244,
+          6.412
         ],
         [
-          7.744,
-          12.912
+          7.678,
+          11.244
         ],
         [
-          14.178,
-          17.745
+          13.028,
+          14.799
         ],
         [
-          19.528,
-          21.298
+          15.511,
+          16.377
         ],
         [
-          22.011,
-          22.876
+          20.068,
+          22.603
         ],
         [
-          26.568,
-          29.105
+          25.967,
+          26.522
         ],
         [
-          32.467,
-          33.023
+          29.942,
+          39.438
         ],
         [
-          36.442,
-          45.939
+          43.218,
+          43.918
         ],
         [
-          49.718,
-          50.418
-        ],
-        [
-          54.075,
-          68.809
+          47.575,
+          62.309
         ]
       ]
     }
@@ -1622,12 +1581,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-18.38 LUFS is outside the house band -16.0 to -10.5",
-      "20.9s of the audio is digital zero (30%), in 10 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-18.42 LUFS is outside the house band -16.0 to -10.5",
+      "20.9s of the audio is digital zero (29%), in 10 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 5752775,
-      "duration": 68.7,
+      "size_bytes": 6071628,
+      "duration": 72.4,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -1636,9 +1595,9 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -18.38,
+      "lufs": -18.42,
       "true_peak": -6.65,
-      "lra": 6.0,
+      "lra": 4.8,
       "silences": [
         [
           0.905102,
@@ -1707,7 +1666,7 @@
       ],
       "blacks": [],
       "dead_audio_total": 20.914,
-      "dead_audio_fraction": 0.3044,
+      "dead_audio_fraction": 0.2889,
       "dead_audio_runs": [
         [
           7.332,
@@ -1758,11 +1717,11 @@
     "rejected": [],
     "warnings": [
       "-19.24 LUFS is outside the house band -16.0 to -10.5",
-      "3.7s of the audio is digital zero (12%), in 4 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "3.7s of the audio is digital zero (11%), in 4 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 2856616,
-      "duration": 30.2,
+      "size_bytes": 3059328,
+      "duration": 33.2,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -1773,7 +1732,7 @@
       "channels": 2,
       "lufs": -19.24,
       "true_peak": -6.68,
-      "lra": 2.9,
+      "lra": 2.8,
       "silences": [
         [
           0.853197,
@@ -1814,11 +1773,15 @@
         [
           28.625601,
           29.041791
+        ],
+        [
+          30.53381,
+          30.789229
         ]
       ],
       "blacks": [],
       "dead_audio_total": 3.745,
-      "dead_audio_fraction": 0.124,
+      "dead_audio_fraction": 0.1128,
       "dead_audio_runs": [
         [
           5.161,
@@ -1844,12 +1807,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.69 LUFS is outside the house band -16.0 to -10.5",
-      "4.1s of the audio is digital zero (10%), in 4 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.83 LUFS is outside the house band -16.0 to -10.5",
+      "4.7s of the audio is digital zero (10%), in 5 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 3884435,
-      "duration": 41.7,
+      "size_bytes": 4326686,
+      "duration": 46.217,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -1858,9 +1821,9 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.69,
+      "lufs": -19.83,
       "true_peak": -6.29,
-      "lra": 3.7,
+      "lra": 3.3,
       "silences": [
         [
           0.0,
@@ -1916,12 +1879,12 @@
         ],
         [
           41.451383,
-          41.7
+          42.253311
         ]
       ],
       "blacks": [],
-      "dead_audio_total": 4.116,
-      "dead_audio_fraction": 0.0987,
+      "dead_audio_total": 4.689,
+      "dead_audio_fraction": 0.1015,
       "dead_audio_runs": [
         [
           13.926,
@@ -1938,6 +1901,10 @@
         [
           38.03,
           39.874
+        ],
+        [
+          41.678,
+          42.251
         ]
       ]
     }
@@ -1947,12 +1914,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.48 LUFS is outside the house band -16.0 to -10.5",
-      "30.5s of the audio is digital zero (58%), in 8 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.41 LUFS is outside the house band -16.0 to -10.5",
+      "30.5s of the audio is digital zero (54%), in 8 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 3715206,
-      "duration": 52.6,
+      "size_bytes": 4024333,
+      "duration": 56.117,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -1961,9 +1928,9 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.48,
+      "lufs": -19.41,
       "true_peak": -6.46,
-      "lra": 11.8,
+      "lra": 9.2,
       "silences": [
         [
           1.789274,
@@ -2016,11 +1983,15 @@
         [
           49.730068,
           52.509728
+        ],
+        [
+          54.822404,
+          55.476689
         ]
       ],
       "blacks": [],
       "dead_audio_total": 30.548,
-      "dead_audio_fraction": 0.5808,
+      "dead_audio_fraction": 0.5444,
       "dead_audio_runs": [
         [
           1.999,
@@ -2062,12 +2033,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.72 LUFS is outside the house band -16.0 to -10.5",
-      "23.7s of the audio is digital zero (31%), in 16 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.84 LUFS is outside the house band -16.0 to -10.5",
+      "23.7s of the audio is digital zero (30%), in 16 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 6028306,
-      "duration": 77.5,
+      "size_bytes": 6229733,
+      "duration": 79.5,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -2076,7 +2047,7 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.72,
+      "lufs": -19.84,
       "true_peak": -6.19,
       "lra": 8.1,
       "silences": [
@@ -2187,7 +2158,7 @@
       ],
       "blacks": [],
       "dead_audio_total": 23.673,
-      "dead_audio_fraction": 0.3055,
+      "dead_audio_fraction": 0.2978,
       "dead_audio_runs": [
         [
           5.594,
@@ -2261,12 +2232,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-20.29 LUFS is outside the house band -16.0 to -10.5",
+      "-20.27 LUFS is outside the house band -16.0 to -10.5",
       "22.7s of the audio is digital zero (38%), in 6 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 4762288,
-      "duration": 60.4,
+      "size_bytes": 4753628,
+      "duration": 60.233,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -2275,7 +2246,7 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -20.29,
+      "lufs": -20.27,
       "true_peak": -6.72,
       "lra": 5.9,
       "silences": [
@@ -2358,15 +2329,11 @@
         [
           57.699229,
           58.140476
-        ],
-        [
-          60.150748,
-          60.4
         ]
       ],
       "blacks": [],
       "dead_audio_total": 22.674,
-      "dead_audio_fraction": 0.3754,
+      "dead_audio_fraction": 0.3765,
       "dead_audio_runs": [
         [
           5.951,
@@ -2400,12 +2367,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.23 LUFS is outside the house band -16.0 to -10.5",
-      "42.4s of the audio is digital zero (57%), in 10 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.46 LUFS is outside the house band -16.0 to -10.5",
+      "42.9s of the audio is digital zero (56%), in 11 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 5936443,
-      "duration": 74.7,
+      "size_bytes": 6157361,
+      "duration": 76.7,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -2414,7 +2381,7 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.23,
+      "lufs": -19.46,
       "true_peak": -6.67,
       "lra": 7.8,
       "silences": [
@@ -2476,12 +2443,16 @@
         ],
         [
           74.242086,
-          74.7
+          75.049728
+        ],
+        [
+          75.329524,
+          75.659025
         ]
       ],
       "blacks": [],
-      "dead_audio_total": 42.356,
-      "dead_audio_fraction": 0.567,
+      "dead_audio_total": 42.937,
+      "dead_audio_fraction": 0.5598,
       "dead_audio_runs": [
         [
           1.679,
@@ -2522,21 +2493,27 @@
         [
           70.545,
           72.795
+        ],
+        [
+          74.466,
+          75.047
         ]
       ]
     }
   },
   {
     "path": "jobs/fns-2905408276/clips_1080/21_0h38m38s_roster-speculation-where-second-goes.mp4",
-    "passed": true,
-    "rejected": [],
+    "passed": false,
+    "rejected": [
+      "ends on 0.9s of absent audio"
+    ],
     "warnings": [
-      "-20.20 LUFS is outside the house band -16.0 to -10.5",
-      "36.3s of the audio is digital zero (51%), in 9 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-20.27 LUFS is outside the house band -16.0 to -10.5",
+      "37.1s of the audio is digital zero (51%), in 10 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 6012240,
-      "duration": 71.7,
+      "size_bytes": 6089560,
+      "duration": 73.2,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -2545,9 +2522,9 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -20.2,
+      "lufs": -20.27,
       "true_peak": -6.2,
-      "lra": 6.3,
+      "lra": 5.9,
       "silences": [
         [
           2.479569,
@@ -2612,11 +2589,15 @@
         [
           69.866054,
           70.530476
+        ],
+        [
+          72.134172,
+          73.2
         ]
       ],
       "blacks": [],
-      "dead_audio_total": 36.273,
-      "dead_audio_fraction": 0.5059,
+      "dead_audio_total": 37.142,
+      "dead_audio_fraction": 0.5074,
       "dead_audio_runs": [
         [
           2.687,
@@ -2653,6 +2634,10 @@
         [
           65.205,
           66.323
+        ],
+        [
+          72.331,
+          73.2
         ]
       ]
     }
@@ -2662,12 +2647,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-18.36 LUFS is outside the house band -16.0 to -10.5",
+      "-18.38 LUFS is outside the house band -16.0 to -10.5",
       "55.4s of the audio is digital zero (34%), in 23 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 14530509,
-      "duration": 161.9,
+      "size_bytes": 14557558,
+      "duration": 162.367,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -2676,7 +2661,7 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -18.36,
+      "lufs": -18.38,
       "true_peak": -6.13,
       "lra": 6.3,
       "silences": [
@@ -2839,7 +2824,7 @@
       ],
       "blacks": [],
       "dead_audio_total": 55.417,
-      "dead_audio_fraction": 0.3423,
+      "dead_audio_fraction": 0.3413,
       "dead_audio_runs": [
         [
           1.284,
@@ -2942,11 +2927,11 @@
     "rejected": [],
     "warnings": [
       "-18.88 LUFS is outside the house band -16.0 to -10.5",
-      "12.4s of the audio is digital zero (12%), in 6 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "12.4s of the audio is digital zero (11%), in 6 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 10114805,
-      "duration": 106.5,
+      "size_bytes": 10593209,
+      "duration": 111.1,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -2957,7 +2942,7 @@
       "channels": 2,
       "lufs": -18.88,
       "true_peak": -5.62,
-      "lra": 3.0,
+      "lra": 2.9,
       "silences": [
         [
           5.297256,
@@ -3066,7 +3051,7 @@
       ],
       "blacks": [],
       "dead_audio_total": 12.386,
-      "dead_audio_fraction": 0.1163,
+      "dead_audio_fraction": 0.1115,
       "dead_audio_runs": [
         [
           25.005,
@@ -3097,18 +3082,15 @@
   },
   {
     "path": "jobs/fns-2905408276/clips_1080/24_0h21m23s_open-qualifiers-are-overblown-as-a-c.mp4",
-    "passed": false,
-    "rejected": [
-      "ends on 3.8s of absent audio"
-    ],
+    "passed": true,
+    "rejected": [],
     "warnings": [
-      "-19.25 LUFS is outside the house band -16.0 to -10.5",
-      "ends on 3.97s of silence",
-      "36.6s of the audio is digital zero (31%), in 15 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.30 LUFS is outside the house band -16.0 to -10.5",
+      "32.8s of the audio is digital zero (29%), in 14 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 10623290,
-      "duration": 117.5,
+      "size_bytes": 10310434,
+      "duration": 113.583,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -3117,9 +3099,9 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.25,
+      "lufs": -19.3,
       "true_peak": -5.4,
-      "lra": 5.2,
+      "lra": 4.9,
       "silences": [
         [
           4.04932,
@@ -3236,15 +3218,11 @@
         [
           109.660431,
           110.107188
-        ],
-        [
-          113.527619,
-          117.5
         ]
       ],
       "blacks": [],
-      "dead_audio_total": 36.58,
-      "dead_audio_fraction": 0.3113,
+      "dead_audio_total": 32.812,
+      "dead_audio_fraction": 0.2889,
       "dead_audio_runs": [
         [
           4.259,
@@ -3301,28 +3279,21 @@
         [
           108.765,
           109.336
-        ],
-        [
-          113.732,
-          117.5
         ]
       ]
     }
   },
   {
-    "path": "jobs/fns-2905408276/clips_1080/25_1h12m46s_rant-against-players-complaining-abo.mp4",
-    "passed": false,
-    "rejected": [
-      "opens on 4.7s of absent audio"
-    ],
+    "path": "jobs/fns-2905408276/clips_1080/25_1h12m54s_rant-against-players-complaining-abo.mp4",
+    "passed": true,
+    "rejected": [],
     "warnings": [
-      "-19.79 LUFS is outside the house band -16.0 to -10.5",
-      "opens on 4.70s of silence \u2014 buries the hook",
-      "35.5s of the audio is digital zero (33%), in 11 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.90 LUFS is outside the house band -16.0 to -10.5",
+      "31.8s of the audio is digital zero (31%), in 11 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 9071571,
-      "duration": 109.2,
+      "size_bytes": 8713753,
+      "duration": 103.583,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -3331,160 +3302,157 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.79,
-      "true_peak": -6.66,
-      "lra": 6.1,
+      "lufs": -19.9,
+      "true_peak": -6.55,
+      "lra": 5.4,
       "silences": [
         [
-          0.0,
-          4.701247
+          3.76,
+          4.020431
         ],
         [
-          12.06,
-          12.320454
+          5.12483,
+          5.818844
         ],
         [
-          13.42483,
-          14.118844
+          15.26873,
+          17.049116
         ],
         [
-          23.568798,
-          25.349093
+          18.073583,
+          20.955873
         ],
         [
-          26.373628,
-          29.255873
+          21.622132,
+          33.129501
         ],
         [
-          29.922154,
-          41.434376
+          33.176168,
+          39.455442
         ],
         [
-          41.476168,
-          47.75542
+          47.086848,
+          47.588141
         ],
         [
-          55.386848,
-          55.888027
+          50.024921,
+          52.189887
         ],
         [
-          58.324921,
-          60.489909
+          53.637959,
+          53.99907
         ],
         [
-          61.937959,
-          62.299048
+          54.576327,
+          55.683129
         ],
         [
-          62.876327,
-          63.983152
+          56.900771,
+          61.202698
         ],
         [
-          65.200748,
-          69.502721
+          63.074104,
+          63.77839
         ],
         [
-          71.374059,
-          72.078367
+          64.127687,
+          64.647052
         ],
         [
-          72.42771,
-          72.947029
+          66.721542,
+          67.134331
         ],
         [
-          75.021542,
-          75.434331
+          79.687166,
+          79.89322
         ],
         [
-          87.987166,
-          88.19322
+          81.943673,
+          82.885011
         ],
         [
-          90.243673,
-          91.185011
+          84.120454,
+          85.040408
         ],
         [
-          92.420499,
-          93.340408
+          87.019229,
+          87.958481
         ],
         [
-          95.309932,
-          96.258571
+          89.861814,
+          90.256372
         ],
         [
-          98.161814,
-          98.556372
+          97.430839,
+          97.871701
         ],
         [
-          105.730794,
-          106.171678
+          101.537324,
+          102.6978
         ]
       ],
       "blacks": [],
-      "dead_audio_total": 35.502,
-      "dead_audio_fraction": 0.3251,
+      "dead_audio_total": 31.763,
+      "dead_audio_fraction": 0.3067,
       "dead_audio_runs": [
         [
-          0.0,
-          4.698
+          15.476,
+          17.045
         ],
         [
-          23.774,
-          25.347
+          18.268,
+          20.953
         ],
         [
-          26.568,
-          29.253
+          21.824,
+          33.124
         ],
         [
-          30.124,
-          41.425
+          33.365,
+          39.452
         ],
         [
-          41.665,
-          47.751
+          50.247,
+          52.186
         ],
         [
-          58.547,
-          60.487
+          54.777,
+          55.68
         ],
         [
-          63.077,
-          63.98
+          57.099,
+          61.199
         ],
         [
-          65.402,
-          69.499
+          82.137,
+          82.881
         ],
         [
-          90.437,
-          91.181
+          84.307,
+          85.036
         ],
         [
-          92.607,
-          93.337
+          87.209,
+          87.954
         ],
         [
-          95.509,
-          96.254
+          101.733,
+          102.695
         ]
       ]
     }
   },
   {
     "path": "jobs/fns-2905408276/clips_1080/26_0h44m23s_mibr-s-roster-falling-apart-after-a.mp4",
-    "passed": false,
-    "rejected": [
-      "ends on 1.8s of absent audio"
-    ],
+    "passed": true,
+    "rejected": [],
     "warnings": [
-      "-19.30 LUFS is outside the house band -16.0 to -10.5",
-      "ends on 1.99s of silence",
-      "12.3s of the audio is digital zero (32%), in 4 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.38 LUFS is outside the house band -16.0 to -10.5",
+      "10.5s of the audio is digital zero (29%), in 3 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 3946433,
-      "duration": 38.8,
+      "size_bytes": 3663357,
+      "duration": 36.8,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -3493,9 +3461,9 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.3,
+      "lufs": -19.38,
       "true_peak": -5.73,
-      "lra": 9.6,
+      "lra": 5.8,
       "silences": [
         [
           0.0,
@@ -3532,15 +3500,11 @@
         [
           35.260363,
           35.913016
-        ],
-        [
-          36.809909,
-          38.8
         ]
       ],
       "blacks": [],
-      "dead_audio_total": 12.347,
-      "dead_audio_fraction": 0.3182,
+      "dead_audio_total": 10.497,
+      "dead_audio_fraction": 0.2852,
       "dead_audio_runs": [
         [
           3.702,
@@ -3553,10 +3517,6 @@
         [
           31.096,
           31.601
-        ],
-        [
-          36.95,
-          38.8
         ]
       ]
     }
@@ -3566,12 +3526,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.28 LUFS is outside the house band -16.0 to -10.5",
-      "36.8s of the audio is digital zero (30%), in 11 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.37 LUFS is outside the house band -16.0 to -10.5",
+      "36.8s of the audio is digital zero (29%), in 11 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 10361517,
-      "duration": 123.5,
+      "size_bytes": 10424642,
+      "duration": 124.7,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -3580,7 +3540,7 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.28,
+      "lufs": -19.37,
       "true_peak": -6.4,
       "lra": 4.7,
       "silences": [
@@ -3703,11 +3663,15 @@
         [
           121.58517,
           121.973197
+        ],
+        [
+          123.60356,
+          123.861202
         ]
       ],
       "blacks": [],
       "dead_audio_total": 36.769,
-      "dead_audio_fraction": 0.2977,
+      "dead_audio_fraction": 0.2949,
       "dead_audio_runs": [
         [
           10.48,
@@ -3761,12 +3725,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.45 LUFS is outside the house band -16.0 to -10.5",
+      "-19.62 LUFS is outside the house band -16.0 to -10.5",
       "12.8s of the audio is digital zero (24%), in 9 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 3932128,
-      "duration": 52.8,
+      "size_bytes": 4106196,
+      "duration": 54.3,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -3775,7 +3739,7 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.45,
+      "lufs": -19.62,
       "true_peak": -6.66,
       "lra": 6.8,
       "silences": [
@@ -3858,11 +3822,15 @@
         [
           51.479365,
           51.934218
+        ],
+        [
+          53.251111,
+          53.530045
         ]
       ],
       "blacks": [],
       "dead_audio_total": 12.814,
-      "dead_audio_fraction": 0.2427,
+      "dead_audio_fraction": 0.236,
       "dead_audio_runs": [
         [
           0.549,
@@ -3904,18 +3872,16 @@
     }
   },
   {
-    "path": "jobs/fns-2905408276/clips_1080/29_0h57m04s_streamer-announces-he-ll-livestream.mp4",
-    "passed": false,
-    "rejected": [
-      "opens on 0.6s of absent audio"
-    ],
+    "path": "jobs/fns-2905408276/clips_1080/29_0h57m15s_streamer-announces-he-ll-livestream.mp4",
+    "passed": true,
+    "rejected": [],
     "warnings": [
-      "-19.48 LUFS is outside the house band -16.0 to -10.5",
-      "32.4s of the audio is digital zero (36%), in 13 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.78 LUFS is outside the house band -16.0 to -10.5",
+      "25.7s of the audio is digital zero (30%), in 11 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 8390312,
-      "duration": 90.5,
+      "size_bytes": 7975701,
+      "duration": 84.5,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -3924,174 +3890,158 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.48,
-      "true_peak": -6.79,
-      "lra": 7.7,
+      "lufs": -19.78,
+      "true_peak": -6.76,
+      "lra": 6.8,
       "silences": [
         [
-          0.0,
-          0.63254
+          2.64746,
+          3.105986
         ],
         [
-          0.897914,
-          1.291769
+          8.849365,
+          9.071542
         ],
         [
-          1.421088,
-          7.591247
+          11.658277,
+          13.742721
         ],
         [
-          10.284195,
-          10.589864
+          14.243379,
+          14.572902
         ],
         [
-          13.947438,
-          14.406485
+          15.961927,
+          22.569751
         ],
         [
-          20.149365,
-          20.371565
+          27.63907,
+          28.150907
         ],
         [
-          22.958277,
-          25.042721
+          29.444399,
+          29.666213
         ],
         [
-          25.543379,
-          25.872902
+          30.257415,
+          31.901224
         ],
         [
-          27.261927,
-          33.869728
+          32.994172,
+          34.640204
         ],
         [
-          38.93907,
-          39.450907
+          35.670839,
+          35.916032
         ],
         [
-          40.744399,
-          40.966236
+          40.159819,
+          40.528617
         ],
         [
-          41.557438,
-          43.201224
+          41.887075,
+          42.136916
         ],
         [
-          44.294195,
-          45.940227
+          45.172925,
+          45.434649
         ],
         [
-          46.970839,
-          47.216032
+          46.388639,
+          46.65424
         ],
         [
-          51.459819,
-          51.828617
+          48.244286,
+          50.787823
         ],
         [
-          53.187098,
-          53.436916
+          50.90576,
+          55.636463
         ],
         [
-          56.472925,
-          56.734649
+          55.783787,
+          59.597143
         ],
         [
-          57.688639,
-          57.95424
+          62.359615,
+          63.829751
         ],
         [
-          59.544286,
-          62.087823
+          65.491814,
+          65.966735
         ],
         [
-          62.20576,
-          66.936463
+          66.303447,
+          68.173696
         ],
         [
-          67.084286,
-          70.89712
+          70.781859,
+          71.48907
         ],
         [
-          73.659615,
-          75.129751
+          73.288299,
+          74.01458
         ],
         [
-          76.792789,
-          77.266599
+          75.7039,
+          76.231066
         ],
         [
-          77.603492,
-          79.473673
+          80.154649,
+          80.356168
         ],
         [
-          82.081837,
-          82.78907
-        ],
-        [
-          84.588322,
-          85.314218
-        ],
-        [
-          87.0039,
-          87.531066
+          83.606054,
+          84.164649
         ]
       ],
       "blacks": [],
-      "dead_audio_total": 32.416,
-      "dead_audio_fraction": 0.3582,
+      "dead_audio_total": 25.743,
+      "dead_audio_fraction": 0.3047,
       "dead_audio_runs": [
         [
-          0.0,
-          0.629
+          11.878,
+          13.739
         ],
         [
-          1.545,
-          7.589
+          16.17,
+          22.566
         ],
         [
-          23.178,
-          25.039
+          30.468,
+          31.899
         ],
         [
-          27.47,
-          33.866
+          33.193,
+          34.637
         ],
         [
-          41.768,
-          43.197
+          48.454,
+          50.786
         ],
         [
-          44.493,
-          45.937
+          51.101,
+          55.634
         ],
         [
-          59.754,
-          62.086
+          55.914,
+          59.593
         ],
         [
-          62.401,
-          66.933
+          62.55,
+          63.827
         ],
         [
-          67.214,
-          70.895
+          66.419,
+          68.17
         ],
         [
-          73.85,
-          75.127
+          70.966,
+          71.486
         ],
         [
-          77.719,
-          79.47
-        ],
-        [
-          82.266,
-          82.787
-        ],
-        [
-          84.793,
-          85.312
+          73.493,
+          74.012
         ]
       ]
     }
@@ -4101,12 +4051,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.35 LUFS is outside the house band -16.0 to -10.5",
-      "4.9s of the audio is digital zero (9%), in 6 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.48 LUFS is outside the house band -16.0 to -10.5",
+      "5.5s of the audio is digital zero (10%), in 7 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 4401787,
-      "duration": 53.6,
+      "size_bytes": 4757006,
+      "duration": 57.6,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -4115,9 +4065,9 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.35,
+      "lufs": -19.48,
       "true_peak": -5.71,
-      "lra": 4.0,
+      "lra": 3.7,
       "silences": [
         [
           0.0,
@@ -4194,11 +4144,19 @@
         [
           49.380544,
           50.273787
+        ],
+        [
+          54.733333,
+          55.497732
+        ],
+        [
+          57.32551,
+          57.6
         ]
       ],
       "blacks": [],
-      "dead_audio_total": 4.946,
-      "dead_audio_fraction": 0.0923,
+      "dead_audio_total": 5.504,
+      "dead_audio_fraction": 0.0956,
       "dead_audio_runs": [
         [
           9.826,
@@ -4223,6 +4181,10 @@
         [
           49.559,
           50.27
+        ],
+        [
+          54.937,
+          55.495
         ]
       ]
     }
@@ -4232,12 +4194,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-20.12 LUFS is outside the house band -16.0 to -10.5",
-      "33.9s of the audio is digital zero (51%), in 8 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-20.06 LUFS is outside the house band -16.0 to -10.5",
+      "33.9s of the audio is digital zero (49%), in 8 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 5140557,
-      "duration": 66.7,
+      "size_bytes": 5352250,
+      "duration": 69.5,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -4246,9 +4208,9 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -20.12,
+      "lufs": -20.06,
       "true_peak": -6.55,
-      "lra": 13.1,
+      "lra": 6.8,
       "silences": [
         [
           0.825941,
@@ -4305,7 +4267,7 @@
       ],
       "blacks": [],
       "dead_audio_total": 33.92,
-      "dead_audio_fraction": 0.5085,
+      "dead_audio_fraction": 0.4881,
       "dead_audio_runs": [
         [
           9.431,
@@ -4344,17 +4306,15 @@
   },
   {
     "path": "jobs/fns-2905408276/clips_1080/32_0h19m15s_whether-released-franchise-players-l.mp4",
-    "passed": false,
-    "rejected": [
-      "ends on 1.2s of absent audio"
-    ],
+    "passed": true,
+    "rejected": [],
     "warnings": [
-      "-19.62 LUFS is outside the house band -16.0 to -10.5",
-      "17.3s of the audio is digital zero (28%), in 3 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.57 LUFS is outside the house band -16.0 to -10.5",
+      "16.1s of the audio is digital zero (27%), in 2 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 4953559,
-      "duration": 61.7,
+      "size_bytes": 4907261,
+      "duration": 60.383,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -4363,7 +4323,7 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.62,
+      "lufs": -19.57,
       "true_peak": -6.27,
       "lra": 4.1,
       "silences": [
@@ -4398,15 +4358,11 @@
         [
           58.377687,
           58.896122
-        ],
-        [
-          60.307347,
-          61.7
         ]
       ],
       "blacks": [],
-      "dead_audio_total": 17.292,
-      "dead_audio_fraction": 0.2803,
+      "dead_audio_total": 16.109,
+      "dead_audio_fraction": 0.2668,
       "dead_audio_runs": [
         [
           33.282,
@@ -4415,10 +4371,6 @@
         [
           35.766,
           51.101
-        ],
-        [
-          60.517,
-          61.7
         ]
       ]
     }
@@ -4428,12 +4380,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.43 LUFS is outside the house band -16.0 to -10.5",
+      "-19.45 LUFS is outside the house band -16.0 to -10.5",
       "63.6s of the audio is digital zero (38%), in 22 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 13735095,
-      "duration": 166.4,
+      "size_bytes": 13975511,
+      "duration": 167.983,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -4442,7 +4394,7 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.43,
+      "lufs": -19.45,
       "true_peak": -5.4,
       "lra": 7.6,
       "silences": [
@@ -4597,7 +4549,7 @@
       ],
       "blacks": [],
       "dead_audio_total": 63.624,
-      "dead_audio_fraction": 0.3824,
+      "dead_audio_fraction": 0.3788,
       "dead_audio_runs": [
         [
           1.337,
@@ -4695,12 +4647,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.29 LUFS is outside the house band -16.0 to -10.5",
+      "-19.31 LUFS is outside the house band -16.0 to -10.5",
       "34.0s of the audio is digital zero (30%), in 14 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 9843613,
-      "duration": 112.2,
+      "size_bytes": 10017105,
+      "duration": 112.733,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -4709,7 +4661,7 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.29,
+      "lufs": -19.31,
       "true_peak": -6.12,
       "lra": 10.1,
       "silences": [
@@ -4848,7 +4800,7 @@
       ],
       "blacks": [],
       "dead_audio_total": 33.978,
-      "dead_audio_fraction": 0.3028,
+      "dead_audio_fraction": 0.3014,
       "dead_audio_runs": [
         [
           2.842,
@@ -4914,12 +4866,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.80 LUFS is outside the house band -16.0 to -10.5",
+      "-19.78 LUFS is outside the house band -16.0 to -10.5",
       "23.9s of the audio is digital zero (54%), in 5 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 3443884,
-      "duration": 44.7,
+      "size_bytes": 3429964,
+      "duration": 44.467,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -4928,7 +4880,7 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.8,
+      "lufs": -19.78,
       "true_peak": -6.08,
       "lra": 7.4,
       "silences": [
@@ -4963,15 +4915,11 @@
         [
           43.297891,
           43.926689
-        ],
-        [
-          44.406213,
-          44.7
         ]
       ],
       "blacks": [],
       "dead_audio_total": 23.929,
-      "dead_audio_fraction": 0.5353,
+      "dead_audio_fraction": 0.5382,
       "dead_audio_runs": [
         [
           4.948,
@@ -5001,12 +4949,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.72 LUFS is outside the house band -16.0 to -10.5",
-      "6.0s of the audio is digital zero (16%), in 5 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.69 LUFS is outside the house band -16.0 to -10.5",
+      "6.0s of the audio is digital zero (17%), in 5 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 3196826,
-      "duration": 36.6,
+      "size_bytes": 3177401,
+      "duration": 36.283,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -5015,7 +4963,7 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.72,
+      "lufs": -19.69,
       "true_peak": -6.54,
       "lra": 3.6,
       "silences": [
@@ -5074,15 +5022,11 @@
         [
           31.169478,
           33.904762
-        ],
-        [
-          36.218141,
-          36.6
         ]
       ],
       "blacks": [],
       "dead_audio_total": 6.016,
-      "dead_audio_fraction": 0.1644,
+      "dead_audio_fraction": 0.1658,
       "dead_audio_runs": [
         [
           5.529,
@@ -5108,19 +5052,16 @@
     }
   },
   {
-    "path": "jobs/fns-2905408276/clips_1080/37_1h10m06s_teasing-his-own-team-s-roster-and-an.mp4",
-    "passed": false,
-    "rejected": [
-      "opens on 7.2s of absent audio"
-    ],
+    "path": "jobs/fns-2905408276/clips_1080/37_1h10m20s_teasing-his-own-team-s-roster-and-an.mp4",
+    "passed": true,
+    "rejected": [],
     "warnings": [
-      "-20.23 LUFS is outside the house band -16.0 to -10.5",
-      "opens on 7.22s of silence \u2014 buries the hook",
-      "28.2s of the audio is digital zero (62%), in 6 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-20.19 LUFS is outside the house band -16.0 to -10.5",
+      "18.9s of the audio is digital zero (60%), in 4 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 3448779,
-      "duration": 45.5,
+      "size_bytes": 2454462,
+      "duration": 31.333,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -5129,78 +5070,58 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -20.23,
-      "true_peak": -5.6,
-      "lra": 11.5,
+      "lufs": -20.19,
+      "true_peak": -6.84,
+      "lra": 7.4,
       "silences": [
         [
-          0.0,
-          7.216644
+          0.491406,
+          0.97102
         ],
         [
-          7.662222,
-          10.034717
+          4.619433,
+          6.341383
         ],
         [
-          14.391429,
-          14.87102
+          7.61127,
+          22.869728
         ],
         [
-          18.51941,
-          20.241383
+          23.937098,
+          24.143855
         ],
         [
-          21.511247,
-          36.769705
+          24.338481,
+          24.964467
         ],
         [
-          37.837098,
-          38.043719
+          27.554762,
+          29.518934
         ],
         [
-          38.238481,
-          38.86449
-        ],
-        [
-          41.454853,
-          43.418934
-        ],
-        [
-          43.612857,
-          44.271837
-        ],
-        [
-          45.161519,
-          45.5
+          29.712857,
+          30.371859
         ]
       ],
       "blacks": [],
-      "dead_audio_total": 28.249,
-      "dead_audio_fraction": 0.6209,
+      "dead_audio_total": 18.873,
+      "dead_audio_fraction": 0.6024,
       "dead_audio_runs": [
         [
-          0.0,
-          7.214
+          4.832,
+          6.338
         ],
         [
-          7.871,
-          10.033
+          7.814,
+          22.867
         ],
         [
-          18.732,
-          20.239
+          24.452,
+          24.961
         ],
         [
-          21.714,
-          36.767
-        ],
-        [
-          38.352,
-          38.861
-        ],
-        [
-          41.612,
-          43.416
+          27.712,
+          29.517
         ]
       ]
     }
@@ -5211,11 +5132,11 @@
     "rejected": [],
     "warnings": [
       "-19.27 LUFS is outside the house band -16.0 to -10.5",
-      "68.6s of the audio is digital zero (49%), in 16 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "68.6s of the audio is digital zero (48%), in 16 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 10996249,
-      "duration": 141.3,
+      "size_bytes": 11361128,
+      "duration": 144.2,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -5226,7 +5147,7 @@
       "channels": 2,
       "lufs": -19.27,
       "true_peak": -6.16,
-      "lra": 8.9,
+      "lra": 8.0,
       "silences": [
         [
           11.518549,
@@ -5371,7 +5292,7 @@
       ],
       "blacks": [],
       "dead_audio_total": 68.585,
-      "dead_audio_fraction": 0.4854,
+      "dead_audio_fraction": 0.4756,
       "dead_audio_runs": [
         [
           12.885,
@@ -5442,18 +5363,16 @@
   },
   {
     "path": "jobs/fns-2905408276/clips_1080/39_1h06m23s_sr-missing-out-on-riot-partnership.mp4",
-    "passed": false,
-    "rejected": [
-      "ends on 1.1s of absent audio"
-    ],
+    "passed": true,
+    "rejected": [],
     "warnings": [
-      "-20.02 LUFS is outside the house band -16.0 to -10.5",
+      "-20.09 LUFS is outside the house band -16.0 to -10.5",
       "opens on 17.63s of silence \u2014 buries the hook",
-      "25.9s of the audio is digital zero (52%), in 6 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "25.9s of the audio is digital zero (51%), in 6 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 3675928,
-      "duration": 50.2,
+      "size_bytes": 3729988,
+      "duration": 51.117,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -5462,7 +5381,7 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -20.02,
+      "lufs": -20.09,
       "true_peak": -6.86,
       "lra": 7.7,
       "silences": [
@@ -5504,8 +5423,8 @@
         ]
       ],
       "blacks": [],
-      "dead_audio_total": 25.853,
-      "dead_audio_fraction": 0.515,
+      "dead_audio_total": 25.88,
+      "dead_audio_fraction": 0.5064,
       "dead_audio_runs": [
         [
           0.252,
@@ -5529,7 +5448,7 @@
         ],
         [
           49.081,
-          50.162
+          50.189
         ]
       ]
     }
@@ -5539,12 +5458,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-20.21 LUFS is outside the house band -16.0 to -10.5",
+      "-20.23 LUFS is outside the house band -16.0 to -10.5",
       "59.6s of the audio is digital zero (39%), in 16 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 12981850,
-      "duration": 152.5,
+      "size_bytes": 13030327,
+      "duration": 153.3,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -5553,7 +5472,7 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -20.21,
+      "lufs": -20.23,
       "true_peak": -6.43,
       "lra": 7.8,
       "silences": [
@@ -5684,7 +5603,7 @@
       ],
       "blacks": [],
       "dead_audio_total": 59.602,
-      "dead_audio_fraction": 0.3908,
+      "dead_audio_fraction": 0.3888,
       "dead_audio_runs": [
         [
           0.728,
@@ -5759,11 +5678,11 @@
     "rejected": [],
     "warnings": [
       "-20.56 LUFS is outside the house band -16.0 to -10.5",
-      "8.9s of the audio is digital zero (35%), in 4 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "8.9s of the audio is digital zero (36%), in 4 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 2233147,
-      "duration": 25.0,
+      "size_bytes": 2225192,
+      "duration": 24.85,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -5803,15 +5722,11 @@
         [
           18.910272,
           23.199841
-        ],
-        [
-          24.780862,
-          25.0
         ]
       ],
       "blacks": [],
       "dead_audio_total": 8.858,
-      "dead_audio_fraction": 0.3543,
+      "dead_audio_fraction": 0.3566,
       "dead_audio_runs": [
         [
           4.093,
@@ -5837,12 +5752,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-18.91 LUFS is outside the house band -16.0 to -10.5",
-      "9.4s of the audio is digital zero (20%), in 5 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-18.82 LUFS is outside the house band -16.0 to -10.5",
+      "9.4s of the audio is digital zero (19%), in 5 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 4933445,
-      "duration": 46.6,
+      "size_bytes": 5173342,
+      "duration": 49.983,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -5851,9 +5766,9 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -18.91,
+      "lufs": -18.82,
       "true_peak": -6.33,
-      "lra": 5.7,
+      "lra": 5.1,
       "silences": [
         [
           1.331451,
@@ -5910,7 +5825,7 @@
       ],
       "blacks": [],
       "dead_audio_total": 9.388,
-      "dead_audio_fraction": 0.2015,
+      "dead_audio_fraction": 0.1878,
       "dead_audio_runs": [
         [
           7.28,
@@ -5940,12 +5855,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-20.01 LUFS is outside the house band -16.0 to -10.5",
-      "1.8s of the audio is digital zero (7%), in 1 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-20.32 LUFS is outside the house band -16.0 to -10.5",
+      "2.5s of the audio is digital zero (8%), in 2 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 2399063,
-      "duration": 25.7,
+      "size_bytes": 2580006,
+      "duration": 28.95,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -5954,9 +5869,9 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -20.01,
+      "lufs": -20.32,
       "true_peak": -6.54,
-      "lra": 2.7,
+      "lra": 5.9,
       "silences": [
         [
           1.879093,
@@ -5989,15 +5904,23 @@
         [
           23.222789,
           23.589773
+        ],
+        [
+          27.135601,
+          27.996599
         ]
       ],
       "blacks": [],
-      "dead_audio_total": 1.806,
-      "dead_audio_fraction": 0.0703,
+      "dead_audio_total": 2.456,
+      "dead_audio_fraction": 0.0849,
       "dead_audio_runs": [
         [
           2.047,
           3.853
+        ],
+        [
+          27.343,
+          27.993
         ]
       ]
     }
@@ -6007,12 +5930,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.57 LUFS is outside the house band -16.0 to -10.5",
-      "8.8s of the audio is digital zero (27%), in 2 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.68 LUFS is outside the house band -16.0 to -10.5",
+      "8.8s of the audio is digital zero (26%), in 2 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 2520300,
-      "duration": 33.1,
+      "size_bytes": 2676624,
+      "duration": 34.1,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -6021,9 +5944,9 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.57,
+      "lufs": -19.68,
       "true_peak": -6.84,
-      "lra": 4.5,
+      "lra": 3.7,
       "silences": [
         [
           0.826689,
@@ -6052,11 +5975,15 @@
         [
           32.35644,
           32.971655
+        ],
+        [
+          33.741066,
+          33.986236
         ]
       ],
       "blacks": [],
       "dead_audio_total": 8.822,
-      "dead_audio_fraction": 0.2665,
+      "dead_audio_fraction": 0.2587,
       "dead_audio_runs": [
         [
           1.023,
@@ -6074,12 +6001,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-18.66 LUFS is outside the house band -16.0 to -10.5",
-      "11.3s of the audio is digital zero (55%), in 2 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.10 LUFS is outside the house band -16.0 to -10.5",
+      "11.3s of the audio is digital zero (51%), in 2 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 1754848,
-      "duration": 20.5,
+      "size_bytes": 1938670,
+      "duration": 22.1,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -6088,7 +6015,7 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -18.66,
+      "lufs": -19.1,
       "true_peak": -6.38,
       "lra": 4.5,
       "silences": [
@@ -6107,7 +6034,7 @@
       ],
       "blacks": [],
       "dead_audio_total": 11.271,
-      "dead_audio_fraction": 0.5498,
+      "dead_audio_fraction": 0.5102,
       "dead_audio_runs": [
         [
           0.612,
@@ -6125,12 +6052,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-20.29 LUFS is outside the house band -16.0 to -10.5",
+      "-20.27 LUFS is outside the house band -16.0 to -10.5",
       "6.6s of the audio is digital zero (19%), in 5 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 2902319,
-      "duration": 34.8,
+      "size_bytes": 2893030,
+      "duration": 34.667,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -6139,7 +6066,7 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -20.29,
+      "lufs": -20.27,
       "true_peak": -6.64,
       "lra": 6.0,
       "silences": [
@@ -6202,7 +6129,7 @@
       ],
       "blacks": [],
       "dead_audio_total": 6.61,
-      "dead_audio_fraction": 0.1899,
+      "dead_audio_fraction": 0.1907,
       "dead_audio_runs": [
         [
           3.459,
@@ -6232,12 +6159,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.37 LUFS is outside the house band -16.0 to -10.5",
-      "29.7s of the audio is digital zero (27%), in 12 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-19.24 LUFS is outside the house band -16.0 to -10.5",
+      "29.7s of the audio is digital zero (26%), in 12 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 10684640,
-      "duration": 110.2,
+      "size_bytes": 11125797,
+      "duration": 114.9,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -6246,9 +6173,9 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.37,
-      "true_peak": -6.06,
-      "lra": 6.3,
+      "lufs": -19.24,
+      "true_peak": -5.9,
+      "lra": 6.6,
       "silences": [
         [
           0.0,
@@ -6377,11 +6304,15 @@
         [
           106.67059,
           107.055805
+        ],
+        [
+          110.54839,
+          110.79381
         ]
       ],
       "blacks": [],
       "dead_audio_total": 29.67,
-      "dead_audio_fraction": 0.2692,
+      "dead_audio_fraction": 0.2582,
       "dead_audio_runs": [
         [
           0.589,
@@ -6439,12 +6370,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-22.13 LUFS is outside the house band -16.0 to -10.5",
+      "-22.31 LUFS is outside the house band -16.0 to -10.5",
       "17.9s of the audio is digital zero (53%), in 6 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 2393782,
-      "duration": 33.5,
+      "size_bytes": 2422170,
+      "duration": 33.9,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -6453,7 +6384,7 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -22.13,
+      "lufs": -22.31,
       "true_peak": -7.17,
       "lra": 8.7,
       "silences": [
@@ -6504,7 +6435,7 @@
       ],
       "blacks": [],
       "dead_audio_total": 17.869,
-      "dead_audio_fraction": 0.5334,
+      "dead_audio_fraction": 0.5271,
       "dead_audio_runs": [
         [
           0.45,
@@ -6538,12 +6469,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.27 LUFS is outside the house band -16.0 to -10.5",
+      "-19.28 LUFS is outside the house band -16.0 to -10.5",
       "63.5s of the audio is digital zero (47%), in 19 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 9275492,
-      "duration": 135.6,
+      "size_bytes": 9311088,
+      "duration": 136.233,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -6552,7 +6483,7 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -19.27,
+      "lufs": -19.28,
       "true_peak": -5.47,
       "lra": 7.8,
       "silences": [
@@ -6683,7 +6614,7 @@
       ],
       "blacks": [],
       "dead_audio_total": 63.499,
-      "dead_audio_fraction": 0.4683,
+      "dead_audio_fraction": 0.4661,
       "dead_audio_runs": [
         [
           14.72,
@@ -6769,12 +6700,12 @@
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-18.74 LUFS is outside the house band -16.0 to -10.5",
-      "19.4s of the audio is digital zero (18%), in 14 run(s) \u2014 absent, not quiet; check the source for muted regions"
+      "-18.76 LUFS is outside the house band -16.0 to -10.5",
+      "19.4s of the audio is digital zero (17%), in 14 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
-      "size_bytes": 9916995,
-      "duration": 109.5,
+      "size_bytes": 10022711,
+      "duration": 111.3,
       "width": 1920,
       "height": 1080,
       "fps": 60.0,
@@ -6783,7 +6714,7 @@
       "audio_codec": "aac",
       "sample_rate": 44100,
       "channels": 2,
-      "lufs": -18.74,
+      "lufs": -18.76,
       "true_peak": -6.24,
       "lra": 4.6,
       "silences": [
@@ -6906,11 +6837,15 @@
         [
           105.874512,
           106.153673
+        ],
+        [
+          109.324014,
+          109.754036
         ]
       ],
       "blacks": [],
       "dead_audio_total": 19.408,
-      "dead_audio_fraction": 0.1772,
+      "dead_audio_fraction": 0.1744,
       "dead_audio_runs": [
         [
           28.707,

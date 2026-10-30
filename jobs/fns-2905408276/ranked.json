@@ -143,7 +143,7 @@
     "audio_mean": 0.588,
     "has_clip": true,
     "genre": "take",
-    "in_point": 3276.9,
+    "in_point": 3281.9,
     "out_point": 3332.08,
     "setup": "\"K drill is the only one that I watched for League of Legends when he was watching worlds finals\"",
     "claim": "\"I like people who explain things because I'm an idiot\" and he was \"glazing him\"",
@@ -176,7 +176,9 @@
     ],
     "file": "04_0h54m36s_why-he-only-watches-worlds-finals-th.mp4",
     "out_point_original": 3329.0,
-    "out_point_fix": "clamped at a 6.4s mute"
+    "out_point_fix": "clamped at a 6.4s mute",
+    "in_point_original": 3276.9,
+    "in_point_fix": "moved 5.0s past an opening mute onto first speech"
   },
   {
     "region": [
@@ -373,7 +375,7 @@
     "audio_mean": 0.627,
     "has_clip": true,
     "genre": "take",
-    "in_point": 2613.1,
+    "in_point": 2617.56,
     "out_point": 2653.86,
     "setup": "\"But how crazy would it be?\" if Lev or neon ended up at LOUD",
     "claim": "\"that is brain dead that should never be allowed... We need to put a cap on that ASAP\"",
@@ -408,7 +410,9 @@
     ],
     "file": "09_0h43m33s_joke-outrage-at-the-idea-of-loud-sig.mp4",
     "out_point_original": 2655.9,
-    "out_point_fix": "trimmed back to where the audio stops (2.2s mute follows)"
+    "out_point_fix": "trimmed back to where the audio stops (2.2s mute follows)",
+    "in_point_original": 2613.1,
+    "in_point_fix": "moved past a 4.2s opening mute"
   },
   {
     "region": [
@@ -558,7 +562,7 @@
     "audio_mean": 0.694,
     "has_clip": true,
     "genre": "take",
-    "in_point": 3798.3,
+    "in_point": 3804.8,
     "out_point": 3872.47,
     "setup": "\"What about Mako? ... you got the KRX players that are teamless now\"",
     "claim": "\"Those guys are available if need be\" while still loving the current lineup, and \"the dictator is the only reason we won the event\"",
@@ -595,7 +599,9 @@
     ],
     "file": "13_1h03m18s_teamless-krx-players-as-free-agent-o.mp4",
     "out_point_original": 3867.3,
-    "out_point_fix": "clamped at a 2.2s mute"
+    "out_point_fix": "clamped at a 2.2s mute",
+    "in_point_original": 3798.3,
+    "in_point_fix": "moved 6.5s past an opening mute onto first speech"
   },
   {
     "region": [
@@ -937,7 +943,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 2318.0,
-    "out_point": 2391.2,
+    "out_point": 2390.231,
     "setup": "You think that oxy, second and redox can work together in a team?",
     "claim": "I can almost guarantee he's not gonna stay at MIBR.",
     "consequence": "Oxy's new contract is probably brain dead... That's fucked.",
@@ -973,7 +979,7 @@
     ],
     "file": "21_0h38m38s_roster-speculation-where-second-goes.mp4",
     "out_point_original": 2389.7,
-    "out_point_fix": "extended to the end of the named line"
+    "out_point_fix": "trimmed a 0.9s tail mute the 1.0s map floor missed"
   },
   {
     "region": [
@@ -1122,7 +1128,7 @@
     "audio_mean": 0.63,
     "has_clip": true,
     "genre": "take",
-    "in_point": 4366.1,
+    "in_point": 4374.4,
     "out_point": 4477.97,
     "setup": "\"people complaining if you play from your parents house you got no rent to pay\" - players grumbling about months without salary in open qualifiers",
     "claim": "\"I don't empathize with it that much. I had to do the same thing for years\"",
@@ -1155,7 +1161,9 @@
     ],
     "file": "25_1h12m46s_rant-against-players-complaining-abo.mp4",
     "out_point_original": 4475.3,
-    "out_point_fix": "clamped at a 5.3s mute"
+    "out_point_fix": "clamped at a 5.3s mute",
+    "in_point_original": 4366.1,
+    "in_point_fix": "moved 8.3s past an opening mute onto first speech"
   },
   {
     "region": [
@@ -1305,7 +1313,7 @@
     "audio_mean": 0.588,
     "has_clip": true,
     "genre": "take",
-    "in_point": 3424.2,
+    "in_point": 3435.5,
     "out_point": 3520.0,
     "setup": "\"because we're gonna be coaching I got to start watching VODs\"",
     "claim": "\"I'm gonna be live while coaching... I'm not gonna have chat up\" so chat can't rage bait him with \"L coach\"",
@@ -1338,7 +1346,9 @@
     ],
     "file": "29_0h57m04s_streamer-announces-he-ll-livestream.mp4",
     "out_point_original": 3514.7,
-    "out_point_fix": "extended to the end of the named line"
+    "out_point_fix": "extended to the end of the named line",
+    "in_point_original": 3424.2,
+    "in_point_fix": "moved 11.3s past an opening mute onto first speech"
   },
   {
     "region": [
@@ -1674,7 +1684,7 @@
     "audio_mean": 0.586,
     "has_clip": true,
     "genre": "take",
-    "in_point": 4206.1,
+    "in_point": 4220.0,
     "out_point": 4251.33,
     "setup": "Chat: \"Can you please tell us something... is your team all streamers or maybe X pro join?\"",
     "claim": "\"Everyone that is on my team currently streams. It's about the only hint I can give.\"",
@@ -1704,7 +1714,9 @@
     ],
     "file": "37_1h10m06s_teasing-his-own-team-s-roster-and-an.mp4",
     "out_point_original": 4251.6,
-    "out_point_fix": "trimmed back to where the audio stops (1.8s mute follows)"
+    "out_point_fix": "trimmed back to where the audio stops (1.8s mute follows)",
+    "in_point_original": 4206.1,
+    "in_point_fix": "moved 13.9s past an opening mute onto first speech"
   },
   {
     "region": [

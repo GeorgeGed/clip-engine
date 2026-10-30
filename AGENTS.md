@@ -175,11 +175,48 @@ and the clip gained 11.7s of absent audio in the middle of the line it was
 supposed to recover. Five clips were affected; the overlap test fixed all five.
 
 Known limit: `muted_regions.json` keeps runs ≥1.0s, so sub-second mutes are
-invisible to the clamp. Clip 21 ends on a 0.9s mute for this reason. Rebuild
-the map with a lower floor if that matters.
+invisible to the clamp — clip 21 ended on a 0.9s one. Measuring the cut file
+with `qc.dead_audio(min_run=0.3)` catches what the map misses, which is the
+right habit: **the map is a planning aid, the file is the truth.**
 
 Of the 7 remaining rejects, **6 open on absent audio** — the in-point mute
 problem, which is separate and still unsolved.
+
+### Fixing an opening that sits on a mute
+
+Six clips opened on absent audio. Moving the in-point is safe here in a way the
+earlier blind walk was not: the span skipped is *known absent*, so nothing
+audible is lost. (The earlier attempt trusted `silencedetect` and would have
+stepped over a mute onto the answer, cutting the question off the front.)
+
+**Landing on the mute's edge is not enough.** In all six the shape was: mute
+ends, then **3–8s of ordinary quiet**, then speech. Stopping at the mute's edge
+only trades absent audio for silence. The in-point goes to the first
+transcribed utterance at or after the absent span, less the natural 0.3s
+pre-roll.
+
+**Measure the clip, not the map.** `muted_regions.json` keeps runs ≥1.0s, so
+clip 29's 0.6s opening run was invisible to it. Re-measuring the file with
+`qc.dead_audio(min_run=0.3)` caught it.
+
+Result: 5 moved, 1 already fixed, **45.0s of dead opening removed, all 5 pass
+QC**.
+
+**But passing QC is not the same as being watchable.** What a mute eats is
+whatever was SAID inside it, and if that was the clip's setup then the clip now
+opens mid-thought. That is rule 3, and no measurement settles it — so every
+move prints its first words for review. On these six:
+
+| clip | opens with | verdict |
+|---|---|---|
+| 04 | "K drill is the only one that I watched for League of Legends…" | matches its subject |
+| 37 | "We're all everyone that is on my team currently streams" | matches its subject |
+| 25 | "All free food problem is a lot of these people are grown ass men" | gist lands, whisper garbled |
+| 29 | "I got to start figuring out what… things other teams…" | **drifted** — the announcement its subject names was inside the mute |
+| 13 | "Yeah, wait" / "human is seamless" / "Say it ain't so mummy" | **incoherent — drop it** |
+
+Clip 13 is the clean illustration that a mechanical in-point fix cannot rescue
+a clip whose setup was muted. It measures fine and is unwatchable.
 
 ## Three rules from review
 
