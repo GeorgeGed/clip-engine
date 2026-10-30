@@ -1,14 +1,13 @@
 [
   {
-    "rank": 1,
-    "subject": "Speaker reveals he is coaching a team in the open qualifier and streaming it",
-    "in_point": 2829.3,
-    "out_point": 2931.9,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/01_0h47m09s_speaker-reveals-he-is-coaching-a-tea.mp4",
-    "passed": true,
-    "rejected": [],
+    "path": "jobs/fns-2905408276/clips_1080/01_0h47m09s_speaker-reveals-he-is-coaching-a-tea.mp4",
+    "passed": false,
+    "rejected": [
+      "ends on 1.1s of absent audio"
+    ],
     "warnings": [
-      "-19.23 LUFS is outside the house band -16.0 to -10.5"
+      "-19.23 LUFS is outside the house band -16.0 to -10.5",
+      "43.2s of the audio is digital zero (42%), in 22 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 8848533,
@@ -158,19 +157,110 @@
           102.6
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 43.179,
+      "dead_audio_fraction": 0.4208,
+      "dead_audio_runs": [
+        [
+          0.373,
+          7.296
+        ],
+        [
+          14.772,
+          15.367
+        ],
+        [
+          19.053,
+          22.291
+        ],
+        [
+          22.538,
+          23.386
+        ],
+        [
+          24.144,
+          27.752
+        ],
+        [
+          29.268,
+          33.657
+        ],
+        [
+          35.496,
+          37.316
+        ],
+        [
+          44.819,
+          46.12
+        ],
+        [
+          51.579,
+          53.004
+        ],
+        [
+          56.504,
+          57.286
+        ],
+        [
+          58.082,
+          60.11
+        ],
+        [
+          60.356,
+          61.825
+        ],
+        [
+          62.105,
+          64.06
+        ],
+        [
+          64.335,
+          68.324
+        ],
+        [
+          69.38,
+          71.492
+        ],
+        [
+          71.79,
+          73.478
+        ],
+        [
+          73.835,
+          74.565
+        ],
+        [
+          76.996,
+          77.507
+        ],
+        [
+          83.064,
+          83.746
+        ],
+        [
+          87.348,
+          88.751
+        ],
+        [
+          95.544,
+          96.111
+        ],
+        [
+          101.484,
+          102.6
+        ]
+      ]
     }
   },
   {
-    "rank": 2,
-    "subject": "Her one-sided friendship with Pedro, which she admits is basically parasocial",
-    "in_point": 3232.6,
-    "out_point": 3274.3,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/02_0h53m52s_her-one-sided-friendship-with-pedro.mp4",
-    "passed": true,
-    "rejected": [],
+    "path": "jobs/fns-2905408276/clips_1080/02_0h53m52s_her-one-sided-friendship-with-pedro.mp4",
+    "passed": false,
+    "rejected": [
+      "ends on 0.5s of absent audio"
+    ],
     "warnings": [
-      "-20.13 LUFS is outside the house band -16.0 to -10.5"
+      "-20.13 LUFS is outside the house band -16.0 to -10.5",
+      "18.1s of the audio is digital zero (43%), in 10 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 3177492,
@@ -248,15 +338,55 @@
           41.7
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 18.088,
+      "dead_audio_fraction": 0.4338,
+      "dead_audio_runs": [
+        [
+          5.014,
+          6.87
+        ],
+        [
+          8.07,
+          8.73
+        ],
+        [
+          9.937,
+          10.565
+        ],
+        [
+          11.366,
+          18.46
+        ],
+        [
+          20.459,
+          21.103
+        ],
+        [
+          29.92,
+          30.511
+        ],
+        [
+          32.189,
+          33.053
+        ],
+        [
+          34.285,
+          37.952
+        ],
+        [
+          39.004,
+          40.542
+        ],
+        [
+          41.154,
+          41.7
+        ]
+      ]
     }
   },
   {
-    "rank": 3,
-    "subject": "Whether Cryo and Austin leave when their contracts end",
-    "in_point": 2809.2,
-    "out_point": 2824.4,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/03_0h46m49s_whether-cryo-and-austin-leave-when-t.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/03_0h46m49s_whether-cryo-and-austin-leave-when-t.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
@@ -294,20 +424,22 @@
           11.209365
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 0,
+      "dead_audio_fraction": 0.0,
+      "dead_audio_runs": []
     }
   },
   {
-    "rank": 4,
-    "subject": "Why he only watches Worlds finals through K drill's play-by-play co-stream",
-    "in_point": 3276.9,
-    "out_point": 3329.0,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/04_0h54m36s_why-he-only-watches-worlds-finals-th.mp4",
-    "passed": true,
-    "rejected": [],
+    "path": "jobs/fns-2905408276/clips_1080/04_0h54m36s_why-he-only-watches-worlds-finals-th.mp4",
+    "passed": false,
+    "rejected": [
+      "opens on 1.9s of absent audio"
+    ],
     "warnings": [
       "-19.28 LUFS is outside the house band -16.0 to -10.5",
-      "opens on 1.87s of silence \u2014 buries the hook"
+      "opens on 1.87s of silence \u2014 buries the hook",
+      "7.4s of the audio is digital zero (14%), in 2 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 4518488,
@@ -385,19 +517,28 @@
           49.400454
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 7.446,
+      "dead_audio_fraction": 0.1429,
+      "dead_audio_runs": [
+        [
+          0.0,
+          1.864
+        ],
+        [
+          32.734,
+          38.316
+        ]
+      ]
     }
   },
   {
-    "rank": 5,
-    "subject": "Cane's era as the trendsetter that NA streamers imitate",
-    "in_point": 5668.5,
-    "out_point": 5724.1,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/05_1h34m28s_cane-s-era-as-the-trendsetter-that-n.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/05_1h34m28s_cane-s-era-as-the-trendsetter-that-n.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-18.66 LUFS is outside the house band -16.0 to -10.5"
+      "-18.66 LUFS is outside the house band -16.0 to -10.5",
+      "17.7s of the audio is digital zero (32%), in 8 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 5300684,
@@ -467,19 +608,52 @@
           53.468662
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 17.735,
+      "dead_audio_fraction": 0.319,
+      "dead_audio_runs": [
+        [
+          8.004,
+          8.516
+        ],
+        [
+          14.916,
+          16.139
+        ],
+        [
+          16.67,
+          17.523
+        ],
+        [
+          24.175,
+          24.677
+        ],
+        [
+          29.057,
+          32.857
+        ],
+        [
+          33.201,
+          42.099
+        ],
+        [
+          42.352,
+          43.46
+        ],
+        [
+          52.624,
+          53.463
+        ]
+      ]
     }
   },
   {
-    "rank": 6,
-    "subject": "Open qualifiers in the new circuit will be plagued by tech issues, but still beat franchising",
-    "in_point": 2194.8,
-    "out_point": 2238.2,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/06_0h36m34s_open-qualifiers-in-the-new-circuit-w.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/06_0h36m34s_open-qualifiers-in-the-new-circuit-w.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.26 LUFS is outside the house band -16.0 to -10.5"
+      "-19.26 LUFS is outside the house band -16.0 to -10.5",
+      "2.5s of the audio is digital zero (6%), in 3 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 4990674,
@@ -533,19 +707,32 @@
           43.304626
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 2.484,
+      "dead_audio_fraction": 0.0572,
+      "dead_audio_runs": [
+        [
+          36.086,
+          36.773
+        ],
+        [
+          37.437,
+          38.146
+        ],
+        [
+          42.213,
+          43.301
+        ]
+      ]
     }
   },
   {
-    "rank": 7,
-    "subject": "Free agent market and a guarantee that Sam won't join a team this year",
-    "in_point": 3690.0,
-    "out_point": 3757.6,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/07_1h01m30s_free-agent-market-and-a-guarantee-th.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/07_1h01m30s_free-agent-market-and-a-guarantee-th.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.07 LUFS is outside the house band -16.0 to -10.5"
+      "-19.07 LUFS is outside the house band -16.0 to -10.5",
+      "28.1s of the audio is digital zero (42%), in 8 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 6234570,
@@ -631,19 +818,52 @@
           67.6
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 28.065,
+      "dead_audio_fraction": 0.4152,
+      "dead_audio_runs": [
+        [
+          0.266,
+          8.355
+        ],
+        [
+          10.13,
+          11.194
+        ],
+        [
+          12.546,
+          16.557
+        ],
+        [
+          29.453,
+          32.293
+        ],
+        [
+          43.708,
+          44.482
+        ],
+        [
+          46.387,
+          47.349
+        ],
+        [
+          51.683,
+          61.177
+        ],
+        [
+          64.376,
+          65.207
+        ]
+      ]
     }
   },
   {
-    "rank": 8,
-    "subject": "Reaction to a team missing the partnership cycle and what it means for player job security",
-    "in_point": 5978.8,
-    "out_point": 6043.2,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/08_1h39m38s_reaction-to-a-team-missing-the-partn.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/08_1h39m38s_reaction-to-a-team-missing-the-partn.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-20.08 LUFS is outside the house band -16.0 to -10.5"
+      "-20.08 LUFS is outside the house band -16.0 to -10.5",
+      "12.5s of the audio is digital zero (19%), in 7 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 5891017,
@@ -737,21 +957,53 @@
           64.326009
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 12.515,
+      "dead_audio_fraction": 0.1943,
+      "dead_audio_runs": [
+        [
+          3.304,
+          5.245
+        ],
+        [
+          6.502,
+          8.769
+        ],
+        [
+          18.044,
+          19.74
+        ],
+        [
+          32.593,
+          34.436
+        ],
+        [
+          36.727,
+          39.485
+        ],
+        [
+          49.509,
+          50.153
+        ],
+        [
+          54.308,
+          55.674
+        ]
+      ]
     }
   },
   {
-    "rank": 9,
-    "subject": "Joke outrage at the idea of LOUD signing Lev or neon, with a Man City comparison",
-    "in_point": 2613.1,
-    "out_point": 2655.9,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/09_0h43m33s_joke-outrage-at-the-idea-of-loud-sig.mp4",
-    "passed": true,
-    "rejected": [],
+    "path": "jobs/fns-2905408276/clips_1080/09_0h43m33s_joke-outrage-at-the-idea-of-loud-sig.mp4",
+    "passed": false,
+    "rejected": [
+      "opens on 4.2s of absent audio",
+      "ends on 1.9s of absent audio"
+    ],
     "warnings": [
       "-20.63 LUFS is outside the house band -16.0 to -10.5",
       "opens on 4.36s of silence \u2014 buries the hook",
-      "ends on 2.09s of silence"
+      "ends on 2.09s of silence",
+      "18.4s of the audio is digital zero (43%), in 5 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 3367307,
@@ -817,19 +1069,40 @@
           42.8
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 18.363,
+      "dead_audio_fraction": 0.429,
+      "dead_audio_runs": [
+        [
+          0.114,
+          4.354
+        ],
+        [
+          6.164,
+          6.698
+        ],
+        [
+          15.676,
+          22.773
+        ],
+        [
+          32.286,
+          36.885
+        ],
+        [
+          40.907,
+          42.8
+        ]
+      ]
     }
   },
   {
-    "rank": 10,
-    "subject": "Dazzlers as a coach for crew",
-    "in_point": 4113.6,
-    "out_point": 4169.5,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/10_1h08m33s_dazzlers-as-a-coach-for-crew.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/10_1h08m33s_dazzlers-as-a-coach-for-crew.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.28 LUFS is outside the house band -16.0 to -10.5"
+      "-19.28 LUFS is outside the house band -16.0 to -10.5",
+      "24.0s of the audio is digital zero (43%), in 10 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 4059461,
@@ -899,20 +1172,62 @@
           55.251202
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 24.031,
+      "dead_audio_fraction": 0.4299,
+      "dead_audio_runs": [
+        [
+          3.698,
+          7.301
+        ],
+        [
+          10.774,
+          11.522
+        ],
+        [
+          13.527,
+          15.753
+        ],
+        [
+          17.538,
+          18.215
+        ],
+        [
+          18.768,
+          19.684
+        ],
+        [
+          21.52,
+          27.416
+        ],
+        [
+          37.068,
+          38.533
+        ],
+        [
+          40.844,
+          43.073
+        ],
+        [
+          45.197,
+          47.1
+        ],
+        [
+          50.88,
+          55.248
+        ]
+      ]
     }
   },
   {
-    "rank": 11,
-    "subject": "Streamer's all-streamer team: a win would embarrass the game, and he expects them to lose",
-    "in_point": 4767.6,
-    "out_point": 4827.8,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/11_1h19m27s_streamer-s-all-streamer-team-a-win-w.mp4",
-    "passed": true,
-    "rejected": [],
+    "path": "jobs/fns-2905408276/clips_1080/11_1h19m27s_streamer-s-all-streamer-team-a-win-w.mp4",
+    "passed": false,
+    "rejected": [
+      "ends on 1.1s of absent audio"
+    ],
     "warnings": [
       "-20.05 LUFS is outside the house band -16.0 to -10.5",
-      "opens on 0.40s of silence \u2014 buries the hook"
+      "18.6s of the audio is digital zero (31%), in 5 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 5324892,
@@ -1002,20 +1317,40 @@
           60.2
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 18.567,
+      "dead_audio_fraction": 0.3084,
+      "dead_audio_runs": [
+        [
+          14.851,
+          15.399
+        ],
+        [
+          18.179,
+          19.323
+        ],
+        [
+          24.662,
+          26.397
+        ],
+        [
+          28.734,
+          42.81
+        ],
+        [
+          59.136,
+          60.2
+        ]
+      ]
     }
   },
   {
-    "rank": 12,
-    "subject": "Rant telling complaining players they have it easy and should sacrifice pay for the freedom to pick their own roster",
-    "in_point": 4437.8,
-    "out_point": 4524.5,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/12_1h13m57s_rant-telling-complaining-players-the.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/12_1h13m57s_rant-telling-complaining-players-the.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
       "-19.42 LUFS is outside the house band -16.0 to -10.5",
-      "opens on 0.38s of silence \u2014 buries the hook"
+      "13.6s of the audio is digital zero (16%), in 7 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 7943184,
@@ -1117,20 +1452,51 @@
           84.767868
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 13.577,
+      "dead_audio_fraction": 0.1566,
+      "dead_audio_runs": [
+        [
+          18.737,
+          19.48
+        ],
+        [
+          20.907,
+          21.637
+        ],
+        [
+          23.809,
+          24.555
+        ],
+        [
+          38.333,
+          39.296
+        ],
+        [
+          40.316,
+          45.577
+        ],
+        [
+          46.655,
+          49.736
+        ],
+        [
+          80.658,
+          82.711
+        ]
+      ]
     }
   },
   {
-    "rank": 13,
-    "subject": "Teamless KRX players as free-agent options, and credit for the dictator in the event win",
-    "in_point": 3798.3,
-    "out_point": 3867.3,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/13_1h03m18s_teamless-krx-players-as-free-agent-o.mp4",
-    "passed": true,
-    "rejected": [],
+    "path": "jobs/fns-2905408276/clips_1080/13_1h03m18s_teamless-krx-players-as-free-agent-o.mp4",
+    "passed": false,
+    "rejected": [
+      "opens on 2.0s of absent audio"
+    ],
     "warnings": [
       "-19.08 LUFS is outside the house band -16.0 to -10.5",
-      "opens on 1.98s of silence \u2014 buries the hook"
+      "opens on 1.98s of silence \u2014 buries the hook",
+      "41.4s of the audio is digital zero (60%), in 10 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 5911028,
@@ -1204,19 +1570,60 @@
           68.812086
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 41.366,
+      "dead_audio_fraction": 0.5995,
+      "dead_audio_runs": [
+        [
+          0.0,
+          1.972
+        ],
+        [
+          7.744,
+          12.912
+        ],
+        [
+          14.178,
+          17.745
+        ],
+        [
+          19.528,
+          21.298
+        ],
+        [
+          22.011,
+          22.876
+        ],
+        [
+          26.568,
+          29.105
+        ],
+        [
+          32.467,
+          33.023
+        ],
+        [
+          36.442,
+          45.939
+        ],
+        [
+          49.718,
+          50.418
+        ],
+        [
+          54.075,
+          68.809
+        ]
+      ]
     }
   },
   {
-    "rank": 14,
-    "subject": "Why orgs pulling back investment won't hurt top players much",
-    "in_point": 782.4,
-    "out_point": 851.1,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/14_0h13m02s_why-orgs-pulling-back-investment-won.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/14_0h13m02s_why-orgs-pulling-back-investment-won.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-18.38 LUFS is outside the house band -16.0 to -10.5"
+      "-18.38 LUFS is outside the house band -16.0 to -10.5",
+      "20.9s of the audio is digital zero (30%), in 10 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 5752775,
@@ -1298,19 +1705,60 @@
           68.424853
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 20.914,
+      "dead_audio_fraction": 0.3044,
+      "dead_audio_runs": [
+        [
+          7.332,
+          8.323
+        ],
+        [
+          13.182,
+          20.522
+        ],
+        [
+          20.805,
+          24.334
+        ],
+        [
+          25.722,
+          27.094
+        ],
+        [
+          34.302,
+          35.488
+        ],
+        [
+          45.912,
+          46.469
+        ],
+        [
+          49.724,
+          50.403
+        ],
+        [
+          54.306,
+          54.873
+        ],
+        [
+          63.497,
+          66.524
+        ],
+        [
+          66.758,
+          68.424
+        ]
+      ]
     }
   },
   {
-    "rank": 15,
-    "subject": "Open-qualifier system is clearly better than franchise for players",
-    "in_point": 1050.9,
-    "out_point": 1081.1,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/15_0h17m30s_open-qualifier-system-is-clearly-bet.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/15_0h17m30s_open-qualifier-system-is-clearly-bet.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.24 LUFS is outside the house band -16.0 to -10.5"
+      "-19.24 LUFS is outside the house band -16.0 to -10.5",
+      "3.7s of the audio is digital zero (12%), in 4 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 2856616,
@@ -1368,19 +1816,36 @@
           29.041791
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 3.745,
+      "dead_audio_fraction": 0.124,
+      "dead_audio_runs": [
+        [
+          5.161,
+          5.693
+        ],
+        [
+          15.237,
+          16.593
+        ],
+        [
+          20.73,
+          21.484
+        ],
+        [
+          25.314,
+          26.417
+        ]
+      ]
     }
   },
   {
-    "rank": 16,
-    "subject": "Successful teams often hide internal problems, with Vitality as a speculative example",
-    "in_point": 1906.3,
-    "out_point": 1948.0,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/16_0h31m46s_successful-teams-often-hide-internal.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/16_0h31m46s_successful-teams-often-hide-internal.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.69 LUFS is outside the house band -16.0 to -10.5"
+      "-19.69 LUFS is outside the house band -16.0 to -10.5",
+      "4.1s of the audio is digital zero (10%), in 4 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 3884435,
@@ -1454,19 +1919,36 @@
           41.7
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 4.116,
+      "dead_audio_fraction": 0.0987,
+      "dead_audio_runs": [
+        [
+          13.926,
+          14.619
+        ],
+        [
+          26.824,
+          27.334
+        ],
+        [
+          34.654,
+          35.723
+        ],
+        [
+          38.03,
+          39.874
+        ]
+      ]
     }
   },
   {
-    "rank": 17,
-    "subject": "Valin as an IGL move to MIBR, and a possible player swap",
-    "in_point": 5212.4,
-    "out_point": 5265.0,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/17_1h26m52s_valin-as-an-igl-move-to-mibr-and-a-p.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/17_1h26m52s_valin-as-an-igl-move-to-mibr-and-a-p.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.48 LUFS is outside the house band -16.0 to -10.5"
+      "-19.48 LUFS is outside the house band -16.0 to -10.5",
+      "30.5s of the audio is digital zero (58%), in 8 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 3715206,
@@ -1536,19 +2018,52 @@
           52.509728
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 30.548,
+      "dead_audio_fraction": 0.5808,
+      "dead_audio_runs": [
+        [
+          1.999,
+          6.234
+        ],
+        [
+          7.889,
+          17.588
+        ],
+        [
+          19.209,
+          20.554
+        ],
+        [
+          22.576,
+          23.857
+        ],
+        [
+          26.86,
+          28.238
+        ],
+        [
+          34.428,
+          40.071
+        ],
+        [
+          44.686,
+          49.078
+        ],
+        [
+          49.932,
+          52.507
+        ]
+      ]
     }
   },
   {
-    "rank": 18,
-    "subject": "Team-by-team rundown of how the new rosters look",
-    "in_point": 3892.1,
-    "out_point": 3969.6,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/18_1h04m52s_team-by-team-rundown-of-how-the-new.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/18_1h04m52s_team-by-team-rundown-of-how-the-new.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.72 LUFS is outside the house band -16.0 to -10.5"
+      "-19.72 LUFS is outside the house band -16.0 to -10.5",
+      "23.7s of the audio is digital zero (31%), in 16 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 6028306,
@@ -1670,20 +2185,84 @@
           75.529456
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 23.673,
+      "dead_audio_fraction": 0.3055,
+      "dead_audio_runs": [
+        [
+          5.594,
+          6.175
+        ],
+        [
+          10.227,
+          10.807
+        ],
+        [
+          13.569,
+          14.499
+        ],
+        [
+          15.738,
+          16.897
+        ],
+        [
+          17.69,
+          18.698
+        ],
+        [
+          20.344,
+          20.879
+        ],
+        [
+          23.94,
+          24.995
+        ],
+        [
+          31.945,
+          32.515
+        ],
+        [
+          33.4,
+          34.469
+        ],
+        [
+          38.913,
+          39.458
+        ],
+        [
+          43.908,
+          44.753
+        ],
+        [
+          52.891,
+          53.658
+        ],
+        [
+          54.308,
+          55.797
+        ],
+        [
+          57.071,
+          60.298
+        ],
+        [
+          63.498,
+          67.983
+        ],
+        [
+          70.7,
+          75.528
+        ]
+      ]
     }
   },
   {
-    "rank": 19,
-    "subject": "Speaker wants a cap on a rich org like LOUD stacking top free agents like neon",
-    "in_point": 2568.4,
-    "out_point": 2628.8,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/19_0h42m48s_speaker-wants-a-cap-on-a-rich-org-li.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/19_0h42m48s_speaker-wants-a-cap-on-a-rich-org-li.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
       "-20.29 LUFS is outside the house band -16.0 to -10.5",
-      "opens on 0.43s of silence \u2014 buries the hook"
+      "22.7s of the audio is digital zero (38%), in 6 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 4762288,
@@ -1785,19 +2364,44 @@
           60.4
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 22.674,
+      "dead_audio_fraction": 0.3754,
+      "dead_audio_runs": [
+        [
+          5.951,
+          15.054
+        ],
+        [
+          17.315,
+          18.268
+        ],
+        [
+          22.961,
+          29.735
+        ],
+        [
+          43.001,
+          44.068
+        ],
+        [
+          44.814,
+          49.056
+        ],
+        [
+          50.864,
+          51.399
+        ]
+      ]
     }
   },
   {
-    "rank": 20,
-    "subject": "Where the big teamless players (Second, Knights, Demon1, Oxy) land, and how stacked the Americas are",
-    "in_point": 2713.5,
-    "out_point": 2788.2,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/20_0h45m13s_where-the-big-teamless-players-secon.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/20_0h45m13s_where-the-big-teamless-players-secon.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.23 LUFS is outside the house band -16.0 to -10.5"
+      "-19.23 LUFS is outside the house band -16.0 to -10.5",
+      "42.4s of the audio is digital zero (57%), in 10 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 5936443,
@@ -1875,19 +2479,60 @@
           74.7
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 42.356,
+      "dead_audio_fraction": 0.567,
+      "dead_audio_runs": [
+        [
+          1.679,
+          6.549
+        ],
+        [
+          8.422,
+          22.237
+        ],
+        [
+          22.716,
+          25.552
+        ],
+        [
+          28.983,
+          29.829
+        ],
+        [
+          31.058,
+          38.67
+        ],
+        [
+          48.255,
+          49.089
+        ],
+        [
+          50.561,
+          51.355
+        ],
+        [
+          55.912,
+          60.487
+        ],
+        [
+          64.662,
+          68.586
+        ],
+        [
+          70.545,
+          72.795
+        ]
+      ]
     }
   },
   {
-    "rank": 21,
-    "subject": "Roster speculation: where Second goes from MIBR and whether Oxy, Second and Redox fit together",
-    "in_point": 2318.0,
-    "out_point": 2389.7,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/21_0h38m38s_roster-speculation-where-second-goes.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/21_0h38m38s_roster-speculation-where-second-goes.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-20.20 LUFS is outside the house band -16.0 to -10.5"
+      "-20.20 LUFS is outside the house band -16.0 to -10.5",
+      "36.3s of the audio is digital zero (51%), in 9 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 6012240,
@@ -1969,19 +2614,56 @@
           70.530476
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 36.273,
+      "dead_audio_fraction": 0.5059,
+      "dead_audio_runs": [
+        [
+          2.687,
+          3.515
+        ],
+        [
+          4.554,
+          5.786
+        ],
+        [
+          6.407,
+          8.619
+        ],
+        [
+          11.345,
+          15.136
+        ],
+        [
+          16.437,
+          31.194
+        ],
+        [
+          37.759,
+          48.117
+        ],
+        [
+          51.418,
+          52.238
+        ],
+        [
+          55.542,
+          56.699
+        ],
+        [
+          65.205,
+          66.323
+        ]
+      ]
     }
   },
   {
-    "rank": 22,
-    "subject": "Defending the open qualifier system and arguing that players spoiled by franchise pay are the ones complaining",
-    "in_point": 1694.4,
-    "out_point": 1856.3,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/22_0h28m14s_defending-the-open-qualifier-system.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/22_0h28m14s_defending-the-open-qualifier-system.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-18.36 LUFS is outside the house band -16.0 to -10.5"
+      "-18.36 LUFS is outside the house band -16.0 to -10.5",
+      "55.4s of the audio is digital zero (34%), in 23 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 14530509,
@@ -2155,19 +2837,112 @@
           161.803197
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 55.417,
+      "dead_audio_fraction": 0.3423,
+      "dead_audio_runs": [
+        [
+          1.284,
+          3.023
+        ],
+        [
+          8.901,
+          9.705
+        ],
+        [
+          12.464,
+          13.539
+        ],
+        [
+          17.68,
+          20.879
+        ],
+        [
+          29.962,
+          30.68
+        ],
+        [
+          34.925,
+          36.257
+        ],
+        [
+          37.45,
+          39.403
+        ],
+        [
+          41.501,
+          42.494
+        ],
+        [
+          47.868,
+          48.565
+        ],
+        [
+          55.984,
+          56.624
+        ],
+        [
+          60.014,
+          61.395
+        ],
+        [
+          64.731,
+          71.992
+        ],
+        [
+          73.996,
+          74.553
+        ],
+        [
+          80.286,
+          81.496
+        ],
+        [
+          83.247,
+          86.721
+        ],
+        [
+          87.985,
+          95.08
+        ],
+        [
+          95.948,
+          98.781
+        ],
+        [
+          100.666,
+          101.167
+        ],
+        [
+          125.475,
+          126.394
+        ],
+        [
+          129.84,
+          140.336
+        ],
+        [
+          140.596,
+          141.397
+        ],
+        [
+          141.641,
+          144.119
+        ],
+        [
+          146.49,
+          149.751
+        ]
+      ]
     }
   },
   {
-    "rank": 23,
-    "subject": "Players who missed out on the league can just grind open qualifiers and orgs will pick them up",
-    "in_point": 929.5,
-    "out_point": 1036.0,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/23_0h15m29s_players-who-missed-out-on-the-league.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/23_0h15m29s_players-who-missed-out-on-the-league.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-18.88 LUFS is outside the house band -16.0 to -10.5"
+      "-18.88 LUFS is outside the house band -16.0 to -10.5",
+      "12.4s of the audio is digital zero (12%), in 6 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 10114805,
@@ -2289,20 +3064,47 @@
           106.407211
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 12.386,
+      "dead_audio_fraction": 0.1163,
+      "dead_audio_runs": [
+        [
+          25.005,
+          25.991
+        ],
+        [
+          37.226,
+          39.471
+        ],
+        [
+          40.395,
+          46.439
+        ],
+        [
+          59.975,
+          61.544
+        ],
+        [
+          77.551,
+          78.317
+        ],
+        [
+          92.089,
+          92.865
+        ]
+      ]
     }
   },
   {
-    "rank": 24,
-    "subject": "Open qualifiers are overblown as a controversy, though the turnaround time is a fair complaint",
-    "in_point": 1283.7,
-    "out_point": 1401.2,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/24_0h21m23s_open-qualifiers-are-overblown-as-a-c.mp4",
-    "passed": true,
-    "rejected": [],
+    "path": "jobs/fns-2905408276/clips_1080/24_0h21m23s_open-qualifiers-are-overblown-as-a-c.mp4",
+    "passed": false,
+    "rejected": [
+      "ends on 3.8s of absent audio"
+    ],
     "warnings": [
       "-19.25 LUFS is outside the house band -16.0 to -10.5",
-      "ends on 3.97s of silence"
+      "ends on 3.97s of silence",
+      "36.6s of the audio is digital zero (31%), in 15 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 10623290,
@@ -2440,20 +3242,83 @@
           117.5
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 36.58,
+      "dead_audio_fraction": 0.3113,
+      "dead_audio_runs": [
+        [
+          4.259,
+          5.384
+        ],
+        [
+          7.972,
+          8.524
+        ],
+        [
+          10.301,
+          11.237
+        ],
+        [
+          18.951,
+          19.907
+        ],
+        [
+          22.251,
+          27.886
+        ],
+        [
+          39.933,
+          42.317
+        ],
+        [
+          45.594,
+          46.578
+        ],
+        [
+          53.718,
+          54.517
+        ],
+        [
+          63.8,
+          64.803
+        ],
+        [
+          72.922,
+          73.625
+        ],
+        [
+          74.2,
+          89.649
+        ],
+        [
+          92.442,
+          93.42
+        ],
+        [
+          98.476,
+          99.213
+        ],
+        [
+          108.765,
+          109.336
+        ],
+        [
+          113.732,
+          117.5
+        ]
+      ]
     }
   },
   {
-    "rank": 25,
-    "subject": "Rant against players complaining about unpaid months in the open circuit",
-    "in_point": 4366.1,
-    "out_point": 4475.3,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/25_1h12m46s_rant-against-players-complaining-abo.mp4",
-    "passed": true,
-    "rejected": [],
+    "path": "jobs/fns-2905408276/clips_1080/25_1h12m46s_rant-against-players-complaining-abo.mp4",
+    "passed": false,
+    "rejected": [
+      "opens on 4.7s of absent audio"
+    ],
     "warnings": [
       "-19.79 LUFS is outside the house band -16.0 to -10.5",
-      "opens on 4.70s of silence \u2014 buries the hook"
+      "opens on 4.70s of silence \u2014 buries the hook",
+      "35.5s of the audio is digital zero (33%), in 11 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 9071571,
@@ -2555,21 +3420,67 @@
           106.171678
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 35.502,
+      "dead_audio_fraction": 0.3251,
+      "dead_audio_runs": [
+        [
+          0.0,
+          4.698
+        ],
+        [
+          23.774,
+          25.347
+        ],
+        [
+          26.568,
+          29.253
+        ],
+        [
+          30.124,
+          41.425
+        ],
+        [
+          41.665,
+          47.751
+        ],
+        [
+          58.547,
+          60.487
+        ],
+        [
+          63.077,
+          63.98
+        ],
+        [
+          65.402,
+          69.499
+        ],
+        [
+          90.437,
+          91.181
+        ],
+        [
+          92.607,
+          93.337
+        ],
+        [
+          95.509,
+          96.254
+        ]
+      ]
     }
   },
   {
-    "rank": 26,
-    "subject": "MIBR's roster falling apart after a year of near-misses",
-    "in_point": 2663.8,
-    "out_point": 2702.6,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/26_0h44m23s_mibr-s-roster-falling-apart-after-a.mp4",
-    "passed": true,
-    "rejected": [],
+    "path": "jobs/fns-2905408276/clips_1080/26_0h44m23s_mibr-s-roster-falling-apart-after-a.mp4",
+    "passed": false,
+    "rejected": [
+      "ends on 1.8s of absent audio"
+    ],
     "warnings": [
       "-19.30 LUFS is outside the house band -16.0 to -10.5",
-      "opens on 0.40s of silence \u2014 buries the hook",
-      "ends on 1.99s of silence"
+      "ends on 1.99s of silence",
+      "12.3s of the audio is digital zero (32%), in 4 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 3946433,
@@ -2627,19 +3538,36 @@
           38.8
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 12.347,
+      "dead_audio_fraction": 0.3182,
+      "dead_audio_runs": [
+        [
+          3.702,
+          6.435
+        ],
+        [
+          16.075,
+          23.334
+        ],
+        [
+          31.096,
+          31.601
+        ],
+        [
+          36.95,
+          38.8
+        ]
+      ]
     }
   },
   {
-    "rank": 27,
-    "subject": "Defending the open-qualifier circuit format with his own come-up stories",
-    "in_point": 1958.0,
-    "out_point": 2081.5,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/27_0h32m38s_defending-the-open-qualifier-circuit.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/27_0h32m38s_defending-the-open-qualifier-circuit.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.28 LUFS is outside the house band -16.0 to -10.5"
+      "-19.28 LUFS is outside the house band -16.0 to -10.5",
+      "36.8s of the audio is digital zero (30%), in 11 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 10361517,
@@ -2777,19 +3705,64 @@
           121.973197
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 36.769,
+      "dead_audio_fraction": 0.2977,
+      "dead_audio_runs": [
+        [
+          10.48,
+          11.016
+        ],
+        [
+          32.256,
+          33.824
+        ],
+        [
+          39.146,
+          40.18
+        ],
+        [
+          43.585,
+          47.219
+        ],
+        [
+          48.492,
+          50.382
+        ],
+        [
+          62.166,
+          63.56
+        ],
+        [
+          64.96,
+          67.828
+        ],
+        [
+          83.744,
+          86.884
+        ],
+        [
+          88.406,
+          100.596
+        ],
+        [
+          102.228,
+          109.074
+        ],
+        [
+          116.483,
+          118.152
+        ]
+      ]
     }
   },
   {
-    "rank": 28,
-    "subject": "Streamer's read on the new Valorant agent: too much support util to be a solo duelist",
-    "in_point": 5032.4,
-    "out_point": 5085.2,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/28_1h23m52s_streamer-s-read-on-the-new-valorant.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/28_1h23m52s_streamer-s-read-on-the-new-valorant.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.45 LUFS is outside the house band -16.0 to -10.5"
+      "-19.45 LUFS is outside the house band -16.0 to -10.5",
+      "12.8s of the audio is digital zero (24%), in 9 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 3932128,
@@ -2887,20 +3860,58 @@
           51.934218
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 12.814,
+      "dead_audio_fraction": 0.2427,
+      "dead_audio_runs": [
+        [
+          0.549,
+          1.688
+        ],
+        [
+          2.546,
+          6.987
+        ],
+        [
+          16.686,
+          17.565
+        ],
+        [
+          25.315,
+          26.101
+        ],
+        [
+          29.189,
+          31.247
+        ],
+        [
+          33.978,
+          34.702
+        ],
+        [
+          35.501,
+          36.5
+        ],
+        [
+          38.08,
+          38.8
+        ],
+        [
+          39.891,
+          40.959
+        ]
+      ]
     }
   },
   {
-    "rank": 29,
-    "subject": "Streamer announces he'll livestream while coaching, with chat off and a delay",
-    "in_point": 3424.2,
-    "out_point": 3514.7,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/29_0h57m04s_streamer-announces-he-ll-livestream.mp4",
-    "passed": true,
-    "rejected": [],
+    "path": "jobs/fns-2905408276/clips_1080/29_0h57m04s_streamer-announces-he-ll-livestream.mp4",
+    "passed": false,
+    "rejected": [
+      "opens on 0.6s of absent audio"
+    ],
     "warnings": [
       "-19.48 LUFS is outside the house band -16.0 to -10.5",
-      "opens on 0.63s of silence \u2014 buries the hook"
+      "32.4s of the audio is digital zero (36%), in 13 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 8390312,
@@ -3026,19 +4037,72 @@
           87.531066
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 32.416,
+      "dead_audio_fraction": 0.3582,
+      "dead_audio_runs": [
+        [
+          0.0,
+          0.629
+        ],
+        [
+          1.545,
+          7.589
+        ],
+        [
+          23.178,
+          25.039
+        ],
+        [
+          27.47,
+          33.866
+        ],
+        [
+          41.768,
+          43.197
+        ],
+        [
+          44.493,
+          45.937
+        ],
+        [
+          59.754,
+          62.086
+        ],
+        [
+          62.401,
+          66.933
+        ],
+        [
+          67.214,
+          70.895
+        ],
+        [
+          73.85,
+          75.127
+        ],
+        [
+          77.719,
+          79.47
+        ],
+        [
+          82.266,
+          82.787
+        ],
+        [
+          84.793,
+          85.312
+        ]
+      ]
     }
   },
   {
-    "rank": 30,
-    "subject": "Why building your own roster through open qualifiers beats joining a partner team",
-    "in_point": 4261.1,
-    "out_point": 4314.7,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/30_1h11m01s_why-building-your-own-roster-through.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/30_1h11m01s_why-building-your-own-roster-through.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.35 LUFS is outside the house band -16.0 to -10.5"
+      "-19.35 LUFS is outside the house band -16.0 to -10.5",
+      "4.9s of the audio is digital zero (9%), in 6 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 4401787,
@@ -3132,19 +4196,44 @@
           50.273787
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 4.946,
+      "dead_audio_fraction": 0.0923,
+      "dead_audio_runs": [
+        [
+          9.826,
+          10.375
+        ],
+        [
+          14.122,
+          14.949
+        ],
+        [
+          20.519,
+          21.039
+        ],
+        [
+          21.738,
+          22.688
+        ],
+        [
+          31.942,
+          33.331
+        ],
+        [
+          49.559,
+          50.27
+        ]
+      ]
     }
   },
   {
-    "rank": 31,
-    "subject": "What his stream team would do in the open qualifier, and the pressure of the lineup",
-    "in_point": 4627.0,
-    "out_point": 4693.7,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/31_1h17m07s_what-his-stream-team-would-do-in-the.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/31_1h17m07s_what-his-stream-team-would-do-in-the.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-20.12 LUFS is outside the house band -16.0 to -10.5"
+      "-20.12 LUFS is outside the house band -16.0 to -10.5",
+      "33.9s of the audio is digital zero (51%), in 8 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 5140557,
@@ -3214,19 +4303,54 @@
           66.585193
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 33.92,
+      "dead_audio_fraction": 0.5085,
+      "dead_audio_runs": [
+        [
+          9.431,
+          9.984
+        ],
+        [
+          14.476,
+          15.701
+        ],
+        [
+          22.164,
+          41.429
+        ],
+        [
+          45.651,
+          46.435
+        ],
+        [
+          47.811,
+          49.754
+        ],
+        [
+          52.678,
+          56.365
+        ],
+        [
+          59.224,
+          59.912
+        ],
+        [
+          60.807,
+          66.582
+        ]
+      ]
     }
   },
   {
-    "rank": 32,
-    "subject": "Whether released franchise players like Valin get hurt by the new system",
-    "in_point": 1155.0,
-    "out_point": 1216.7,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/32_0h19m15s_whether-released-franchise-players-l.mp4",
-    "passed": true,
-    "rejected": [],
+    "path": "jobs/fns-2905408276/clips_1080/32_0h19m15s_whether-released-franchise-players-l.mp4",
+    "passed": false,
+    "rejected": [
+      "ends on 1.2s of absent audio"
+    ],
     "warnings": [
-      "-19.62 LUFS is outside the house band -16.0 to -10.5"
+      "-19.62 LUFS is outside the house band -16.0 to -10.5",
+      "17.3s of the audio is digital zero (28%), in 3 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 4953559,
@@ -3280,19 +4404,32 @@
           61.7
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 17.292,
+      "dead_audio_fraction": 0.2803,
+      "dead_audio_runs": [
+        [
+          33.282,
+          34.056
+        ],
+        [
+          35.766,
+          51.101
+        ],
+        [
+          60.517,
+          61.7
+        ]
+      ]
     }
   },
   {
-    "rank": 33,
-    "subject": "Who missed out on Valorant partnership and whether being non-partnered is actually better",
-    "in_point": 1512.4,
-    "out_point": 1678.8,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/33_0h25m12s_who-missed-out-on-valorant-partnersh.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/33_0h25m12s_who-missed-out-on-valorant-partnersh.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.43 LUFS is outside the house band -16.0 to -10.5"
+      "-19.43 LUFS is outside the house band -16.0 to -10.5",
+      "63.6s of the audio is digital zero (38%), in 22 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 13735095,
@@ -3458,19 +4595,108 @@
           159.003129
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 63.624,
+      "dead_audio_fraction": 0.3824,
+      "dead_audio_runs": [
+        [
+          1.337,
+          3.285
+        ],
+        [
+          3.646,
+          4.539
+        ],
+        [
+          25.197,
+          25.734
+        ],
+        [
+          27.864,
+          30.024
+        ],
+        [
+          36.49,
+          51.739
+        ],
+        [
+          55.791,
+          56.457
+        ],
+        [
+          58.361,
+          59.761
+        ],
+        [
+          61.877,
+          66.88
+        ],
+        [
+          67.122,
+          70.992
+        ],
+        [
+          71.92,
+          74.175
+        ],
+        [
+          75.905,
+          77.173
+        ],
+        [
+          78.121,
+          82.005
+        ],
+        [
+          94.715,
+          95.732
+        ],
+        [
+          96.047,
+          97.164
+        ],
+        [
+          99.776,
+          101.357
+        ],
+        [
+          102.556,
+          104.323
+        ],
+        [
+          107.635,
+          108.686
+        ],
+        [
+          109.809,
+          117.23
+        ],
+        [
+          118.2,
+          119.996
+        ],
+        [
+          124.47,
+          129.671
+        ],
+        [
+          129.955,
+          132.927
+        ],
+        [
+          143.594,
+          144.162
+        ]
+      ]
     }
   },
   {
-    "rank": 34,
-    "subject": "Is the open qualifier turnaround too short for roster building after Champs?",
-    "in_point": 1373.3,
-    "out_point": 1485.5,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/34_0h22m53s_is-the-open-qualifier-turnaround-too.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/34_0h22m53s_is-the-open-qualifier-turnaround-too.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.29 LUFS is outside the house band -16.0 to -10.5"
+      "-19.29 LUFS is outside the house band -16.0 to -10.5",
+      "34.0s of the audio is digital zero (30%), in 14 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 9843613,
@@ -3620,19 +4846,76 @@
           111.621678
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 33.978,
+      "dead_audio_fraction": 0.3028,
+      "dead_audio_runs": [
+        [
+          2.842,
+          3.819
+        ],
+        [
+          8.876,
+          9.613
+        ],
+        [
+          19.164,
+          19.736
+        ],
+        [
+          24.132,
+          28.035
+        ],
+        [
+          30.479,
+          35.125
+        ],
+        [
+          37.894,
+          39.528
+        ],
+        [
+          55.311,
+          56.002
+        ],
+        [
+          63.964,
+          66.774
+        ],
+        [
+          78.075,
+          79.248
+        ],
+        [
+          86.21,
+          86.794
+        ],
+        [
+          87.345,
+          97.724
+        ],
+        [
+          101.707,
+          104.739
+        ],
+        [
+          105.315,
+          106.526
+        ],
+        [
+          109.989,
+          111.618
+        ]
+      ]
     }
   },
   {
-    "rank": 35,
-    "subject": "Streamer shoots down the idea of reuniting old Optic",
-    "in_point": 5380.1,
-    "out_point": 5424.8,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/35_1h29m40s_streamer-shoots-down-the-idea-of-reu.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/35_1h29m40s_streamer-shoots-down-the-idea-of-reu.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.80 LUFS is outside the house band -16.0 to -10.5"
+      "-19.80 LUFS is outside the house band -16.0 to -10.5",
+      "23.9s of the audio is digital zero (54%), in 5 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 3443884,
@@ -3686,20 +4969,40 @@
           44.7
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 23.929,
+      "dead_audio_fraction": 0.5353,
+      "dead_audio_runs": [
+        [
+          4.948,
+          21.852
+        ],
+        [
+          23.786,
+          24.545
+        ],
+        [
+          31.64,
+          32.163
+        ],
+        [
+          33.139,
+          33.669
+        ],
+        [
+          34.64,
+          39.853
+        ]
+      ]
     }
   },
   {
-    "rank": 36,
-    "subject": "Whether Virus gets signed again",
-    "in_point": 4169.5,
-    "out_point": 4206.1,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/36_1h09m29s_whether-virus-gets-signed-again.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/36_1h09m29s_whether-virus-gets-signed-again.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
       "-19.72 LUFS is outside the house band -16.0 to -10.5",
-      "opens on 0.45s of silence \u2014 buries the hook"
+      "6.0s of the audio is digital zero (16%), in 5 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 3196826,
@@ -3777,20 +5080,43 @@
           36.6
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 6.016,
+      "dead_audio_fraction": 0.1644,
+      "dead_audio_runs": [
+        [
+          5.529,
+          6.178
+        ],
+        [
+          7.838,
+          8.762
+        ],
+        [
+          13.746,
+          14.335
+        ],
+        [
+          23.751,
+          25.071
+        ],
+        [
+          31.369,
+          33.903
+        ]
+      ]
     }
   },
   {
-    "rank": 37,
-    "subject": "Teasing his own team's roster and announcement timing",
-    "in_point": 4206.1,
-    "out_point": 4251.6,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/37_1h10m06s_teasing-his-own-team-s-roster-and-an.mp4",
-    "passed": true,
-    "rejected": [],
+    "path": "jobs/fns-2905408276/clips_1080/37_1h10m06s_teasing-his-own-team-s-roster-and-an.mp4",
+    "passed": false,
+    "rejected": [
+      "opens on 7.2s of absent audio"
+    ],
     "warnings": [
       "-20.23 LUFS is outside the house band -16.0 to -10.5",
-      "opens on 7.22s of silence \u2014 buries the hook"
+      "opens on 7.22s of silence \u2014 buries the hook",
+      "28.2s of the audio is digital zero (62%), in 6 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 3448779,
@@ -3848,19 +5174,44 @@
           45.5
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 28.249,
+      "dead_audio_fraction": 0.6209,
+      "dead_audio_runs": [
+        [
+          0.0,
+          7.214
+        ],
+        [
+          7.871,
+          10.033
+        ],
+        [
+          18.732,
+          20.239
+        ],
+        [
+          21.714,
+          36.767
+        ],
+        [
+          38.352,
+          38.861
+        ],
+        [
+          41.612,
+          43.416
+        ]
+      ]
     }
   },
   {
-    "rank": 38,
-    "subject": "Sentinels' rumored rebuilt roster as a super team, compared to Real Madrid",
-    "in_point": 2949.4,
-    "out_point": 3090.7,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/38_0h49m09s_sentinels-rumored-rebuilt-roster-as.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/38_0h49m09s_sentinels-rumored-rebuilt-roster-as.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.27 LUFS is outside the house band -16.0 to -10.5"
+      "-19.27 LUFS is outside the house band -16.0 to -10.5",
+      "68.6s of the audio is digital zero (49%), in 16 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 10996249,
@@ -4018,20 +5369,87 @@
           140.918458
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 68.585,
+      "dead_audio_fraction": 0.4854,
+      "dead_audio_runs": [
+        [
+          12.885,
+          14.213
+        ],
+        [
+          17.927,
+          19.387
+        ],
+        [
+          22.622,
+          28.255
+        ],
+        [
+          30.646,
+          38.151
+        ],
+        [
+          43.405,
+          47.698
+        ],
+        [
+          47.943,
+          53.179
+        ],
+        [
+          54.352,
+          63.259
+        ],
+        [
+          66.171,
+          72.724
+        ],
+        [
+          84.231,
+          85.468
+        ],
+        [
+          86.994,
+          96.599
+        ],
+        [
+          104.136,
+          105.097
+        ],
+        [
+          106.725,
+          107.33
+        ],
+        [
+          108.782,
+          109.304
+        ],
+        [
+          110.026,
+          111.178
+        ],
+        [
+          123.073,
+          126.468
+        ],
+        [
+          130.722,
+          140.915
+        ]
+      ]
     }
   },
   {
-    "rank": 39,
-    "subject": "SR missing out on Riot partnership",
-    "in_point": 3983.1,
-    "out_point": 4033.3,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/39_1h06m23s_sr-missing-out-on-riot-partnership.mp4",
-    "passed": true,
-    "rejected": [],
+    "path": "jobs/fns-2905408276/clips_1080/39_1h06m23s_sr-missing-out-on-riot-partnership.mp4",
+    "passed": false,
+    "rejected": [
+      "ends on 1.1s of absent audio"
+    ],
     "warnings": [
       "-20.02 LUFS is outside the house band -16.0 to -10.5",
-      "opens on 17.63s of silence \u2014 buries the hook"
+      "opens on 17.63s of silence \u2014 buries the hook",
+      "25.9s of the audio is digital zero (52%), in 6 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 3675928,
@@ -4085,19 +5503,44 @@
           50.192857
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 25.853,
+      "dead_audio_fraction": 0.515,
+      "dead_audio_runs": [
+        [
+          0.252,
+          17.667
+        ],
+        [
+          25.105,
+          26.439
+        ],
+        [
+          30.65,
+          32.785
+        ],
+        [
+          33.469,
+          36.656
+        ],
+        [
+          41.56,
+          42.261
+        ],
+        [
+          49.081,
+          50.162
+        ]
+      ]
     }
   },
   {
-    "rank": 40,
-    "subject": "Val explains why he is coaching for fun and won't coach full-time",
-    "in_point": 5724.1,
-    "out_point": 5876.6,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/40_1h35m24s_val-explains-why-he-is-coaching-for.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/40_1h35m24s_val-explains-why-he-is-coaching-for.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-20.21 LUFS is outside the house band -16.0 to -10.5"
+      "-20.21 LUFS is outside the house band -16.0 to -10.5",
+      "59.6s of the audio is digital zero (39%), in 16 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 12981850,
@@ -4239,19 +5682,84 @@
           151.066644
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 59.602,
+      "dead_audio_fraction": 0.3908,
+      "dead_audio_runs": [
+        [
+          0.728,
+          7.641
+        ],
+        [
+          10.567,
+          27.358
+        ],
+        [
+          51.241,
+          52.891
+        ],
+        [
+          54.215,
+          55.444
+        ],
+        [
+          65.145,
+          65.688
+        ],
+        [
+          66.206,
+          67.136
+        ],
+        [
+          73.564,
+          75.092
+        ],
+        [
+          76.251,
+          81.628
+        ],
+        [
+          87.608,
+          88.278
+        ],
+        [
+          101.826,
+          106.33
+        ],
+        [
+          109.435,
+          111.076
+        ],
+        [
+          112.001,
+          123.914
+        ],
+        [
+          125.206,
+          125.857
+        ],
+        [
+          140.737,
+          142.406
+        ],
+        [
+          146.032,
+          149.013
+        ],
+        [
+          150.451,
+          151.063
+        ]
+      ]
     }
   },
   {
-    "rank": 41,
-    "subject": "Would he sponsor a qualifier team? Only as a loan with interest",
-    "in_point": 4537.7,
-    "out_point": 4562.7,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/41_1h15m37s_would-he-sponsor-a-qualifier-team-on.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/41_1h15m37s_would-he-sponsor-a-qualifier-team-on.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-20.56 LUFS is outside the house band -16.0 to -10.5"
+      "-20.56 LUFS is outside the house band -16.0 to -10.5",
+      "8.9s of the audio is digital zero (35%), in 4 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 2233147,
@@ -4301,19 +5809,36 @@
           25.0
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 8.858,
+      "dead_audio_fraction": 0.3543,
+      "dead_audio_runs": [
+        [
+          4.093,
+          5.671
+        ],
+        [
+          13.246,
+          14.82
+        ],
+        [
+          15.723,
+          17.358
+        ],
+        [
+          19.125,
+          23.196
+        ]
+      ]
     }
   },
   {
-    "rank": 42,
-    "subject": "Defending the open qualifier circuit format and the need for a solid rule book",
-    "in_point": 2255.5,
-    "out_point": 2302.1,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/42_0h37m35s_defending-the-open-qualifier-circuit.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/42_0h37m35s_defending-the-open-qualifier-circuit.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-18.91 LUFS is outside the house band -16.0 to -10.5"
+      "-18.91 LUFS is outside the house band -16.0 to -10.5",
+      "9.4s of the audio is digital zero (20%), in 5 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 4933445,
@@ -4383,19 +5908,40 @@
           46.555918
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 9.388,
+      "dead_audio_fraction": 0.2015,
+      "dead_audio_runs": [
+        [
+          7.28,
+          9.865
+        ],
+        [
+          13.348,
+          14.876
+        ],
+        [
+          19.783,
+          20.84
+        ],
+        [
+          25.423,
+          28.012
+        ],
+        [
+          43.571,
+          45.2
+        ]
+      ]
     }
   },
   {
-    "rank": 43,
-    "subject": "Prediction that Kiko might leave NRG to return to EMEA",
-    "in_point": 2391.2,
-    "out_point": 2416.9,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/43_0h39m51s_prediction-that-kiko-might-leave-nrg.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/43_0h39m51s_prediction-that-kiko-might-leave-nrg.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-20.01 LUFS is outside the house band -16.0 to -10.5"
+      "-20.01 LUFS is outside the house band -16.0 to -10.5",
+      "1.8s of the audio is digital zero (7%), in 1 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 2399063,
@@ -4445,19 +5991,24 @@
           23.589773
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 1.806,
+      "dead_audio_fraction": 0.0703,
+      "dead_audio_runs": [
+        [
+          2.047,
+          3.853
+        ]
+      ]
     }
   },
   {
-    "rank": 44,
-    "subject": "The open qualifier as a pipeline for rookies",
-    "in_point": 4709.5,
-    "out_point": 4742.6,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/44_1h18m29s_the-open-qualifier-as-a-pipeline-for.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/44_1h18m29s_the-open-qualifier-as-a-pipeline-for.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.57 LUFS is outside the house band -16.0 to -10.5"
+      "-19.57 LUFS is outside the house band -16.0 to -10.5",
+      "8.8s of the audio is digital zero (27%), in 2 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 2520300,
@@ -4503,19 +6054,28 @@
           32.971655
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 8.822,
+      "dead_audio_fraction": 0.2665,
+      "dead_audio_runs": [
+        [
+          1.023,
+          1.891
+        ],
+        [
+          23.026,
+          30.98
+        ]
+      ]
     }
   },
   {
-    "rank": 45,
-    "subject": "Oxy's reported move to Sun",
-    "in_point": 5146.4,
-    "out_point": 5166.9,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/45_1h25m46s_oxy-s-reported-move-to-sun.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/45_1h25m46s_oxy-s-reported-move-to-sun.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-18.66 LUFS is outside the house band -16.0 to -10.5"
+      "-18.66 LUFS is outside the house band -16.0 to -10.5",
+      "11.3s of the audio is digital zero (55%), in 2 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 1754848,
@@ -4545,20 +6105,28 @@
           17.143991
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 11.271,
+      "dead_audio_fraction": 0.5498,
+      "dead_audio_runs": [
+        [
+          0.612,
+          8.864
+        ],
+        [
+          9.149,
+          12.168
+        ]
+      ]
     }
   },
   {
-    "rank": 46,
-    "subject": "Whether Zix could become an assistant coach",
-    "in_point": 5502.8,
-    "out_point": 5537.6,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/46_1h31m42s_whether-zix-could-become-an-assistan.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/46_1h31m42s_whether-zix-could-become-an-assistan.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
       "-20.29 LUFS is outside the house band -16.0 to -10.5",
-      "opens on 0.43s of silence \u2014 buries the hook"
+      "6.6s of the audio is digital zero (19%), in 5 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 2902319,
@@ -4632,19 +6200,40 @@
           29.59542
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 6.61,
+      "dead_audio_fraction": 0.1899,
+      "dead_audio_runs": [
+        [
+          3.459,
+          4.441
+        ],
+        [
+          13.123,
+          14.056
+        ],
+        [
+          18.11,
+          19.092
+        ],
+        [
+          21.07,
+          21.778
+        ],
+        [
+          23.229,
+          26.234
+        ]
+      ]
     }
   },
   {
-    "rank": 47,
-    "subject": "Passport worries about the open circuit are overblown; qualifying teams will get sponsors and can sort it out",
-    "in_point": 95.3,
-    "out_point": 205.5,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/47_0h01m35s_passport-worries-about-the-open-circ.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/47_0h01m35s_passport-worries-about-the-open-circ.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.37 LUFS is outside the house band -16.0 to -10.5"
+      "-19.37 LUFS is outside the house band -16.0 to -10.5",
+      "29.7s of the audio is digital zero (27%), in 12 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 10684640,
@@ -4790,19 +6379,68 @@
           107.055805
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 29.67,
+      "dead_audio_fraction": 0.2692,
+      "dead_audio_runs": [
+        [
+          0.589,
+          1.105
+        ],
+        [
+          1.972,
+          5.005
+        ],
+        [
+          21.753,
+          24.685
+        ],
+        [
+          28.789,
+          31.273
+        ],
+        [
+          34.845,
+          35.969
+        ],
+        [
+          37.847,
+          41.148
+        ],
+        [
+          44.129,
+          46.497
+        ],
+        [
+          47.984,
+          53.109
+        ],
+        [
+          60.066,
+          60.567
+        ],
+        [
+          79.05,
+          79.6
+        ],
+        [
+          80.497,
+          81.234
+        ],
+        [
+          88.733,
+          95.732
+        ]
+      ]
     }
   },
   {
-    "rank": 48,
-    "subject": "Streamer unsure whether his new team will really try to win",
-    "in_point": 4998.9,
-    "out_point": 5032.4,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/48_1h23m18s_streamer-unsure-whether-his-new-team.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/48_1h23m18s_streamer-unsure-whether-his-new-team.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-22.13 LUFS is outside the house band -16.0 to -10.5"
+      "-22.13 LUFS is outside the house band -16.0 to -10.5",
+      "17.9s of the audio is digital zero (53%), in 6 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 2393782,
@@ -4864,19 +6502,44 @@
           32.102222
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 17.869,
+      "dead_audio_fraction": 0.5334,
+      "dead_audio_runs": [
+        [
+          0.45,
+          11.458
+        ],
+        [
+          11.707,
+          13.455
+        ],
+        [
+          15.562,
+          17.774
+        ],
+        [
+          21.327,
+          23.131
+        ],
+        [
+          28.454,
+          28.98
+        ],
+        [
+          29.79,
+          30.361
+        ]
+      ]
     }
   },
   {
-    "rank": 49,
-    "subject": "Streamer is coaching in the open qualifiers, hiding which team, and will miss most of Worlds Swiss stage",
-    "in_point": 3090.7,
-    "out_point": 3226.3,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/49_0h51m30s_streamer-is-coaching-in-the-open-qua.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/49_0h51m30s_streamer-is-coaching-in-the-open-qua.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-19.27 LUFS is outside the house band -16.0 to -10.5"
+      "-19.27 LUFS is outside the house band -16.0 to -10.5",
+      "63.5s of the audio is digital zero (47%), in 19 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 9275492,
@@ -5018,19 +6681,96 @@
           134.610703
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 63.499,
+      "dead_audio_fraction": 0.4683,
+      "dead_audio_runs": [
+        [
+          14.72,
+          15.331
+        ],
+        [
+          16.747,
+          17.717
+        ],
+        [
+          18.923,
+          24.232
+        ],
+        [
+          30.988,
+          43.8
+        ],
+        [
+          46.45,
+          47.486
+        ],
+        [
+          54.753,
+          66.176
+        ],
+        [
+          72.096,
+          73.441
+        ],
+        [
+          74.718,
+          80.482
+        ],
+        [
+          81.471,
+          84.804
+        ],
+        [
+          85.562,
+          86.189
+        ],
+        [
+          87.013,
+          88.546
+        ],
+        [
+          89.823,
+          90.508
+        ],
+        [
+          99.623,
+          110.402
+        ],
+        [
+          113.752,
+          115.824
+        ],
+        [
+          117.778,
+          118.642
+        ],
+        [
+          119.745,
+          121.39
+        ],
+        [
+          126.219,
+          127.091
+        ],
+        [
+          127.726,
+          128.739
+        ],
+        [
+          132.349,
+          133.155
+        ]
+      ]
     }
   },
   {
-    "rank": 50,
-    "subject": "Tier two players shouldn't wait for org backing; just be good and win open qualifiers",
-    "in_point": 443.9,
-    "out_point": 553.4,
-    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/50_0h07m23s_tier-two-players-shouldn-t-wait-for.mp4",
+    "path": "jobs/fns-2905408276/clips_1080/50_0h07m23s_tier-two-players-shouldn-t-wait-for.mp4",
     "passed": true,
     "rejected": [],
     "warnings": [
-      "-18.74 LUFS is outside the house band -16.0 to -10.5"
+      "-18.74 LUFS is outside the house band -16.0 to -10.5",
+      "19.4s of the audio is digital zero (18%), in 14 run(s) \u2014 absent, not quiet; check the source for muted regions"
     ],
     "measured": {
       "size_bytes": 9916995,
@@ -5168,7 +6908,67 @@
           106.153673
         ]
       ],
-      "blacks": []
+      "blacks": [],
+      "dead_audio_total": 19.408,
+      "dead_audio_fraction": 0.1772,
+      "dead_audio_runs": [
+        [
+          28.707,
+          29.732
+        ],
+        [
+          33.574,
+          34.784
+        ],
+        [
+          35.977,
+          37.324
+        ],
+        [
+          37.912,
+          38.489
+        ],
+        [
+          41.34,
+          41.997
+        ],
+        [
+          43.725,
+          45.114
+        ],
+        [
+          54.554,
+          55.107
+        ],
+        [
+          61.863,
+          62.949
+        ],
+        [
+          63.886,
+          68.784
+        ],
+        [
+          69.4,
+          72.267
+        ],
+        [
+          75.68,
+          76.207
+        ],
+        [
+          78.314,
+          79.572
+        ],
+        [
+          82.814,
+          83.428
+        ],
+        [
+          84.923,
+          86.323
+        ]
+      ]
     }
   }
 ]

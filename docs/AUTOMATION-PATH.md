@@ -240,10 +240,74 @@ it. Still no rule from George on where to stop.
 
 ---
 
+## The source audio is 34% missing
+
+Found while fixing in-points, and it outranks everything else here.
+
+**35.8% of FNS VOD 2905408276's audio is absent** — not quiet, absent — across
+**552 runs** totalling 2213s. Present at identical timestamps in independently
+fetched 720p and 1080p renditions, so it is in the VOD on Twitch's side rather
+than an artifact of either download.
+
+Across the 50 clips cut from it:
+
+| | |
+|---|---|
+| Median absent audio per clip | **31.9%** |
+| Worst clip | **62.1%** (#37, 28.2s of 45.5s) |
+| Over 25% absent | **35 of 50** |
+| Over 10% absent | 45 of 50 |
+| Entirely clean | **1 of 50** (#3) |
+| QC rejects, all on absent audio at a clip edge | **13 of 50** |
+
+**The detector nearly missed it.** An exact-zero test found nothing and
+reported clean files, because after AAC the absent region decodes to about
+−122 dBFS rather than literal zeros. Only the 16-bit WAV extraction has true
+zeros. The working test is a dB floor at −90 dBFS, where the absent region is
+100% below and speech — peaking at −4.1 dBFS in the same file — is 0.1% below.
+That is the kind of bug that makes a QC pass worse than none: it would have
+issued a confident all-clear.
+
+**What it does not explain.** Clip 3 measures 0% absent, so its abrupt ending
+is still prosodic. And it is not automatically fatal: clips 1, 4 and 8 measure
+37%, 14% and 19% absent and George accepted all three, because the mutes mostly
+land where nobody is talking. So it warns with a number and rejects only at a
+clip's edge.
+
+**Consequences for selection.** A muted region reads as "not loud" to Tier 1,
+so it is never flagged — this caps recall, invisibly. It is also why the
+transcript has gaps up to 29.5s, which is what Tier 3 reads.
+
+### Why the in-point fix held on all 6
+
+The job was to walk 13 in-points forward past dead air. Two corrections came
+out of it:
+
+The 0.35s threshold was a guess and it was wrong. Measured, leading silence
+splits cleanly — 30 clips open on speech, 14 cluster at 0.24–0.63s (median
+0.42s, the breath before a first word), then a **1.24s gap**, then 6 at 1.87s
+and up. The gap is the threshold. Only 6 clips were ever defects; the other 7
+had normal pre-roll.
+
+Then the walk refused all 6, because the transcript cross-check found no
+utterance at any target. That was right, for a reason I had not anticipated:
+the silence is a mute, not a pause. Walking clip 39's in-point forward 17.33s
+would have landed on the far side of a muted region, cutting the question off
+the front and breaking rule 2 — the rule George gave explicitly. The
+cross-check exists because `silencedetect` fires on any audio above the floor;
+it was added to stop an in-point landing on a keyboard clack, and it caught
+something worse.
+
+The real fix for a clip spanning a mute is a segment cut through the middle,
+keeping the speech either side. That is an edit, not a boundary move.
+
+---
+
 ## Honest state
 
 - ffmpeg renderer: built, 417 lines, never run against a hand-built reference.
-- Render QC: built, 18 tests, run against 50 real clips.
+- Render QC: built, 31 tests, run against 50 real clips.
+- In-point walk: built, 20 tests; held on all 6 real candidates.
 - FCPXML emitter: built, never imported into Resolve.
 - Resolve driver: built, never connected.
 - `edit.json` schema and gates: 53 tests passing, exercised only on synthetic
