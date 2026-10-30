@@ -67,6 +67,27 @@ def probe(path: str | Path) -> dict:
     }
 
 
+def _require_height(info: dict, min_height: int | None, what: str) -> None:
+    """Refuse a source too small for a 1080x1920 master."""
+    if min_height is None:
+        return
+    h = int(info.get("height") or 0)
+    if h < min_height:
+        raise RuntimeError(
+            f"{what} is {info.get('width')}x{h}; a 1080x1920 master needs at "
+            f"least {min_height}px of source height. Check the available "
+            f"renditions (`yt-dlp --list-formats`) and pull the taller one, or "
+            f"pass min_height=None if this really is the best available."
+        )
+
+
+# A 9:16 master is 1920 tall. Anything under 1080p source is upscaled, and the
+# cost is invisible until the look has already been tuned against soft footage.
+# Measured the hard way: the first FNS run pulled 720p60 and all 50 clips were
+# cut from it before anyone checked.
+MIN_SOURCE_HEIGHT = 1080
+
+
 def fetch(
     url_or_path: str,
     out_dir: str | Path,
@@ -74,14 +95,21 @@ def fetch(
     start: float | None = None,
     end: float | None = None,
     owner: str | None = None,
+    min_height: int | None = MIN_SOURCE_HEIGHT,
 ) -> Source:
-    """Download (or adopt) the source and return a probed Source."""
+    """Download (or adopt) the source and return a probed Source.
+
+    Raises if the result is shorter than `min_height` pixels tall. Pass
+    `min_height=None` to accept whatever the platform offers — correct for a
+    Twitch clip or an old VOD that genuinely has no better rendition.
+    """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     local = Path(url_or_path)
     if local.exists():
         info = probe(local)
+        _require_height(info, min_height, str(local))
         return Source(
             path=str(local.resolve()), url=None, owner=(owner or "local"),
             duration=info["duration"], fps=info["fps"],
@@ -108,6 +136,7 @@ def fetch(
         target = found[0]
 
     info = probe(target)
+    _require_height(info, min_height, url_or_path)
     return Source(
         path=str(target.resolve()), url=url_or_path,
         owner=(owner or owner_from_url(url_or_path)),

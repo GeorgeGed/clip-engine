@@ -254,8 +254,17 @@ Use two-pass loudnorm. Single-pass lands a dB off.
 Median true peak was −6.30 dBTP, so the lift to −12 has headroom and will not
 clip. Normalisation is not optional polish; without it every clip ships quiet.
 
-**The VOD downloads at 1280×720.** All 50 measured 720p. A 1080×1920 master
-built from that is upscaled — fix the download before tuning a look against it.
+**Pull 1080p source and verify you got it.** The first FNS run used an ad-hoc
+`yt-dlp` call that landed 720p60, and all 50 clips were cut from it before
+anyone measured the files. A 1080×1920 master built from 720p is upscaled, and
+the cost is invisible until the look has already been tuned against soft
+footage. `ingest.fetch` now refuses source under `MIN_SOURCE_HEIGHT` (1080),
+with a `min_height=None` opt-out for a Twitch clip or old VOD that genuinely
+has nothing better. **[checked]**
+
+VOD 2905408276 re-pulled at 1920×1080@60 — 6.28 GB for 103 minutes. Twitch
+offers 1080p60 as `Source`; `--list-formats` shows what exists before you
+commit to a download.
 
 ---
 
