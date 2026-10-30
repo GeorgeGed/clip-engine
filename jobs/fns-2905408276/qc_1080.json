@@ -1,0 +1,5174 @@
+[
+  {
+    "rank": 1,
+    "subject": "Speaker reveals he is coaching a team in the open qualifier and streaming it",
+    "in_point": 2829.3,
+    "out_point": 2931.9,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/01_0h47m09s_speaker-reveals-he-is-coaching-a-tea.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.23 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 8848533,
+      "duration": 102.6,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.23,
+      "true_peak": -6.32,
+      "lra": 9.0,
+      "silences": [
+        [
+          0.171814,
+          7.299116
+        ],
+        [
+          8.847914,
+          9.415533
+        ],
+        [
+          14.564082,
+          15.371066
+        ],
+        [
+          17.337891,
+          17.961655
+        ],
+        [
+          18.929728,
+          22.294853
+        ],
+        [
+          22.362744,
+          23.388503
+        ],
+        [
+          23.939796,
+          27.756168
+        ],
+        [
+          29.068118,
+          33.661859
+        ],
+        [
+          35.290272,
+          37.319048
+        ],
+        [
+          40.774989,
+          41.329229
+        ],
+        [
+          44.601655,
+          46.123764
+        ],
+        [
+          51.387143,
+          53.007982
+        ],
+        [
+          53.685624,
+          54.037029
+        ],
+        [
+          56.313424,
+          57.288571
+        ],
+        [
+          57.89102,
+          60.115351
+        ],
+        [
+          60.160204,
+          61.82839
+        ],
+        [
+          61.907914,
+          64.063129
+        ],
+        [
+          64.128345,
+          68.328844
+        ],
+        [
+          68.667211,
+          69.120181
+        ],
+        [
+          69.190952,
+          71.495964
+        ],
+        [
+          71.573991,
+          73.481497
+        ],
+        [
+          73.618345,
+          74.568503
+        ],
+        [
+          75.296032,
+          75.719773
+        ],
+        [
+          76.788526,
+          77.510295
+        ],
+        [
+          79.261565,
+          79.482812
+        ],
+        [
+          81.730023,
+          82.102494
+        ],
+        [
+          82.887732,
+          83.749819
+        ],
+        [
+          85.007891,
+          85.290998
+        ],
+        [
+          87.14068,
+          88.754308
+        ],
+        [
+          89.219773,
+          89.62381
+        ],
+        [
+          90.566735,
+          90.914014
+        ],
+        [
+          95.336032,
+          96.114036
+        ],
+        [
+          101.291678,
+          102.6
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 2,
+    "subject": "Her one-sided friendship with Pedro, which she admits is basically parasocial",
+    "in_point": 3232.6,
+    "out_point": 3274.3,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/02_0h53m52s_her-one-sided-friendship-with-pedro.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-20.13 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 3177492,
+      "duration": 41.7,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -20.13,
+      "true_peak": -6.4,
+      "lra": 8.4,
+      "silences": [
+        [
+          0.0,
+          0.277755
+        ],
+        [
+          3.964104,
+          4.394331
+        ],
+        [
+          4.783968,
+          6.871633
+        ],
+        [
+          7.877279,
+          8.732336
+        ],
+        [
+          9.828073,
+          10.569864
+        ],
+        [
+          11.221678,
+          18.462676
+        ],
+        [
+          20.253379,
+          21.10576
+        ],
+        [
+          24.645193,
+          25.237846
+        ],
+        [
+          27.241134,
+          27.856213
+        ],
+        [
+          29.706395,
+          30.514218
+        ],
+        [
+          31.291678,
+          31.656667
+        ],
+        [
+          31.96805,
+          33.057982
+        ],
+        [
+          34.071882,
+          37.955079
+        ],
+        [
+          38.807392,
+          40.545125
+        ],
+        [
+          40.934399,
+          41.7
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 3,
+    "subject": "Whether Cryo and Austin leave when their contracts end",
+    "in_point": 2809.2,
+    "out_point": 2824.4,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/03_0h46m49s_whether-cryo-and-austin-leave-when-t.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.83 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 1343311,
+      "duration": 15.2,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.83,
+      "true_peak": -6.98,
+      "lra": 1.5,
+      "silences": [
+        [
+          3.284444,
+          3.93449
+        ],
+        [
+          8.005306,
+          8.227438
+        ],
+        [
+          10.100454,
+          10.485125
+        ],
+        [
+          10.980998,
+          11.209365
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 4,
+    "subject": "Why he only watches Worlds finals through K drill's play-by-play co-stream",
+    "in_point": 3276.9,
+    "out_point": 3329.0,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/04_0h54m36s_why-he-only-watches-worlds-finals-th.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.28 LUFS is outside the house band -16.0 to -10.5",
+      "opens on 1.87s of silence \u2014 buries the hook"
+    ],
+    "measured": {
+      "size_bytes": 4518488,
+      "duration": 52.1,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.28,
+      "true_peak": -6.13,
+      "lra": 6.0,
+      "silences": [
+        [
+          0.0,
+          1.86644
+        ],
+        [
+          2.415397,
+          2.964626
+        ],
+        [
+          3.139501,
+          3.677664
+        ],
+        [
+          5.389819,
+          5.658481
+        ],
+        [
+          15.62381,
+          16.130476
+        ],
+        [
+          19.332902,
+          19.734558
+        ],
+        [
+          20.89483,
+          21.344444
+        ],
+        [
+          26.463764,
+          26.903991
+        ],
+        [
+          29.396893,
+          29.780136
+        ],
+        [
+          31.423265,
+          31.853469
+        ],
+        [
+          32.517415,
+          38.319592
+        ],
+        [
+          42.126939,
+          42.552313
+        ],
+        [
+          45.592449,
+          46.076667
+        ],
+        [
+          47.454649,
+          47.875465
+        ],
+        [
+          49.105805,
+          49.400454
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 5,
+    "subject": "Cane's era as the trendsetter that NA streamers imitate",
+    "in_point": 5668.5,
+    "out_point": 5724.1,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/05_1h34m28s_cane-s-era-as-the-trendsetter-that-n.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-18.66 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 5300684,
+      "duration": 55.6,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -18.66,
+      "true_peak": -5.89,
+      "lra": 5.1,
+      "silences": [
+        [
+          7.836077,
+          8.518639
+        ],
+        [
+          10.080159,
+          10.468866
+        ],
+        [
+          13.280816,
+          13.517392
+        ],
+        [
+          14.700952,
+          16.142857
+        ],
+        [
+          16.455601,
+          17.526667
+        ],
+        [
+          19.805193,
+          20.062676
+        ],
+        [
+          21.180703,
+          21.465397
+        ],
+        [
+          24.029161,
+          24.680113
+        ],
+        [
+          27.140045,
+          27.683991
+        ],
+        [
+          28.865601,
+          32.858367
+        ],
+        [
+          33.042177,
+          42.098889
+        ],
+        [
+          42.158141,
+          43.464014
+        ],
+        [
+          52.502313,
+          53.468662
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 6,
+    "subject": "Open qualifiers in the new circuit will be plagued by tech issues, but still beat franchising",
+    "in_point": 2194.8,
+    "out_point": 2238.2,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/06_0h36m34s_open-qualifiers-in-the-new-circuit-w.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.26 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 4990674,
+      "duration": 43.4,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.26,
+      "true_peak": -5.44,
+      "lra": 4.5,
+      "silences": [
+        [
+          11.146145,
+          11.409478
+        ],
+        [
+          13.642676,
+          13.995147
+        ],
+        [
+          21.439569,
+          21.825828
+        ],
+        [
+          26.455147,
+          26.823129
+        ],
+        [
+          31.577551,
+          31.887778
+        ],
+        [
+          34.201814,
+          34.667778
+        ],
+        [
+          35.882676,
+          36.77737
+        ],
+        [
+          37.242132,
+          38.148526
+        ],
+        [
+          41.994717,
+          43.304626
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 7,
+    "subject": "Free agent market and a guarantee that Sam won't join a team this year",
+    "in_point": 3690.0,
+    "out_point": 3757.6,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/07_1h01m30s_free-agent-market-and-a-guarantee-th.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.07 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 6234570,
+      "duration": 67.6,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.07,
+      "true_peak": -6.1,
+      "lra": 8.2,
+      "silences": [
+        [
+          0.0587302,
+          8.359002
+        ],
+        [
+          8.749546,
+          9.434898
+        ],
+        [
+          9.935646,
+          11.197914
+        ],
+        [
+          12.32966,
+          16.560227
+        ],
+        [
+          18.637937,
+          19.324649
+        ],
+        [
+          24.387211,
+          24.606054
+        ],
+        [
+          25.884603,
+          26.248912
+        ],
+        [
+          29.234558,
+          32.295714
+        ],
+        [
+          36.668844,
+          37.33288
+        ],
+        [
+          41.173084,
+          41.782993
+        ],
+        [
+          43.508299,
+          44.484649
+        ],
+        [
+          46.190998,
+          47.351293
+        ],
+        [
+          48.42,
+          48.801542
+        ],
+        [
+          49.948776,
+          50.181633
+        ],
+        [
+          51.490658,
+          61.180998
+        ],
+        [
+          64.169229,
+          65.210227
+        ],
+        [
+          67.258753,
+          67.6
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 8,
+    "subject": "Reaction to a team missing the partnership cycle and what it means for player job security",
+    "in_point": 5978.8,
+    "out_point": 6043.2,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/08_1h39m38s_reaction-to-a-team-missing-the-partn.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-20.08 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 5891017,
+      "duration": 64.4,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -20.08,
+      "true_peak": -6.38,
+      "lra": 6.0,
+      "silences": [
+        [
+          3.092766,
+          5.248209
+        ],
+        [
+          6.306576,
+          8.771066
+        ],
+        [
+          14.313696,
+          14.678367
+        ],
+        [
+          15.208458,
+          15.41059
+        ],
+        [
+          17.8278,
+          19.744172
+        ],
+        [
+          23.179955,
+          23.721837
+        ],
+        [
+          24.88932,
+          25.112041
+        ],
+        [
+          28.921746,
+          29.442041
+        ],
+        [
+          32.377959,
+          34.438776
+        ],
+        [
+          35.571066,
+          35.98678
+        ],
+        [
+          36.531247,
+          39.49
+        ],
+        [
+          42.029138,
+          42.32068
+        ],
+        [
+          43.753061,
+          44.059025
+        ],
+        [
+          44.809025,
+          45.404195
+        ],
+        [
+          49.318345,
+          50.155488
+        ],
+        [
+          54.137483,
+          55.675692
+        ],
+        [
+          58.480862,
+          58.6861
+        ],
+        [
+          61.532653,
+          61.819705
+        ],
+        [
+          63.746984,
+          64.326009
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 9,
+    "subject": "Joke outrage at the idea of LOUD signing Lev or neon, with a Man City comparison",
+    "in_point": 2613.1,
+    "out_point": 2655.9,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/09_0h43m33s_joke-outrage-at-the-idea-of-loud-sig.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-20.63 LUFS is outside the house band -16.0 to -10.5",
+      "opens on 4.36s of silence \u2014 buries the hook",
+      "ends on 2.09s of silence"
+    ],
+    "measured": {
+      "size_bytes": 3367307,
+      "duration": 42.8,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -20.63,
+      "true_peak": -6.99,
+      "lra": 14.0,
+      "silences": [
+        [
+          0.0,
+          4.360454
+        ],
+        [
+          5.955873,
+          6.702404
+        ],
+        [
+          7.729592,
+          7.974331
+        ],
+        [
+          10.136009,
+          10.453741
+        ],
+        [
+          11.4239,
+          11.932381
+        ],
+        [
+          12.999161,
+          13.440476
+        ],
+        [
+          15.450771,
+          22.777007
+        ],
+        [
+          29.248549,
+          29.582358
+        ],
+        [
+          30.691315,
+          31.160454
+        ],
+        [
+          32.092177,
+          36.890998
+        ],
+        [
+          37.560431,
+          37.933628
+        ],
+        [
+          40.711315,
+          42.8
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 10,
+    "subject": "Dazzlers as a coach for crew",
+    "in_point": 4113.6,
+    "out_point": 4169.5,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/10_1h08m33s_dazzlers-as-a-coach-for-crew.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.28 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 4059461,
+      "duration": 55.9,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.28,
+      "true_peak": -6.19,
+      "lra": 6.7,
+      "silences": [
+        [
+          3.495125,
+          7.305624
+        ],
+        [
+          8.530544,
+          8.926213
+        ],
+        [
+          10.578549,
+          11.525805
+        ],
+        [
+          13.285283,
+          15.757029
+        ],
+        [
+          17.33619,
+          18.219093
+        ],
+        [
+          18.576735,
+          19.687891
+        ],
+        [
+          21.320408,
+          27.418503
+        ],
+        [
+          31.62415,
+          32.254218
+        ],
+        [
+          33.600454,
+          34.284467
+        ],
+        [
+          36.85805,
+          38.537075
+        ],
+        [
+          40.663605,
+          43.07551
+        ],
+        [
+          44.994512,
+          47.103356
+        ],
+        [
+          50.663401,
+          55.251202
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 11,
+    "subject": "Streamer's all-streamer team: a win would embarrass the game, and he expects them to lose",
+    "in_point": 4767.6,
+    "out_point": 4827.8,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/11_1h19m27s_streamer-s-all-streamer-team-a-win-w.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-20.05 LUFS is outside the house band -16.0 to -10.5",
+      "opens on 0.40s of silence \u2014 buries the hook"
+    ],
+    "measured": {
+      "size_bytes": 5324892,
+      "duration": 60.2,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -20.05,
+      "true_peak": -6.41,
+      "lra": 6.3,
+      "silences": [
+        [
+          0.0,
+          0.400907
+        ],
+        [
+          1.322358,
+          1.546281
+        ],
+        [
+          3.863537,
+          4.35746
+        ],
+        [
+          6.1361,
+          6.775669
+        ],
+        [
+          13.35288,
+          13.771587
+        ],
+        [
+          14.650181,
+          15.403061
+        ],
+        [
+          17.99746,
+          19.327075
+        ],
+        [
+          21.672404,
+          22.023039
+        ],
+        [
+          22.50712,
+          23.149025
+        ],
+        [
+          24.505465,
+          26.39932
+        ],
+        [
+          26.496463,
+          26.762472
+        ],
+        [
+          28.192381,
+          28.450272
+        ],
+        [
+          28.592766,
+          42.812562
+        ],
+        [
+          44.298776,
+          44.548549
+        ],
+        [
+          52.678231,
+          52.903583
+        ],
+        [
+          56.366689,
+          56.711633
+        ],
+        [
+          57.634649,
+          58.002132
+        ],
+        [
+          58.930499,
+          60.2
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 12,
+    "subject": "Rant telling complaining players they have it easy and should sacrifice pay for the freedom to pick their own roster",
+    "in_point": 4437.8,
+    "out_point": 4524.5,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/12_1h13m57s_rant-telling-complaining-players-the.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.42 LUFS is outside the house band -16.0 to -10.5",
+      "opens on 0.38s of silence \u2014 buries the hook"
+    ],
+    "measured": {
+      "size_bytes": 7943184,
+      "duration": 86.7,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.42,
+      "true_peak": -6.66,
+      "lra": 3.7,
+      "silences": [
+        [
+          0.0,
+          0.378367
+        ],
+        [
+          0.72771,
+          1.247029
+        ],
+        [
+          3.321542,
+          3.734263
+        ],
+        [
+          16.287166,
+          16.49322
+        ],
+        [
+          18.543673,
+          19.485011
+        ],
+        [
+          20.720499,
+          21.640408
+        ],
+        [
+          23.619229,
+          24.558571
+        ],
+        [
+          26.461814,
+          26.856349
+        ],
+        [
+          34.030839,
+          34.471701
+        ],
+        [
+          38.137324,
+          39.2978
+        ],
+        [
+          40.13483,
+          45.579909
+        ],
+        [
+          45.732902,
+          46.147211
+        ],
+        [
+          46.480522,
+          49.737483
+        ],
+        [
+          50.673787,
+          51.085147
+        ],
+        [
+          54.351338,
+          54.862472
+        ],
+        [
+          61.175125,
+          61.688413
+        ],
+        [
+          69.584308,
+          69.85102
+        ],
+        [
+          71.251293,
+          71.554059
+        ],
+        [
+          78.562857,
+          79.202381
+        ],
+        [
+          80.452993,
+          82.714104
+        ],
+        [
+          84.302744,
+          84.767868
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 13,
+    "subject": "Teamless KRX players as free-agent options, and credit for the dictator in the event win",
+    "in_point": 3798.3,
+    "out_point": 3867.3,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/13_1h03m18s_teamless-krx-players-as-free-agent-o.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.08 LUFS is outside the house band -16.0 to -10.5",
+      "opens on 1.98s of silence \u2014 buries the hook"
+    ],
+    "measured": {
+      "size_bytes": 5911028,
+      "duration": 69.0,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.08,
+      "true_peak": -6.62,
+      "lra": 10.9,
+      "silences": [
+        [
+          0.0,
+          1.975556
+        ],
+        [
+          3.543197,
+          4.091293
+        ],
+        [
+          6.460952,
+          6.963197
+        ],
+        [
+          7.527846,
+          12.914921
+        ],
+        [
+          13.953061,
+          17.747302
+        ],
+        [
+          19.315692,
+          21.301565
+        ],
+        [
+          21.867234,
+          22.878889
+        ],
+        [
+          24.435578,
+          24.699955
+        ],
+        [
+          26.36424,
+          29.10771
+        ],
+        [
+          30.293537,
+          30.519751
+        ],
+        [
+          32.284512,
+          33.026213
+        ],
+        [
+          36.262336,
+          45.942336
+        ],
+        [
+          49.509002,
+          50.422948
+        ],
+        [
+          53.861497,
+          68.812086
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 14,
+    "subject": "Why orgs pulling back investment won't hurt top players much",
+    "in_point": 782.4,
+    "out_point": 851.1,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/14_0h13m02s_why-orgs-pulling-back-investment-won.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-18.38 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 5752775,
+      "duration": 68.7,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -18.38,
+      "true_peak": -6.65,
+      "lra": 6.0,
+      "silences": [
+        [
+          0.905102,
+          1.405964
+        ],
+        [
+          6.328889,
+          6.692426
+        ],
+        [
+          7.129025,
+          8.327483
+        ],
+        [
+          12.958163,
+          20.524694
+        ],
+        [
+          20.64551,
+          24.336984
+        ],
+        [
+          25.504785,
+          27.097279
+        ],
+        [
+          33.326689,
+          33.678118
+        ],
+        [
+          34.093515,
+          35.49229
+        ],
+        [
+          43.725034,
+          44.314535
+        ],
+        [
+          45.707687,
+          46.472245
+        ],
+        [
+          49.529728,
+          50.407166
+        ],
+        [
+          54.101746,
+          54.874966
+        ],
+        [
+          59.750612,
+          60.043946
+        ],
+        [
+          61.55068,
+          62.005669
+        ],
+        [
+          63.289751,
+          66.527551
+        ],
+        [
+          66.563016,
+          68.424853
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 15,
+    "subject": "Open-qualifier system is clearly better than franchise for players",
+    "in_point": 1050.9,
+    "out_point": 1081.1,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/15_0h17m30s_open-qualifier-system-is-clearly-bet.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.24 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 2856616,
+      "duration": 30.2,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.24,
+      "true_peak": -6.68,
+      "lra": 2.9,
+      "silences": [
+        [
+          0.853197,
+          1.083447
+        ],
+        [
+          4.310862,
+          4.554512
+        ],
+        [
+          4.980499,
+          5.697188
+        ],
+        [
+          7.966145,
+          8.314898
+        ],
+        [
+          9.681383,
+          10.266463
+        ],
+        [
+          10.788934,
+          11.018776
+        ],
+        [
+          15.036213,
+          16.59576
+        ],
+        [
+          20.537438,
+          21.488027
+        ],
+        [
+          25.147392,
+          26.419796
+        ],
+        [
+          28.625601,
+          29.041791
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 16,
+    "subject": "Successful teams often hide internal problems, with Vitality as a speculative example",
+    "in_point": 1906.3,
+    "out_point": 1948.0,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/16_0h31m46s_successful-teams-often-hide-internal.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.69 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 3884435,
+      "duration": 41.7,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.69,
+      "true_peak": -6.29,
+      "lra": 3.7,
+      "silences": [
+        [
+          0.0,
+          0.321179
+        ],
+        [
+          1.715238,
+          2.05263
+        ],
+        [
+          11.853946,
+          12.101882
+        ],
+        [
+          13.730544,
+          14.621927
+        ],
+        [
+          17.319773,
+          17.597914
+        ],
+        [
+          20.093991,
+          20.569705
+        ],
+        [
+          23.452154,
+          24.023583
+        ],
+        [
+          26.066735,
+          26.278481
+        ],
+        [
+          26.60576,
+          27.337324
+        ],
+        [
+          28.082109,
+          28.738005
+        ],
+        [
+          30.349501,
+          30.60839
+        ],
+        [
+          34.437029,
+          35.725306
+        ],
+        [
+          37.843447,
+          39.876236
+        ],
+        [
+          41.451383,
+          41.7
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 17,
+    "subject": "Valin as an IGL move to MIBR, and a possible player swap",
+    "in_point": 5212.4,
+    "out_point": 5265.0,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/17_1h26m52s_valin-as-an-igl-move-to-mibr-and-a-p.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.48 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 3715206,
+      "duration": 52.6,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.48,
+      "true_peak": -6.46,
+      "lra": 11.8,
+      "silences": [
+        [
+          1.789274,
+          6.238821
+        ],
+        [
+          7.690045,
+          17.589841
+        ],
+        [
+          18.995986,
+          20.558027
+        ],
+        [
+          22.371587,
+          23.862472
+        ],
+        [
+          26.659592,
+          28.24229
+        ],
+        [
+          28.752132,
+          29.065782
+        ],
+        [
+          31.043447,
+          31.321111
+        ],
+        [
+          31.918095,
+          32.532222
+        ],
+        [
+          34.203356,
+          40.074671
+        ],
+        [
+          40.632336,
+          41.219705
+        ],
+        [
+          43.330159,
+          43.902177
+        ],
+        [
+          44.481519,
+          49.082018
+        ],
+        [
+          49.730068,
+          52.509728
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 18,
+    "subject": "Team-by-team rundown of how the new rosters look",
+    "in_point": 3892.1,
+    "out_point": 3969.6,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/18_1h04m52s_team-by-team-rundown-of-how-the-new.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.72 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 6028306,
+      "duration": 77.5,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.72,
+      "true_peak": -6.19,
+      "lra": 8.1,
+      "silences": [
+        [
+          2.850363,
+          3.356508
+        ],
+        [
+          5.406893,
+          6.176939
+        ],
+        [
+          10.02381,
+          10.81034
+        ],
+        [
+          13.359229,
+          14.502971
+        ],
+        [
+          15.537188,
+          16.900317
+        ],
+        [
+          17.512517,
+          18.70127
+        ],
+        [
+          20.198005,
+          20.882993
+        ],
+        [
+          22.46839,
+          22.901905
+        ],
+        [
+          23.739637,
+          24.997551
+        ],
+        [
+          29.468912,
+          30.062857
+        ],
+        [
+          31.744603,
+          32.517392
+        ],
+        [
+          33.193039,
+          34.472834
+        ],
+        [
+          35.750091,
+          35.957528
+        ],
+        [
+          38.762494,
+          39.460907
+        ],
+        [
+          40.606463,
+          40.826712
+        ],
+        [
+          42.452472,
+          42.744943
+        ],
+        [
+          43.720975,
+          44.755057
+        ],
+        [
+          45.517166,
+          45.988231
+        ],
+        [
+          49.831202,
+          50.162698
+        ],
+        [
+          51.768209,
+          52.086803
+        ],
+        [
+          52.684717,
+          53.660975
+        ],
+        [
+          54.110431,
+          55.800612
+        ],
+        [
+          56.863129,
+          60.30093
+        ],
+        [
+          62.191066,
+          62.438186
+        ],
+        [
+          63.318889,
+          67.98619
+        ],
+        [
+          70.483016,
+          75.529456
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 19,
+    "subject": "Speaker wants a cap on a rich org like LOUD stacking top free agents like neon",
+    "in_point": 2568.4,
+    "out_point": 2628.8,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/19_0h42m48s_speaker-wants-a-cap-on-a-rich-org-li.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-20.29 LUFS is outside the house band -16.0 to -10.5",
+      "opens on 0.43s of silence \u2014 buries the hook"
+    ],
+    "measured": {
+      "size_bytes": 4762288,
+      "duration": 60.4,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -20.29,
+      "true_peak": -6.72,
+      "lra": 5.9,
+      "silences": [
+        [
+          0.0,
+          0.429728
+        ],
+        [
+          1.979229,
+          2.485193
+        ],
+        [
+          5.79678,
+          15.056984
+        ],
+        [
+          17.136009,
+          18.271746
+        ],
+        [
+          18.724558,
+          19.237732
+        ],
+        [
+          21.226395,
+          21.917392
+        ],
+        [
+          22.748163,
+          29.738662
+        ],
+        [
+          31.640045,
+          31.877732
+        ],
+        [
+          32.483787,
+          33.178345
+        ],
+        [
+          37.318095,
+          37.518707
+        ],
+        [
+          38.356508,
+          38.739841
+        ],
+        [
+          40.481202,
+          40.787732
+        ],
+        [
+          40.836009,
+          41.261451
+        ],
+        [
+          42.806984,
+          44.071701
+        ],
+        [
+          44.59873,
+          49.060454
+        ],
+        [
+          50.655873,
+          51.402404
+        ],
+        [
+          52.429592,
+          52.674354
+        ],
+        [
+          54.836009,
+          55.153741
+        ],
+        [
+          56.1239,
+          56.632381
+        ],
+        [
+          57.699229,
+          58.140476
+        ],
+        [
+          60.150748,
+          60.4
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 20,
+    "subject": "Where the big teamless players (Second, Knights, Demon1, Oxy) land, and how stacked the Americas are",
+    "in_point": 2713.5,
+    "out_point": 2788.2,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/20_0h45m13s_where-the-big-teamless-players-secon.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.23 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 5936443,
+      "duration": 74.7,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.23,
+      "true_peak": -6.67,
+      "lra": 7.8,
+      "silences": [
+        [
+          1.479433,
+          6.552154
+        ],
+        [
+          8.234104,
+          22.239206
+        ],
+        [
+          22.512358,
+          25.55576
+        ],
+        [
+          27.109025,
+          27.391383
+        ],
+        [
+          28.780204,
+          29.831179
+        ],
+        [
+          30.833152,
+          38.672268
+        ],
+        [
+          45.739841,
+          46.042562
+        ],
+        [
+          48.069637,
+          49.091202
+        ],
+        [
+          50.352063,
+          51.355964
+        ],
+        [
+          53.904989,
+          54.165374
+        ],
+        [
+          55.705692,
+          60.488571
+        ],
+        [
+          62.603605,
+          63.068526
+        ],
+        [
+          64.463424,
+          68.590522
+        ],
+        [
+          70.316689,
+          72.798503
+        ],
+        [
+          74.242086,
+          74.7
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 21,
+    "subject": "Roster speculation: where Second goes from MIBR and whether Oxy, Second and Redox fit together",
+    "in_point": 2318.0,
+    "out_point": 2389.7,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/21_0h38m38s_roster-speculation-where-second-goes.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-20.20 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 6012240,
+      "duration": 71.7,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -20.2,
+      "true_peak": -6.2,
+      "lra": 6.3,
+      "silences": [
+        [
+          2.479569,
+          3.518345
+        ],
+        [
+          4.35093,
+          5.78966
+        ],
+        [
+          6.205306,
+          8.621202
+        ],
+        [
+          11.143764,
+          15.140317
+        ],
+        [
+          16.220884,
+          31.197664
+        ],
+        [
+          34.813129,
+          35.184807
+        ],
+        [
+          36.316712,
+          36.627007
+        ],
+        [
+          37.541451,
+          48.119683
+        ],
+        [
+          49.76966,
+          50.100385
+        ],
+        [
+          51.223152,
+          52.241678
+        ],
+        [
+          53.296825,
+          53.543424
+        ],
+        [
+          55.340454,
+          56.701451
+        ],
+        [
+          60.982653,
+          61.38263
+        ],
+        [
+          62.601179,
+          62.955669
+        ],
+        [
+          65.002698,
+          66.326576
+        ],
+        [
+          69.866054,
+          70.530476
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 22,
+    "subject": "Defending the open qualifier system and arguing that players spoiled by franchise pay are the ones complaining",
+    "in_point": 1694.4,
+    "out_point": 1856.3,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/22_0h28m14s_defending-the-open-qualifier-system.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-18.36 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 14530509,
+      "duration": 161.9,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -18.36,
+      "true_peak": -6.13,
+      "lra": 6.3,
+      "silences": [
+        [
+          0.0,
+          0.327234
+        ],
+        [
+          1.077755,
+          3.026916
+        ],
+        [
+          5.594535,
+          5.899093
+        ],
+        [
+          7.029501,
+          7.535782
+        ],
+        [
+          8.693311,
+          9.709796
+        ],
+        [
+          12.26102,
+          13.542585
+        ],
+        [
+          16.330771,
+          16.836077
+        ],
+        [
+          17.464989,
+          20.881769
+        ],
+        [
+          29.778503,
+          30.6839
+        ],
+        [
+          32.021678,
+          32.665873
+        ],
+        [
+          33.23771,
+          33.469887
+        ],
+        [
+          34.735057,
+          36.263197
+        ],
+        [
+          37.231882,
+          39.405986
+        ],
+        [
+          41.290045,
+          42.497506
+        ],
+        [
+          42.919796,
+          43.342449
+        ],
+        [
+          46.387687,
+          46.677778
+        ],
+        [
+          47.664286,
+          48.570181
+        ],
+        [
+          53.829274,
+          54.387528
+        ],
+        [
+          55.812245,
+          56.62805
+        ],
+        [
+          59.832857,
+          61.399206
+        ],
+        [
+          62.926349,
+          63.534467
+        ],
+        [
+          64.500907,
+          71.996463
+        ],
+        [
+          73.811451,
+          74.555964
+        ],
+        [
+          80.08483,
+          81.499274
+        ],
+        [
+          83.058141,
+          86.724649
+        ],
+        [
+          87.772086,
+          95.084286
+        ],
+        [
+          95.731655,
+          98.783492
+        ],
+        [
+          100.497302,
+          101.169274
+        ],
+        [
+          110.48449,
+          110.840181
+        ],
+        [
+          113.080408,
+          113.417279
+        ],
+        [
+          118.037914,
+          118.239796
+        ],
+        [
+          125.28873,
+          126.397211
+        ],
+        [
+          129.633469,
+          140.33771
+        ],
+        [
+          140.399274,
+          141.400023
+        ],
+        [
+          141.420726,
+          144.120907
+        ],
+        [
+          146.324444,
+          149.754036
+        ],
+        [
+          154.532812,
+          154.855238
+        ],
+        [
+          157.342245,
+          158.020113
+        ],
+        [
+          161.453356,
+          161.803197
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 23,
+    "subject": "Players who missed out on the league can just grind open qualifiers and orgs will pick them up",
+    "in_point": 929.5,
+    "out_point": 1036.0,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/23_0h15m29s_players-who-missed-out-on-the-league.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-18.88 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 10114805,
+      "duration": 106.5,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -18.88,
+      "true_peak": -5.62,
+      "lra": 3.0,
+      "silences": [
+        [
+          5.297256,
+          5.506848
+        ],
+        [
+          6.825737,
+          7.036077
+        ],
+        [
+          9.051587,
+          9.483061
+        ],
+        [
+          11.026621,
+          11.24102
+        ],
+        [
+          14.903175,
+          15.365125
+        ],
+        [
+          17.949524,
+          18.303492
+        ],
+        [
+          20.981406,
+          21.293447
+        ],
+        [
+          24.79059,
+          25.993832
+        ],
+        [
+          30.111814,
+          30.541701
+        ],
+        [
+          37.04449,
+          39.474512
+        ],
+        [
+          40.18288,
+          46.441111
+        ],
+        [
+          47.010045,
+          47.624785
+        ],
+        [
+          56.290204,
+          56.903923
+        ],
+        [
+          59.749887,
+          61.548481
+        ],
+        [
+          63.807302,
+          64.214626
+        ],
+        [
+          70.18966,
+          70.429161
+        ],
+        [
+          70.871723,
+          71.203016
+        ],
+        [
+          77.336077,
+          78.319184
+        ],
+        [
+          85.741293,
+          86.082132
+        ],
+        [
+          91.888549,
+          92.868662
+        ],
+        [
+          94.859501,
+          95.517188
+        ],
+        [
+          97.484898,
+          97.810499
+        ],
+        [
+          98.696349,
+          99.207143
+        ],
+        [
+          100.745918,
+          100.961179
+        ],
+        [
+          101.977098,
+          102.326327
+        ],
+        [
+          106.159932,
+          106.407211
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 24,
+    "subject": "Open qualifiers are overblown as a controversy, though the turnaround time is a fair complaint",
+    "in_point": 1283.7,
+    "out_point": 1401.2,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/24_0h21m23s_open-qualifiers-are-overblown-as-a-c.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.25 LUFS is outside the house band -16.0 to -10.5",
+      "ends on 3.97s of silence"
+    ],
+    "measured": {
+      "size_bytes": 10623290,
+      "duration": 117.5,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.25,
+      "true_peak": -5.4,
+      "lra": 5.2,
+      "silences": [
+        [
+          4.04932,
+          5.3878
+        ],
+        [
+          7.767528,
+          8.527256
+        ],
+        [
+          10.105125,
+          11.240544
+        ],
+        [
+          12.076531,
+          12.744853
+        ],
+        [
+          13.850703,
+          14.355306
+        ],
+        [
+          18.768934,
+          19.909365
+        ],
+        [
+          22.037075,
+          27.889206
+        ],
+        [
+          36.380181,
+          36.88127
+        ],
+        [
+          37.812018,
+          38.410658
+        ],
+        [
+          39.757211,
+          42.321293
+        ],
+        [
+          43.087279,
+          43.615828
+        ],
+        [
+          45.38619,
+          46.581837
+        ],
+        [
+          53.51873,
+          54.519388
+        ],
+        [
+          59.314853,
+          59.930544
+        ],
+        [
+          61.504308,
+          62.159388
+        ],
+        [
+          62.529864,
+          62.949297
+        ],
+        [
+          63.590227,
+          64.806213
+        ],
+        [
+          68.636735,
+          69.174875
+        ],
+        [
+          70.404512,
+          70.824853
+        ],
+        [
+          72.746077,
+          73.627166
+        ],
+        [
+          73.998118,
+          89.653107
+        ],
+        [
+          92.263628,
+          93.423016
+        ],
+        [
+          97.004535,
+          97.658662
+        ],
+        [
+          98.281247,
+          99.216054
+        ],
+        [
+          101.185896,
+          101.695873
+        ],
+        [
+          103.532608,
+          103.74941
+        ],
+        [
+          106.008594,
+          106.402517
+        ],
+        [
+          108.565601,
+          109.339524
+        ],
+        [
+          109.660431,
+          110.107188
+        ],
+        [
+          113.527619,
+          117.5
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 25,
+    "subject": "Rant against players complaining about unpaid months in the open circuit",
+    "in_point": 4366.1,
+    "out_point": 4475.3,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/25_1h12m46s_rant-against-players-complaining-abo.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.79 LUFS is outside the house band -16.0 to -10.5",
+      "opens on 4.70s of silence \u2014 buries the hook"
+    ],
+    "measured": {
+      "size_bytes": 9071571,
+      "duration": 109.2,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.79,
+      "true_peak": -6.66,
+      "lra": 6.1,
+      "silences": [
+        [
+          0.0,
+          4.701247
+        ],
+        [
+          12.06,
+          12.320454
+        ],
+        [
+          13.42483,
+          14.118844
+        ],
+        [
+          23.568798,
+          25.349093
+        ],
+        [
+          26.373628,
+          29.255873
+        ],
+        [
+          29.922154,
+          41.434376
+        ],
+        [
+          41.476168,
+          47.75542
+        ],
+        [
+          55.386848,
+          55.888027
+        ],
+        [
+          58.324921,
+          60.489909
+        ],
+        [
+          61.937959,
+          62.299048
+        ],
+        [
+          62.876327,
+          63.983152
+        ],
+        [
+          65.200748,
+          69.502721
+        ],
+        [
+          71.374059,
+          72.078367
+        ],
+        [
+          72.42771,
+          72.947029
+        ],
+        [
+          75.021542,
+          75.434331
+        ],
+        [
+          87.987166,
+          88.19322
+        ],
+        [
+          90.243673,
+          91.185011
+        ],
+        [
+          92.420499,
+          93.340408
+        ],
+        [
+          95.309932,
+          96.258571
+        ],
+        [
+          98.161814,
+          98.556372
+        ],
+        [
+          105.730794,
+          106.171678
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 26,
+    "subject": "MIBR's roster falling apart after a year of near-misses",
+    "in_point": 2663.8,
+    "out_point": 2702.6,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/26_0h44m23s_mibr-s-roster-falling-apart-after-a.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.30 LUFS is outside the house band -16.0 to -10.5",
+      "opens on 0.40s of silence \u2014 buries the hook",
+      "ends on 1.99s of silence"
+    ],
+    "measured": {
+      "size_bytes": 3946433,
+      "duration": 38.8,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.3,
+      "true_peak": -5.73,
+      "lra": 9.6,
+      "silences": [
+        [
+          0.0,
+          0.404989
+        ],
+        [
+          3.502971,
+          6.43966
+        ],
+        [
+          11.268118,
+          11.847642
+        ],
+        [
+          13.203696,
+          13.65195
+        ],
+        [
+          15.872721,
+          23.337823
+        ],
+        [
+          26.993878,
+          27.234308
+        ],
+        [
+          30.331678,
+          30.818005
+        ],
+        [
+          30.894444,
+          31.605057
+        ],
+        [
+          35.260363,
+          35.913016
+        ],
+        [
+          36.809909,
+          38.8
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 27,
+    "subject": "Defending the open-qualifier circuit format with his own come-up stories",
+    "in_point": 1958.0,
+    "out_point": 2081.5,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/27_0h32m38s_defending-the-open-qualifier-circuit.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.28 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 10361517,
+      "duration": 123.5,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.28,
+      "true_peak": -6.4,
+      "lra": 4.7,
+      "silences": [
+        [
+          0.0,
+          0.288503
+        ],
+        [
+          7.400884,
+          7.692177
+        ],
+        [
+          9.371293,
+          9.770635
+        ],
+        [
+          10.283991,
+          11.01907
+        ],
+        [
+          13.76966,
+          14.0278
+        ],
+        [
+          16.510295,
+          16.747234
+        ],
+        [
+          17.567392,
+          18.11381
+        ],
+        [
+          19.622358,
+          20.280068
+        ],
+        [
+          22.050159,
+          22.328571
+        ],
+        [
+          29.44932,
+          29.826417
+        ],
+        [
+          32.049615,
+          33.827619
+        ],
+        [
+          35.703197,
+          36.247914
+        ],
+        [
+          37.796961,
+          38.044036
+        ],
+        [
+          38.958481,
+          40.182472
+        ],
+        [
+          43.390499,
+          47.223787
+        ],
+        [
+          48.285125,
+          50.385283
+        ],
+        [
+          56.3639,
+          56.642426
+        ],
+        [
+          57.391723,
+          57.934263
+        ],
+        [
+          58.876644,
+          59.379184
+        ],
+        [
+          61.956644,
+          63.562494
+        ],
+        [
+          64.746349,
+          67.831224
+        ],
+        [
+          81.059524,
+          81.328639
+        ],
+        [
+          82.658844,
+          83.0178
+        ],
+        [
+          83.53288,
+          86.886893
+        ],
+        [
+          88.194422,
+          100.598299
+        ],
+        [
+          100.64424,
+          100.856531
+        ],
+        [
+          102.028844,
+          109.076621
+        ],
+        [
+          112.235374,
+          112.627937
+        ],
+        [
+          116.299819,
+          118.15449
+        ],
+        [
+          121.58517,
+          121.973197
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 28,
+    "subject": "Streamer's read on the new Valorant agent: too much support util to be a solo duelist",
+    "in_point": 5032.4,
+    "out_point": 5085.2,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/28_1h23m52s_streamer-s-read-on-the-new-valorant.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.45 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 3932128,
+      "duration": 52.8,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.45,
+      "true_peak": -6.66,
+      "lra": 6.8,
+      "silences": [
+        [
+          0.332063,
+          1.69093
+        ],
+        [
+          2.363016,
+          6.989388
+        ],
+        [
+          9.934739,
+          10.257642
+        ],
+        [
+          12.357982,
+          12.603447
+        ],
+        [
+          15.262744,
+          15.652018
+        ],
+        [
+          16.4878,
+          17.567846
+        ],
+        [
+          19.880045,
+          20.142812
+        ],
+        [
+          22.363991,
+          22.816304
+        ],
+        [
+          25.135034,
+          26.106077
+        ],
+        [
+          27.787347,
+          28.444785
+        ],
+        [
+          28.991814,
+          31.250907
+        ],
+        [
+          32.918844,
+          33.1561
+        ],
+        [
+          33.799841,
+          34.706848
+        ],
+        [
+          35.292426,
+          36.503673
+        ],
+        [
+          37.870998,
+          38.802925
+        ],
+        [
+          39.705215,
+          40.960839
+        ],
+        [
+          42.183923,
+          42.427642
+        ],
+        [
+          46.877596,
+          47.518073
+        ],
+        [
+          48.151111,
+          48.491542
+        ],
+        [
+          51.479365,
+          51.934218
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 29,
+    "subject": "Streamer announces he'll livestream while coaching, with chat off and a delay",
+    "in_point": 3424.2,
+    "out_point": 3514.7,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/29_0h57m04s_streamer-announces-he-ll-livestream.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.48 LUFS is outside the house band -16.0 to -10.5",
+      "opens on 0.63s of silence \u2014 buries the hook"
+    ],
+    "measured": {
+      "size_bytes": 8390312,
+      "duration": 90.5,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.48,
+      "true_peak": -6.79,
+      "lra": 7.7,
+      "silences": [
+        [
+          0.0,
+          0.63254
+        ],
+        [
+          0.897914,
+          1.291769
+        ],
+        [
+          1.421088,
+          7.591247
+        ],
+        [
+          10.284195,
+          10.589864
+        ],
+        [
+          13.947438,
+          14.406485
+        ],
+        [
+          20.149365,
+          20.371565
+        ],
+        [
+          22.958277,
+          25.042721
+        ],
+        [
+          25.543379,
+          25.872902
+        ],
+        [
+          27.261927,
+          33.869728
+        ],
+        [
+          38.93907,
+          39.450907
+        ],
+        [
+          40.744399,
+          40.966236
+        ],
+        [
+          41.557438,
+          43.201224
+        ],
+        [
+          44.294195,
+          45.940227
+        ],
+        [
+          46.970839,
+          47.216032
+        ],
+        [
+          51.459819,
+          51.828617
+        ],
+        [
+          53.187098,
+          53.436916
+        ],
+        [
+          56.472925,
+          56.734649
+        ],
+        [
+          57.688639,
+          57.95424
+        ],
+        [
+          59.544286,
+          62.087823
+        ],
+        [
+          62.20576,
+          66.936463
+        ],
+        [
+          67.084286,
+          70.89712
+        ],
+        [
+          73.659615,
+          75.129751
+        ],
+        [
+          76.792789,
+          77.266599
+        ],
+        [
+          77.603492,
+          79.473673
+        ],
+        [
+          82.081837,
+          82.78907
+        ],
+        [
+          84.588322,
+          85.314218
+        ],
+        [
+          87.0039,
+          87.531066
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 30,
+    "subject": "Why building your own roster through open qualifiers beats joining a partner team",
+    "in_point": 4261.1,
+    "out_point": 4314.7,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/30_1h11m01s_why-building-your-own-roster-through.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.35 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 4401787,
+      "duration": 53.6,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.35,
+      "true_peak": -5.71,
+      "lra": 4.0,
+      "silences": [
+        [
+          0.0,
+          0.240023
+        ],
+        [
+          1.973764,
+          2.368549
+        ],
+        [
+          9.637392,
+          10.378458
+        ],
+        [
+          12.485714,
+          12.810363
+        ],
+        [
+          13.906236,
+          14.951723
+        ],
+        [
+          18.598503,
+          18.81381
+        ],
+        [
+          20.305986,
+          21.041224
+        ],
+        [
+          21.541701,
+          22.689751
+        ],
+        [
+          26.863673,
+          27.168798
+        ],
+        [
+          28.761338,
+          29.289048
+        ],
+        [
+          30.746848,
+          31.12381
+        ],
+        [
+          31.747574,
+          33.334036
+        ],
+        [
+          35.491111,
+          36.025828
+        ],
+        [
+          37.772313,
+          38.1822
+        ],
+        [
+          40.303787,
+          40.532109
+        ],
+        [
+          42.166848,
+          42.602925
+        ],
+        [
+          43.18195,
+          43.545918
+        ],
+        [
+          44.772041,
+          45.098435
+        ],
+        [
+          49.380544,
+          50.273787
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 31,
+    "subject": "What his stream team would do in the open qualifier, and the pressure of the lineup",
+    "in_point": 4627.0,
+    "out_point": 4693.7,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/31_1h17m07s_what-his-stream-team-would-do-in-the.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-20.12 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 5140557,
+      "duration": 66.7,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -20.12,
+      "true_peak": -6.55,
+      "lra": 13.1,
+      "silences": [
+        [
+          0.825941,
+          1.248322
+        ],
+        [
+          4.127098,
+          4.436961
+        ],
+        [
+          7.929705,
+          8.476485
+        ],
+        [
+          9.203968,
+          9.986417
+        ],
+        [
+          11.608345,
+          12.271655
+        ],
+        [
+          14.260023,
+          15.705737
+        ],
+        [
+          20.73644,
+          21.115941
+        ],
+        [
+          21.953243,
+          41.432358
+        ],
+        [
+          45.454014,
+          46.438299
+        ],
+        [
+          47.599138,
+          49.757007
+        ],
+        [
+          52.45746,
+          56.369977
+        ],
+        [
+          59.002177,
+          59.915351
+        ],
+        [
+          60.622812,
+          66.585193
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 32,
+    "subject": "Whether released franchise players like Valin get hurt by the new system",
+    "in_point": 1155.0,
+    "out_point": 1216.7,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/32_0h19m15s_whether-released-franchise-players-l.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.62 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 4953559,
+      "duration": 61.7,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.62,
+      "true_peak": -6.27,
+      "lra": 4.1,
+      "silences": [
+        [
+          0.0,
+          0.255624
+        ],
+        [
+          15.359048,
+          15.805397
+        ],
+        [
+          17.098186,
+          17.377098
+        ],
+        [
+          33.084308,
+          34.059161
+        ],
+        [
+          35.570544,
+          51.10449
+        ],
+        [
+          53.999773,
+          54.339342
+        ],
+        [
+          54.427075,
+          54.970068
+        ],
+        [
+          58.377687,
+          58.896122
+        ],
+        [
+          60.307347,
+          61.7
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 33,
+    "subject": "Who missed out on Valorant partnership and whether being non-partnered is actually better",
+    "in_point": 1512.4,
+    "out_point": 1678.8,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/33_0h25m12s_who-missed-out-on-valorant-partnersh.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.43 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 13735095,
+      "duration": 166.4,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.43,
+      "true_peak": -5.4,
+      "lra": 7.6,
+      "silences": [
+        [
+          1.135624,
+          3.289683
+        ],
+        [
+          3.455057,
+          4.542585
+        ],
+        [
+          12.362222,
+          12.64127
+        ],
+        [
+          18.577868,
+          18.84746
+        ],
+        [
+          20.987075,
+          21.60356
+        ],
+        [
+          25.002313,
+          25.737256
+        ],
+        [
+          26.450522,
+          26.707778
+        ],
+        [
+          26.852358,
+          27.400204
+        ],
+        [
+          27.668231,
+          30.026077
+        ],
+        [
+          30.168912,
+          30.468866
+        ],
+        [
+          35.39415,
+          35.687982
+        ],
+        [
+          36.275079,
+          51.743107
+        ],
+        [
+          54.227914,
+          54.429116
+        ],
+        [
+          55.587868,
+          56.459955
+        ],
+        [
+          58.145805,
+          59.76517
+        ],
+        [
+          61.677052,
+          66.885306
+        ],
+        [
+          66.904444,
+          70.995374
+        ],
+        [
+          71.741655,
+          74.179388
+        ],
+        [
+          75.68678,
+          77.177302
+        ],
+        [
+          77.915351,
+          82.007891
+        ],
+        [
+          90.699841,
+          90.926757
+        ],
+        [
+          94.499615,
+          95.73585
+        ],
+        [
+          95.847959,
+          97.169206
+        ],
+        [
+          99.571247,
+          101.359819
+        ],
+        [
+          102.348005,
+          104.326485
+        ],
+        [
+          107.438798,
+          108.687143
+        ],
+        [
+          109.608526,
+          117.23356
+        ],
+        [
+          117.991315,
+          119.999138
+        ],
+        [
+          124.261315,
+          129.675283
+        ],
+        [
+          129.73093,
+          132.930454
+        ],
+        [
+          136.250522,
+          136.507551
+        ],
+        [
+          138.90415,
+          139.214014
+        ],
+        [
+          141.099637,
+          141.651814
+        ],
+        [
+          143.404036,
+          144.167007
+        ],
+        [
+          151.363515,
+          151.961315
+        ],
+        [
+          153.394218,
+          154.005805
+        ],
+        [
+          158.323447,
+          159.003129
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 34,
+    "subject": "Is the open qualifier turnaround too short for roster building after Champs?",
+    "in_point": 1373.3,
+    "out_point": 1485.5,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/34_0h22m53s_is-the-open-qualifier-turnaround-too.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.29 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 9843613,
+      "duration": 112.2,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.29,
+      "true_peak": -6.12,
+      "lra": 10.1,
+      "silences": [
+        [
+          2.663628,
+          3.823016
+        ],
+        [
+          7.404535,
+          8.058617
+        ],
+        [
+          8.681247,
+          9.616077
+        ],
+        [
+          11.585896,
+          12.09585
+        ],
+        [
+          13.932608,
+          14.149365
+        ],
+        [
+          16.408594,
+          16.802517
+        ],
+        [
+          18.965601,
+          19.739524
+        ],
+        [
+          20.062834,
+          20.507166
+        ],
+        [
+          23.927619,
+          28.038571
+        ],
+        [
+          29.409456,
+          29.656531
+        ],
+        [
+          30.261179,
+          35.1278
+        ],
+        [
+          35.534467,
+          36.103492
+        ],
+        [
+          37.745918,
+          39.531043
+        ],
+        [
+          45.273447,
+          45.771338
+        ],
+        [
+          48.037098,
+          48.309433
+        ],
+        [
+          52.767302,
+          53.380431
+        ],
+        [
+          53.849841,
+          54.223651
+        ],
+        [
+          55.107846,
+          56.003356
+        ],
+        [
+          56.040499,
+          56.272971
+        ],
+        [
+          56.873197,
+          57.234875
+        ],
+        [
+          60.530884,
+          60.84712
+        ],
+        [
+          63.769501,
+          66.778299
+        ],
+        [
+          67.548435,
+          68.027143
+        ],
+        [
+          75.945578,
+          76.347937
+        ],
+        [
+          77.901429,
+          79.251111
+        ],
+        [
+          79.57517,
+          80.185964
+        ],
+        [
+          85.229751,
+          85.461429
+        ],
+        [
+          86.009615,
+          86.797211
+        ],
+        [
+          87.138481,
+          97.7278
+        ],
+        [
+          101.505238,
+          104.741111
+        ],
+        [
+          105.121655,
+          106.529592
+        ],
+        [
+          107.511043,
+          108.223832
+        ],
+        [
+          109.802971,
+          111.621678
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 35,
+    "subject": "Streamer shoots down the idea of reuniting old Optic",
+    "in_point": 5380.1,
+    "out_point": 5424.8,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/35_1h29m40s_streamer-shoots-down-the-idea-of-reu.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.80 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 3443884,
+      "duration": 44.7,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.8,
+      "true_peak": -6.08,
+      "lra": 7.4,
+      "silences": [
+        [
+          2.594036,
+          2.946576
+        ],
+        [
+          4.745283,
+          21.854762
+        ],
+        [
+          23.565828,
+          24.547619
+        ],
+        [
+          24.604082,
+          24.875941
+        ],
+        [
+          31.435397,
+          32.165624
+        ],
+        [
+          32.94644,
+          33.672313
+        ],
+        [
+          34.447256,
+          39.855079
+        ],
+        [
+          43.297891,
+          43.926689
+        ],
+        [
+          44.406213,
+          44.7
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 36,
+    "subject": "Whether Virus gets signed again",
+    "in_point": 4169.5,
+    "out_point": 4206.1,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/36_1h09m29s_whether-virus-gets-signed-again.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.72 LUFS is outside the house band -16.0 to -10.5",
+      "opens on 0.45s of silence \u2014 buries the hook"
+    ],
+    "measured": {
+      "size_bytes": 3196826,
+      "duration": 36.6,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.72,
+      "true_peak": -6.54,
+      "lra": 3.6,
+      "silences": [
+        [
+          0.0,
+          0.449569
+        ],
+        [
+          5.398821,
+          6.181633
+        ],
+        [
+          7.063129,
+          7.300385
+        ],
+        [
+          7.663016,
+          8.765669
+        ],
+        [
+          10.2122,
+          10.613152
+        ],
+        [
+          12.051723,
+          12.721542
+        ],
+        [
+          13.533515,
+          14.338753
+        ],
+        [
+          15.777914,
+          16.2122
+        ],
+        [
+          16.798821,
+          17.362494
+        ],
+        [
+          20.906735,
+          21.245397
+        ],
+        [
+          21.71127,
+          22.310862
+        ],
+        [
+          23.559728,
+          25.074694
+        ],
+        [
+          28.433832,
+          28.941882
+        ],
+        [
+          31.169478,
+          33.904762
+        ],
+        [
+          36.218141,
+          36.6
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 37,
+    "subject": "Teasing his own team's roster and announcement timing",
+    "in_point": 4206.1,
+    "out_point": 4251.6,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/37_1h10m06s_teasing-his-own-team-s-roster-and-an.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-20.23 LUFS is outside the house band -16.0 to -10.5",
+      "opens on 7.22s of silence \u2014 buries the hook"
+    ],
+    "measured": {
+      "size_bytes": 3448779,
+      "duration": 45.5,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -20.23,
+      "true_peak": -5.6,
+      "lra": 11.5,
+      "silences": [
+        [
+          0.0,
+          7.216644
+        ],
+        [
+          7.662222,
+          10.034717
+        ],
+        [
+          14.391429,
+          14.87102
+        ],
+        [
+          18.51941,
+          20.241383
+        ],
+        [
+          21.511247,
+          36.769705
+        ],
+        [
+          37.837098,
+          38.043719
+        ],
+        [
+          38.238481,
+          38.86449
+        ],
+        [
+          41.454853,
+          43.418934
+        ],
+        [
+          43.612857,
+          44.271837
+        ],
+        [
+          45.161519,
+          45.5
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 38,
+    "subject": "Sentinels' rumored rebuilt roster as a super team, compared to Real Madrid",
+    "in_point": 2949.4,
+    "out_point": 3090.7,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/38_0h49m09s_sentinels-rumored-rebuilt-roster-as.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.27 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 10996249,
+      "duration": 141.3,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.27,
+      "true_peak": -6.16,
+      "lra": 8.9,
+      "silences": [
+        [
+          11.518549,
+          11.959252
+        ],
+        [
+          12.680794,
+          14.213333
+        ],
+        [
+          17.730204,
+          19.390544
+        ],
+        [
+          20.720975,
+          21.303696
+        ],
+        [
+          22.408912,
+          28.257914
+        ],
+        [
+          30.46424,
+          38.153696
+        ],
+        [
+          41.855692,
+          42.372358
+        ],
+        [
+          43.175964,
+          47.699501
+        ],
+        [
+          47.760499,
+          53.181655
+        ],
+        [
+          54.154059,
+          63.263197
+        ],
+        [
+          64.266553,
+          64.724104
+        ],
+        [
+          65.200091,
+          65.620771
+        ],
+        [
+          65.953855,
+          72.727029
+        ],
+        [
+          75.009229,
+          75.70619
+        ],
+        [
+          76.685714,
+          77.102993
+        ],
+        [
+          81.198707,
+          81.473016
+        ],
+        [
+          82.183333,
+          82.630998
+        ],
+        [
+          84.016871,
+          85.469705
+        ],
+        [
+          86.782313,
+          96.601497
+        ],
+        [
+          99.883016,
+          100.30517
+        ],
+        [
+          101.09068,
+          101.687029
+        ],
+        [
+          103.921814,
+          105.100794
+        ],
+        [
+          105.874603,
+          106.262336
+        ],
+        [
+          106.52424,
+          107.334376
+        ],
+        [
+          108.02127,
+          108.228277
+        ],
+        [
+          108.562154,
+          109.30771
+        ],
+        [
+          109.819637,
+          111.182336
+        ],
+        [
+          112.455692,
+          112.815828
+        ],
+        [
+          114.652834,
+          115.284399
+        ],
+        [
+          117.010159,
+          117.2139
+        ],
+        [
+          118.618571,
+          119.279819
+        ],
+        [
+          119.840658,
+          120.144649
+        ],
+        [
+          122.889524,
+          126.471633
+        ],
+        [
+          126.919025,
+          127.192449
+        ],
+        [
+          130.502971,
+          140.918458
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 39,
+    "subject": "SR missing out on Riot partnership",
+    "in_point": 3983.1,
+    "out_point": 4033.3,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/39_1h06m23s_sr-missing-out-on-riot-partnership.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-20.02 LUFS is outside the house band -16.0 to -10.5",
+      "opens on 17.63s of silence \u2014 buries the hook"
+    ],
+    "measured": {
+      "size_bytes": 3675928,
+      "duration": 50.2,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -20.02,
+      "true_peak": -6.86,
+      "lra": 7.7,
+      "silences": [
+        [
+          0.0438322,
+          17.670091
+        ],
+        [
+          22.071655,
+          22.532404
+        ],
+        [
+          24.901565,
+          26.444467
+        ],
+        [
+          30.429637,
+          32.787619
+        ],
+        [
+          33.249365,
+          36.658254
+        ],
+        [
+          40.364172,
+          40.870227
+        ],
+        [
+          41.357914,
+          42.263696
+        ],
+        [
+          47.374785,
+          47.824286
+        ],
+        [
+          48.892517,
+          50.192857
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 40,
+    "subject": "Val explains why he is coaching for fun and won't coach full-time",
+    "in_point": 5724.1,
+    "out_point": 5876.6,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/40_1h35m24s_val-explains-why-he-is-coaching-for.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-20.21 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 12981850,
+      "duration": 152.5,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -20.21,
+      "true_peak": -6.43,
+      "lra": 7.8,
+      "silences": [
+        [
+          0.551995,
+          7.645374
+        ],
+        [
+          9.7739,
+          10.029388
+        ],
+        [
+          10.342086,
+          27.36068
+        ],
+        [
+          29.735986,
+          30.117415
+        ],
+        [
+          32.542857,
+          33.009433
+        ],
+        [
+          43.876349,
+          44.345873
+        ],
+        [
+          46.072245,
+          46.321497
+        ],
+        [
+          49.234626,
+          49.475374
+        ],
+        [
+          51.074104,
+          52.894853
+        ],
+        [
+          54.025102,
+          55.445964
+        ],
+        [
+          64.9339,
+          65.689116
+        ],
+        [
+          66.000408,
+          67.138662
+        ],
+        [
+          73.35,
+          75.094082
+        ],
+        [
+          76.040794,
+          81.631247
+        ],
+        [
+          86.268458,
+          86.890952
+        ],
+        [
+          87.4039,
+          88.280998
+        ],
+        [
+          95.979637,
+          96.378095
+        ],
+        [
+          100.592177,
+          100.828798
+        ],
+        [
+          101.628345,
+          106.330635
+        ],
+        [
+          106.379478,
+          106.743356
+        ],
+        [
+          109.222721,
+          111.078685
+        ],
+        [
+          111.768662,
+          123.916871
+        ],
+        [
+          125.011678,
+          125.860023
+        ],
+        [
+          129.287778,
+          129.501406
+        ],
+        [
+          130.679093,
+          131.020816
+        ],
+        [
+          131.334444,
+          131.978231
+        ],
+        [
+          135.713719,
+          135.932766
+        ],
+        [
+          139.487982,
+          140.029615
+        ],
+        [
+          140.534898,
+          142.408707
+        ],
+        [
+          145.814535,
+          149.017415
+        ],
+        [
+          150.238027,
+          151.066644
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 41,
+    "subject": "Would he sponsor a qualifier team? Only as a loan with interest",
+    "in_point": 4537.7,
+    "out_point": 4562.7,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/41_1h15m37s_would-he-sponsor-a-qualifier-team-on.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-20.56 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 2233147,
+      "duration": 25.0,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -20.56,
+      "true_peak": -5.94,
+      "lra": 7.6,
+      "silences": [
+        [
+          3.881179,
+          5.673197
+        ],
+        [
+          5.786395,
+          6.057891
+        ],
+        [
+          8.449977,
+          8.875283
+        ],
+        [
+          10.662358,
+          11.282426
+        ],
+        [
+          13.049206,
+          14.821927
+        ],
+        [
+          15.516939,
+          17.361088
+        ],
+        [
+          18.910272,
+          23.199841
+        ],
+        [
+          24.780862,
+          25.0
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 42,
+    "subject": "Defending the open qualifier circuit format and the need for a solid rule book",
+    "in_point": 2255.5,
+    "out_point": 2302.1,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/42_0h37m35s_defending-the-open-qualifier-circuit.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-18.91 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 4933445,
+      "duration": 46.6,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -18.91,
+      "true_peak": -6.33,
+      "lra": 5.7,
+      "silences": [
+        [
+          1.331451,
+          2.015896
+        ],
+        [
+          3.737392,
+          4.12839
+        ],
+        [
+          5.620454,
+          6.074422
+        ],
+        [
+          7.067392,
+          9.868685
+        ],
+        [
+          13.174082,
+          14.879456
+        ],
+        [
+          15.542608,
+          15.996757
+        ],
+        [
+          19.562222,
+          20.843379
+        ],
+        [
+          25.22542,
+          28.014943
+        ],
+        [
+          36.287642,
+          36.87907
+        ],
+        [
+          38.970227,
+          39.17322
+        ],
+        [
+          40.107732,
+          40.461111
+        ],
+        [
+          43.368957,
+          45.203696
+        ],
+        [
+          46.335397,
+          46.555918
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 43,
+    "subject": "Prediction that Kiko might leave NRG to return to EMEA",
+    "in_point": 2391.2,
+    "out_point": 2416.9,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/43_0h39m51s_prediction-that-kiko-might-leave-nrg.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-20.01 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 2399063,
+      "duration": 25.7,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -20.01,
+      "true_peak": -6.54,
+      "lra": 2.7,
+      "silences": [
+        [
+          1.879093,
+          3.855125
+        ],
+        [
+          8.591202,
+          8.915533
+        ],
+        [
+          9.978163,
+          10.423673
+        ],
+        [
+          10.505918,
+          10.892041
+        ],
+        [
+          17.301859,
+          17.683129
+        ],
+        [
+          18.688095,
+          19.338435
+        ],
+        [
+          22.39678,
+          22.7322
+        ],
+        [
+          23.222789,
+          23.589773
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 44,
+    "subject": "The open qualifier as a pipeline for rookies",
+    "in_point": 4709.5,
+    "out_point": 4742.6,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/44_1h18m29s_the-open-qualifier-as-a-pipeline-for.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.57 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 2520300,
+      "duration": 33.1,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.57,
+      "true_peak": -6.84,
+      "lra": 4.5,
+      "silences": [
+        [
+          0.826689,
+          1.89424
+        ],
+        [
+          5.219297,
+          5.613628
+        ],
+        [
+          10.245714,
+          10.539615
+        ],
+        [
+          15.677596,
+          16.00907
+        ],
+        [
+          17.199478,
+          17.740227
+        ],
+        [
+          22.803832,
+          30.980862
+        ],
+        [
+          32.35644,
+          32.971655
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 45,
+    "subject": "Oxy's reported move to Sun",
+    "in_point": 5146.4,
+    "out_point": 5166.9,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/45_1h25m46s_oxy-s-reported-move-to-sun.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-18.66 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 1754848,
+      "duration": 20.5,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -18.66,
+      "true_peak": -6.38,
+      "lra": 4.5,
+      "silences": [
+        [
+          0.406054,
+          8.868299
+        ],
+        [
+          8.929546,
+          12.170862
+        ],
+        [
+          16.682744,
+          17.143991
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 46,
+    "subject": "Whether Zix could become an assistant coach",
+    "in_point": 5502.8,
+    "out_point": 5537.6,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/46_1h31m42s_whether-zix-could-become-an-assistan.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-20.29 LUFS is outside the house band -16.0 to -10.5",
+      "opens on 0.43s of silence \u2014 buries the hook"
+    ],
+    "measured": {
+      "size_bytes": 2902319,
+      "duration": 34.8,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -20.29,
+      "true_peak": -6.64,
+      "lra": 6.0,
+      "silences": [
+        [
+          0.0,
+          0.432109
+        ],
+        [
+          2.198458,
+          2.440862
+        ],
+        [
+          3.252222,
+          4.445261
+        ],
+        [
+          6.995578,
+          7.47093
+        ],
+        [
+          8.619002,
+          9.141066
+        ],
+        [
+          9.897687,
+          10.204875
+        ],
+        [
+          11.822744,
+          12.306939
+        ],
+        [
+          12.923787,
+          14.059297
+        ],
+        [
+          14.847551,
+          15.134218
+        ],
+        [
+          17.931565,
+          19.095488
+        ],
+        [
+          19.894853,
+          20.21966
+        ],
+        [
+          20.866077,
+          21.780703
+        ],
+        [
+          23.016508,
+          26.236236
+        ],
+        [
+          29.06737,
+          29.59542
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 47,
+    "subject": "Passport worries about the open circuit are overblown; qualifying teams will get sponsors and can sort it out",
+    "in_point": 95.3,
+    "out_point": 205.5,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/47_0h01m35s_passport-worries-about-the-open-circ.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.37 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 10684640,
+      "duration": 110.2,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.37,
+      "true_peak": -6.06,
+      "lra": 6.3,
+      "silences": [
+        [
+          0.0,
+          0.300794
+        ],
+        [
+          0.407483,
+          1.109252
+        ],
+        [
+          1.28551,
+          1.674014
+        ],
+        [
+          1.864626,
+          5.007959
+        ],
+        [
+          8.330272,
+          8.544649
+        ],
+        [
+          10.317687,
+          10.55127
+        ],
+        [
+          17.258254,
+          17.670272
+        ],
+        [
+          19.503515,
+          19.985964
+        ],
+        [
+          21.546531,
+          24.688503
+        ],
+        [
+          26.309615,
+          26.784286
+        ],
+        [
+          28.612721,
+          31.273923
+        ],
+        [
+          34.706712,
+          35.972517
+        ],
+        [
+          36.96746,
+          37.299841
+        ],
+        [
+          37.650907,
+          41.151202
+        ],
+        [
+          43.928707,
+          46.500544
+        ],
+        [
+          47.767075,
+          53.112721
+        ],
+        [
+          59.040181,
+          59.359184
+        ],
+        [
+          59.859297,
+          60.570454
+        ],
+        [
+          62.400522,
+          62.913129
+        ],
+        [
+          67.226667,
+          67.501156
+        ],
+        [
+          69.26254,
+          69.677143
+        ],
+        [
+          70.708118,
+          71.244467
+        ],
+        [
+          78.852426,
+          79.604467
+        ],
+        [
+          80.278277,
+          81.2378
+        ],
+        [
+          86.132426,
+          86.738707
+        ],
+        [
+          88.517528,
+          95.735737
+        ],
+        [
+          96.087846,
+          96.363107
+        ],
+        [
+          96.69619,
+          96.908934
+        ],
+        [
+          99.088299,
+          99.642857
+        ],
+        [
+          101.527302,
+          102.028481
+        ],
+        [
+          103.084875,
+          103.626553
+        ],
+        [
+          106.67059,
+          107.055805
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 48,
+    "subject": "Streamer unsure whether his new team will really try to win",
+    "in_point": 4998.9,
+    "out_point": 5032.4,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/48_1h23m18s_streamer-unsure-whether-his-new-team.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-22.13 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 2393782,
+      "duration": 33.5,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -22.13,
+      "true_peak": -7.17,
+      "lra": 8.7,
+      "silences": [
+        [
+          0.250317,
+          11.46263
+        ],
+        [
+          11.489751,
+          13.459138
+        ],
+        [
+          14.265533,
+          14.528186
+        ],
+        [
+          15.356553,
+          17.778231
+        ],
+        [
+          19.890091,
+          20.132948
+        ],
+        [
+          20.343107,
+          20.928549
+        ],
+        [
+          21.12542,
+          23.134535
+        ],
+        [
+          27.480091,
+          27.689093
+        ],
+        [
+          28.227868,
+          28.983515
+        ],
+        [
+          29.596485,
+          30.365601
+        ],
+        [
+          31.587574,
+          32.102222
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 49,
+    "subject": "Streamer is coaching in the open qualifiers, hiding which team, and will miss most of Worlds Swiss stage",
+    "in_point": 3090.7,
+    "out_point": 3226.3,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/49_0h51m30s_streamer-is-coaching-in-the-open-qua.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-19.27 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 9275492,
+      "duration": 135.6,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -19.27,
+      "true_peak": -5.47,
+      "lra": 7.8,
+      "silences": [
+        [
+          3.600839,
+          3.805896
+        ],
+        [
+          4.6022,
+          4.913129
+        ],
+        [
+          11.99458,
+          12.249819
+        ],
+        [
+          13.636395,
+          13.990113
+        ],
+        [
+          14.534898,
+          15.334626
+        ],
+        [
+          16.537143,
+          17.720385
+        ],
+        [
+          18.691633,
+          24.235669
+        ],
+        [
+          27.204603,
+          27.525805
+        ],
+        [
+          30.775873,
+          43.803651
+        ],
+        [
+          46.278095,
+          47.489138
+        ],
+        [
+          49.942608,
+          50.342608
+        ],
+        [
+          52.837143,
+          53.179705
+        ],
+        [
+          54.549478,
+          66.178299
+        ],
+        [
+          69.027937,
+          69.643968
+        ],
+        [
+          71.879365,
+          73.44356
+        ],
+        [
+          74.527415,
+          80.484989
+        ],
+        [
+          81.275125,
+          84.808367
+        ],
+        [
+          85.380408,
+          86.192177
+        ],
+        [
+          86.81322,
+          88.54966
+        ],
+        [
+          89.613741,
+          90.511678
+        ],
+        [
+          94.333175,
+          94.908367
+        ],
+        [
+          97.133878,
+          97.522222
+        ],
+        [
+          99.424195,
+          110.404354
+        ],
+        [
+          112.159093,
+          112.766327
+        ],
+        [
+          113.545737,
+          115.828617
+        ],
+        [
+          117.579116,
+          118.646372
+        ],
+        [
+          119.529478,
+          121.394376
+        ],
+        [
+          126.032358,
+          127.092245
+        ],
+        [
+          127.527619,
+          128.742585
+        ],
+        [
+          132.155125,
+          133.157778
+        ],
+        [
+          134.119274,
+          134.610703
+        ]
+      ],
+      "blacks": []
+    }
+  },
+  {
+    "rank": 50,
+    "subject": "Tier two players shouldn't wait for org backing; just be good and win open qualifiers",
+    "in_point": 443.9,
+    "out_point": 553.4,
+    "path": "/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/jobs/fns-2905408276/clips_1080/50_0h07m23s_tier-two-players-shouldn-t-wait-for.mp4",
+    "passed": true,
+    "rejected": [],
+    "warnings": [
+      "-18.74 LUFS is outside the house band -16.0 to -10.5"
+    ],
+    "measured": {
+      "size_bytes": 9916995,
+      "duration": 109.5,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.0,
+      "video_codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "sample_rate": 44100,
+      "channels": 2,
+      "lufs": -18.74,
+      "true_peak": -6.24,
+      "lra": 4.6,
+      "silences": [
+        [
+          2.627551,
+          3.026916
+        ],
+        [
+          4.888118,
+          5.472517
+        ],
+        [
+          8.638685,
+          8.851565
+        ],
+        [
+          12.420068,
+          12.718209
+        ],
+        [
+          23.899637,
+          24.322449
+        ],
+        [
+          28.507211,
+          29.735918
+        ],
+        [
+          30.081338,
+          30.761043
+        ],
+        [
+          33.371746,
+          34.795782
+        ],
+        [
+          35.786054,
+          37.327483
+        ],
+        [
+          37.695351,
+          38.492585
+        ],
+        [
+          39.327188,
+          39.775238
+        ],
+        [
+          41.139955,
+          41.998685
+        ],
+        [
+          43.534717,
+          45.11746
+        ],
+        [
+          54.342948,
+          55.110726
+        ],
+        [
+          56.149841,
+          56.6839
+        ],
+        [
+          61.666236,
+          62.951565
+        ],
+        [
+          63.679819,
+          68.787891
+        ],
+        [
+          69.200771,
+          72.27127
+        ],
+        [
+          75.483016,
+          76.21059
+        ],
+        [
+          78.121088,
+          79.576032
+        ],
+        [
+          82.578209,
+          83.430476
+        ],
+        [
+          84.712766,
+          86.3278
+        ],
+        [
+          87.478141,
+          87.950975
+        ],
+        [
+          90.252812,
+          90.652336
+        ],
+        [
+          95.416803,
+          95.942721
+        ],
+        [
+          97.322358,
+          97.867211
+        ],
+        [
+          99.952177,
+          100.168209
+        ],
+        [
+          100.59898,
+          101.153311
+        ],
+        [
+          104.005351,
+          104.359932
+        ],
+        [
+          105.874512,
+          106.153673
+        ]
+      ],
+      "blacks": []
+    }
+  }
+]

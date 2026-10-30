@@ -191,21 +191,22 @@ reference" is, and it is the honest target.
 ## What the first QC run found
 
 All 50 raw clips from FNS VOD 2905408276, measured. None rejected — they are
-raw cuts, so only the container and audio checks apply. Four things fell out:
+raw cuts, so only the container and audio checks apply.
 
-| | measured |
-|---|---|
-| Resolution | **1280×720 on all 50** |
-| Integrated loudness | median **−19.45 LUFS**, range −22.13 to −18.36 |
-| In the house band (−16 to −10.5) | **0 of 50** |
-| True peak | median **−6.30 dBTP**, max −5.40 |
-| Loudness range | 1.50 to 14.00 LU |
-| Opens on ≥0.35s of silence | **13 of 50** |
-| Over 100s | **13 of 50**, max 166.4s |
+| | 720p set | re-cut from 1080p |
+|---|---|---|
+| Resolution | 1280×720 | **1920×1080** |
+| Integrated loudness | median −19.45 LUFS | unchanged (same audio) |
+| In the house band (−16 to −10.5) | 0 of 50 | **0 of 50** |
+| True peak | median −6.30 dBTP | unchanged |
+| Loudness range | 1.50 to 14.00 LU | unchanged |
+| Opens on ≥0.35s of silence | 13 of 50 | **13 of 50** |
+| Over 100s | 13 of 50, max 166.4s | **13 of 50** |
 
-**The source is 720p, not 1080p.** A 1080×1920 master built from it is
-upscaled. Fix the download before the look is signed off, or the hand edit gets
-tuned against softer footage than production will have.
+**The source was 720p.** Fixed: the VOD was re-pulled at 1920×1080@60 (6.28 GB,
+103 min) and all 50 re-cut. The two sets pair exactly — max duration delta
+0.000s, max loudness delta 0.01 LU — so resolution is the only thing that
+changed, and `ingest.fetch` now refuses sub-1080p source so it cannot recur.
 
 **Everything is ~7 dB quiet.** Raw Twitch VOD audio sits around −19.5 LUFS
 against a −12 house target. Every clip George has reviewed so far he reviewed
@@ -213,12 +214,26 @@ quiet. The headroom is there — median true peak −6.30 dBTP means a +7.5 dB l
 does not clip — so this is a normalisation step that simply isn't applied yet,
 not a problem with the material.
 
-**13 of 50 open on silence**, 0.40s to 1.87s. Worth separating from the
-boundary-rule work: this is *mechanically* detectable from the audio, which is
-why five text-based attempts never saw it. It is not the same fault as rule 2
-("include the prompt") — a clip can open on speech and still be missing its
-prompt — but dead air at the in-point is its own defect and now gets caught
-deterministically.
+**13 of 50 open on silence**, and the tail is worse than it first looked:
+
+| clip | dead air at the open | length |
+|---|---|---|
+| 39 — SR missing out on Riot partnership | **17.63s** | 50.2s |
+| 37 — teasing his own team's roster | 7.22s | — |
+| 25 — rant against players complaining about unpaid money | 4.70s | — |
+| 09 — joke outrage at LOUD signing Lev | 4.36s | — |
+
+Clip 39 spends **35% of its runtime silent before anyone speaks.** Verified
+directly against the file, not inferred: `silence_start: 0.04`,
+`silence_end: 17.67`.
+
+Worth separating from the boundary-rule work. This is *mechanically* detectable
+from the audio, which is why five text-based attempts never saw it — they were
+all reading the transcript, where dead air leaves no trace. It is not the same
+fault as rule 2 ("include the prompt"); a clip can open on speech and still be
+missing its prompt. But dead air at the in-point is its own defect, it is
+larger than any of the three faults George caught by hand, and it now gets
+caught deterministically.
 
 **13 of 50 run over 100s.** The known out-point problem, now with a number on
 it. Still no rule from George on where to stop.
