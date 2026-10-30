@@ -109,7 +109,7 @@ in frames at the source rate.
     { "in": 4886.70, "length": 1.6, "asset": "hermes_images/nrg/roster_2026.jpg",
       "push": [1.0, 1.04], "covers_cut": true }
   ],
-  "captions": { "enabled": true, "style": "phrase", "words_per_card": 4, "position_y": 0.55, "max_lines": 2 },
+  "captions": { "enabled": true, "style": "word", "words_per_card": 2, "position_y": 0.44, "max_lines": 1 },
   "audio": { "target_lufs": -14.0, "duck": { "amount_db": 7.0 }, "music": { "bed": "licensed/calm_01.wav", "lufs": -22.0 } },
   "tail_frames": 48,
   "gates": { "passed": true, "warnings": ["'NRG' confirmed in roster.json"], "held": [] },
@@ -117,20 +117,61 @@ in frames at the source rate.
 }
 ```
 
-## Field rules the renderers enforce
+## Field rules
 
-| Field | Rule |
-|---|---|
-| `segments[].speed` | `1.0` during any fight. Dead time `1.6`–`2.2`. Exactly one segment may be `< 1.0`, length ≤ 30 source frames |
-| `segments[].ramp_frames` | `8` unless overridden |
-| `segments[]` boundaries | For `genre: "take"`, must fall on a word boundary |
-| `captions.position_y` | `0.62`–`0.68` for L1/L3; `0.55` for L2 |
-| `captions.style` | `"phrase"` for take, `"word"` allowed for frag |
-| `tail_frames` | `36`–`90` |
-| `hook.device` | one of `cold_open`, `flash_forward`, `none` — never two |
-| `audio.music` | must be `null` for `genre: "frag"` unless explicitly overridden |
-| `range` duration | frag `12`–`35s`, take `18`–`45s` |
-| `source.rights_basis` | must be `explicit`, `affiliate` or `client_owned` |
+Two kinds. **Rejects** are genuine defects — a cut inside a word, audio that
+clips, a flash rate that triggers seizures, footage with no rights basis.
+**Warns** is everything that's a matter of taste, including most of what earlier
+drafts of this file stated as law. `engine/gates.py` is the authority; this
+table tracks it.
+
+| Field | Rule | |
+|---|---|---|
+| `genre` | `frag`, `take`, `receipts` or `hybrid` | rejects |
+| `segments[]` boundaries | For `take` and `receipts`, must land on a word boundary (±0.06s) | rejects |
+| `segments[].speed` | `1.0` during any fight. Dead time `1.6`–`2.2`. At most one segment `< 1.0`, in `0.2`–`0.9`, length ≤ 30 source frames | rejects |
+| `effects[].type: "flash"` | ≤ 3 per second, `intensity` ≤ `0.8` — the WCAG general flash threshold | rejects |
+| `effects[].motivation` | required in practice; an effect that punctuates nothing is decoration | warns |
+| `audio.true_peak_dbtp` | ceiling `-0.1`. R1 clips at `+1.25` — do not copy that | rejects |
+| `source.rights_basis` | `explicit`, `affiliate` or `client_owned` | rejects |
+| `speaker.confidence` | ≥ `0.85`, else attribution holds | rejects |
+| `layout.facecam_source` | a "face" under 2% of frame is a HUD portrait, not a webcam | rejects |
+| `range` duration | absolute `5`–`180s`. Per genre: frag `12`–`35`, take `15`–`50`, receipts `45`–`110`, hybrid `12`–`90` | rejects outside absolute, warns outside genre |
+| `captions.position_y` | advisory bands — L1/L3 `0.60`–`0.70`, L2 `0.40`–`0.76`. Hard checks are the safe area (top 150px, bottom 320px) and the killfeed | warns |
+| `captions.style` | `"word"` is the default — both references use word-level, 1–3 words, changing ~twice a second. `"phrase"` is for quote cards, where the written sentence is the product | warns |
+| `audio.target_lufs` | house default `-12`. References measured `-11.79` and `-14.26`; the accepted band is `-16`–`-10.5` | warns |
+| `segments[].ramp_frames` | `8` unless overridden | warns |
+| `tail_frames` | `36`–`90` | warns |
+| `hook.device` | one of `cold_open`, `flash_forward`, `none` — never two | rejects |
+| `audio.music` | `null` by default. **Neither reference has a music bed** | warns |
+| receipts speech coverage | over 85% warns — the silence in a receipts clip *is* the evidence | warns |
+
+## `effects[]` — the juice layer
+
+In the schema, undocumented until now. Frame-timed visual punctuation, kept
+separate from `segments[]` because an effect does not change what footage plays.
+
+```json
+"effects": [
+  { "type": "zoom_punch", "at": 4892.95, "duration": 0.18, "intensity": 0.55,
+    "ease": "out", "motivation": "the fifth kill lands" },
+  { "type": "shake", "at": 4893.10, "duration": 0.25, "intensity": 0.4,
+    "ease": "out", "motivation": "his chair hits the desk" },
+  { "type": "flash", "at": 4893.45, "duration": 0.08, "intensity": 0.6,
+    "motivation": "cut to the scoreboard" }
+]
+```
+
+`type` is one of `shake`, `flash`, `glow`, `whip_pan`, `zoom_punch`,
+`rgb_split`. `at` is source-relative seconds, like everything else.
+`duration` is `0.02`–`2.0`, `intensity` is `0`–`1`.
+
+`motivation` is the field that matters. It names what in the footage the effect
+punctuates. Nothing enforces that the answer is a good one, but an effect that
+can't fill it in is decoration, and the gate says so. Effect `asset`s carry a
+`rights_basis` like any other source.
+
+Flashes are capped hard: 3 per second, intensity `0.8`. That one rejects.
 
 ## Backends
 
@@ -140,3 +181,8 @@ in frames at the source rate.
   human editor will take over.
 - **`resolve_mcp`** — only for triggering renders, applying grades and driving Fusion.
   Requires Resolve **Studio**. Not needed to build a timeline.
+
+---
+
+See `docs/AUTOMATION-PATH.md` for how a hand-built Resolve edit becomes the
+numbers in this file, and which parts of a hand edit cannot make the trip.
