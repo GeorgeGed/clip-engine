@@ -86,8 +86,11 @@ a reveal, a strong reaction, a real exchange with chat. Not: logistics, \
 scheduling, generic explanation, thinking aloud.
 
 CONSTRAINTS
-- in_point and out_point MUST be timestamps that appear in the supplied \
-utterances. Never invent one.
+- Each line is [start-end]. in_point is the START of the first utterance you \
+include; out_point is the END of the LAST utterance you include. Both MUST be \
+timestamps shown above. Never invent one.
+- Do NOT give the start of the line after your clip. If the clip's last line is \
+[120.4-124.1], out_point is 124.1, not 124.1's successor and not 120.4.
 - Quote setup/claim/consequence verbatim from the transcript, briefly.
 - Names from speech-to-text are often wrong. List any in names_to_verify.
 - If more than one person speaks, say so in risks.
@@ -138,6 +141,63 @@ class Verdict:
         return asdict(self)
 
 
+def _ends(utts: list[dict], *, tail: float = 4.0) -> tuple[list[float], bool]:
+    """End timestamps for every utterance, and whether they are REAL.
+
+    `transcribe.py` keeps a real `end` per utterance; the small-model run that
+    produced jobs/fns-2905408276 kept only starts. The difference decides
+    whether an out-point is ambiguous at all:
+
+      * Real ends sit in the gap BEFORE the next start, so "end of line b" and
+        "start of line c" are different numbers and the model's intent is
+        unambiguous.
+      * Derived ends are the next start, so the two coincide and no snapping
+        can tell "end of b" from "start of c" apart. Then the tie has to be
+        broken by policy.
+
+    Returns (ends, real).
+    """
+    real = all(u.get("end") is not None for u in utts)
+    out: list[float] = []
+    for i, u in enumerate(utts):
+        e = u.get("end")
+        if e is None:
+            e = float(utts[i + 1]["start"]) if i + 1 < len(utts) \
+                else float(u["start"]) + tail
+        out.append(round(float(e), 3))
+    return out, real
+
+
+def _snap_out(t: float | None, starts: list[float], ends: list[float],
+              *, real_ends: bool = False,
+              tol: float = 1.5) -> tuple[float | None, bool]:
+    """Snap an out-point, resolving the off-by-one in favour of INCLUDING.
+
+    The failure this exists for: out-points were snapped to utterance STARTS,
+    so every clip stopped just before the line it named. On clip 8 that cut off
+    "You sacrifice a lot of time and you could just end up with nothing" — the
+    whole point of the clip. Clip 3 proved the model's intent: its stated
+    consequence quoted verbatim the line the cut excluded.
+
+    With `real_ends` the value is unambiguous and is snapped straight to the
+    nearest end. Without them a start and the preceding end are the same
+    instant, so policy breaks the tie: rule 1 says finish the sentence and the
+    observed failure is always stopping short, so a value matching an utterance
+    START is read as "include this utterance" and resolved to that utterance's
+    END. That bias can over-include by one line; stopping short loses the
+    payoff, which is worse.
+    """
+    if t is None:
+        return None, False
+    t = float(t)
+    if not real_ends:
+        for s, e in zip(starts, ends):
+            if abs(s - t) <= 0.05:
+                return e, True
+    near = min(ends, key=lambda x: abs(x - t))
+    return (near, True) if abs(near - t) <= tol else (t, False)
+
+
 def _snap(t: float | None, starts: list[float], tol: float = 1.5) -> tuple[float | None, bool]:
     """Snap a model timestamp to a real utterance boundary, or reject it."""
     if t is None:
@@ -164,7 +224,10 @@ def judge(utterances: list[dict], region: tuple[float, float], *,
     if not inside:
         return [Verdict(False, "none", None, None, why="no transcript in region")]
 
-    lines = "\n".join(f'[{float(u["start"]):.1f}] {u["text"].strip()}' for u in inside)
+    ends, real_ends = _ends(inside)
+    lines = "\n".join(
+        f'[{float(u["start"]):.1f}-{e:.1f}] {u["text"].strip()}'
+        for u, e in zip(inside, ends))
     msg = client.messages.create(
         model=model, max_tokens=4000, system=SYSTEM,
         messages=[{"role": "user", "content":
@@ -198,7 +261,8 @@ def judge(utterances: list[dict], region: tuple[float, float], *,
     for c in entries[:3]:
         notes: list[str] = []
         in_t, ok_in = _snap(c.get("in_point"), starts)
-        out_t, _ = _snap(c.get("out_point"), starts + [hi + pad])
+        out_t, _ = _snap_out(c.get("out_point"), starts, ends + [hi + pad],
+                             real_ends=real_ends)
         if not ok_in:
             notes.append(f"in_point {c.get('in_point')} matches no utterance — not trusted")
         if in_t is not None and not (lo - pad - 2 <= in_t <= hi + pad + 2):

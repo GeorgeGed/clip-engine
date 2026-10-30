@@ -110,10 +110,53 @@ Note this is NOT the same problem as over-long clips. Measured on the first 29:
 clips over 100s had *higher* mean strength (0.57) than clips under 70s (0.50).
 Length and multi-narrative are separate defects and need separate fixes.
 
+## The out-point off-by-one — SOLVED, and it was mechanical
+
+**This was misdiagnosed for several turns as an editorial problem. It was a
+bug.** Read this before trusting anything below about rule 1.
+
+Out-points were snapped to utterance **starts**, so every clip stopped just
+*before* the line it named. Measured on the reviewed top 10: **all ten**
+out-points landed exactly on an utterance start, so all ten dropped their final
+line. Usually survivable — George accepted 7 of them. On clip 8 the dropped
+line was *"You sacrifice a lot of time and you could just end up with
+nothing"*, the whole point of the clip, and his note was "clip ended too
+early".
+
+**Clip 3 proves it was the model's intent, not its mistake.** Clip 3's stated
+`consequence` is *"They've had a very successful year... you can't just
+leave"* — quoting verbatim the line the cut excluded. The model meant to
+include it. The pipeline threw it away.
+
+The root cause is that the prompt asked for something the data could not
+express: it said "the out-point lands where a sentence ENDS" while the
+transcript carried only `start` timestamps. There was no end to name.
+
+Fixed in `engine/tier3.py`:
+- transcript lines render as `[start-end]`, and the contract says in_point is
+  the START of the first included utterance, out_point the END of the last;
+- `_ends()` reports whether ends are **real** (from `transcribe.py`) or
+  **derived** (the next start);
+- `_snap_out()` snaps to ends. With real ends the value is unambiguous. With
+  derived ends a start and the preceding end are the same instant, so policy
+  breaks the tie toward **including** the named line — over-including by one
+  line is recoverable, losing the payoff is not.
+
+**Use `transcribe.py` for future VODs**, which keeps real word-level ends. The
+`small`-model run that produced `jobs/fns-2905408276` stored only starts, which
+is why that job needs the tie-break. 14 tests in `tests/test_tier3.py`.
+
+**Correction to what follows.** I argued repeatedly that clip 3's abrupt ending
+was *prosodic* — that it read as a complete sentence in text and so could not
+be detected. That was wrong. It was this off-by-one, and it is fully mechanical.
+Rule 1 did not need a model to enforce it; it needed an end timestamp.
+
 ## Three rules from review
 
-**Status: stated, NOT enforced.** Three approaches were tried against the three
-clips George flagged, and all three failed:
+**Status: rule 1 is now enforced (above). Rules 2 and 3 remain unenforced.**
+Three approaches were tried against the three clips George flagged, and all
+three failed — but note that the clip-3 case they kept failing on was a bug,
+not an editorial judgement, which is part of why they failed:
 
 | approach | result |
 |---|---|

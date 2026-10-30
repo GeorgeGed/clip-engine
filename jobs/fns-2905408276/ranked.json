@@ -317,7 +317,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 5978.8,
-    "out_point": 6043.2,
+    "out_point": 6046.0,
     "setup": "Reads news: \"Global Eastwards will not be in the partnership cycle.\" Says he's already seen it.",
     "claim": "Non-partner orgs only signing teams after cups or masters is worse for the scene, but \"people are blowing it out of proportion.\"",
     "consequence": "Lack of job security \"forces you to be exceptional consistently\"; even signed players can be replaced and end up with nothing.",
@@ -345,7 +345,9 @@
       "fit": 0.15
     },
     "flags": [],
-    "file": "08_1h39m38s_reaction-to-a-team-missing-the-partn.mp4"
+    "file": "08_1h39m38s_reaction-to-a-team-missing-the-partn.mp4",
+    "out_point_original": 6043.2,
+    "out_point_fix": "off-by-one: kept the payoff line the start-snap excluded"
   },
   {
     "region": [
