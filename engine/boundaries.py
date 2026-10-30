@@ -13,6 +13,17 @@ from __future__ import annotations
 
 TERMINAL = (".", "!", "?", '."', '!"', '?"')
 
+# Measured on 50 clips from FNS VOD 2905408276, leading silence sorted:
+# 30 clips open on speech (0.00s); 14 cluster at 0.24-0.63s, median 0.42s —
+# the natural breath before a first word; then a 1.24s gap; then 6 clips at
+# 1.87s and above, which is dead air. The gap is the threshold, not a guess.
+# An earlier 0.35s guess flagged 13 clips, 7 of them with normal pre-roll.
+LEAD_SILENCE_DEFECT_S = 1.0
+
+# Where to land when walking an in-point forward. Inside the measured natural
+# band, and far enough off the word onset to survive detector jitter.
+SPEECH_PREROLL_S = 0.3
+
 
 def utt_at(utterances: list[dict], t: float) -> dict | None:
     ins = [u for u in utterances if float(u["start"]) <= t + 0.01]
@@ -64,3 +75,47 @@ def audit(utterances: list[dict], in_point: float, out_point: float) -> dict:
         "in_point_ok": ok_in, "in_point_note": why_in,
         "clean": ok_end is not False and ok_in is not False,
     }
+
+def walk_in_point_to_speech(
+    in_point: float,
+    lead_silence: float,
+    *,
+    preroll: float = SPEECH_PREROLL_S,
+    threshold: float = LEAD_SILENCE_DEFECT_S,
+) -> tuple[float, str]:
+    """Move an in-point forward past dead air, leaving `preroll` before speech.
+
+    `lead_silence` is measured from the cut file (see `qc.leading_silence`).
+    Returns the in-point to use and why. Leaves the in-point alone when the
+    silence is within the natural band — a 0.4s breath before the first word is
+    correct, and trimming it clips the onset.
+
+    Only ever moves FORWARD, so it cannot pull in speech the clip did not
+    already contain. That keeps it safe against the one-narrative rule: no new
+    topic can appear at the front.
+    """
+    if lead_silence <= 0:
+        return in_point, "opens on speech, unchanged"
+    if lead_silence < threshold:
+        return in_point, (f"opens on {lead_silence:.2f}s, inside the natural "
+                          f"{threshold}s band, unchanged")
+    shift = lead_silence - preroll
+    if shift <= 0:
+        return in_point, f"opens on {lead_silence:.2f}s, shorter than the preroll"
+    return round(in_point + shift, 3), (
+        f"walked +{shift:.2f}s past {lead_silence:.2f}s of dead air, "
+        f"leaving {preroll:.2f}s before speech")
+
+
+def speech_near(utterances: list[dict], t: float, *, window: float = 1.5) -> dict | None:
+    """The first utterance starting within `window` after `t`, if any.
+
+    Cross-check for a walked in-point. `silencedetect` fires on any audio above
+    the floor, so without this a keyboard clack or a game sound would pass as
+    speech and the in-point would land on it.
+    """
+    for u in sorted(utterances, key=lambda u: float(u["start"])):
+        s = float(u["start"])
+        if t - 0.35 <= s <= t + window:
+            return u
+    return None

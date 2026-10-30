@@ -45,6 +45,20 @@ def vertical(d: Path, *, dur: float = 6.0, vol: str = "0.1",
                 "-c:a", "aac", "-shortest"], d / f"v_{size}_{safe}_{dur}.mp4")
 
 
+def gapped(d: Path, *, silent_until: float = 3.0, dur: float = 8.0) -> Path:
+    """Video with TRUE digital silence for the first `silent_until` seconds.
+
+    Encoded to AAC on purpose: that is what a real clip is, and AAC's lossy
+    decode turns exact zeros into about -122 dBFS, which is why the detector
+    uses a dB floor rather than equality with zero.
+    """
+    expr = f"if(gt(t\\,{silent_until})\\,0.5*sin(2*PI*440*t)\\,0)"
+    return _ff(["-f", "lavfi", "-i", f"color=c=navy:s=1080x1920:r=60:d={dur}",
+                "-f", "lavfi", "-i", f"aevalsrc={expr}:d={dur}",
+                "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p",
+                "-c:a", "aac", "-shortest"], d / f"gap_{silent_until}_{dur}.mp4")
+
+
 def run() -> int:
     tmp = Path(tempfile.mkdtemp(prefix="qc-fixtures-"))
 
@@ -117,6 +131,31 @@ def run() -> int:
                                            {"in": 10.0, "out": 16.0, "speed": 1.0}]})
     ok("segment spans summed, gap excluded", d is not None and abs(d - 10.0) < 1e-6)
     ok("no segments and no range is unknown", qc._planned_duration({}) is None)
+
+    print("absent audio is not the same as quiet audio")
+    g = gapped(tmp, silent_until=3.0, dur=8.0)
+    dead = qc.dead_audio(g)
+    ok("finds the absent run", len(dead["runs"]) >= 1)
+    ok(f"run is ~3s (got {dead['total']:.2f})", abs(dead["total"] - 3.0) < 0.35)
+    ok(f"fraction is ~0.375 (got {dead['fraction']:.3f})",
+       abs(dead["fraction"] - 0.375) < 0.06)
+    r = qc.check(g)
+    ok("opening on absent audio rejects",
+       not r.passed and any("absent audio" in x for x in r.rejected))
+    ok("warning names the run count",
+       any("absent, not quiet" in w for w in r.warnings))
+
+    quiet = vertical(tmp, vol="-60dB")
+    d2 = qc.dead_audio(quiet)
+    ok("quiet audio is NOT reported absent", d2["runs"] == [])
+    ok("a quiet file still passes", qc.check(quiet).passed)
+
+    full = vertical(tmp)
+    ok("audio throughout reports no absent runs", qc.dead_audio(full)["runs"] == [])
+
+    ok("min_run filters short runs",
+       qc.dead_audio(g, min_run=10.0)["runs"] == [])
+    ok("floor is -90 dBFS", qc.DEAD_AUDIO_FLOOR_DB == -90.0)
 
     print()
     print(f"{'ALL PASS' if not fails else str(len(fails)) + ' FAILED'}")

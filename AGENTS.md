@@ -165,6 +165,21 @@ commitment. Never a fixed offset — that imports dead air and buries the hook.
 
 If the clip runs long, trim from the FRONT. The payoff is at the end.
 
+**Leading silence: natural pre-roll is 0.24–0.63s.** Measured across 50 clips —
+30 open on speech at 0.00s, 14 cluster at 0.24–0.63s (median **0.42s**, the
+breath before a first word), then a **1.24s gap**, then 6 at 1.87s and above,
+which is dead air. The threshold is that gap: `LEAD_SILENCE_DEFECT_S = 1.0`.
+An earlier 0.35s guess flagged 13 clips and was wrong about 7 of them.
+**[checked]**
+
+`boundaries.walk_in_point_to_speech` moves an in-point forward past dead air,
+leaving 0.3s before speech. It only ever moves FORWARD, so it cannot pull in a
+new topic at the front. **Always cross-check with `boundaries.speech_near`**:
+`silencedetect` fires on any audio above the floor, so without it an in-point
+lands on a keyboard clack — or, as happened on all 6 flagged clips here, on the
+far side of a muted region, which would have cut the prompt off the front and
+broken rule 2.
+
 **Duration is set by the content, not the clock.** The references are 20s and
 80s. The gate warns outside a genre's typical window and rejects only beyond
 5–180s. **[checked]**
@@ -253,6 +268,31 @@ Use two-pass loudnorm. Single-pass lands a dB off.
 2905408276: median −19.45 LUFS, and **0 of 50** inside the −16 to −10.5 band.
 Median true peak was −6.30 dBTP, so the lift to −12 has headroom and will not
 clip. Normalisation is not optional polish; without it every clip ships quiet.
+
+**Check the source audio is actually there.** Measured on FNS VOD
+2905408276: **35.8% of the audio is absent** — not quiet, *absent* — across
+**552 runs**. Present at identical timestamps in independently fetched 720p and
+1080p renditions, so it is in the VOD on Twitch's side, not a download
+artifact. `engine.qc.dead_audio` detects it. **[checked]**
+
+The test is a **dB floor (−90 dBFS), not equality with zero.** After AAC the
+absent region decodes to about −122 dBFS while speech in the same file peaks at
+−4.1 dBFS, so the separation is enormous — but an exact-zero test finds nothing
+and reports a clean file. Only the WAV extraction, quantised to 16-bit, has
+literal zeros.
+
+What it does and does not explain:
+
+- It explains the transcript's gaps (up to 29.5s), and it caps Tier 1 recall:
+  a muted region reads as "not loud" and is never flagged.
+- It explains the clips that open or end on nothing — 49 of 50 contain some
+  absent audio, 31 of 50 over 25%.
+- **It does not explain clip 3's abrupt ending.** That clip measures 0% absent.
+  The prosodic conclusion stands; do not re-attribute it to this.
+- It is not automatically fatal. George accepted clips 1, 4 and 8, which
+  measure 37%, 14% and 19% absent. The mutes mostly land where nobody is
+  talking. Treat it as a warning with a number, not a reject, except at a
+  clip's edges.
 
 **Pull 1080p source and verify you got it.** The first FNS run used an ad-hoc
 `yt-dlp` call that landed 720p60, and all 50 clips were cut from it before

@@ -25,13 +25,18 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from . import gates
+from . import boundaries, gates
 
-# A rendered clip that opens on silence buries its own hook.
-LEAD_SILENCE_WARN_S = 0.35
+# A rendered clip that opens on dead air buries its own hook. The threshold is
+# measured, not guessed — see engine/boundaries.LEAD_SILENCE_DEFECT_S.
+LEAD_SILENCE_WARN_S = boundaries.LEAD_SILENCE_DEFECT_S
 # Trailing silence is normal (tail_frames) but a long one is dead air.
 TAIL_SILENCE_WARN_S = 1.5
 SILENCE_FLOOR_DB = -50
+# Absent audio, not quiet audio. Real room tone never reaches this; a muted or
+# dropped region does. See dead_audio() for the measurement behind the number.
+DEAD_AUDIO_FLOOR_DB = -90.0
+DEAD_AUDIO_FLOOR = 10 ** (DEAD_AUDIO_FLOOR_DB / 20)
 BLACK_PIX_THRESHOLD = 0.10
 BLACK_MIN_S = 0.05
 # How far the rendered duration may drift from the plan before it is a defect.
@@ -222,8 +227,17 @@ def check(path: str | Path, *, edit: dict | None = None,
         m["silences"] = a["silences"]
         m["blacks"] = a["blacks"]
 
-        if m["lufs"] is None:
+        # loudnorm clamps the integrated loudness of a very quiet signal to
+        # -inf, so a missing input_i alone does not mean silence. True peak is
+        # the corroborating measurement: present-but-quiet still has one.
+        if m["lufs"] is None and (m["true_peak"] is None
+                                  or m["true_peak"] < DEAD_AUDIO_FLOOR_DB):
             r.rejected.append("audio stream is silent")
+        elif m["lufs"] is None:
+            r.warnings.append(
+                f"integrated loudness unmeasurable (true peak "
+                f"{m['true_peak']:.2f} dBTP) — the audio is present but far "
+                f"below any usable level")
         else:
             glo, ghi = gates.LOUDNESS_RANGE
             if not (glo <= m["lufs"] <= ghi):
@@ -244,6 +258,24 @@ def check(path: str | Path, *, edit: dict | None = None,
             if dur and end >= dur - 0.05 and (end - start) > TAIL_SILENCE_WARN_S:
                 r.warnings.append(f"ends on {end - start:.2f}s of silence")
 
+        dead = dead_audio(p)
+        m["dead_audio_total"] = dead["total"]
+        m["dead_audio_fraction"] = dead["fraction"]
+        m["dead_audio_runs"] = dead["runs"]
+        if dead["runs"]:
+            r.warnings.append(
+                f"{dead['total']:.1f}s of the audio is digital zero "
+                f"({dead['fraction']:.0%}), in {len(dead['runs'])} run(s) — "
+                f"absent, not quiet; check the source for muted regions")
+            first, last = dead["runs"][0], dead["runs"][-1]
+            # 0.15s, not 0.05s: the run boundary lands a frame or two in.
+            if first[0] <= 0.15:
+                r.rejected.append(
+                    f"opens on {first[1] - first[0]:.1f}s of absent audio")
+            if dur and last[1] >= dur - 0.05:
+                r.rejected.append(
+                    f"ends on {last[1] - last[0]:.1f}s of absent audio")
+
         for start, end in m["blacks"]:
             if dur and end >= dur - 0.05:
                 r.warnings.append(f"ends on {end - start:.2f}s of black")
@@ -252,6 +284,65 @@ def check(path: str | Path, *, edit: dict | None = None,
 
     r.passed = not r.rejected
     return r
+
+
+def dead_audio(path: str | Path, *, min_run: float = 0.5) -> dict:
+    """Find runs of EXACT digital zero — audio that is absent, not merely quiet.
+
+    This is a different defect from silence and must not be confused with it. A
+    pause has a noise floor; a muted or dropped region has literal zero
+    samples. Twitch replaces DMCA-flagged audio this way, and a clip whose edge
+    sits on one of those boundaries opens or ends on nothing.
+
+    Measured on FNS VOD 2905408276: 35.8% of the audio is absent across 552
+    runs, present identically in independently fetched 720p and 1080p
+    renditions, so it is in the VOD rather than the download.
+
+    The test is a dB floor, not equality with zero. After AAC the muted region
+    decodes to about -122 dBFS rather than exact zeros, while speech in the
+    same file peaks at -4.1 dBFS. At the -90 dBFS floor the muted region is
+    100% below and speech 0.1% below (its zero crossings), so the separation is
+    not close. An earlier exact-zero test silently found nothing.
+    """
+    import numpy as np
+
+    out = subprocess.run(
+        ["ffmpeg", "-nostdin", "-v", "error", "-i", str(path),
+         "-ac", "1", "-ar", "16000", "-f", "f32le", "-"],
+        capture_output=True,
+    )
+    a = np.frombuffer(out.stdout, dtype="<f4")
+    if a.size == 0:
+        return {"runs": [], "total": 0.0, "fraction": 0.0}
+
+    sr = 16000
+    zero = np.abs(a) < DEAD_AUDIO_FLOOR
+    d = np.diff(zero.astype(np.int8))
+    starts = (np.where(d == 1)[0] + 1).tolist()
+    ends = (np.where(d == -1)[0] + 1).tolist()
+    if zero[0]:
+        starts.insert(0, 0)
+    if zero[-1]:
+        ends.append(zero.size)
+
+    runs = [[round(s / sr, 3), round(e / sr, 3)] for s, e in zip(starts, ends)
+            if (e - s) / sr >= min_run]
+    total = sum(e - s for s, e in runs)
+    return {"runs": runs, "total": round(total, 3),
+            "fraction": round(total / (a.size / sr), 4)}
+
+
+def leading_silence(path: str | Path) -> float:
+    """Seconds of silence at the head of a file. 0.0 if it opens on sound."""
+    dur = None
+    try:
+        dur = float(_probe(Path(path))["format"]["duration"])
+    except (KeyError, ValueError, RuntimeError):
+        pass
+    for start, end in _analyse(Path(path))["silences"]:
+        if start is not None and start <= 0.05:
+            return round((end if end is not None else (dur or 0.0)) - start, 3)
+    return 0.0
 
 
 def _planned_duration(edit: dict) -> float | None:

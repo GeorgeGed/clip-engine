@@ -1,0 +1,44 @@
+[
+  {
+    "rank": 4,
+    "action": "held",
+    "lead": 1.866,
+    "in_point": 3276.9,
+    "why": "no transcript support"
+  },
+  {
+    "rank": 9,
+    "action": "held",
+    "lead": 4.36,
+    "in_point": 2613.1,
+    "why": "no transcript support"
+  },
+  {
+    "rank": 13,
+    "action": "held",
+    "lead": 1.976,
+    "in_point": 3798.3,
+    "why": "no transcript support"
+  },
+  {
+    "rank": 25,
+    "action": "held",
+    "lead": 4.701,
+    "in_point": 4366.1,
+    "why": "no transcript support"
+  },
+  {
+    "rank": 37,
+    "action": "held",
+    "lead": 7.217,
+    "in_point": 4206.1,
+    "why": "no transcript support"
+  },
+  {
+    "rank": 39,
+    "action": "held",
+    "lead": 17.626,
+    "in_point": 3983.1,
+    "why": "no transcript support"
+  }
+]
