@@ -10,7 +10,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 2829.3,
-    "out_point": 2931.9,
+    "out_point": 2930.64,
     "setup": "\"Oh, yeah, I didn't even tell you guys\"",
     "claim": "\"I'm gonna be coaching in the open qualifier and we're gonna be streaming it\"",
     "consequence": "Won't name the lineup yet and hints it will be obvious. Then: \"how am I supposed to stream League of Legends worlds if... I have to sit here and make comps\"",
@@ -40,7 +40,9 @@
     "flags": [
       "103s is long for short-form \u2014 check the out-point"
     ],
-    "file": "01_0h47m09s_speaker-reveals-he-is-coaching-a-tea.mp4"
+    "file": "01_0h47m09s_speaker-reveals-he-is-coaching-a-tea.mp4",
+    "out_point_original": 2931.9,
+    "out_point_fix": "trimmed back to where the audio stops (1.2s mute follows)"
   },
   {
     "region": [
@@ -53,7 +55,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 3232.6,
-    "out_point": 3274.3,
+    "out_point": 3276.58,
     "setup": "\"Been watching Pedro a little bit here, too. I watched a couple YouTube videos of his\" - then asked how they became friends.",
     "claim": "\"I don't think he considers me a friend, but I considered him a friend. I think it's just one-sided.\"",
     "consequence": "\"Obsessed with him... pushed my way in.\" The other speaker answers \"Yeah, parasocial\" and she agrees it's pretty one-sided.",
@@ -82,7 +84,9 @@
     "flags": [
       "speaker attribution needs checking before this ships"
     ],
-    "file": "02_0h53m52s_her-one-sided-friendship-with-pedro.mp4"
+    "file": "02_0h53m52s_her-one-sided-friendship-with-pedro.mp4",
+    "out_point_original": 3274.3,
+    "out_point_fix": "clamped at a 2.0s mute"
   },
   {
     "region": [
@@ -95,7 +99,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 2809.2,
-    "out_point": 2824.4,
+    "out_point": 2829.3,
     "setup": "\"Cryo and Austin a contract ending. Do you think either of them will leave?\"",
     "claim": "\"Austin is never gonna leave... I just don't see a world where they leave after the year\"",
     "consequence": "\"They've had a very successful year... you can't just leave\"",
@@ -125,7 +129,9 @@
       "15s is tight",
       "speaker attribution needs checking before this ships"
     ],
-    "file": "03_0h46m49s_whether-cryo-and-austin-leave-when-t.mp4"
+    "file": "03_0h46m49s_whether-cryo-and-austin-leave-when-t.mp4",
+    "out_point_original": 2824.4,
+    "out_point_fix": "extended to the end of the named line"
   },
   {
     "region": [
@@ -138,7 +144,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 3276.9,
-    "out_point": 3329.0,
+    "out_point": 3332.08,
     "setup": "\"K drill is the only one that I watched for League of Legends when he was watching worlds finals\"",
     "claim": "\"I like people who explain things because I'm an idiot\" and he was \"glazing him\"",
     "consequence": "\"He got me so invested into League worlds\" that he stayed for all five maps while Selena fell asleep",
@@ -168,7 +174,9 @@
     "flags": [
       "speaker attribution needs checking before this ships"
     ],
-    "file": "04_0h54m36s_why-he-only-watches-worlds-finals-th.mp4"
+    "file": "04_0h54m36s_why-he-only-watches-worlds-finals-th.mp4",
+    "out_point_original": 3329.0,
+    "out_point_fix": "clamped at a 6.4s mute"
   },
   {
     "region": [
@@ -181,7 +189,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 5668.5,
-    "out_point": 5724.1,
+    "out_point": 5724.68,
     "setup": "\"Yeet machine has never been. Okay. This is what happened. All these people like cloudy acts like Sam and shanks...\"",
     "claim": "\"Cane's era is basically the new Sinatra\", a trendsetter whose mannerisms get copied.",
     "consequence": "\"people just copy it because they worship him he's the overlord of the young\"",
@@ -217,7 +225,9 @@
     "flags": [
       "speaker attribution needs checking before this ships"
     ],
-    "file": "05_1h34m28s_cane-s-era-as-the-trendsetter-that-n.mp4"
+    "file": "05_1h34m28s_cane-s-era-as-the-trendsetter-that-n.mp4",
+    "out_point_original": 5724.1,
+    "out_point_fix": "clamped at a 6.9s mute"
   },
   {
     "region": [
@@ -230,7 +240,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 2194.8,
-    "out_point": 2238.2,
+    "out_point": 2241.87,
     "setup": "\"in the new circuit i already said this i've said this on every single stream\"",
     "claim": "\"these open qualifiers are gonna be an absolute shit show ping issues cheaters\"",
     "consequence": "Tech problems will cause delays and controversy; a co-speaker agrees but says \"It is still better than locking players out of franchise forever.\"",
@@ -259,7 +269,9 @@
       "fit": 0.15
     },
     "flags": [],
-    "file": "06_0h36m34s_open-qualifiers-in-the-new-circuit-w.mp4"
+    "file": "06_0h36m34s_open-qualifiers-in-the-new-circuit-w.mp4",
+    "out_point_original": 2238.2,
+    "out_point_fix": "clamped at a 9.7s mute"
   },
   {
     "region": [
@@ -272,7 +284,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 3690.0,
-    "out_point": 3757.6,
+    "out_point": 3757.33,
     "setup": "Chat asks \"which free agents are must pickups\"; he lists \"oxy... zek... crash... Valin\" and says it's \"brain dead out there\".",
     "claim": "\"He will not compete this year. He will not compete on an org this year. I can guarantee you that.\"",
     "consequence": "\"I would be shocked if Sam joined... a top team... I would be blown away.\"",
@@ -304,7 +316,9 @@
       "fit": 0.15
     },
     "flags": [],
-    "file": "07_1h01m30s_free-agent-market-and-a-guarantee-th.mp4"
+    "file": "07_1h01m30s_free-agent-market-and-a-guarantee-th.mp4",
+    "out_point_original": 3757.6,
+    "out_point_fix": "trimmed back to where the audio stops (11.8s mute follows)"
   },
   {
     "region": [
@@ -317,7 +331,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 5978.8,
-    "out_point": 6046.0,
+    "out_point": 6045.89,
     "setup": "Reads news: \"Global Eastwards will not be in the partnership cycle.\" Says he's already seen it.",
     "claim": "Non-partner orgs only signing teams after cups or masters is worse for the scene, but \"people are blowing it out of proportion.\"",
     "consequence": "Lack of job security \"forces you to be exceptional consistently\"; even signed players can be replaced and end up with nothing.",
@@ -347,7 +361,7 @@
     "flags": [],
     "file": "08_1h39m38s_reaction-to-a-team-missing-the-partn.mp4",
     "out_point_original": 6043.2,
-    "out_point_fix": "off-by-one: kept the payoff line the start-snap excluded"
+    "out_point_fix": "clamped at a 11.3s mute"
   },
   {
     "region": [
@@ -360,7 +374,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 2613.1,
-    "out_point": 2655.9,
+    "out_point": 2653.86,
     "setup": "\"But how crazy would it be?\" if Lev or neon ended up at LOUD",
     "claim": "\"that is brain dead that should never be allowed... We need to put a cap on that ASAP\"",
     "consequence": "\"That's a man city shit... 115 charges... We are not accepting that, not a chance\"",
@@ -392,7 +406,9 @@
     "flags": [
       "speaker attribution needs checking before this ships"
     ],
-    "file": "09_0h43m33s_joke-outrage-at-the-idea-of-loud-sig.mp4"
+    "file": "09_0h43m33s_joke-outrage-at-the-idea-of-loud-sig.mp4",
+    "out_point_original": 2655.9,
+    "out_point_fix": "trimmed back to where the audio stops (2.2s mute follows)"
   },
   {
     "region": [
@@ -405,7 +421,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 4113.6,
-    "out_point": 4169.5,
+    "out_point": 4175.4,
     "setup": "Chat: \"Do you think Dazzlers will be a promising talent for 2027 season?\"",
     "claim": "\"I think Dazzlers to join crew as a coach\" and \"they can put their differences aside.\"",
     "consequence": "He'd be a tough coach, but players would respect him enough to take the criticism; Dante and heat \"got to just figure it out.\"",
@@ -437,7 +453,9 @@
     "flags": [
       "payoff is a teaser, not news"
     ],
-    "file": "10_1h08m33s_dazzlers-as-a-coach-for-crew.mp4"
+    "file": "10_1h08m33s_dazzlers-as-a-coach-for-crew.mp4",
+    "out_point_original": 4169.5,
+    "out_point_fix": "extended to the end of the named line"
   },
   {
     "region": [
@@ -450,7 +468,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 4767.6,
-    "out_point": 4827.8,
+    "out_point": 4826.59,
     "setup": "Chat asks his thoughts on the only champs he won being with the stream team: \"if we win a tournament... with this lineup while streaming\"",
     "claim": "\"It would be so bad for the game. I think the game would die right there... genuinely embarrassing\"",
     "consequence": "Asked about making kickoff: \"Likely not. I don't think you guys understand how good these teams are\" and they probably lose to tier two teams, but \"we're gonna try our best\"",
@@ -482,7 +500,9 @@
     "flags": [
       "speaker attribution needs checking before this ships"
     ],
-    "file": "11_1h19m27s_streamer-s-all-streamer-team-a-win-w.mp4"
+    "file": "11_1h19m27s_streamer-s-all-streamer-team-a-win-w.mp4",
+    "out_point_original": 4827.8,
+    "out_point_fix": "trimmed back to where the audio stops (1.4s mute follows)"
   },
   {
     "region": [
@@ -495,7 +515,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 4437.8,
-    "out_point": 4524.5,
+    "out_point": 4525.5,
     "setup": "\"Remember when you had to pull up on a LAN when you were hungry... five different modes of transportation\"",
     "claim": "\"You guys have it good now... I don't want to hear no complaints\" about not getting paid for a couple months",
     "consequence": "\"You got to just want it... I will take that freedom and sacrifice a couple months of salary all day\"",
@@ -524,7 +544,9 @@
       "87s runs past the comfortable window",
       "speaker attribution needs checking before this ships"
     ],
-    "file": "12_1h13m57s_rant-telling-complaining-players-the.mp4"
+    "file": "12_1h13m57s_rant-telling-complaining-players-the.mp4",
+    "out_point_original": 4524.5,
+    "out_point_fix": "extended to the end of the named line"
   },
   {
     "region": [
@@ -537,7 +559,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 3798.3,
-    "out_point": 3867.3,
+    "out_point": 3872.47,
     "setup": "\"What about Mako? ... you got the KRX players that are teamless now\"",
     "claim": "\"Those guys are available if need be\" while still loving the current lineup, and \"the dictator is the only reason we won the event\"",
     "consequence": "He could not credit the dictator all year because he was on a different lineup, so the free-agent pickups look real",
@@ -571,7 +593,9 @@
     "flags": [
       "speaker attribution needs checking before this ships"
     ],
-    "file": "13_1h03m18s_teamless-krx-players-as-free-agent-o.mp4"
+    "file": "13_1h03m18s_teamless-krx-players-as-free-agent-o.mp4",
+    "out_point_original": 3867.3,
+    "out_point_fix": "clamped at a 2.2s mute"
   },
   {
     "region": [
@@ -584,7 +608,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 782.4,
-    "out_point": 851.1,
+    "out_point": 854.8,
     "setup": "\"these orgs, right here is the orgs he names that are going to start investing less potentially, okay?\"",
     "claim": "\"These orgs weren't paying their players a fucking dumb amount of money anyway\", so they can wait it out and pick up rosters later.",
     "consequence": "\"you lose like what two to three months of salary before you get picked up\", even as a top player.",
@@ -613,7 +637,9 @@
       "fit": 0.15
     },
     "flags": [],
-    "file": "14_0h13m02s_why-orgs-pulling-back-investment-won.mp4"
+    "file": "14_0h13m02s_why-orgs-pulling-back-investment-won.mp4",
+    "out_point_original": 851.1,
+    "out_point_fix": "extended to the end of the named line"
   },
   {
     "region": [
@@ -626,7 +652,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 1050.9,
-    "out_point": 1081.1,
+    "out_point": 1084.09,
     "setup": "\"I can't see why any player would be complaining about this... why am I seeing so much pessimism on my timeline about this system?\"",
     "claim": "\"This is a clearly better system than franchise. It's not close.\"",
     "consequence": "\"You were locked out of franchising if you were not a partnered team... Now your own fate is in your own hands.\"",
@@ -651,7 +677,9 @@
       "fit": 0.132
     },
     "flags": [],
-    "file": "15_0h17m30s_open-qualifier-system-is-clearly-bet.mp4"
+    "file": "15_0h17m30s_open-qualifier-system-is-clearly-bet.mp4",
+    "out_point_original": 1081.1,
+    "out_point_fix": "clamped at a 2.6s mute"
   },
   {
     "region": [
@@ -664,7 +692,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 1906.3,
-    "out_point": 1948.0,
+    "out_point": 1952.51,
     "setup": "\"Do you think Loud will split up?\" \"I have no idea what's going to happen with the teams.\"",
     "claim": "\"Teams that succeed had prior issues as well... sometimes teams are dead going into whole ass events and end up making runs.\"",
     "consequence": "\"For all you know Vitality was a dead fucking team that just happened to make a run.\"",
@@ -692,7 +720,9 @@
       "fit": 0.15
     },
     "flags": [],
-    "file": "16_0h31m46s_successful-teams-often-hide-internal.mp4"
+    "file": "16_0h31m46s_successful-teams-often-hide-internal.mp4",
+    "out_point_original": 1948.0,
+    "out_point_fix": "clamped at a 5.6s mute"
   },
   {
     "region": [
@@ -705,7 +735,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 5212.4,
-    "out_point": 5265.0,
+    "out_point": 5268.51,
     "setup": "\"he have had to move with Leon as well. So he's obviously willing to move.\"",
     "claim": "\"might go to MIBR as the only one that makes sense to me here. They need an IGL like a full IGL.\"",
     "consequence": "\"So what, King and Valorant just swap teams?... The first player trade in history?\"",
@@ -740,7 +770,9 @@
     "flags": [
       "speaker attribution needs checking before this ships"
     ],
-    "file": "17_1h26m52s_valin-as-an-igl-move-to-mibr-and-a-p.mp4"
+    "file": "17_1h26m52s_valin-as-an-igl-move-to-mibr-and-a-p.mp4",
+    "out_point_original": 5265.0,
+    "out_point_fix": "clamped at a 7.5s mute"
   },
   {
     "region": [
@@ -753,7 +785,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 3892.1,
-    "out_point": 3969.6,
+    "out_point": 3971.6,
     "setup": "Sentinels likely with this kind of lineup is gonna be insane... G2. They have King Sato",
     "claim": "G2 is gonna be good no matter what; 100 Thieves are very solid; Crew only have Lotus in their map pool",
     "consequence": "Nats is LFT. That's fucking bad. It's crazy since Valens leaked org didn't make it.",
@@ -793,7 +825,9 @@
     "flags": [
       "78s runs past the comfortable window"
     ],
-    "file": "18_1h04m52s_team-by-team-rundown-of-how-the-new.mp4"
+    "file": "18_1h04m52s_team-by-team-rundown-of-how-the-new.mp4",
+    "out_point_original": 3969.6,
+    "out_point_fix": "extended to the end of the named line"
   },
   {
     "region": [
@@ -806,7 +840,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 2568.4,
-    "out_point": 2628.8,
+    "out_point": 2628.63,
     "setup": "\"Damn neon is without a tea. Oh my god\" - then the loan situation and what happens if the loaned player leaves.",
     "claim": "\"If Lev or neon went to loud somehow that is brain dead that should never be allowed\"",
     "consequence": "\"We need to put a cap on that ASAP... that's a man city shit right there\"",
@@ -837,7 +871,9 @@
       "fit": 0.15
     },
     "flags": [],
-    "file": "19_0h42m48s_speaker-wants-a-cap-on-a-rich-org-li.mp4"
+    "file": "19_0h42m48s_speaker-wants-a-cap-on-a-rich-org-li.mp4",
+    "out_point_original": 2628.8,
+    "out_point_fix": "trimmed back to where the audio stops (7.1s mute follows)"
   },
   {
     "region": [
@@ -850,7 +886,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 2713.5,
-    "out_point": 2788.2,
+    "out_point": 2790.2,
     "setup": "\"So where are you slotting in second here?\"",
     "claim": "\"I think second stays in MIBR. Maybe I don't think so though.\" Then: \"all the teamless players that are still available... Knights, Demon1, Second, Oxy.\"",
     "consequence": "\"America's is already stacked as is and now you're gonna stack it even more... it is crazy out there, man\"",
@@ -886,7 +922,9 @@
       "75s runs past the comfortable window",
       "speaker attribution needs checking before this ships"
     ],
-    "file": "20_0h45m13s_where-the-big-teamless-players-secon.mp4"
+    "file": "20_0h45m13s_where-the-big-teamless-players-secon.mp4",
+    "out_point_original": 2788.2,
+    "out_point_fix": "clamped at a 18.7s mute"
   },
   {
     "region": [
@@ -899,7 +937,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 2318.0,
-    "out_point": 2389.7,
+    "out_point": 2391.2,
     "setup": "You think that oxy, second and redox can work together in a team?",
     "claim": "I can almost guarantee he's not gonna stay at MIBR.",
     "consequence": "Oxy's new contract is probably brain dead... That's fucked.",
@@ -933,7 +971,9 @@
       "72s runs past the comfortable window",
       "speaker attribution needs checking before this ships"
     ],
-    "file": "21_0h38m38s_roster-speculation-where-second-goes.mp4"
+    "file": "21_0h38m38s_roster-speculation-where-second-goes.mp4",
+    "out_point_original": 2389.7,
+    "out_point_fix": "extended to the end of the named line"
   },
   {
     "region": [
@@ -946,7 +986,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 1694.4,
-    "out_point": 1856.3,
+    "out_point": 1856.76,
     "setup": "\"Why wouldn't you want an open qualifier system? ... You want to go back into franchising?\"",
     "claim": "\"These fucking kids nowadays are too spoiled by the franchise system and they got paid from the beginning.\"",
     "consequence": "\"If you're an exceptional player, you will get there... the pros far outweigh the cons. Long term.\"",
@@ -975,7 +1015,9 @@
       "162s is long for short-form \u2014 check the out-point",
       "speaker attribution needs checking before this ships"
     ],
-    "file": "22_0h28m14s_defending-the-open-qualifier-system.mp4"
+    "file": "22_0h28m14s_defending-the-open-qualifier-system.mp4",
+    "out_point_original": 1856.3,
+    "out_point_fix": "clamped at a 1.8s mute"
   },
   {
     "region": [
@@ -988,7 +1030,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 929.5,
-    "out_point": 1036.0,
+    "out_point": 1040.6,
     "setup": "\"I'm not trying to say SR shouldn't be in it. Fly quest shouldn't be in it. There's just not enough slots.\"",
     "claim": "Missing the league doesn't mean orgs give up on Val. Orgless players should just grind the open qualifiers, and the speaker doesn't see what anyone is complaining about.",
     "consequence": "\"One result is all it takes and org will pick you up... Multiple orgs will fight for you,\" and you can leverage those offers for maximum salary.",
@@ -1022,7 +1064,9 @@
     "flags": [
       "106s is long for short-form \u2014 check the out-point"
     ],
-    "file": "23_0h15m29s_players-who-missed-out-on-the-league.mp4"
+    "file": "23_0h15m29s_players-who-missed-out-on-the-league.mp4",
+    "out_point_original": 1036.0,
+    "out_point_fix": "extended to the end of the named line"
   },
   {
     "region": [
@@ -1035,7 +1079,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 1283.7,
-    "out_point": 1401.2,
+    "out_point": 1397.28,
     "setup": "\"The reason I got on is to figure out what everyone is crying about with this open qualifier shit.\"",
     "claim": "\"I don't think this is the end of the world.\" Open qualifiers might be disastrous, but they give outside players a real shot at tier one.",
     "consequence": "Players have to earn qualification by beating org teams. He concedes the fast turnaround is a fair complaint: \"It's too little for sure, but what can you do?\"",
@@ -1064,7 +1108,9 @@
     "flags": [
       "118s is long for short-form \u2014 check the out-point"
     ],
-    "file": "24_0h21m23s_open-qualifiers-are-overblown-as-a-c.mp4"
+    "file": "24_0h21m23s_open-qualifiers-are-overblown-as-a-c.mp4",
+    "out_point_original": 1401.2,
+    "out_point_fix": "trimmed back to where the audio stops (3.9s mute follows)"
   },
   {
     "region": [
@@ -1077,7 +1123,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 4366.1,
-    "out_point": 4475.3,
+    "out_point": 4477.97,
     "setup": "\"people complaining if you play from your parents house you got no rent to pay\" - players grumbling about months without salary in open qualifiers",
     "claim": "\"I don't empathize with it that much. I had to do the same thing for years\"",
     "consequence": "\"You guys have it good now... I don't want to hear it, sit there and make a team, stay humble and be good\"",
@@ -1107,7 +1153,9 @@
     "flags": [
       "109s is long for short-form \u2014 check the out-point"
     ],
-    "file": "25_1h12m46s_rant-against-players-complaining-abo.mp4"
+    "file": "25_1h12m46s_rant-against-players-complaining-abo.mp4",
+    "out_point_original": 4475.3,
+    "out_point_fix": "clamped at a 5.3s mute"
   },
   {
     "region": [
@@ -1120,7 +1168,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 2663.8,
-    "out_point": 2702.6,
+    "out_point": 2700.6,
     "setup": "\"The South Americans are gonna cook\" as the MIBR roster is discussed",
     "claim": "\"This roster is just completely nuclear bombed out of existence... Mazzini was going to be the only one left standing\"",
     "consequence": "\"One of the most unfortunate years for a roster... not qualifying for a single event while being that close every time. That is fucked.\"",
@@ -1150,7 +1198,9 @@
     "flags": [
       "speaker attribution needs checking before this ships"
     ],
-    "file": "26_0h44m23s_mibr-s-roster-falling-apart-after-a.mp4"
+    "file": "26_0h44m23s_mibr-s-roster-falling-apart-after-a.mp4",
+    "out_point_original": 2702.6,
+    "out_point_fix": "trimmed back to where the audio stops (2.1s mute follows)"
   },
   {
     "region": [
@@ -1163,7 +1213,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 1958.0,
-    "out_point": 2081.5,
+    "out_point": 2082.69,
     "setup": "\"this format is literally million times better for everyone. I agree\"",
     "claim": "The open circuit is an even playing field: you grind from the bottom and everyone has the same shot at qualifying.",
     "consequence": "He backs it with his own Envy and CLG climbs, then pushes back on a counter that 'those were early days': \"that's a horrible argument\".",
@@ -1199,7 +1249,9 @@
       "124s is long for short-form \u2014 check the out-point",
       "speaker attribution needs checking before this ships"
     ],
-    "file": "27_0h32m38s_defending-the-open-qualifier-circuit.mp4"
+    "file": "27_0h32m38s_defending-the-open-qualifier-circuit.mp4",
+    "out_point_original": 2081.5,
+    "out_point_fix": "clamped at a 4.8s mute"
   },
   {
     "region": [
@@ -1212,7 +1264,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 5032.4,
-    "out_point": 5085.2,
+    "out_point": 5086.7,
     "setup": "Chat asks: \"How much do you think the new agent will affect the meta right now.\"",
     "claim": "\"She has too much supportive util to be a pure duelist.\"",
     "consequence": "Likes the kit anyway: the throw ability that displaces a player and stuns them on a wall hit is \"pretty good\".",
@@ -1239,7 +1291,9 @@
       "fit": 0.15
     },
     "flags": [],
-    "file": "28_1h23m52s_streamer-s-read-on-the-new-valorant.mp4"
+    "file": "28_1h23m52s_streamer-s-read-on-the-new-valorant.mp4",
+    "out_point_original": 5085.2,
+    "out_point_fix": "clamped at a 1.3s mute"
   },
   {
     "region": [
@@ -1252,7 +1306,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 3424.2,
-    "out_point": 3514.7,
+    "out_point": 3520.0,
     "setup": "\"because we're gonna be coaching I got to start watching VODs\"",
     "claim": "\"I'm gonna be live while coaching... I'm not gonna have chat up\" so chat can't rage bait him with \"L coach\"",
     "consequence": "\"three-minute delay\" so he can't respond anyway; \"first time ever... trying to coach\"",
@@ -1282,7 +1336,9 @@
       "90s runs past the comfortable window",
       "speaker attribution needs checking before this ships"
     ],
-    "file": "29_0h57m04s_streamer-announces-he-ll-livestream.mp4"
+    "file": "29_0h57m04s_streamer-announces-he-ll-livestream.mp4",
+    "out_point_original": 3514.7,
+    "out_point_fix": "extended to the end of the named line"
   },
   {
     "region": [
@@ -1295,7 +1351,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 4261.1,
-    "out_point": 4314.7,
+    "out_point": 4318.7,
     "setup": "\"I think with this new format a lot of these players can just take their time... they don't have to join a partner team\"",
     "claim": "\"If I was as young as Nats, I would probably create my own lineup... you decide your own fate\"",
     "consequence": "\"You lose a couple of months of salary for sure... but if you're good enough, you will get paid eventually\"",
@@ -1321,7 +1377,9 @@
       "fit": 0.15
     },
     "flags": [],
-    "file": "30_1h11m01s_why-building-your-own-roster-through.mp4"
+    "file": "30_1h11m01s_why-building-your-own-roster-through.mp4",
+    "out_point_original": 4314.7,
+    "out_point_fix": "extended to the end of the named line"
   },
   {
     "region": [
@@ -1334,7 +1392,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 4627.0,
-    "out_point": 4693.7,
+    "out_point": 4696.49,
     "setup": "\"the amount of open qualifier teams that aren't sponsored right away. I want to see who ends up beating one of these partnered teams\"",
     "claim": "\"Imagine it's our stream team... we're going to stop trying at a certain point just cause we don't want to actually qualify\"",
     "consequence": "\"If we can't make it past the first game, that is very bad... with the lineup that we have\"",
@@ -1362,7 +1420,9 @@
     "flags": [
       "speaker attribution needs checking before this ships"
     ],
-    "file": "31_1h17m07s_what-his-stream-team-would-do-in-the.mp4"
+    "file": "31_1h17m07s_what-his-stream-team-would-do-in-the.mp4",
+    "out_point_original": 4693.7,
+    "out_point_fix": "clamped at a 1.1s mute"
   },
   {
     "region": [
@@ -1375,7 +1435,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 1155.0,
-    "out_point": 1216.7,
+    "out_point": 1215.37,
     "setup": "\"It is fucked for people released from franchise teams that are not franchised anymore. Let's say Valin.\"",
     "claim": "\"It's not fucked to the degree that you think it is... Valin is a terrible example because he's already made enough money.\"",
     "consequence": "\"Valin is guaranteed on a partnered team. Who knows? ... you replace Vora with Valin? Do you replace Ethan?\"",
@@ -1408,7 +1468,9 @@
     "flags": [
       "speaker attribution needs checking before this ships"
     ],
-    "file": "32_0h19m15s_whether-released-franchise-players-l.mp4"
+    "file": "32_0h19m15s_whether-released-franchise-players-l.mp4",
+    "out_point_original": 1216.7,
+    "out_point_fix": "trimmed back to where the audio stops (1.2s mute follows)"
   },
   {
     "region": [
@@ -1421,7 +1483,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 1512.4,
-    "out_point": 1678.8,
+    "out_point": 1680.37,
     "setup": "\"isn't C9 big enough for partnership\" / \"It's just in comparison to teams like Sen, Hundred Thieves.\"",
     "claim": "Missing partnership hurts through lost bundle sales, but next year gives non-partnered orgs and players far more freedom.",
     "consequence": "\"if that team does end up succeeding... you end up getting an org anyway.\"",
@@ -1460,7 +1522,9 @@
     "flags": [
       "166s is long for short-form \u2014 check the out-point"
     ],
-    "file": "33_0h25m12s_who-missed-out-on-valorant-partnersh.mp4"
+    "file": "33_0h25m12s_who-missed-out-on-valorant-partnersh.mp4",
+    "out_point_original": 1678.8,
+    "out_point_fix": "clamped at a 5.3s mute"
   },
   {
     "region": [
@@ -1473,7 +1537,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 1373.3,
-    "out_point": 1485.5,
+    "out_point": 1486.02,
     "setup": "\"I agree that I think the turnaround time is too fast... open qualifiers are starting immediately.\"",
     "claim": "The short turnaround is a fair complaint but not the end of the world: partnered teams already have kickoff slots, and the non-qualifiers had all of champs to sort out rosters.",
     "consequence": "\"You could assume though, if you have like half a brain that you're not going to get in there.\"",
@@ -1507,7 +1571,9 @@
     "flags": [
       "112s is long for short-form \u2014 check the out-point"
     ],
-    "file": "34_0h22m53s_is-the-open-qualifier-turnaround-too.mp4"
+    "file": "34_0h22m53s_is-the-open-qualifier-turnaround-too.mp4",
+    "out_point_original": 1485.5,
+    "out_point_fix": "clamped at a 17.3s mute"
   },
   {
     "region": [
@@ -1520,7 +1586,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 5380.1,
-    "out_point": 5424.8,
+    "out_point": 5424.56,
     "setup": "\"Assuming Zekin is gone and Aspass stays. Zekin can be replaced by Valin.\"",
     "claim": "\"Why can't we get the old optic back?\" / \"I'm 34 years old. You cannot get the old optic back.\"",
     "consequence": "\"We're literally old. I can barely make it out of fucking ascendant... It's over.\"",
@@ -1552,7 +1618,9 @@
     "flags": [
       "speaker attribution needs checking before this ships"
     ],
-    "file": "35_1h29m40s_streamer-shoots-down-the-idea-of-reu.mp4"
+    "file": "35_1h29m40s_streamer-shoots-down-the-idea-of-reu.mp4",
+    "out_point_original": 5424.8,
+    "out_point_fix": "trimmed back to where the audio stops (13.8s mute follows)"
   },
   {
     "region": [
@@ -1565,7 +1633,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 4169.5,
-    "out_point": 4206.1,
+    "out_point": 4205.78,
     "setup": "Chat: \"You think it's virus ever gonna get picked up again?\"",
     "claim": "He's a \"solid sentinel player in terms of... pure skill.\"",
     "consequence": "Intangibles are unknown, but if he's a good teammate he'll get trials; \"I think it's [he's] good as fuck.\"",
@@ -1592,7 +1660,9 @@
       "fit": 0.15
     },
     "flags": [],
-    "file": "36_1h09m29s_whether-virus-gets-signed-again.mp4"
+    "file": "36_1h09m29s_whether-virus-gets-signed-again.mp4",
+    "out_point_original": 4206.1,
+    "out_point_fix": "trimmed back to where the audio stops (7.4s mute follows)"
   },
   {
     "region": [
@@ -1605,7 +1675,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 4206.1,
-    "out_point": 4251.6,
+    "out_point": 4251.33,
     "setup": "Chat: \"Can you please tell us something... is your team all streamers or maybe X pro join?\"",
     "claim": "\"Everyone that is on my team currently streams. It's about the only hint I can give.\"",
     "consequence": "Asked if an announcement is coming: \"Probably pretty soon... next couple days.\"",
@@ -1632,7 +1702,9 @@
     "flags": [
       "speaker attribution needs checking before this ships"
     ],
-    "file": "37_1h10m06s_teasing-his-own-team-s-roster-and-an.mp4"
+    "file": "37_1h10m06s_teasing-his-own-team-s-roster-and-an.mp4",
+    "out_point_original": 4251.6,
+    "out_point_fix": "trimmed back to where the audio stops (1.8s mute follows)"
   },
   {
     "region": [
@@ -1645,7 +1717,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 2949.4,
-    "out_point": 3090.7,
+    "out_point": 3093.6,
     "setup": "\"Sentinels rebuild, hear me out. Rob is cooking for something and we don't know what it is yet.\"",
     "claim": "\"This is an insane lineup... this is their ideal lineup for sure.\" He backs it with a Real Madrid 2014-2017 super-team comparison.",
     "consequence": "\"This is literally a super team though. And we know how super teams can go sometimes.\"",
@@ -1683,7 +1755,9 @@
       "141s is long for short-form \u2014 check the out-point",
       "speaker attribution needs checking before this ships"
     ],
-    "file": "38_0h49m09s_sentinels-rumored-rebuilt-roster-as.mp4"
+    "file": "38_0h49m09s_sentinels-rumored-rebuilt-roster-as.mp4",
+    "out_point_original": 3090.7,
+    "out_point_fix": "extended to the end of the named line"
   },
   {
     "region": [
@@ -1696,7 +1770,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 3983.1,
-    "out_point": 4033.3,
+    "out_point": 4034.21,
     "setup": "What do you think about SR not getting a spot in partnership?",
     "claim": "I'm not even slightly surprised; it would be very hard to replace the current partnered teams with SR.",
     "consequence": "I don't know what Riot looks at, so I can't say one team deserved it over the other.",
@@ -1722,7 +1796,9 @@
       "fit": 0.15
     },
     "flags": [],
-    "file": "39_1h06m23s_sr-missing-out-on-riot-partnership.mp4"
+    "file": "39_1h06m23s_sr-missing-out-on-riot-partnership.mp4",
+    "out_point_original": 4033.3,
+    "out_point_fix": "clamped at a 6.1s mute"
   },
   {
     "region": [
@@ -1735,7 +1811,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 5724.1,
-    "out_point": 5876.6,
+    "out_point": 5877.39,
     "setup": "Chat asks: \"Val your plan on becoming a coach or is it something that just came up\"",
     "claim": "\"I never actually planned on coaching... a fun thing where I can combine streaming with coaching.\" It's unpaid and he won't coach a big org.",
     "consequence": "\"Coaching is a very stressful job... you need the exact same passion you have as a player... I don't think that I have that right now.\"",
@@ -1766,7 +1842,9 @@
     "flags": [
       "152s is long for short-form \u2014 check the out-point"
     ],
-    "file": "40_1h35m24s_val-explains-why-he-is-coaching-for.mp4"
+    "file": "40_1h35m24s_val-explains-why-he-is-coaching-for.mp4",
+    "out_point_original": 5876.6,
+    "out_point_fix": "clamped at a 7.3s mute"
   },
   {
     "region": [
@@ -1779,7 +1857,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 4537.7,
-    "out_point": 4562.7,
+    "out_point": 4562.54,
     "setup": "Chat asks: \"Do you ever consider sponsoring a team in qualifiers who you think deserves to be paid?\"",
     "claim": "\"It would be a loan. I'm not just giving away money. Pay that shit back.\"",
     "consequence": "\"You have a year plus interest, unless it's someone I know very personally.\"",
@@ -1805,7 +1883,9 @@
     "flags": [
       "speaker attribution needs checking before this ships"
     ],
-    "file": "41_1h15m37s_would-he-sponsor-a-qualifier-team-on.mp4"
+    "file": "41_1h15m37s_would-he-sponsor-a-qualifier-team-on.mp4",
+    "out_point_original": 4562.7,
+    "out_point_fix": "trimmed back to where the audio stops (12.8s mute follows)"
   },
   {
     "region": [
@@ -1818,7 +1898,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 2255.5,
-    "out_point": 2302.1,
+    "out_point": 2305.48,
     "setup": "If they do this as they go, and the rules aren't set beforehand, this is gonna be a shit show no matter what.",
     "claim": "This is the only circuit everyone should want. If you're bitching about it, give me a real reason.",
     "consequence": "You have to outweigh the pros and cons; CS and Dota do it, it's doable.",
@@ -1845,7 +1925,9 @@
     "flags": [
       "speaker attribution needs checking before this ships"
     ],
-    "file": "42_0h37m35s_defending-the-open-qualifier-circuit.mp4"
+    "file": "42_0h37m35s_defending-the-open-qualifier-circuit.mp4",
+    "out_point_original": 2302.1,
+    "out_point_fix": "clamped at a 3.7s mute"
   },
   {
     "region": [
@@ -1858,7 +1940,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 2391.2,
-    "out_point": 2416.9,
+    "out_point": 2420.14,
     "setup": "Chat asks: \"What changes could you see NRG making?\"",
     "claim": "\"The only player that might end up leaving on his own accord... is Kiko simply because he's an EMEA player\"",
     "consequence": "\"He may want to go back... It didn't come from anything. I don't have any extra information\"",
@@ -1887,7 +1969,9 @@
       "fit": 0.15
     },
     "flags": [],
-    "file": "43_0h39m51s_prediction-that-kiko-might-leave-nrg.mp4"
+    "file": "43_0h39m51s_prediction-that-kiko-might-leave-nrg.mp4",
+    "out_point_original": 2416.9,
+    "out_point_fix": "clamped at a 1.1s mute"
   },
   {
     "region": [
@@ -1900,7 +1984,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 4709.5,
-    "out_point": 4742.6,
+    "out_point": 4743.6,
     "setup": "\"That's the other perk about having an open qualifier system... if you're not on a partnered team\"",
     "claim": "\"look at how many young players have already made it... that's got to be so motivating for more young players\"",
     "consequence": "\"you have more players to choose from that could be the next Erday or the next Neon\" and a shout-out to Mal",
@@ -1929,7 +2013,9 @@
       "fit": 0.15
     },
     "flags": [],
-    "file": "44_1h18m29s_the-open-qualifier-as-a-pipeline-for.mp4"
+    "file": "44_1h18m29s_the-open-qualifier-as-a-pipeline-for.mp4",
+    "out_point_original": 4742.6,
+    "out_point_fix": "extended to the end of the named line"
   },
   {
     "region": [
@@ -1942,7 +2028,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 5146.4,
-    "out_point": 5166.9,
+    "out_point": 5168.49,
     "setup": "\"leak oxydamir confirmed it's looking like there's too many reports about this\"",
     "claim": "\"I think the oxy one is pretty much set\" \u2013 he's going to Sun.",
     "consequence": "\"the boy finally gets the bag\"",
@@ -1970,7 +2056,9 @@
       "fit": 0.15
     },
     "flags": [],
-    "file": "45_1h25m46s_oxy-s-reported-move-to-sun.mp4"
+    "file": "45_1h25m46s_oxy-s-reported-move-to-sun.mp4",
+    "out_point_original": 5166.9,
+    "out_point_fix": "clamped at a 1.3s mute"
   },
   {
     "region": [
@@ -1983,7 +2071,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 5502.8,
-    "out_point": 5537.6,
+    "out_point": 5537.46,
     "setup": "\"Get zix as an assistant coach\"",
     "claim": "\"He may want to just watch party if I'm coaching... I feel like he would want to be on a way more serious team\"",
     "consequence": "Zix wants to do content creation and maybe coach later in the year, and the speaker would happily work with him.",
@@ -2013,7 +2101,9 @@
     "flags": [
       "speaker attribution needs checking before this ships"
     ],
-    "file": "46_1h31m42s_whether-zix-could-become-an-assistan.mp4"
+    "file": "46_1h31m42s_whether-zix-could-become-an-assistan.mp4",
+    "out_point_original": 5537.6,
+    "out_point_fix": "trimmed back to where the audio stops (2.4s mute follows)"
   },
   {
     "region": [
@@ -2026,7 +2116,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 95.3,
-    "out_point": 205.5,
+    "out_point": 210.2,
     "setup": "\"I just wanted to discuss this scenario because there's a lot of pessimism... about this open circuit\"",
     "claim": "\"A passport should not stop you from literally living out your dream.\" Teams that qualify should already be getting passports.",
     "consequence": "\"You can expedite it... you're going to get org backing no matter what\"",
@@ -2060,7 +2150,9 @@
       "110s is long for short-form \u2014 check the out-point",
       "speaker attribution needs checking before this ships"
     ],
-    "file": "47_0h01m35s_passport-worries-about-the-open-circ.mp4"
+    "file": "47_0h01m35s_passport-worries-about-the-open-circ.mp4",
+    "out_point_original": 205.5,
+    "out_point_fix": "extended to the end of the named line"
   },
   {
     "region": [
@@ -2073,7 +2165,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 4998.9,
-    "out_point": 5032.4,
+    "out_point": 5032.8,
     "setup": "Chat asks whether he already knows when the team's first game is, then whether the team has people who actually want to win and try.",
     "claim": "\"I don't know yet. We'll see. I think we're going to be trying. But I'm not 100% sure.\"",
     "consequence": "Moves straight on to thanking a viewer for the prime and taking the next question.",
@@ -2098,7 +2190,9 @@
       "fit": 0.132
     },
     "flags": [],
-    "file": "48_1h23m18s_streamer-unsure-whether-his-new-team.mp4"
+    "file": "48_1h23m18s_streamer-unsure-whether-his-new-team.mp4",
+    "out_point_original": 5032.4,
+    "out_point_fix": "clamped at a 1.1s mute"
   },
   {
     "region": [
@@ -2111,7 +2205,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 3090.7,
-    "out_point": 3226.3,
+    "out_point": 3226.93,
     "setup": "\"to get juice on who you're coaching y'all I'll tell the mods you guys gotta keep it to yourselves\"",
     "claim": "\"I'm gonna be coaching in the open qualifiers... I don't think I could watch worlds\"",
     "consequence": "\"on days we have off we'll watch league... but if we're cracking it's going to be tough.\"",
@@ -2142,7 +2236,9 @@
       "136s is long for short-form \u2014 check the out-point",
       "speaker attribution needs checking before this ships"
     ],
-    "file": "49_0h51m30s_streamer-is-coaching-in-the-open-qua.mp4"
+    "file": "49_0h51m30s_streamer-is-coaching-in-the-open-qua.mp4",
+    "out_point_original": 3226.3,
+    "out_point_fix": "clamped at a 5.8s mute"
   },
   {
     "region": [
@@ -2155,7 +2251,7 @@
     "has_clip": true,
     "genre": "take",
     "in_point": 443.9,
-    "out_point": 553.4,
+    "out_point": 555.19,
     "setup": "\"Realistically speaking this is pretty normal... you're not always gonna get org backing\"",
     "claim": "\"Forget orgs\": orgs only invest in proven top teams, so tier two players should just form teams, grind open qualifiers and win.",
     "consequence": "\"Orgs have never made money in this game\"; he doesn't see the change as a deal breaker, though he \"sees what he's saying\".",
@@ -2186,6 +2282,8 @@
     "flags": [
       "110s is long for short-form \u2014 check the out-point"
     ],
-    "file": "50_0h07m23s_tier-two-players-shouldn-t-wait-for.mp4"
+    "file": "50_0h07m23s_tier-two-players-shouldn-t-wait-for.mp4",
+    "out_point_original": 553.4,
+    "out_point_fix": "clamped at a 1.1s mute"
   }
 ]

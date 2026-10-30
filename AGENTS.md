@@ -151,6 +151,36 @@ was *prosodic* — that it read as a complete sentence in text and so could not
 be detected. That was wrong. It was this off-by-one, and it is fully mechanical.
 Rule 1 did not need a model to enforce it; it needed an end timestamp.
 
+### Applying it to all 50
+
+| | |
+|---|---|
+| Extended to keep the named line | **37 clips, +95.4s of speech recovered** |
+| Trimmed back to where audio stops | 10 clips, −11.4s |
+| Unchanged | 3 clips |
+| QC rejects | **7 of 50**, down from 13 |
+
+Three cases, and the third only became visible after the second was wrong:
+
+1. **No mute in the span** → extend to the next utterance start. Recovers the line.
+2. **Mute starts inside the span** → clamp to 0.15s before it. Keeps the audible
+   part. Cutting exactly on the boundary leaves a few frames of mute in the tail.
+3. **The named line sits inside a mute** → it has no audio to recover, so pull
+   the out-point BACK to where audible speech stops. Leaving it put ends the
+   clip on a mute boundary, which reads as absent audio.
+
+**Test mute overlap, not containment.** The first version only looked for mutes
+*starting* after the out-point. Clip 7's began 0.12s earlier, so it was skipped
+and the clip gained 11.7s of absent audio in the middle of the line it was
+supposed to recover. Five clips were affected; the overlap test fixed all five.
+
+Known limit: `muted_regions.json` keeps runs ≥1.0s, so sub-second mutes are
+invisible to the clamp. Clip 21 ends on a 0.9s mute for this reason. Rebuild
+the map with a lower floor if that matters.
+
+Of the 7 remaining rejects, **6 open on absent audio** — the in-point mute
+problem, which is separate and still unsolved.
+
 ## Three rules from review
 
 **Status: rule 1 is now enforced (above). Rules 2 and 3 remain unenforced.**
