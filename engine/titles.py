@@ -223,3 +223,73 @@ def exhibit(src_png: Path, out: Path, *, crop_x=(200, 680), width=1010,
                     fill=accent)
     img.save(out)
     return img.size
+
+
+# Regions of the VCT Roster Board worth showing, in SOURCE pixels, measured
+# off clip 08's frame. The board is pixel-static for 61 of the clip's 67s
+# (content-region frame delta: median 0.13, one change at 5.5s), so variety
+# in the lower pane has to come from moving through the document rather than
+# from the document changing — which is what R1 gets for free by having
+# seven different exhibits.
+BOARD_REGIONS = {
+    "strip": (10, 152, 680, 180),        # the header stat line
+    "kru":   (958, 246, 1417, 480),      # KRU Esports: 1/5 signed, 4 unconfirmed
+    "g2":    (489, 246, 951, 480),
+    "nrg":   (958, 637, 1417, 880),
+    "sen":   (1431, 637, 1894, 880),
+}
+
+
+def panel(src_png: Path, out: Path, rect, *, width=820, kicker="VCT Roster Board",
+          boxes=(), rules=(), accent=ACCENT, pad=22, src_px=25, rule_px=4):
+    """Magnify any region of a SOURCE frame and mark what matters.
+
+    The general form of `exhibit`. Same principle, which is the one R1
+    demonstrates and three rejected designs taught: **show the document, do
+    not redraw it.** Real pixels cannot be mis-transcribed, cannot drift from
+    the source, and preserve handle casing for free — "KRU ESPORTS",
+    "Dantedeu5", "mwzera" come out right without touching the whisper
+    transcript that garbles them.
+
+    `rect` is (x0, y0, x1, y1) in source pixels and must be a single
+    contiguous region; stitching separated parts together fabricates an
+    adjacency the page does not have. `boxes` outlines sub-rects (also in
+    source pixels), `rules` underlines them.
+    """
+    x0, y0, x1, y1 = rect
+    img_src = Image.open(src_png).convert("RGBA")
+    crop = img_src.crop((x0, y0, x1, y1))
+    sc = width / (x1 - x0)
+    crop = crop.resize((width, max(1, round(crop.height * sc))), Image.LANCZOS)
+
+    fsrc = _font(src_px)
+    head = int(src_px * 1.7) if kicker else 0
+    extra = rule_px + 7 if rules else 0
+    bw, bh = width + pad * 2, crop.height + head + extra + pad * 2
+    img = Image.new("RGBA", (bw, bh), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rectangle([0, 0, bw - 1, bh - 1], fill=(8, 10, 14, 242))      # square, no shadow
+    d.rectangle([0, 0, bw - 1, 0], fill=accent)
+
+    if kicker:
+        x = pad
+        for ch in kicker.upper():
+            d.text((x, pad - 4), ch, font=fsrc, fill=(150, 157, 170, 255))
+            x += d.textlength(ch, font=fsrc) + 2.0
+
+    top = pad - 4 + head
+    img.paste(crop, (pad, top), crop)
+
+    def to_px(v, origin):
+        return round((v - origin) * sc)
+
+    for bx0, by0, bx1, by1 in boxes:
+        d.rectangle([pad + to_px(bx0, x0), top + to_px(by0, y0),
+                     pad + to_px(bx1, x0), top + to_px(by1, y0)],
+                    outline=accent, width=3)
+    for rx0, rx1 in rules:
+        d.rectangle([pad + to_px(rx0, x0), top + crop.height + 7,
+                     pad + to_px(rx1, x0), top + crop.height + 7 + rule_px],
+                    fill=accent)
+    img.save(out)
+    return img.size

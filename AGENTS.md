@@ -621,6 +621,99 @@ Dropped deliberately: **flashes on cuts** (a cut is already an edit event, and
 neither reference uses flashes at all) and **shake** (decoration on a speaker
 this measured).
 
+### The overlays belong IN the Resolve timeline
+
+George: "stop being lazy, edit this in davinci." He was right — the hook,
+cards and sound were being composited in ffmpeg after Resolve rendered, so
+none of them existed in the timeline and none could be nudged in the UI.
+
+They are now clips on **V4/V5** and **A2**. Resolve composites and renders
+them. `resolve_overlays.py` places them; `engine/overlays.py` prepares them.
+
+**How, given there is no keyframe API.** `Opacity` IS a settable
+TimelineItem property (verified: set 40, reads back 40) but holds one static
+value. `AddTransition` does not exist. So each overlay's fade and settle are
+baked into a full-frame **alpha movie clip**, and Resolve just composites
+it.
+
+Four things cost a render each:
+
+1. **`hasattr` LIES on Resolve objects.** They are remote proxies, and
+   `hasattr(tl, "ThisMethodDoesNotExistAtAll")` returns True. That is how
+   `AddTransition` looked available. Call it: `TypeError: 'NoneType' object
+   is not callable`. Never feature-detect with `hasattr` here.
+2. **A still cannot be used as an overlay clip.** A PNG in the media pool
+   reports `Frames == 1` and `AppendToTimeline` ignores `endFrame` for it —
+   the clip lands at Resolve's default length (300 frames) no matter what
+   you ask for. A movie clip honours `endFrame` exactly.
+3. **`color=c=black@0.0` needs `,format=rgba` INSIDE the lavfi source.** The
+   bare source emits an opaque format, so the `@0.0` has nothing to be
+   carried in, and converting to rgba afterwards gives opaque black. Also
+   `overlay=...:format=rgb` flattens alpha — use `format=auto`. Either
+   mistake yields a clip that looks right as a still and composites in
+   Resolve as a solid black rectangle.
+4. **Use `qtrle`, not ProRes 4444.** Both are lossless with alpha, but these
+   frames are almost entirely transparent and RLE collapses that: 56 MB for
+   five overlays instead of ~1.2 GB. The ProRes attempt filled the disk and
+   died with exit 228.
+
+**Derive the length FROM the timeline.** Hard-coding 51.5s put the sound bed
+5 frames past the picture, which permanently extended the timeline (deleting
+the clip does not shrink it back) and left a black frame at 51.42s.
+
+**What still cannot be in Resolve, and why:**
+
+| | |
+|---|---|
+| Loudness | `NormalizeAudioLevel` applies gain without true-peak limiting. At -20.2 LUFS / -3.5 dBTP, the +6.2 dB to reach -14 would hit +2.7 dBTP |
+| Animated shot pushes | no keyframe API for transforms (see the juice section) |
+
+**Regression to be honest about:** the animated 5% shot pushes are GONE from
+v22. They were an ffmpeg `zoompan` over the whole frame, and now that the
+overlays are burned into the Resolve render, pushing would scale the cards
+too. The per-shot *framings* remain (they are V2 insets in Resolve); only the
+movement within a shot is lost. To get it back, bake the push into the
+source clips BEFORE Resolve rather than after.
+
+### More overlays, because the reference has far more
+
+George: "we need more popups on the screen for things like news, references,
+etc ... still looks basic." Measured, he is right by a wide margin.
+
+Clip 8's own footage cannot supply variety: the content region is **pixel-
+static for 61 of its 67 seconds** (frame delta median 0.13, one change at
+5.5s when he switches from the tweet to the board). R1 by contrast changes
+its lower pane constantly — in seconds 30-39 alone a per-second sweep found
+the buy menu, gameplay, a scoreboard, the scoreboard with a context card,
+the report dialog and gameplay again.
+
+So variety has to come from moving around INSIDE the one document. Now five
+overlays instead of three, each on the line it supports:
+
+| at | overlay | over |
+|---|---|---|
+| 0.00 | hook title | — |
+| 1.65 | the announcement tweet | the news |
+| 17.45 | strip: 32 open slots / 274 not yet confirmed | "you don't have enough job security" |
+| 30.80 | strip: 139 signed | "once you get SIGNED to an org" |
+| 37.85 | KRU Esports: 1/5, four unconfirmed | "those people that get replaced" |
+
+The KRU card is the strongest thing on the board: four empty roster slots,
+one signed player, and saadhak / Dantedeu5 / mwzera / heat sitting in bench
+/ options. Showing real pixels also preserves handle casing for free —
+"KRU", "Dantedeu5" — which the whisper transcript garbles.
+
+**Sentinels is unusable as an exhibit**: his facecam window sits over it in
+the source frame. Check occlusion before choosing a region.
+
+**Still to build, found by a per-second sweep of R1 and not yet in our
+inventory** (`docs/SKILLS.md` skills 16-18):
+
+- a **hand-drawn marker circle** over the exhibit (R1 at 0:31) — annotation,
+  which is exactly the "references" idea;
+- a **mid-clip section title** ("150K POV:" at 0:31), not only a hook;
+- the content pane **dipping to full black between exhibits** (R1 at 1:11).
+
 ### SHOW the exhibit, do not redraw it
 
 George on a card I designed: *"animations like that are useful and

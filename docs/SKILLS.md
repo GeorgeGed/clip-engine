@@ -286,3 +286,28 @@ an adjacency the source does not have.
 Related: R2's persistent banner is a CLAIM in the speaker's voice ("IT'S
 EITHER PRX OR G2"), never a description of the video. A banner that names the
 subject instead of asserting something reads as metadata and should be cut.
+
+
+## Skills 16-18 — found by a per-second sweep of R1, NOT YET BUILT
+
+A contact-sheet sweep at 1fps turned up three techniques the earlier
+once-over missed. Recorded here so they are not re-derived.
+
+**16. Hand-drawn marker annotation (R1, 0:31).** A red/orange marker circle
+drawn over the gameplay, caught mid-stroke. This is the "reference" overlay
+in its purest form: it points at the thing being discussed. Closest thing we
+have is `titles.panel(boxes=...)`, which draws a clean rectangle — a marker
+stroke would read far less like a UI and more like someone making a case.
+
+**17. Mid-clip section title (R1, 0:31).** "150K POV:" — ALL CAPS, white
+fill, heavy stroke, no panel, appearing 31 seconds in. Titles are not just a
+hook at the head; R1 re-titles as the argument moves.
+
+**18. Black dip between exhibits (R1, 1:11).** The content pane goes to full
+black for about a second between two exhibits. It separates one piece of
+evidence from the next and is the only "transition" observed anywhere in the
+references — note it is a DIP, not a wipe or a whoosh.
+
+Density note: R1's lower pane changes roughly once per 1-2s in its busiest
+stretches. Clip 8's source is pixel-static for 61 of 67s, so matching that
+means moving around inside one document rather than cutting between many.

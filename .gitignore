@@ -5,3 +5,6 @@ jobs/*/media/
 jobs/*/out/
 jobs/*/calib/
 .DS_Store
+renders/*.mov
+jobs/fns-2905408276/overlays/*.mov
+jobs/fns-2905408276/overlays/*.wav
