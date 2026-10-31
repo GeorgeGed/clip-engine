@@ -16,8 +16,13 @@ streamers:
 
   gofns:                 # FNS
     permission: explicit
-    # Top-right. Watch-party streams: pin past the watched POV cams.
-    facecam: { x: 0.72, y: 0.26, w: 0.28, h: 0.27 }
+    # Bottom-right, measured off VOD 2905408276 (2026-10-31): source pixels
+    # x 1456-1920, y 818-1080, i.e. 464x262, 5.9% of frame.
+    # WAS { x: 0.72, y: 0.26, w: 0.28, h: 0.27 } -- top-right, ported from
+    # clip-autopilot and WRONG for this stream. A stale pin is worse than no
+    # pin: it crops confidently to the wrong place. Re-measure per VOD until
+    # detection exists.
+    facecam: { x: 0.758, y: 0.757, w: 0.242, h: 0.243 }
 
   tarik:
     permission: explicit

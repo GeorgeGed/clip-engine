@@ -432,6 +432,36 @@ Black/Bold**, Proxima Nova Extrabold and Compacta — Tungsten is a broadcast
 sports face and is what the reference build uses. Install a font to
 `~/Library/Fonts` before naming it in `Style.font`.
 
+### Grading and loudness
+
+**`TimelineItem.SetCDL` is the grading API**, and it works:
+`{'NodeIndex': '1', 'Slope': 'r g b', 'Offset': 'r g b', 'Power': 'r g b',
+'Saturation': 's'}` — ASC CDL, `out = (in * Slope + Offset) ^ Power`. Values
+are space-separated strings, not floats. The house lift for flat Twitch H.264
+is Slope 1.06, Offset −0.012, Power 1.06, Saturation 1.18. **Grade the facecam
+only** — the lower pane is a document, and lifting contrast there costs text
+legibility for no gain.
+
+**Numeric Fusion inputs take expressions too.** Only keyframes are refused. So
+`Red1`/`Green1`/`Blue1` can carry the same per-card `iif` chain as
+`StyledText`, which is how one Text+ gives some cards the accent colour and
+leaves the rest white — "one emphasis colour per card", driven from data.
+
+**Emphasis is keyed off the model's own `claim` and `consequence`**, not a
+hand-written list: content words ≥5 chars, minus stopwords. On clip 8 that
+marked **16 of 117 cards (14%)** and they were the right ones — "WORSE FOR THE
+SCENE", "ARE BLOWING IT / OUT OF PROPORTION", "EXCEPTIONAL", "UP WITH
+NOTHING". It needs no tuning per clip because the claim is already the point
+of the clip.
+
+**Loudness is finished AFTER the render, in ffmpeg, not in Resolve.**
+`Timeline.NormalizeAudioLevel` exists and offers ITU-R BS.1770-4 and EBU R128,
+but it only applies gain — it does not limit. Clip 8 sat at −20.12 LUFS with a
+−6.37 dBTP peak, so the +8 dB to reach −12 would have hit **+1.6 dBTP** and
+clipped straight through the hard ceiling. Two-pass `loudnorm`
+(`render_ffmpeg._finish_audio`) applies gain AND true-peak limiting in one
+pass: measured result **−12.50 LUFS, −0.74 dBTP**, 5 seconds for a 67s clip.
+
 ### The clip 8 reference build
 
 Project `fns-clip08-reference`, timeline `clip08-L2`, 1080×1920 @ 60.

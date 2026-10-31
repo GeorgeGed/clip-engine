@@ -64,6 +64,7 @@ class Card:
     end: float
     text: str
     words: list[str] = field(default_factory=list)
+    emphasis: bool = False       # whole card takes the accent colour
 
 
 def mask_profanity(word: str) -> str:
@@ -112,6 +113,42 @@ def cards(words: list[dict], *, max_words: int = MAX_WORDS,
     return out
 
 
+STOPWORDS = {
+    "that", "this", "with", "from", "they", "them", "their", "there", "then",
+    "what", "when", "which", "while", "would", "could", "should", "about",
+    "after", "before", "only", "just", "even", "also", "like", "been", "have",
+    "into", "more", "most", "some", "than", "because", "says", "said", "reads",
+    "means", "being", "other", "every", "where", "your", "will", "much",
+}
+
+
+def emphasis_keys(*texts: str, min_len: int = 5) -> set[str]:
+    """Content words from the model's own claim and consequence.
+
+    The claim IS the point of the clip, so its words are what deserve the one
+    accent colour. Keying off the Tier 3 output rather than a hand-written list
+    means this works on any clip without tuning.
+    """
+    keys: set[str] = set()
+    for tx in texts:
+        for raw in re.findall(r"[A-Za-z']+", tx or ""):
+            w = raw.lower().strip("'")
+            if len(w) >= min_len and w not in STOPWORDS:
+                keys.add(w.upper())
+    return keys
+
+
+def mark_emphasis(cards_: list[Card], keys: set[str]) -> int:
+    """Flag cards containing a key word. Returns how many were marked."""
+    n = 0
+    for c in cards_:
+        toks = {w.strip(".,!?'\"").upper() for w in c.text.split()}
+        if toks & keys:
+            c.emphasis = True
+            n += 1
+    return n
+
+
 def _esc(s: str) -> str:
     return s.replace("\\", "\\\\").replace('"', '\\"')
 
@@ -123,8 +160,23 @@ def expression(window_cards: list[tuple[int, int, str]], ) -> str:
     outside every card renders as empty string.
     """
     expr = '""'
-    for start, end, text in reversed(window_cards):
+    for start, end, text, *_ in reversed(window_cards):
         expr = f'iif(time >= {start} and time < {end}, "{_esc(text)}", {expr})'
+    return expr
+
+
+def colour_expression(window_cards: list[tuple[int, int, str, bool]],
+                      channel: int, fill: tuple, accent: tuple) -> str:
+    """Per-card fill colour, same iif trick as the text.
+
+    Numeric inputs do not keyframe, but they DO take expressions — verified the
+    same way StyledText was. So one tool can change colour per card.
+    """
+    base = fill[channel]
+    expr = f"{base}"
+    for start, end, _txt, emph in reversed(window_cards):
+        val = accent[channel] if emph else fill[channel]
+        expr = f"iif(time >= {start} and time < {end}, {val}, {expr})"
     return expr
 
 
@@ -152,7 +204,8 @@ def plan_windows(cards_: list[Card], *, fps: float, total_frames: int) -> list[d
             # only the cards the earlier window could not reach.
             if w == n - 1 and n > 1 and s < (n - 1) * TITLE_FRAMES:
                 continue
-            entries.append((max(0, s - lo), min(TITLE_FRAMES, e - lo), c.text))
+            entries.append((max(0, s - lo), min(TITLE_FRAMES, e - lo),
+                            c.text, c.emphasis))
         out.append({"index": w, "offset_frames": lo, "cards": entries})
     return out
 
