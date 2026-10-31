@@ -432,6 +432,46 @@ Black/Bold**, Proxima Nova Extrabold and Compacta — Tungsten is a broadcast
 sports face and is what the reference build uses. Install a font to
 `~/Library/Fonts` before naming it in `Style.font`.
 
+### Cuts on a take clip, and why clip 8 gets PICTURE cuts only
+
+**Every long pause in clip 8 is a Twitch mute sitting mid-sentence.** Six
+inter-word gaps exceed 0.8s and all six coincide with absent audio, splitting
+a sentence each time: *"was never kind"* [1.25s gone] *"to job stability"*,
+*"it's"* [1.31s] *"hard as"*, *"but"* [2.24s] *"the thing is"*. Removing any of
+them joins speech across content nobody can hear — exactly what the
+non-contiguous speech gate rejects. **This clip has no safe audio cuts.**
+
+So the audio runs unbroken and only the FRAME cuts: shots change on a pause,
+the viewer reads it as cutting, and nothing is spliced. Because no time is
+removed, caption timings need no remapping either.
+
+`engine/cuts.py` picks cut points as the midpoints of the widest inter-word
+gaps, spaced at least `MIN_SHOT` apart. Measured on clip 8:
+
+| min shot | cuts | shots | mean shot | cuts/min |
+|---|---|---|---|---|
+| 4.0s | **5** | 6 | 11.2s | 4.5 |
+| 5.0s | 4 | 5 | 13.4s | 3.6 |
+
+R1 ran 8.9s mean and 6.0 cuts/min, so even the loosest setting is slower than
+the frag reference — the material is 175 wpm with almost no real pauses. Note
+R2, the *take* reference, cut **zero** times. Five picture cuts is already
+more aggressive than the closest reference, not less.
+
+**Watch out: whisper's VAD merges utterances.** Clip 8 came back as 12
+utterances each ending exactly where the next starts, so utterance boundaries
+are useless for finding pauses. Use WORD gaps.
+
+### Resolve can wedge
+
+Two probes hung with no output at all, and `ps` showed Resolve at 90–105% CPU
+in state R — busy, not deadlocked. The scripting API is served on the GUI
+thread, so a long operation blocks every call, and a `SIGALRM` watchdog does
+NOT help: the hang is inside `fusionscript.so`, a C extension that never
+yields to Python signals. Budget a real subprocess timeout instead, leave the
+app on the Edit page rather than Color when scripting, and avoid invalid
+timecodes (`01:00:60:00` is not a time and appeared to start the trouble).
+
 ### Grading and loudness
 
 **`TimelineItem.SetCDL` is the grading API**, and it works:
