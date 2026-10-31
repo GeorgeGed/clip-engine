@@ -621,6 +621,49 @@ Dropped deliberately: **flashes on cuts** (a cut is already an edit event, and
 neither reference uses flashes at all) and **shake** (decoration on a speaker
 this measured).
 
+### SHOW the exhibit, do not redraw it
+
+George on a card I designed: *"animations like that are useful and
+informative but i dont like the design - looks vibe coded."*
+
+He was right, and the fix came from looking at R1 again rather than
+iterating on the design. **R1 does not design a stat panel.** The card at
+0:08 — AIM 98.6 / RATING +2.4 / TIME TO DMG 447ms, twelve figures in a grid
+— is a screenshot of a real stats page composited in, exactly like the tweet
+card. Square corners, no shadow, no accent rule, the page's own light wide
+sans. The reference shows the document.
+
+My card had rounded corners, a drop shadow, a gold rule down one edge and
+heavy condensed gold numerals. That combination is the generic-dashboard
+signature, and no amount of restyling fixes the category error.
+
+So `titles.exhibit` crops the **actual stat strip out of the source frame**,
+magnifies it ~2x and puts an accent rule under the figures being pointed at.
+It cannot be mis-transcribed, cannot drift from the source, and cannot look
+like a component because nothing about it is drawn. Strip geometry is
+measured by column variance and kept in `titles.STRIP_BLOCKS`.
+
+**Crop a CONTIGUOUS run.** The two figures that matter are blocks 2 and 5,
+not adjacent. Stitching them together would fabricate an adjacency the page
+does not have — that is doctoring an exhibit. Show the run that contains
+them and underline the two.
+
+**A banner must be a CLAIM, not metadata.** George: *"the 'fns on job
+security' bit doesnt really make sense."* R2's persistent banner says "IT'S
+EITHER PRX OR G2" — the take, in the speaker's voice. Mine described the
+video to itself. The banner is removed; if one returns, it asserts
+something.
+
+**Pick a sound by TARGET RMS, not peak gain.** Across the palette the RMS of
+a peak-normalised waveform spans 9 dB, so the same `gain` makes a chirp far
+louder than a tock — which is why levelling kept missing in both directions.
+`sfx.cue_gain(name, target_rms_dbfs, master_gain_db)` solves for the gain,
+and swapping sounds then keeps the level. Clip 8 sits at -30 dBFS RMS.
+
+Sound, fourth attempt: rejected were a bell (547ms decay), a shorter bell
+(216ms) and a woodblock (65ms) — all pitched chimes. `sfx.thunk` is the
+other register: a down-swept low body plus a click, gone in 87ms.
+
 ### A card has to carry a FACT, and the exhibit is full of them
 
 George, on the v19 chips: *"why are you adding a text of 'blown out of

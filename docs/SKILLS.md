@@ -258,33 +258,31 @@ construction. **Always extract every file at the same sample rate** before
 comparing spectra.
 
 
-## Skill 15 — The sourced fact card (extrapolated, not observed)
+## Skill 15 — The magnified exhibit (R1, 0:08)
 
-**Honest provenance: no reference contains this exact element.** R2 and R4
-have persistent banners (skill 7) and R4 has tilted screenshot cards (skill
-3); this is those scaled into a transient stat graphic. It exists because
-George asked for popups and then rejected the first attempt for carrying no
-information.
+**This one IS observed.** R1 composites a real Leetify stats page over the
+footage at 0:08: flat dark navy panel, square corners, no shadow, no accent
+rule, the page's own light wide sans, label above value, emphasis values in
+orange. It is a screenshot, not a designed graphic.
+
+The lesson that cost three rejected designs: **when you need data on screen,
+show the document — do not redraw it.** A drawn card has to survive a taste
+judgement; a screenshot does not, and it cannot be mis-transcribed.
 
 | | |
 |---|---|
-| Form | dark card, accent rule down the left edge, drop shadow |
-| Content | source line, then one or more `number` + `label` pairs |
-| Type | Tungsten Bold — 92px number, 36px label, 25px source |
-| Position | y 1150 at 1080x1920 — below the captions, above the banner |
+| Source | a crop of the SOURCE frame at full resolution |
+| Magnification | ~2x (the strip is only 11px tall in a 1080p frame) |
+| Plate | flat dark, square corners, no shadow, 1px accent rule along the top |
+| Kicker | the page name, small grey caps, letter-spaced |
+| Emphasis | accent rule under the figures being pointed at |
 | Entrance | 16px settle over 0.16s under a 0.10s alpha fade |
-| Hold | 3.2s (denser than a chip, so it needs longer to read) |
-| Sound | `sfx.tock`, gain 0.095 (-14.2 dBFS in the master) |
-| Density | 2 in 51.5s, plus the opening screenshot card |
+| Hold | 3.4s |
+| Sound | `sfx.thunk` at `cue_gain(..., -30.0, 6.2)` |
 
-**The content rules are the whole skill:**
+**Crop a contiguous run.** Stitching non-adjacent figures together fabricates
+an adjacency the source does not have.
 
-1. It must tell the viewer something the audio does not. A paraphrase of the
-   caption is not information.
-2. Pair a figure with its denominator. A lone number can argue the opposite
-   of the point it is meant to support.
-3. Copy the source's labels verbatim and invent no nouns.
-4. Carry the source line. An unsourced number is a liability.
-
-The richest supply of such facts is the exhibit already on screen — a
-document the crop to vertical has made illegible.
+Related: R2's persistent banner is a CLAIM in the speaker's voice ("IT'S
+EITHER PRX OR G2"), never a description of the video. A banner that names the
+subject instead of asserting something reads as metadata and should be cut.

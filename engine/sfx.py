@@ -119,6 +119,44 @@ def riser(dur=0.8):
     return (y / np.max(np.abs(y))).astype(np.float32)
 
 
+def thunk(dur=0.09, f0=190.0, seed=9):
+    """A low body with a click on top — a card LANDING, not a note played.
+
+    Fourth sound tried. The three rejected ones were a bell (547ms decay), a
+    shorter bell (216ms) and a woodblock (65ms) — all pitched, all in the
+    chime family. This is the other register: low, physical, and gone in
+    87ms. For a card carrying job-loss figures, weight reads better than a
+    pretty tone.
+
+    The body sweeps DOWN (`f0 * exp(-8t)`), which is what makes an impact
+    read as an impact rather than a tom hit.
+    """
+    n = int(dur * SR); t = np.arange(n) / SR
+    body = np.sin(2 * np.pi * f0 * np.exp(-t * 8) * t) * np.exp(-t * 48)
+    cl = int(0.005 * SR)
+    click = np.zeros(n)
+    click[:cl] = np.random.default_rng(seed).normal(0, 1, cl) * np.linspace(1, 0, cl)
+    y = body + 0.30 * click
+    return (y / np.max(np.abs(y))).astype(np.float32)
+
+
+def cue_gain(name: str, target_rms_dbfs: float, master_gain_db: float) -> float:
+    """Gain for a cue so it lands at a chosen RMS in the FINISHED master.
+
+    Peak-normalised sounds are not equal-loudness: across the palette the RMS
+    of a peak-normalised waveform spans 9 dB, so the same `gain` makes a chirp
+    far louder than a tock. Every level note so far ("way too loud", then
+    "slightly louder") was partly this. Pick a target RMS instead and let the
+    gain fall out, and swapping one sound for another keeps the level.
+
+    `master_gain_db` is what two-pass loudnorm will add — measure it on the
+    clip (clip 8: -20.2 -> -14.0 LUFS, so +6.2).
+    """
+    y = PALETTE[name]()
+    rel = 20 * float(np.log10(np.sqrt(np.mean(y.astype(np.float64) ** 2))))
+    return float(10 ** ((target_rms_dbfs - master_gain_db - rel) / 20))
+
+
 def tock(dur=0.10, f0=1180.0, seed=7):
     """A dry woodblock — the popup sound.
 
@@ -159,7 +197,7 @@ def pop(dur=0.22, f0=1650.0):
 
 
 PALETTE = {"ding": ding, "sparkle": sparkle, "impact": impact,
-           "boom": boom, "whoosh": whoosh, "riser": riser, "pop": pop, "tock": tock}
+           "boom": boom, "whoosh": whoosh, "riser": riser, "pop": pop, "tock": tock, "thunk": thunk}
 
 
 def build(out: Path = ASSETS) -> dict:

@@ -164,3 +164,62 @@ def stat(items, source: str, out: Path, *,
         x += w + gap
     img.save(out)
     return img.size
+
+
+# The stat strip of the VCT Roster Board, in SOURCE pixels, measured off
+# jobs/fns-2905408276 clip 08 by column-variance. Six blocks, left to right:
+# 32 teams | 139 signed | 32 open slots | 82 bench/options | 78 staff |
+# 274 not yet confirmed.
+STRIP_Y = (152, 180)
+STRIP_BLOCKS = [(18, 70), (109, 170), (209, 284), (322, 427), (466, 508), (546, 670)]
+
+
+def exhibit(src_png: Path, out: Path, *, crop_x=(200, 680), width=1010,
+            highlight=(), source="VCT Roster Board", accent=ACCENT,
+            pad=22, src_px=25, rule_px=4):
+    """Magnify a region of the SOURCE frame and underline what matters.
+
+    George, on a card drawn from scratch: "i dont like the design - looks vibe
+    coded." Looking again at R1 for how it handles a stat panel, the answer is
+    that **it does not design one** — the Leetify card at 0:08 is a screenshot
+    of a real page composited in, exactly like the tweet card at the head of
+    this clip. The reference shows the document; it does not redraw it.
+
+    So this does the same. The numbers are the actual pixels from the board on
+    his screen, magnified about 2x, with an accent rule under the figures being
+    pointed at. It cannot be mis-transcribed, it cannot drift from the source,
+    and it cannot look like a generic component because nothing about it is
+    styled.
+
+    `crop_x` must be a CONTIGUOUS run of the strip. Stitching non-adjacent
+    stats together would fabricate an adjacency the page does not have, which
+    is doctoring an exhibit.
+    """
+    strip = Image.open(src_png).convert("RGBA").crop(
+        (crop_x[0], STRIP_Y[0], crop_x[1], STRIP_Y[1]))
+    sc = width / (crop_x[1] - crop_x[0])
+    strip = strip.resize((width, max(1, round(strip.height * sc))), Image.LANCZOS)
+
+    fsrc = _font(src_px)
+    head = int(src_px * 1.7)
+    bw, bh = width + pad * 2, strip.height + head + rule_px + 10 + pad * 2
+    img = Image.new("RGBA", (bw, bh), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rectangle([0, 0, bw - 1, bh - 1], fill=(8, 10, 14, 242))   # square, no shadow
+    d.rectangle([0, 0, bw - 1, 0], fill=accent)
+
+    x = pad
+    for ch in source.upper():                       # tracked-out kicker
+        d.text((x, pad - 4), ch, font=fsrc, fill=(150, 157, 170, 255))
+        x += d.textlength(ch, font=fsrc) + 2.0
+
+    top = pad - 4 + head
+    img.paste(strip, (pad, top), strip)
+    for i in highlight:
+        a, b = STRIP_BLOCKS[i]
+        x0 = pad + round((a - crop_x[0]) * sc)
+        x1 = pad + round((b - crop_x[0]) * sc)
+        d.rectangle([x0, top + strip.height + 7, x1, top + strip.height + 7 + rule_px],
+                    fill=accent)
+    img.save(out)
+    return img.size

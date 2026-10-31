@@ -62,5 +62,13 @@
   "centroid_hz": 2020,
   "rights_basis": "synthesised",
   "source": "engine/sfx.py \u2014 generated, no third-party audio"
+ },
+ "thunk": {
+  "file": "thunk.wav",
+  "seconds": 0.09,
+  "peak": 1.0,
+  "centroid_hz": 557,
+  "rights_basis": "synthesised",
+  "source": "engine/sfx.py \u2014 generated, no third-party audio"
  }
 }
