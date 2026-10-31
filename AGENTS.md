@@ -621,6 +621,81 @@ Dropped deliberately: **flashes on cuts** (a cut is already an edit event, and
 neither reference uses flashes at all) and **shake** (decoration on a speaker
 this measured).
 
+### The black dip, and what Resolve does to an alpha overlay
+
+**Measured on R1 at 1:11, frame by frame, and all three assumptions were wrong:**
+
+| | |
+|---|---|
+| What dips | the CONTENT PANE only — facecam holds 67-69 luma straight through |
+| Depth | to ~6 luma from ~79. It never reaches black |
+| Shape | down 0.13s, hold 0.40s, up 0.15s — asymmetric, 0.56s total |
+
+It is the ONLY transition anywhere in the four references. No wipes, no
+whooshes. `overlays.pane_dip`.
+
+**RESOLVE COMPOSITES IN LINEAR LIGHT, and it moves the number 12x.** The
+identical alpha clip over the identical frame measures a 0.189 luma ratio
+in ffmpeg — exactly the 0.18 the alpha asks for — and **0.015 in Resolve**.
+Two depths pin the transfer at `(1 - alpha) ** 2.4`: alpha 0.82 predicts
+0.0156, measured 0.015. So an alpha intended to darken by a given amount on
+screen has to be solved through that gamma. For R1's floor here,
+`(1-a)**2.4 = 6/24` gives **a = 0.42**, which lands at 10.6 luma measured.
+Anything composited in Resolve with an intended opacity needs this.
+
+**It goes BELOW the captions.** In R1 the dip is the document going dark and
+the editor's own overlays stay lit through it, so track order is now
+`V1 content | V2 facecam | V3 dip | V4 cards | V5 titles | V6 captions`.
+The 11 caption Text+ titles were lifted from V3 to V6 with `SetPosition`;
+never clear V6, since rebuilding them means re-running the Fusion pass.
+
+**One dip, because clip 8 earns exactly one.** R1 dips between exhibits and
+has 72 of them; clip 8's pane shows one static document, so the single
+handoff is the announcement tweet giving way to the board as the card
+clears. Anywhere else it would punctuate nothing.
+
+### No dead space on a talking head
+
+George: "for talking head videos like these ensure there is NO dead space."
+
+The earlier cut removed only DIGITAL ZERO (the Twitch mutes) and left
+ordinary room tone, so **6.40s of pause survived into the delivered clip —
+12.4% of it**, against R2's 96% speech coverage. `qc.quiet_runs` catches the
+other kind, on a floor **relative to the speaker's own level** (75th
+percentile of window RMS, minus 12 dB) rather than a fixed dBFS, because raw
+VOD audio runs ~7 dB under target and a fixed threshold means something
+different on every clip.
+
+| | before | after |
+|---|---|---|
+| Duration | 51.5s | **46.9s** |
+| Absent audio | 1.77s | **0.00s** |
+| Quiet | 6.40s (12.4%) | 3.70s (7.9%) |
+| Speech coverage | 87.6% | **92.1%** (R2: 96%) |
+| Shots | 5 | 11 |
+
+Two things this costs, both real:
+
+* **12.8 cuts/min against R1's 6.0.** Each removal is a splice, and the
+  facecam framing changes at every one so it reads as a cut rather than a
+  jump — but the cadence is now twice the reference and that is a
+  consequence of the instruction, not an editorial choice.
+* **15 joins splice across unheard speech**, printed by `tighten.joins()`.
+  The caveat from the adversarial review stands and has been overruled
+  twice; it is not re-litigated, only recorded.
+
+**Anchor overlays to SOURCE time, never to the finished cut.** Re-timing the
+clip moved every output timestamp, and hard-coded overlay positions would
+all have drifted silently. `build_overlays.at(src_t)` remaps a spoken-line
+anchor through the same keeps `build_v7.py` uses, so the two agree by
+construction.
+
+**Trim the render to the PICTURE.** A caption title is a fixed 300 frames
+and cannot be trimmed through the API, so the last one overhangs V1 by
+whatever the keeps fall short of `round(out_dur * fps)` — 4 frames here,
+which render black. And `-t` with `-c:v copy` cuts at a keyframe, so it
+misses: use `-frames:v` on the delivery re-encode.
+
 ### Marker annotation and mid-clip titles (R1, 0:31)
 
 Both came out of a per-second contact-sheet sweep of R1 that the earlier

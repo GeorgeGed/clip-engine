@@ -17,12 +17,19 @@ sys.path.insert(0, str(ROOT))
 from engine.render_ffmpeg import _finish_audio
 from engine import qc
 
-SRC = ROOT / "renders/clip08_v23_resolve.mov"
-EQD = ROOT / "renders/clip08_v23_eq.mov"
-OUT = ROOT / "renders/clip08_v23.mp4"
+SRC = ROOT / "renders/clip08_v27_resolve.mov"
+EQD = ROOT / "renders/clip08_v27_eq.mov"
+OUT = ROOT / "renders/clip08_v27.mp4"
 
 EQ = "equalizer=f=3000:t=q:w=1.1:g=4,equalizer=f=9500:t=q:w=1.0:g=-7"
-subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(SRC),
+
+# Trim to the PICTURE. A caption title is a fixed 300 frames and cannot be
+# trimmed through the API, so the last one overhangs V1 by however much the
+# keeps fall short of round(out_dur * fps) — 4 frames here, which render as
+# black and which QC correctly flags. Those frames hold nothing.
+PICTURE_FRAMES = 2812
+DUR = PICTURE_FRAMES / 60
+subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(SRC), "-t", f"{DUR:.4f}",
                 "-af", EQ, "-c:v", "copy", "-c:a", "pcm_s16le", str(EQD)], check=True)
 _finish_audio(EQD, {"audio": {"target_lufs": -14.0, "true_peak_dbtp": -1.0},
                     "render": {"audio_codec": "aac"}}, OUT)

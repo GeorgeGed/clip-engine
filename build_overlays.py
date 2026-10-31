@@ -19,7 +19,7 @@ import sys
 ROOT = Path(__file__).parent
 sys.path.insert(0, str(ROOT))
 from engine.titles import hook, panel, section, marker_ellipse, BOARD_REGIONS
-from engine.overlays import alpha_clip, sequence_clip, CANVAS
+from engine.overlays import alpha_clip, sequence_clip, pane_dip, CANVAS
 
 SCRATCH = Path("/private/tmp/claude-501/"
                "-Users-georgegeddes-Library-Application-Support-Claude-scratch-workspaces-"
@@ -29,6 +29,43 @@ PLATE = ROOT / "jobs/fns-2905408276/clip08_src_plate.png"
 OUT = ROOT / "jobs/fns-2905408276/overlays"
 OUT.mkdir(parents=True, exist_ok=True)
 PNG = OUT / "png"; PNG.mkdir(exist_ok=True)
+
+# ---------------------------------------------------------------------------
+# Overlays are anchored to SOURCE time — a spoken line — not to a position in
+# the finished cut. Tightening the dead space moved every output timestamp,
+# and hard-coded ones would all have drifted silently. Anchors survive a
+# re-cut; output positions do not.
+# ---------------------------------------------------------------------------
+import glob
+from engine.tighten import removals, keeps, remap_card
+from engine import qc
+
+IN_POINT, MIN_DEAD, BEAT = 8.85, 0.35, 0.12
+_clip = glob.glob(str(ROOT / "jobs/fns-2905408276/clips_1080/08_*.mp4"))[0]
+_src_dur = 4026 / 60
+
+
+def _keeps():
+    """The same cut build_v7.py makes, so the two agree by construction."""
+    dead = sorted([r for r in qc.dead_audio(_clip, min_run=0.3)["runs"]
+                   + qc.quiet_runs(_clip, min_run=MIN_DEAD)["runs"]
+                   if r[0] >= IN_POINT])
+    kp = [k for k in keeps(removals(dead, _src_dur, min_remove=MIN_DEAD, beat=BEAT),
+                           _src_dur) if k.end > IN_POINT]
+    if kp:
+        kp[0].start = max(kp[0].start, IN_POINT)
+    return kp
+
+
+KP = _keeps()
+OUT_DUR = sum(k.length for k in KP)
+
+
+def at(src_t: float, fallback: float = 0.0) -> float:
+    """Source second -> second in the finished cut."""
+    r = remap_card(src_t, src_t + 0.05, KP)
+    return round(r[0], 2) if r else fallback
+
 
 STRIP = (200, 152, 680, 180)          # contiguous: blocks 2..5 of the header
 B_OPEN, B_BENCH, B_STAFF, B_UNCONF = (209, 284), (322, 427), (466, 508), (546, 670)
@@ -44,13 +81,13 @@ PLAN = [
     dict(name="hook",   track=4, at=0.00,  dur=2.05, y=1050, fade_in=0.01, fade_out=0.50,
          settle=0,  make=lambda p: hook(["YOU CAN END UP", "WITH NOTHING"], p,
                                         accent_words=("NOTHING",))),
-    dict(name="tweet",  track=5, at=1.65,  dur=3.00, y=900,  fade_in=0.12, fade_out=0.30,
+    dict(name="tweet",  track=5, at=at(10.40),  dur=3.00, y=900,  fade_in=0.12, fade_out=0.30,
          settle=0,  make=lambda p: __import__("shutil").copy(SCRATCH / "tweet_card.png", p)),
-    dict(name="strip1", track=4, at=17.45, dur=3.40, y=1150, fade_in=0.10, fade_out=0.25,
+    dict(name="strip1", track=4, at=at(26.40), dur=3.40, y=1150, fade_in=0.10, fade_out=0.25,
          settle=16, make=lambda p: panel(PLATE, p, STRIP, width=1010,
                                          kicker="VCT Roster Board",
                                          rules=[B_OPEN, B_UNCONF])),
-    dict(name="strip2", track=4, at=30.80, dur=3.10, y=1150, fade_in=0.10, fade_out=0.25,
+    dict(name="strip2", track=4, at=at(41.30), dur=3.10, y=1150, fade_in=0.10, fade_out=0.25,
          settle=16, make=lambda p: panel(PLATE, p, (100, 152, 680, 180), width=1010,
                                          kicker="VCT Roster Board",
                                          rules=[B_SIGNED])),
@@ -58,7 +95,7 @@ PLAN = [
     # so it is built by sequence_clip rather than alpha_clip. The clean
     # rectangle round the four unconfirmed players is gone; the marker does
     # that job, and does it the way R1 does.
-    dict(name="kru",    track=4, at=37.85, dur=4.20, y=1060, fade_in=0.10, fade_out=0.25,
+    dict(name="kru",    track=4, at=at(51.40), dur=4.20, y=1060, fade_in=0.10, fade_out=0.25,
          settle=16, marker=True,
          make=lambda p: panel(PLATE, p, BOARD_REGIONS["kru"], width=780,
                               kicker="VCT Roster Board — Americas",
@@ -66,12 +103,20 @@ PLAN = [
     # Mid-clip section titles (R1, 0:31). Not restatements of his words —
     # they frame the stretch that follows, which is the job the removed
     # banner was doing badly.
-    dict(name="sec1",   track=5, at=6.10,  dur=2.30, y=1120, fade_in=0.14, fade_out=0.45,
+    dict(name="sec1",   track=5, at=at(15.20),  dur=2.30, y=1120, fade_in=0.14, fade_out=0.45,
          settle=0,  make=lambda p: section("WHAT IT MEANS FOR PLAYERS", p,
                                            cap_px=84, accent_words=("PLAYERS",))),
-    dict(name="sec2",   track=5, at=44.40, dur=2.20, y=1120, fade_in=0.14, fade_out=0.45,
+    dict(name="sec2",   track=5, at=at(57.90), dur=2.20, y=1120, fade_in=0.14, fade_out=0.45,
          settle=0,  make=lambda p: section("THE TRADE-OFF", p,
                                            cap_px=96, accent_words=("TRADE-OFF",))),
+    # The ONE place the dip is earned. R1 dips between exhibits; clip 8's
+    # pane never changes document, so there is exactly one handoff — the
+    # announcement tweet giving way to the roster board as the card clears.
+    # Anywhere else it would punctuate nothing. On V3, below the cards and
+    # captions, because in R1 it is the DOCUMENT going dark and the editor's
+    # own overlays stay lit straight through it.
+    dict(name="dip",    track=3, at=at(10.40)+2.65, dur=0.56, y=0, fade_in=0.0, fade_out=0.0,
+         settle=0, dip=True, make=None),
 ]
 
 # Where the four unconfirmed KRU players land on the 1080x1920 canvas, after
@@ -104,9 +149,14 @@ def kru_frame(card_png: Path):
 
 if __name__ == "__main__":
     for o in PLAN:
+        mov = OUT / f"{o['name']}.mov"
+        if o.get("dip"):
+            pane_dip(mov, dur=o["dur"])
+            print(f"  {o['name']:7} V{o['track']}  {o['at']:6.2f}s +{o['dur']:.2f}s  "
+                  f"{'pane dip':14} {mov.name}")
+            continue
         png = PNG / f"{o['name']}.png"
         o["make"](png)
-        mov = OUT / f"{o['name']}.mov"
         if o.get("marker"):
             sequence_clip(kru_frame(png), mov, dur=o["dur"],
                           fade_in=o["fade_in"], fade_out=o["fade_out"])

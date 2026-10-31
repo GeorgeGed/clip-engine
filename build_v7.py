@@ -33,7 +33,8 @@ from engine import qc
 SP = Path("/private/tmp/claude-501/-Users-georgegeddes-Library-Application-Support-Claude-scratch-workspaces-6d38ae6d-05dd-4827-8e46-76304910d38e-68f1a3b0-a8d1-4d98-a822-3205d41bec7a-scratch-2026-10-28-f045e2/ce92e562-40cc-4445-80fa-a3607729fc90/scratchpad")
 FPS, SEAM, CHROME = 60, 0.42, 92
 IN_POINT = 8.85            # where the job-security argument starts
-MIN_DEAD = 0.50            # shorter removals read as jitter, not tightening
+MIN_DEAD = 0.35            # shorter removals read as jitter, not tightening
+BEAT = 0.12                # what is LEFT of each pause; 0 makes speech collide
 CAM = (1456, 818, 1920, 1080)
 CANVAS = Frame(1080, 1920, 1920, 1080)
 GRADE = {"NodeIndex": "1", "Slope": "1.06 1.06 1.07",
@@ -45,8 +46,16 @@ clip = glob.glob(str(ROOT / "jobs/fns-2905408276/clips_1080/08_*.mp4"))[0]
 src_dur = 4026 / FPS
 
 # ---- plan the cut -------------------------------------------------------
-dead = [r for r in qc.dead_audio(clip, min_run=0.3)["runs"] if r[0] >= IN_POINT]
-spans = removals(dead, src_dur, min_remove=MIN_DEAD, beat=0.10)
+# George, on talking-head clips: "ensure there is NO dead space." The first
+# version removed only DIGITAL ZERO (the Twitch mutes) and left ordinary room
+# tone, so 6.4s of pause survived into the delivered cut — 12.4% of it, where
+# R2, the take reference, runs 96% speech. `quiet_runs` catches the other
+# kind, on a floor relative to the speaker's own level rather than a fixed
+# dBFS, since raw VOD audio runs ~7 dB under target.
+_absent = qc.dead_audio(clip, min_run=0.3)["runs"]
+_quiet = qc.quiet_runs(clip, min_run=MIN_DEAD)["runs"]
+dead = sorted([r for r in _absent + _quiet if r[0] >= IN_POINT])
+spans = removals(dead, src_dur, min_remove=MIN_DEAD, beat=BEAT)
 kp = [k for k in keeps(spans, src_dur) if k.end > IN_POINT]
 if kp:
     kp[0].start = max(kp[0].start, IN_POINT)

@@ -313,3 +313,31 @@ references — note it is a DIP, not a wipe or a whoosh.
 Density note: R1's lower pane changes roughly once per 1-2s in its busiest
 stretches. Clip 8's source is pixel-static for 61 of 67s, so matching that
 means moving around inside one document rather than cutting between many.
+
+## The R1 density numbers, from a complete per-second sweep
+
+A 1fps contact-sheet sweep of all 80s of R1 and all 20s of R2, ten agents,
+one per 10s window. The headline is that R1 is **far** denser than the
+earlier once-over suggested:
+
+| | R1 (80.3s) | R2 (20.2s) |
+|---|---|---|
+| Distinct documents in the lower pane | **72** | 2 |
+| Editor-added overlays | **40** | 9 |
+
+Two things in there contradict what is written above and are worth acting on:
+
+1. **R1 punches IN and OUT on its exhibits constantly, and animates it** —
+   the player-card punch animates in over 0.65s; the chat-panel sequence
+   pushes 1.16x across a single shot; a montage of 13 score cards runs one
+   card every **0.217s** (exactly 13 frames at 60fps) before pulling out
+   over 1.3s. Our lower pane holds one framing for the whole clip.
+2. **R1 DOES use rounded corners and a drop shadow** — but only on an inset
+   exhibit card floating over a *blurred copy of the content pane*, which is
+   an L1 blurred-pillar treatment applied inside the pane. The flat
+   square-cornered panel is what a full-bleed screenshot looks like. Both
+   exist; the earlier "no rounded corners, ever" note was too strong.
+
+Clip 8 cannot reach 72 documents from a source whose pane is pixel-static
+for 61 of 67 seconds. The reachable version of this is punching around
+inside the one document, with blurred-backdrop insets for the detail views.

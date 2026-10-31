@@ -62,8 +62,11 @@ def main():
         tl.AddTrack("video")
     while tl.GetTrackCount("audio") < 2:
         tl.AddTrack("audio")
+    # V3 is the dip, V4/V5 the cards and titles. V6 is the CAPTIONS — never
+    # clear it: the 11 Text+ titles were lifted there to free V3, and
+    # rebuilding them means re-running the whole Fusion caption pass.
     stale = []
-    for t in (4, 5):
+    for t in (3, 4, 5):
         stale += tl.GetItemListInTrack("video", t) or []
     stale += tl.GetItemListInTrack("audio", 2) or []
     if stale:
@@ -100,7 +103,7 @@ def main():
     placed = mp.AppendToTimeline(entries)
     print(f"appended {len(placed or [])} of {len(entries)}")
 
-    for t in (4, 5):
+    for t in (3, 4, 5, 6):
         for it in tl.GetItemListInTrack("video", t) or []:
             print(f"  V{t}  {it.GetName():14} {it.GetStart()-start:5d}..{it.GetEnd()-start:5d}"
                   f"  ({(it.GetEnd()-it.GetStart())/FPS:.2f}s)")

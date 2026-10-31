@@ -388,3 +388,55 @@ if __name__ == "__main__":
         warn = [r for r in results if r.passed and r.warnings]
         print(f"\n{len(results)} measured, {len(bad)} rejected, {len(warn)} with warnings")
     raise SystemExit(1 if any(not r.passed for r in results) else 0)
+
+
+QUIET_BELOW_SPEECH_DB = 12.0
+
+
+def quiet_runs(path, *, min_run: float = 0.35, window: float = 0.05,
+               below_speech_db: float = QUIET_BELOW_SPEECH_DB) -> dict:
+    """Runs of ordinary low-level silence, relative to the speaker's own level.
+
+    `dead_audio` finds DIGITAL ZERO — the Twitch mutes. This finds the other
+    kind of dead space: real room tone between sentences. George, on
+    talking-head clips: "ensure there is NO dead space."
+
+    The floor is relative, not absolute, because raw VOD audio runs about
+    7 dB under target and a fixed dBFS threshold would mean something
+    different on every clip. The speech level is taken as the 75th
+    percentile of window RMS, and anything `below_speech_db` under that is
+    quiet.
+    """
+    import subprocess
+
+    import numpy as np
+
+    sr = 16000
+    raw = subprocess.run(
+        ["ffmpeg", "-v", "error", "-i", str(path), "-ac", "1", "-ar", str(sr),
+         "-f", "f32le", "-"], capture_output=True).stdout
+    a = np.frombuffer(raw, np.float32)
+    w = max(1, int(window * sr))
+    n = len(a) // w
+    if n == 0:
+        return {"runs": [], "total": 0.0, "fraction": 0.0, "floor_db": None}
+    rms = np.array([
+        20 * np.log10(max(1e-7, float(np.sqrt(np.mean(a[i * w:(i + 1) * w] ** 2)))))
+        for i in range(n)])
+    speech = float(np.percentile(rms, 75))
+    floor = speech - below_speech_db
+
+    runs, st = [], None
+    for i, q in enumerate(rms < floor):
+        if q and st is None:
+            st = i
+        elif not q and st is not None:
+            if (i - st) * window >= min_run:
+                runs.append([round(st * window, 3), round(i * window, 3)])
+            st = None
+    if st is not None and (n - st) * window >= min_run:
+        runs.append([round(st * window, 3), round(n * window, 3)])
+    total = sum(e - s for s, e in runs)
+    return {"runs": runs, "total": round(total, 3),
+            "fraction": round(total / (len(a) / sr), 4),
+            "floor_db": round(floor, 1), "speech_db": round(speech, 1)}

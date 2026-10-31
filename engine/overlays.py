@@ -93,12 +93,21 @@ def sequence_clip(fn, out: Path, *, dur: float, canvas=CANVAS, fps: int = FPS,
 
     w, h = canvas
     n = int(round(dur * fps))
+    # A zero-length `fade` is NOT a no-op — ffmpeg falls back to a default
+    # duration and quietly ramps the whole clip, which turned a measured
+    # 0.13s-down / 0.40s-hold envelope into one slow linear fade with no
+    # hold at all. When the caller's own function already carries the
+    # envelope, emit no fade filter.
+    chain = []
+    if fade_in > 0:
+        chain.append(f"fade=t=in:st=0:d={fade_in}:alpha=1")
+    if fade_out > 0:
+        chain.append(f"fade=t=out:st={max(0.0, dur - fade_out):.3f}:d={fade_out}:alpha=1")
+    graph = f"[0]{','.join(chain)}[v]" if chain else "[0]null[v]"
     proc = subprocess.Popen(
         ["ffmpeg", "-y", "-v", "error",
          "-f", "rawvideo", "-pix_fmt", "rgba", "-s", f"{w}x{h}", "-r", str(fps), "-i", "-",
-         "-filter_complex",
-         f"[0]fade=t=in:st=0:d={fade_in}:alpha=1,"
-         f"fade=t=out:st={max(0.0, dur - fade_out):.3f}:d={fade_out}:alpha=1[v]",
+         "-filter_complex", graph,
          "-map", "[v]", "-c:v", "qtrle", "-pix_fmt", "argb", str(out)],
         stdin=subprocess.PIPE)
     for i in range(n):
@@ -108,3 +117,57 @@ def sequence_clip(fn, out: Path, *, dur: float, canvas=CANVAS, fps: int = FPS,
     if proc.wait() != 0:
         raise RuntimeError(f"ffmpeg failed writing {out}")
     return out
+
+
+SEAM_Y = 806          # 0.42 * 1920, the house seam
+
+
+def pane_dip(out: Path, *, dur: float = 0.56, down: float = 0.13, up: float = 0.15,
+             depth: float = 0.42, seam_y: int = SEAM_Y, canvas=CANVAS,
+             fps: int = FPS) -> Path:
+    """R1's dip between exhibits (1:11), measured frame by frame.
+
+    What the measurement changed about my assumptions, all three ways:
+
+    * **Only the CONTENT PANE dips.** The facecam sits at 67-69 luma right
+      through it, untouched. Dipping the whole frame would be a different,
+      much heavier effect.
+    * **It does not reach black.** R1's pane bottoms out at ~6 luma from
+      ~79, and that FLOOR is what a viewer sees, so match it rather than the
+      ratio — clip 8's roster board is far darker (23-30 luma) and the same
+      92% would land on literally 0, reading as a dropped frame.
+
+    **RESOLVE COMPOSITES IN LINEAR LIGHT, and it changes the number by 12x.**
+    The identical clip over the identical frame gives a 0.189 luma ratio in
+    ffmpeg (exactly the 0.18 the alpha asks for) and 0.015 in Resolve.
+    Measured at two depths, the transfer is `(1 - alpha) ** 2.4`: alpha 0.82
+    predicts 0.0156 and measured 0.015. So an alpha meant to darken by a
+    given amount on screen must be solved through that gamma, not set
+    directly. For R1's floor here: (1-a)**2.4 = 6/24 -> a = 0.42.
+    * **It is a fade, not a cut**, and an asymmetric one: down in ~0.13s,
+      hold ~0.40s, up in ~0.15s, 0.56s in all.
+
+    It is the ONLY transition observed anywhere in the four references — no
+    wipes, no whooshes. And it earns its place by separating one exhibit
+    from the next, so it goes where a document changes and nowhere else.
+    """
+    from PIL import Image
+
+    hold_end = dur - up
+    w, h = canvas
+
+    def fn(t, i):
+        if t < down:
+            a = t / down
+        elif t < hold_end:
+            a = 1.0
+        else:
+            a = max(0.0, (dur - t) / up)
+        frame = Image.new("RGBA", canvas, (0, 0, 0, 0))
+        band = Image.new("RGBA", (w, h - seam_y), (0, 0, 0, int(255 * depth * a)))
+        frame.alpha_composite(band, (0, seam_y))
+        return frame
+
+    # No extra fades: the envelope above IS the fade.
+    return sequence_clip(fn, out, dur=dur, canvas=canvas, fps=fps,
+                         fade_in=0.0, fade_out=0.0)
