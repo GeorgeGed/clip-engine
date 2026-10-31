@@ -337,6 +337,62 @@ Safe area at 1080×1920: top 150px, bottom 320px. **[checked]**
 
 ---
 
+## Driving Resolve
+
+Studio, running, External Scripting = Local. `python -m engine.resolve_driver
+doctor` reports exactly what is missing. No MCP server is needed — any such
+server wraps this same Python API, so it inherits the same requirements.
+
+**Four conventions, every one measured after a wrong-looking frame.** They are
+in `engine/resolve_layout.py`; the reasoning is here so it is not re-derived.
+
+1. **`recordFrame` is absolute.** A timeline starts at 01:00:00:00 = **216000**
+   at 60fps. `AppendToTimeline(..., recordFrame=0)` puts the clip an hour
+   before the start. `GetItemListInTrack` still lists it, so the failure is
+   silent — the tell is `GetStartFrame() == GetEndFrame()` and a black render.
+   Pass `timeline.GetStartFrame()`.
+2. **Crop is in fitted-display pixels, not source pixels.** A 1920×1080 source
+   in a 1080×1920 timeline fits to 1080×607.5 and crop clamps there: set
+   `CropLeft=1456` and it reads back `1080`. Multiply by the fit factor.
+3. **Zoom is relative to the fitted size and scales about the CANVAS centre**,
+   not the image centre.
+4. **Pan and Tilt do not share a scale.** Measured: Pan moves **1.000** canvas
+   px per unit; Tilt moves **0.3164**, which is `fitted_h / canvas_h`, and the
+   Tilt rate is **independent of zoom** (300 units moved 95px at both zoom 1
+   and zoom 2, linear to 600). A vertical move needs a ×3.1605 conversion a
+   horizontal one does not. Get it wrong and the panes come out the right size
+   in the wrong place, which looks like a sign error and is not.
+   **+Pan is right, +Tilt is up.**
+
+`AppendToTimeline` also ignores `trackIndex` across separate calls — pass every
+entry in ONE call. Give the second copy `mediaType: 1` (video only) or the
+audio doubles.
+
+**Verify with a still, not with the maths.** `timeline.GrabStill()` then
+`album.ExportStills(...)` writes a PNG of the actual program output. Measure it
+— `ffmpeg -vf scale=216:384 -pix_fmt gray -f rawvideo -` and scan for the
+non-black box gives position to 5px with no numpy. Two grabs pinned convention
+4 after the arithmetic had looked right three times. After rebuilding a
+timeline, `SetCurrentTimecode` lands on the timeline END the first time; call
+it twice.
+
+### The clip 8 reference build
+
+Project `fns-clip08-reference`, timeline `clip08-L2`, 1080×1920 @ 60.
+
+| | |
+|---|---|
+| Facecam in source | **x 1456–1920, y 818–1080** (464×262, 16:9, 5.9% of frame) |
+| Seam | **0.42 → 806.4px** |
+| Facecam pane | zoom 5.472, pan −2240.7, tilt +5738.3 |
+| Content pane | zoom 2.004, pan 0, tilt −1110.4, chrome cropped 92px |
+
+**Crop the browser chrome.** 92 source px removes the tab and address bars,
+which otherwise sit right under the seam and read as a mistake.
+
+The facecam is a 3× upscale of a 464px-wide region, so it is soft. That is what
+the source gives; a bigger facecam on stream would be the only fix.
+
 ## Captions
 
 Word-level, 1–3 words, in both references. Changing roughly twice a second.
