@@ -554,6 +554,47 @@ Removing it is not tightening, it is splicing. The engine is in
 `engine/tighten.py` with `joins()` reporting every splice for review; it stays
 available for clips whose silence is genuinely empty.
 
+### READ `docs/SKILLS.md` BEFORE EDITING ANYTHING
+
+It is the inventory of what the four references actually DO — ten techniques
+with measured parameters. The reference table at the top of this file is
+durations, cut counts and LUFS; it is not a description of the style. Working
+from it alone produces a bare two-pane layout, which is exactly what happened:
+several turns of polishing structure while every title, banner and overlay in
+the references stayed unbuilt.
+
+Worse, **skill 9 says plainly that speed ramps and punch-ins are "not observed
+in any reference" — all four are talking-head formats.** Zoom punches were
+added to a talking head anyway. They were a gameplay technique imported where
+nothing called for it, and they were correctly described as awful.
+
+What went in once the inventory was read:
+
+| skill | technique | status |
+|---|---|---|
+| 8 | **Hook title** (R1) — 2 lines ALL CAPS, coloured keyword, holds 1.5s, 0.5s dissolve | built, `engine/titles.hook` |
+| 7 | **Persistent banner** (R2, R4) — answers "what am I watching" mid-scroll | built, `engine/titles.banner` |
+| 3 | **Tilted card** (R4) — screenshot at 4–8°, shadow, ~60% frame width | built |
+| 9 | Zoom punches | **removed — in no reference** |
+| 10 | Audio target: talking head is **−14 LUFS**, not the −12 house default | fixed, measured −14.02 |
+
+The tilted card does a second job here. Moving the in-point past the news to
+fix the two-narrative problem also removed the viewer's answer to "why is he
+talking about this"; the card restores it in three seconds of screen time
+instead of nine seconds of audio.
+
+Still unbuilt, and honest about why: **multicam speaker cutting** (needs
+diarisation), **full-frame evidence replacement** and **meme cutouts** (need
+an asset library). Three of the four gaps are editorial sourcing problems, not
+rendering ones.
+
+**ffmpeg notes.** This build has no `drawtext` (no libfreetype) — render text
+to PNG with PIL and `overlay` it, which gives a real alpha dissolve anyway. A
+single-frame PNG input has no advancing timestamps, so `fade` never
+progresses: use `-loop 1 -framerate N -t D`. And an overlay's own timeline
+starts at 0, so shift it with `setpts=PTS+T/TB` to meet the main one, or it
+dies before its `enable` window closes.
+
 ### Effects must be MOTIVATED, and the footage decides how many
 
 George: "the transitions and punches and flashes are so random same with the
