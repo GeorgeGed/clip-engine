@@ -621,6 +621,50 @@ Dropped deliberately: **flashes on cuts** (a cut is already an edit event, and
 neither reference uses flashes at all) and **shake** (decoration on a speaker
 this measured).
 
+### Marker annotation and mid-clip titles (R1, 0:31)
+
+Both came out of a per-second contact-sheet sweep of R1 that the earlier
+once-over had missed, and both are now built.
+
+**The marker DRAWS ON.** R1's annotation is a red/orange circle caught
+mid-stroke — about 70% round, starting bottom-left and sweeping up and over.
+That is the whole character of it: a circle that simply fades in reads as a
+UI element, while one that draws reads as someone pointing. `titles.
+marker_ellipse(…, progress)` renders one frame of the stroke;
+`overlays.sequence_clip` pipes the frames to ffmpeg as raw RGBA so an
+animated overlay needs no intermediate files.
+
+Three details keep it off the vector-ellipse look, and all three matter:
+the radius wanders on three slow harmonics (noise alone looks like noise,
+not like a hand); the stroke thins toward the end as a real pen lifts; and
+the arc **overshoots past 360°**, which is what a hand does closing a circle
+in one motion.
+
+On clip 8 it circles the four unconfirmed KRU players, replacing the clean
+rectangle `panel(boxes=…)` was drawing. Its position is DERIVED from the
+panel geometry — crop scale, card offset, pad and kicker height — not
+eyeballed, so it stays correct if the card is resized.
+
+**Mid-clip titles are the same treatment as the hook.** R1 re-titles as the
+argument moves ("150K POV:" at 0:31): ALL CAPS, white fill, heavy hard black
+outline, no box, no glow, condensed heavy grotesque, roughly a second, then
+a dissolve out — and R1 lets that dissolve run on top of a shot change
+rather than waiting for one. `titles.section` is `hook` with one line at a
+smaller cap height, so the head of the clip keeps its weight.
+
+Clip 8 gets two, and neither restates him — they frame the stretch that
+follows, which is the job the removed banner was doing badly:
+**"WHAT IT MEANS FOR PLAYERS"** at 6.1s (the pivot from news to argument)
+and **"THE TRADE-OFF"** at 44.4s (the closing move).
+
+**Titles get no sound.** Sound stays exclusively on fact cards, so a thunk
+always means the same thing — a fact just arrived. Salting six events
+instead of four is the wrong direction after two notes about level. The
+marker gets none either: it starts 0.55s after its card's cue, well inside
+the 3s spacing floor.
+
+Seven overlays in 51.5s now, up from three.
+
 ### The overlays belong IN the Resolve timeline
 
 George: "stop being lazy, edit this in davinci." He was right — the hook,

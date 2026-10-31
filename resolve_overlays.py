@@ -44,10 +44,16 @@ def main():
     total_s = total_frames / FPS
     print(f"timeline {tl.GetName()}  start {start}  {total_frames} frames ({total_s:.3f}s)")
 
-    # ---- the sound bed: one cue per card arriving, nothing else -----------
+    # ---- the sound bed: one cue per FACT CARD arriving, nothing else ------
+    # Titles get no sound. Keeping the thunk exclusively for cards means a
+    # sound always says the same thing — a fact just arrived — and after two
+    # notes about level, salting six events rather than four is the wrong
+    # direction. The marker draw-on gets none either: it starts 0.55s after
+    # its card's cue, well inside the 3s spacing floor.
+    SOUNDED = {"tweet", "strip1", "strip2", "kru"}
     cues = [Cue(o["at"] + 0.02, "thunk", cue_gain("thunk", TARGET_RMS, MASTER_GAIN),
                 f"{o['name']} card arrives")
-            for o in PLAN if o["name"] != "hook"]
+            for o in PLAN if o["name"] in SOUNDED]
     wav = OUT / "sfx.wav"
     print("sfx:", bed(cues, total_s, out=wav))
 

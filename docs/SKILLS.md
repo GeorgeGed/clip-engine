@@ -288,18 +288,20 @@ EITHER PRX OR G2"), never a description of the video. A banner that names the
 subject instead of asserting something reads as metadata and should be cut.
 
 
-## Skills 16-18 — found by a per-second sweep of R1, NOT YET BUILT
+## Skills 16-18 — found by a per-second sweep of R1 (16 and 17 BUILT)
 
 A contact-sheet sweep at 1fps turned up three techniques the earlier
 once-over missed. Recorded here so they are not re-derived.
 
-**16. Hand-drawn marker annotation (R1, 0:31).** A red/orange marker circle
+**16. Hand-drawn marker annotation (R1, 0:31). BUILT —
+`titles.marker_ellipse` + `overlays.sequence_clip`.** A red/orange marker circle
 drawn over the gameplay, caught mid-stroke. This is the "reference" overlay
-in its purest form: it points at the thing being discussed. Closest thing we
-have is `titles.panel(boxes=...)`, which draws a clean rectangle — a marker
-stroke would read far less like a UI and more like someone making a case.
+in its purest form: it points at the thing being discussed. It replaced the clean rectangle
+`titles.panel(boxes=...)` was drawing. What keeps it from looking like a
+vector ellipse: a radius wandering on three slow harmonics, a stroke that
+thins as the pen lifts, and an arc that overshoots past 360 degrees.
 
-**17. Mid-clip section title (R1, 0:31).** "150K POV:" — ALL CAPS, white
+**17. Mid-clip section title (R1, 0:31). BUILT — `titles.section`.** "150K POV:" — ALL CAPS, white
 fill, heavy stroke, no panel, appearing 31 seconds in. Titles are not just a
 hook at the head; R1 re-titles as the argument moves.
 

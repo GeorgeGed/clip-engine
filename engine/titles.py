@@ -293,3 +293,66 @@ def panel(src_png: Path, out: Path, rect, *, width=820, kicker="VCT Roster Board
                     fill=accent)
     img.save(out)
     return img.size
+
+
+MARKER = (240, 72, 32, 255)          # R1's annotation colour: red/orange
+
+
+def section(text: str, out: Path, *, width=1080, cap_px=96, accent_words=()):
+    """A mid-clip section title (R1, 0:31 — "150K POV:").
+
+    Titles are not only a hook at the head: R1 re-titles as the argument
+    moves, and the treatment is identical to the hook — ALL CAPS, white fill,
+    heavy hard black outline, NO box and no glow, in a tall condensed heavy
+    grotesque. It holds about a second and dissolves out, and R1 lets that
+    dissolve run on top of a shot change rather than waiting for one.
+
+    Single line and smaller than `hook`, so the head of the clip keeps its
+    weight and this reads as a subheading rather than a second hook.
+    """
+    return hook([text], out, width=width, cap_px=cap_px, accent_words=accent_words)
+
+
+def marker_ellipse(size, cx, cy, rx, ry, progress: float, *, colour=MARKER,
+                   stroke=11, rot=-0.18, overshoot=0.22, seed=5, segments=240):
+    """One frame of a hand-drawn marker circle, drawn `progress` of the way.
+
+    R1's annotation at 0:31 is caught MID-DRAW, about 70% round, starting
+    bottom-left and sweeping up and over — so this is a stroke that draws
+    ON, not a shape that fades in. That is the whole character of it; a
+    circle that simply appears reads as a UI element.
+
+    What keeps it from looking like a vector ellipse: the radius wanders on
+    a low-frequency wobble, the stroke thins towards the end as a real pen
+    lifts, and the arc OVERSHOOTS past 360 degrees, which is what a hand
+    does when closing a circle in one motion.
+    """
+    import math
+    import random
+
+    img = Image.new("RGBA", size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    rng = random.Random(seed)
+    # three slow harmonics -> a wobble that reads as a hand, not as noise
+    ph = [rng.uniform(0, math.tau) for _ in range(3)]
+    amp = [0.045, 0.028, 0.015]
+
+    total = math.tau * (1.0 + overshoot)
+    end = total * max(0.0, min(1.0, progress))
+    start = math.pi * 0.75                      # bottom-left, as in R1
+    n = max(2, int(segments * max(progress, 1e-3)))
+
+    pts = []
+    for i in range(n + 1):
+        a = start + end * i / n
+        w = 1.0 + sum(A * math.sin(k * (a - start) + p)
+                      for k, (A, p) in enumerate(zip(amp, ph), start=2))
+        x = cx + math.cos(a) * rx * w * math.cos(rot) - math.sin(a) * ry * w * math.sin(rot)
+        y = cy + math.cos(a) * rx * w * math.sin(rot) + math.sin(a) * ry * w * math.cos(rot)
+        pts.append((x, y))
+
+    for i in range(len(pts) - 1):
+        f = i / max(1, len(pts) - 1)
+        w = max(2, int(stroke * (1.0 - 0.45 * f ** 2)))     # the pen lifts
+        d.line([pts[i], pts[i + 1]], fill=colour, width=w, joint="curve")
+    return img

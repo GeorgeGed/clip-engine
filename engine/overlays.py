@@ -75,3 +75,36 @@ def alpha_clip(png: Path, out: Path, *, dur: float, x: int | str = "(W-w)/2",
 def frames(seconds: float, fps: int = FPS) -> int:
     """Seconds to a frame count. `endFrame` is EXCLUSIVE in AppendToTimeline."""
     return int(round(seconds * fps))
+
+
+def sequence_clip(fn, out: Path, *, dur: float, canvas=CANVAS, fps: int = FPS,
+                  fade_in: float = 0.10, fade_out: float = 0.25) -> Path:
+    """Render a per-frame function to an alpha clip Resolve can composite.
+
+    `alpha_clip` is enough for a static card that fades and settles. An
+    annotation that DRAWS ON cannot be expressed that way — R1's marker
+    circle at 0:31 is caught mid-stroke, and a circle that merely fades in
+    reads as a UI element rather than someone pointing at something.
+
+    `fn(t, i)` returns an RGBA PIL image the size of the canvas. Frames are
+    piped to ffmpeg as raw RGBA, so nothing hits the disk in between.
+    """
+    import numpy as np
+
+    w, h = canvas
+    n = int(round(dur * fps))
+    proc = subprocess.Popen(
+        ["ffmpeg", "-y", "-v", "error",
+         "-f", "rawvideo", "-pix_fmt", "rgba", "-s", f"{w}x{h}", "-r", str(fps), "-i", "-",
+         "-filter_complex",
+         f"[0]fade=t=in:st=0:d={fade_in}:alpha=1,"
+         f"fade=t=out:st={max(0.0, dur - fade_out):.3f}:d={fade_out}:alpha=1[v]",
+         "-map", "[v]", "-c:v", "qtrle", "-pix_fmt", "argb", str(out)],
+        stdin=subprocess.PIPE)
+    for i in range(n):
+        img = fn(i / fps, i)
+        proc.stdin.write(np.asarray(img.convert("RGBA"), dtype=np.uint8).tobytes())
+    proc.stdin.close()
+    if proc.wait() != 0:
+        raise RuntimeError(f"ffmpeg failed writing {out}")
+    return out
