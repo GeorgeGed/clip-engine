@@ -110,6 +110,50 @@ loudnorm — single-pass lands a dB off. **No music bed in any of the four.**
 
 ---
 
+## 11. Sound design *(R3, R4)* — measured 2026-10-31
+
+**The inventory had no sound section and that was the biggest hole in it.**
+Measured by spectral-flux onset detection on the reference audio:
+
+| | transients | rate | bands (spectral centroid) |
+|---|---|---|---|
+| **R3 Pause** | 31 in 27.7s | **1.12/s** | bright **5.0–6.4 kHz**, mid **1.9–2.8 kHz** |
+| **R4 PlatChat** | 46 in 47.0s | 0.98/s | mid 1.5–3.8 kHz, some low <600 Hz |
+
+R3 carries roughly **one audio hit per second**. That density is most of why
+it reads as produced next to a bare edit, and it is invisible if you only look
+at the picture. R4's hits land within **0.1–0.3s of a picture cut**.
+
+Visual cut rate at a frame-diff threshold of 18: R4 **56/min**, R3 **48/min** —
+both far above the 6/min of R1 and the 0 of R2.
+
+**`engine/sfx.py` synthesises the palette** rather than sourcing it, so the
+rights basis is `synthesised` and travels in `assets/sfx/manifest.json`.
+Measured centroids against the reference bands: `ding` 5984 Hz and `sparkle`
+7080 Hz (bright), `impact` 1921 Hz (mid), `boom` 824 Hz (low), plus `whoosh`
+and `riser` for movement.
+
+Tuning note: a noise component will hijack the centroid. `impact` first
+measured 6168 Hz because its crack was lowpassed at 2600 and mixed at 0.8 —
+a bright tick, not an impact. Cutoff 1100 at level 0.30 put it at 1921 Hz.
+
+**Cues carry a motivation and `Cue` refuses one without it**, exactly like a
+visual effect.
+
+## 12. The opening *(George's note)*
+
+"Start the video with a ding and FNS coming into frame." A clip cut to start
+on speech has nowhere for an entrance to live, so prepend a short hold:
+`tpad=start_duration=0.6:start_mode=clone` clones the first frame, a zoompan
+scales it in from 1.18, and the ding rings over it. Speech then begins exactly
+where it did. Everything downstream shifts by the lead-in — overlay windows,
+cue times, and the audio via `adelay`.
+
+Measured: the ding sits **+6.3 dB over speech**, which reads as a hit without
+ducking the first words.
+
+---
+
 ## What I can and cannot do yet
 
 **Can, today, headless:** cuts, the two-pane split, L1/L3 layouts with HUD

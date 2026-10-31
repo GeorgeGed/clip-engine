@@ -1,0 +1,190 @@
+"""A synthesised sound-effect library, and the mixer that places it.
+
+Why synthesised. Every source in this pipeline needs a rights basis and
+`gates.py` rejects one without it; a downloaded SFX pack carries a licence
+that has to be tracked per clip and per platform. These are generated from
+numpy, so the basis is `synthesised` and it travels with the asset in
+`assets/sfx/manifest.json`. They are also parametric, so the palette can be
+retuned to a reference rather than re-sourced.
+
+Tuned against the references, measured rather than guessed:
+
+* **R3 (Pause) runs ~1.1 audio transients per second** over 27.7s — a dense
+  bed, and the single biggest reason it feels produced next to a bare edit.
+* Its transients split cleanly by spectral centroid: **bright hits at
+  5.0–6.4 kHz** and **mid impacts at 1.9–2.8 kHz**.
+* R4 (PlatChat) hits around cuts, within 0.1–0.3s of the picture change.
+
+So the palette covers those bands: `ding` and `sparkle` bright, `impact` and
+`thock` mid, `boom` low, `whoosh` and `riser` for movement.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import numpy as np
+
+SR = 48000
+ASSETS = Path(__file__).parent.parent / "assets" / "sfx"
+
+
+def _env(n, attack=0.004, decay=0.25, power=2.0):
+    a = int(attack * SR)
+    e = np.ones(n, dtype=np.float32)
+    e[:a] = np.linspace(0, 1, a, dtype=np.float32)
+    tail = np.linspace(0, 1, n - a, dtype=np.float32)
+    e[a:] = np.exp(-tail * (n - a) / SR / decay) ** power
+    return e
+
+
+def _noise(n, seed):
+    return np.random.default_rng(seed).standard_normal(n).astype(np.float32)
+
+
+def _lp(x, cutoff):
+    """One-pole lowpass — enough shaping for percussive material."""
+    a = np.exp(-2 * np.pi * cutoff / SR)
+    out = np.empty_like(x)
+    acc = 0.0
+    for i, v in enumerate(x):
+        acc = (1 - a) * v + a * acc
+        out[i] = acc
+    return out
+
+
+def ding(dur=0.55, f0=2100.0):
+    """Bright bell. R3's 5-6 kHz band comes from the upper partials."""
+    n = int(dur * SR); t = np.arange(n) / SR
+    y = np.zeros(n, dtype=np.float32)
+    for mult, amp, dec in ((1.0, 1.0, 0.45), (2.76, 0.62, 0.30),
+                           (5.40, 0.38, 0.18), (8.93, 0.20, 0.10)):
+        y += (amp * np.sin(2 * np.pi * f0 * mult * t) * _env(n, 0.002, dec)).astype(np.float32)
+    return y / np.max(np.abs(y))
+
+
+def sparkle(dur=0.5):
+    """Shimmer: a short upward cascade of bells."""
+    n = int(dur * SR); y = np.zeros(n, dtype=np.float32)
+    for i, f in enumerate((1800, 2400, 3200, 4300)):
+        off = int(i * 0.035 * SR)
+        d = ding(dur - off / SR, f) * (0.8 ** i)
+        y[off:off + len(d)] += d
+    return y / np.max(np.abs(y))
+
+
+def impact(dur=0.33):
+    """Mid thump plus a filtered crack, aimed at R3's 1.9-2.8 kHz band.
+
+    The crack has to be lowpassed HARD and kept quiet. At cutoff 2600 and
+    level 0.8 the broadband noise dominated the spectrum and the measured
+    centroid came out at 6.2 kHz — a bright tick, not the mid impact the
+    reference uses.
+    """
+    n = int(dur * SR); t = np.arange(n) / SR
+    body = np.sin(2 * np.pi * np.linspace(190, 85, n) * t) * _env(n, 0.002, 0.11)
+    mid = np.sin(2 * np.pi * np.linspace(900, 380, n) * t) * _env(n, 0.002, 0.07) * 0.55
+    crack = _lp(_noise(n, 7), 1100) * _env(n, 0.001, 0.035) * 0.30
+    y = (body + mid + crack).astype(np.float32)
+    return y / np.max(np.abs(y))
+
+
+def boom(dur=0.9):
+    """Low sub hit for the heaviest beat. One per clip at most."""
+    n = int(dur * SR); t = np.arange(n) / SR
+    sweep = np.linspace(110, 42, n)
+    y = np.sin(2 * np.pi * sweep * t) * _env(n, 0.006, 0.34)
+    y += _lp(_noise(n, 11), 160) * _env(n, 0.002, 0.12) * 0.35
+    return (y / np.max(np.abs(y))).astype(np.float32)
+
+
+def whoosh(dur=0.42):
+    """Band-swept noise for a transition."""
+    n = int(dur * SR)
+    base = _lp(_noise(n, 3), 5000)          # cap the top: raw noise measured 12.5 kHz
+    low, high = _lp(base, 350), base - _lp(base, 1400)
+    mix = np.linspace(0, 1, n, dtype=np.float32)
+    y = low * (1 - mix) + high * mix
+    shape = np.sin(np.linspace(0, np.pi, n)) ** 1.4
+    return ((y * shape) / np.max(np.abs(y * shape))).astype(np.float32)
+
+
+def riser(dur=0.8):
+    """Builds into a beat. Place so it ENDS on the hit."""
+    n = int(dur * SR); t = np.arange(n) / SR
+    tone = np.sin(2 * np.pi * np.linspace(220, 1500, n) * t)
+    noise = _lp(_noise(n, 5), 2200)
+    y = (tone * 0.5 + noise * 0.5) * np.linspace(0, 1, n) ** 2.2
+    return (y / np.max(np.abs(y))).astype(np.float32)
+
+
+PALETTE = {"ding": ding, "sparkle": sparkle, "impact": impact,
+           "boom": boom, "whoosh": whoosh, "riser": riser}
+
+
+def build(out: Path = ASSETS) -> dict:
+    """Render the palette to disk with a manifest carrying the rights basis."""
+    import soundfile as sf
+    out.mkdir(parents=True, exist_ok=True)
+    man = {}
+    for name, fn in PALETTE.items():
+        y = fn()
+        sf.write(out / f"{name}.wav", y * 0.9, SR, subtype="PCM_16")
+        peak = float(np.max(np.abs(y)))
+        cent = _centroid(y)
+        man[name] = {"file": f"{name}.wav", "seconds": round(len(y) / SR, 3),
+                     "peak": round(peak, 3), "centroid_hz": round(cent),
+                     "rights_basis": "synthesised",
+                     "source": "engine/sfx.py — generated, no third-party audio"}
+    (out / "manifest.json").write_text(json.dumps(man, indent=1))
+    return man
+
+
+def _centroid(y):
+    S = np.abs(np.fft.rfft(y))
+    f = np.fft.rfftfreq(len(y), 1 / SR)
+    return float((S * f).sum() / max(S.sum(), 1e-9))
+
+
+# ─── placement ────────────────────────────────────────────────────────────
+
+from dataclasses import dataclass
+
+
+@dataclass
+class Cue:
+    """One sound effect, placed. `motivation` is required, same as a visual
+    effect — a sound that punctuates nothing is noise."""
+    at: float
+    name: str
+    gain: float
+    motivation: str
+    align: str = "start"          # 'start' or 'end' (for risers)
+
+    def __post_init__(self):
+        if self.name not in PALETTE:
+            raise ValueError(f"no such effect {self.name!r}; have {sorted(PALETTE)}")
+        if not (self.motivation or "").strip():
+            raise ValueError(f"{self.name} at {self.at}s has no motivation")
+
+
+def bed(cues, duration, *, out: Path, assets: Path = ASSETS):
+    """Render the cue list to a single audio bed the length of the clip."""
+    import soundfile as sf
+    n = int(duration * SR) + SR
+    track = np.zeros(n, dtype=np.float32)
+    for c in cues:
+        y, sr = sf.read(assets / f"{c.name}.wav", dtype="float32")
+        if y.ndim > 1:
+            y = y.mean(axis=1)
+        start = c.at - (len(y) / SR if c.align == "end" else 0.0)
+        i = max(0, int(start * SR))
+        seg = y[: n - i] * c.gain
+        track[i:i + len(seg)] += seg
+    peak = float(np.max(np.abs(track)))
+    if peak > 0.99:
+        track *= 0.99 / peak
+    sf.write(out, track, SR, subtype="PCM_16")
+    return {"cues": len(cues), "peak": round(peak, 3),
+            "seconds": round(len(track) / SR, 2)}
