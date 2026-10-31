@@ -621,6 +621,47 @@ Dropped deliberately: **flashes on cuts** (a cut is already an edit event, and
 neither reference uses flashes at all) and **shake** (decoration on a speaker
 this measured).
 
+### A card has to carry a FACT, and the exhibit is full of them
+
+George, on the v19 chips: *"why are you adding a text of 'blown out of
+proportion', makes no sense, stop making these random text cards - if you had
+useful information to put on the screen like you did at the start it'd be
+fine."*
+
+He is pointing at the tweet card. **The test for an overlay is whether it
+tells the viewer something the audio does not.** The v19 chips paraphrased
+his own captions into a box — "BLOWN OUT OF PROPORTION" is literally the
+caption one line earlier — so they carried nothing. Note this was already
+written down here ("chips carry the argument, not the caption") and broken
+anyway, because paraphrasing *feels* like adding something.
+
+**Where the facts were: in the frame the whole time.** FNS reads from the VCT
+Roster Board for all 51.5s, and its header strip is real data made illegible
+by the crop to 1080x1920. Verified by three independent reads of a 2x crop,
+all six figures agreeing exactly:
+
+| 32 teams | 139 signed | 32 open slots | 82 bench / options | 78 staff | 274 not yet confirmed |
+
+This is the same move R1 makes by running seven exhibits through its lower
+pane. The content pane is a document viewer — read the document.
+
+**A LONE FIGURE CAN ARGUE THE OPPOSITE OF THE POINT.** Three independent
+judges caught this before it shipped: "32 OPEN SLOTS" on its own reads as 32
+jobs going spare, which undercuts the scarcity he is arguing; it only means
+scarcity beside the 274 chasing them. So a card shows a PAIR. Likewise "139
+signed" alone implies rosters are nearly full.
+
+**Copy the source's own labels and invent no nouns.** The board says "bench /
+options", not "bench". It says "274 not yet confirmed" with no noun — writing
+"274 PLAYERS" asserts something the source does not say, since staff and
+bench are separate columns. An unsourced or re-worded number on a quote desk
+is a liability, so the card carries its source line.
+
+Shipped: **32 open slots / 274 not yet confirmed** over the job-security
+thesis at 17.45s, and **139 signed / 82 bench / options** over the
+replacement line at 37.85s. `engine/titles.stat`. Unanimously rejected by the
+judges: "78 staff" (he never mentions staff) and dropping cards altogether.
+
 ### Sound belongs to a VISUAL event, not a vocal peak
 
 Three designs were rejected in a row — ding-on-entrance, whoosh-on-cut,
@@ -647,8 +688,18 @@ speech at −0.75 dBTP. The rejected ding at gain 0.45–0.80 works out to −0.
 what "way too loud" meant. Compute the post-normalisation level before
 choosing a gain.
 
-`sfx.pop` is the popup sound: 0.22s, two partials, centroid 2232 Hz. `ding` is
-a 0.55s four-partial bell at 5984 Hz and is too much event for a chip.
+**SUSTAIN is what makes a sound read as a ding.** Both sounds George rejected
+turned out to be the two longest-decaying in the palette — `ding` rings for
+547ms, `pop` for 216ms. Measured across seven candidates, everything under
+~100ms lands as an event instead of a chime. The popup sound is now
+`sfx.tock`, a dry woodblock: **65ms decay**, centroid 2020 Hz, no ring.
+Gain 0.095 puts it at **-14.2 dBFS** in the master.
+
+**Window the spectral centroid.** `_centroid` was taking a raw `rfft`, so
+leakage from the hard start of a short burst smeared across the spectrum and
+inflated every figure in the manifest — `tock` read 7173 Hz raw against 2020
+Hz Hann-windowed, with a tonal body at 1565 Hz. Fixed; `ding` is 4107 Hz, not
+the 5984 Hz quoted earlier here.
 
 **Make a popup a different OBJECT from the banner.** First pass drew the chip
 as a dark card with a gold outline — the same thing the persistent banner is —

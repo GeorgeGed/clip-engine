@@ -3,7 +3,7 @@
   "file": "ding.wav",
   "seconds": 0.55,
   "peak": 1.0,
-  "centroid_hz": 5984,
+  "centroid_hz": 4107,
   "rights_basis": "synthesised",
   "source": "engine/sfx.py \u2014 generated, no third-party audio"
  },
@@ -11,7 +11,7 @@
   "file": "sparkle.wav",
   "seconds": 0.5,
   "peak": 1.0,
-  "centroid_hz": 7080,
+  "centroid_hz": 7094,
   "rights_basis": "synthesised",
   "source": "engine/sfx.py \u2014 generated, no third-party audio"
  },
@@ -19,7 +19,7 @@
   "file": "impact.wav",
   "seconds": 0.33,
   "peak": 1.0,
-  "centroid_hz": 1921,
+  "centroid_hz": 656,
   "rights_basis": "synthesised",
   "source": "engine/sfx.py \u2014 generated, no third-party audio"
  },
@@ -27,7 +27,7 @@
   "file": "boom.wav",
   "seconds": 0.9,
   "peak": 1.0,
-  "centroid_hz": 824,
+  "centroid_hz": 231,
   "rights_basis": "synthesised",
   "source": "engine/sfx.py \u2014 generated, no third-party audio"
  },
@@ -35,7 +35,7 @@
   "file": "whoosh.wav",
   "seconds": 0.42,
   "peak": 1.0,
-  "centroid_hz": 9941,
+  "centroid_hz": 9965,
   "rights_basis": "synthesised",
   "source": "engine/sfx.py \u2014 generated, no third-party audio"
  },
@@ -43,7 +43,7 @@
   "file": "riser.wav",
   "seconds": 0.8,
   "peak": 1.0,
-  "centroid_hz": 6028,
+  "centroid_hz": 5830,
   "rights_basis": "synthesised",
   "source": "engine/sfx.py \u2014 generated, no third-party audio"
  },
@@ -51,7 +51,15 @@
   "file": "pop.wav",
   "seconds": 0.22,
   "peak": 1.0,
-  "centroid_hz": 2232,
+  "centroid_hz": 1913,
+  "rights_basis": "synthesised",
+  "source": "engine/sfx.py \u2014 generated, no third-party audio"
+ },
+ "tock": {
+  "file": "tock.wav",
+  "seconds": 0.1,
+  "peak": 1.0,
+  "centroid_hz": 2020,
   "rights_basis": "synthesised",
   "source": "engine/sfx.py \u2014 generated, no third-party audio"
  }

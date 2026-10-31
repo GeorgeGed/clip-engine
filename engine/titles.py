@@ -104,3 +104,63 @@ def chip(text: str, out: Path, *, width=1080, size=46,
            font=font, fill=(12, 12, 14))
     img.save(out)
     return img.size
+
+
+def stat(items, source: str, out: Path, *,
+         num_px=92, label_px=36, src_px=25, pad=24, gap=46, accent=ACCENT):
+    """A fact card: one or more figures, what each counts, where they came from.
+
+    George rejected the first chips — "BLOWN OUT OF PROPORTION", "NO JOB
+    SECURITY" — as "random text cards": they restated what he was already
+    saying, so they carried nothing. His own test was the news screenshot at
+    the head of the clip: "if you had useful information to put on the screen
+    like you did at the start it'd be fine."
+
+    So a card has to carry a FACT. These come off the exhibit already on his
+    screen — the VCT Roster Board header — which is real on-screen data that
+    is simply illegible once the frame is letterboxed to a phone. Surfacing it
+    is the same move R1 makes by running exhibits through its lower pane.
+
+    **A lone figure can argue the opposite of the point.** Three independent
+    judges caught this before it shipped: "32 OPEN SLOTS" on its own reads as
+    32 jobs going spare, which undercuts a scarcity argument. It only means
+    scarcity next to the 274 chasing them. So `items` is a list — pair a
+    figure with its denominator rather than showing it alone.
+
+    Labels are copied VERBATIM from the source ("bench / options", not
+    "bench") and no noun is invented ("274 not yet confirmed", never "274
+    players"): the board counts staff and bench in other columns, so naming
+    the unit would assert something the source does not say. The source line
+    is not decoration — an unsourced number on a quote desk is a liability.
+    """
+    if isinstance(items, tuple):
+        items = [items]
+    fnum, flab, fsrc = _font(num_px), _font(label_px), _font(src_px)
+    probe = ImageDraw.Draw(Image.new("RGBA", (8, 8)))
+
+    cols = []
+    for number, label in items:
+        w = max(probe.textlength(number, font=fnum),
+                probe.textlength(label.upper(), font=flab))
+        cols.append((number, label, w))
+    ws = probe.textlength(source.upper(), font=fsrc)
+    body_w = sum(c[2] for c in cols) + gap * (len(cols) - 1)
+    bw = int(max(body_w, ws)) + pad * 2 + 14
+    bh = int(src_px * 1.5 + num_px * 0.82 + label_px * 1.15) + pad * 2
+
+    img = Image.new("RGBA", (bw + 8, bh + 8), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle([6, 7, bw + 6, bh + 7], radius=10, fill=(0, 0, 0, 130))
+    d.rounded_rectangle([0, 0, bw, bh], radius=10, fill=(13, 15, 20, 242))
+    d.rectangle([0, 8, 7, bh - 8], fill=accent)            # accent rule
+
+    x0 = pad + 10
+    d.text((x0, pad - 6), source.upper(), font=fsrc, fill=(148, 154, 168, 255))
+    y = pad - 6 + int(src_px * 1.5)
+    x = x0
+    for number, label, w in cols:
+        d.text((x, y), number, font=fnum, fill=accent)
+        d.text((x, y + int(num_px * 0.82)), label.upper(), font=flab, fill=WHITE)
+        x += w + gap
+    img.save(out)
+    return img.size

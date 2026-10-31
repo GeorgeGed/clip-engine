@@ -258,25 +258,33 @@ construction. **Always extract every file at the same sample rate** before
 comparing spectra.
 
 
-## Skill 15 — The popup chip (extrapolated, not observed)
+## Skill 15 — The sourced fact card (extrapolated, not observed)
 
 **Honest provenance: no reference contains this exact element.** R2 and R4
 have persistent banners (skill 7) and R4 has tilted screenshot cards (skill
-3); the chip is those two scaled down into a transient callout, built because
-George asked for "popups with low volume dings". It is an extrapolation from
-the references, not a measurement of them — treat it as taste until a
-reference shows otherwise.
+3); this is those scaled into a transient stat graphic. It exists because
+George asked for popups and then rejected the first attempt for carrying no
+information.
 
 | | |
 |---|---|
-| Form | solid accent fill, dark text, 9px radius, drop shadow |
-| Type | Tungsten Bold, 46px, ALL CAPS |
-| Position | y 1180 at 1080x1920 — below the captions, above the banner |
-| Entrance | 14px settle over 0.16s under a 0.10s alpha fade |
-| Hold | 2.6s |
-| Sound | `sfx.pop`, gain 0.11 pre-loudnorm (-13.9 dBFS in the master) |
-| Density | 4 in 51.5s, min gap 5.4s |
+| Form | dark card, accent rule down the left edge, drop shadow |
+| Content | source line, then one or more `number` + `label` pairs |
+| Type | Tungsten Bold — 92px number, 36px label, 25px source |
+| Position | y 1150 at 1080x1920 — below the captions, above the banner |
+| Entrance | 16px settle over 0.16s under a 0.10s alpha fade |
+| Hold | 3.2s (denser than a chip, so it needs longer to read) |
+| Sound | `sfx.tock`, gain 0.095 (-14.2 dBFS in the master) |
+| Density | 2 in 51.5s, plus the opening screenshot card |
 
-Content rule: the chip states the ARGUMENT, not the words — the captions
-already carry the words. Verify its text against the burned captions in the
-render, not against a reconstructed timeline.
+**The content rules are the whole skill:**
+
+1. It must tell the viewer something the audio does not. A paraphrase of the
+   caption is not information.
+2. Pair a figure with its denominator. A lone number can argue the opposite
+   of the point it is meant to support.
+3. Copy the source's labels verbatim and invent no nouns.
+4. Carry the source line. An unsourced number is a liability.
+
+The richest supply of such facts is the exhibit already on screen — a
+document the crop to vertical has made illegible.

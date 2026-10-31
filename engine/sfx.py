@@ -119,6 +119,31 @@ def riser(dur=0.8):
     return (y / np.max(np.abs(y))).astype(np.float32)
 
 
+def tock(dur=0.10, f0=1180.0, seed=7):
+    """A dry woodblock — the popup sound.
+
+    Both earlier choices were rejected, and measuring them side by side says
+    why: `ding` decays over 547ms and `pop` over 216ms, the two longest in the
+    palette. Sustain is what makes a sound read as a chime playing rather than
+    an event landing. This decays in 65ms and does not ring.
+
+    Centroid is 2020 Hz (Hann-windowed; the tonal body alone is 1565 Hz).
+    That is in the same region as the mid-impact transients measured off R3,
+    but R3's figures came from a different measurement pass, so the decay is
+    the claim to lean on, not the band. R3's DENSITY is not copied either:
+    it is an advert, and R1 and R2 use no SFX at all.
+    """
+    n = int(dur * SR); t = np.arange(n) / SR
+    body = (np.sin(2 * np.pi * f0 * t) * np.exp(-t * 60)
+            + 0.45 * np.sin(2 * np.pi * f0 * 2.76 * t) * np.exp(-t * 115)
+            + 0.20 * np.sin(2 * np.pi * f0 * 5.40 * t) * np.exp(-t * 190))
+    cl = int(0.004 * SR)
+    click = np.zeros(n)
+    click[:cl] = np.random.default_rng(seed).normal(0, 1, cl) * np.linspace(1, 0, cl)
+    y = body + 0.38 * click
+    return (y / np.max(np.abs(y))).astype(np.float32)
+
+
 def pop(dur=0.22, f0=1650.0):
     """A small soft ding for a popup appearing.
 
@@ -134,7 +159,7 @@ def pop(dur=0.22, f0=1650.0):
 
 
 PALETTE = {"ding": ding, "sparkle": sparkle, "impact": impact,
-           "boom": boom, "whoosh": whoosh, "riser": riser, "pop": pop}
+           "boom": boom, "whoosh": whoosh, "riser": riser, "pop": pop, "tock": tock}
 
 
 def build(out: Path = ASSETS) -> dict:
@@ -156,7 +181,15 @@ def build(out: Path = ASSETS) -> dict:
 
 
 def _centroid(y):
-    S = np.abs(np.fft.rfft(y))
+    """Spectral centroid, Hann-windowed.
+
+    WINDOW IT. An un-windowed rfft of a short burst leaks the hard start and
+    end across the whole spectrum, and since the sum is unweighted that
+    leakage dominates: `tock` read 7173 Hz raw against 2020 Hz windowed, and
+    its tonal body is at 1565 Hz. Every figure in the manifest was inflated
+    this way before the fix.
+    """
+    S = np.abs(np.fft.rfft(y * np.hanning(len(y))))
     f = np.fft.rfftfreq(len(y), 1 / SR)
     return float((S * f).sum() / max(S.sum(), 1e-9))
 
