@@ -129,15 +129,28 @@ def expression(window_cards: list[tuple[int, int, str]], ) -> str:
 
 
 def plan_windows(cards_: list[Card], *, fps: float, total_frames: int) -> list[dict]:
-    """Split the clip into 300-frame title windows and assign cards to each."""
+    """Split the clip into 300-frame title windows and assign cards to each.
+
+    A title cannot be trimmed, so the LAST window is pulled back to end exactly
+    on the video rather than overhanging it. Without this the timeline runs
+    past the picture by up to 299 frames and the export carries a tail of
+    captions over black.
+    """
     n = max(1, math.ceil(total_frames / TITLE_FRAMES))
     out = []
     for w in range(n):
-        lo, hi = w * TITLE_FRAMES, (w + 1) * TITLE_FRAMES
+        lo = w * TITLE_FRAMES
+        if w == n - 1 and total_frames >= TITLE_FRAMES:
+            lo = total_frames - TITLE_FRAMES     # sit flush with the end
+        hi = lo + TITLE_FRAMES
         entries = []
         for c in cards_:
             s, e = round(c.start * fps), round(c.end * fps)
             if e <= lo or s >= hi:
+                continue
+            # The pulled-back last window overlaps its predecessor; let it own
+            # only the cards the earlier window could not reach.
+            if w == n - 1 and n > 1 and s < (n - 1) * TITLE_FRAMES:
                 continue
             entries.append((max(0, s - lo), min(TITLE_FRAMES, e - lo), c.text))
         out.append({"index": w, "offset_frames": lo, "cards": entries})

@@ -314,3 +314,51 @@ keeping the speech either side. That is an edit, not a boundary move.
   and reference-derived data.
 
 Nothing here has rendered a clip George has approved. That's what step 5 fixes.
+
+---
+
+## Measured throughput, 2026-10-31
+
+Two clips built and rendered end to end through Resolve Studio 21.1.2, no hand
+tuning on the second. Stage timings from `pipeline.py`:
+
+| stage | clip 4 (50.2s) | share |
+|---|---|---|
+| transcribe (whisper large-v3, CPU) | **37.2s** | 61% |
+| build timeline (layout + 10 caption titles) | **10.7s** | 17% |
+| render (H.264, 1080×1920@60) | **13.4s** | 22% |
+| **total** | **61.3s** | **1.22× realtime** |
+
+Clip 8 (67.1s) rendered in 22s on its own — **0.33× realtime**, 3× faster than
+playback. Both outputs QC clean at 1080×1920@60 with the right duration.
+
+**Rendering is not the bottleneck. Transcription is**, at 61% of the cost —
+and it is the one stage that should not be per-clip at all. `AGENTS.md`
+already says to transcribe the VOD once and slice; the pipeline script does
+not yet do that. Fixing it changes the arithmetic completely:
+
+- per clip today: 61s for a 50s clip
+- per clip with one VOD-level transcription: **~24s** (build + render only)
+- 50 clips from one 103-minute VOD: one ~76min transcription + ~20min of
+  build/render ≈ **1.6 hours unattended**
+
+That is a viable daily pipeline. It is also serial — one Resolve instance,
+one render at a time — so it scales to tens of clips a day, not hundreds.
+
+### What is NOT automated
+
+1. **The facecam rectangle is measured by hand.** `CAM = (1456, 818, 1920,
+   1080)` came from me looking at a frame. It is a property of the STREAM, not
+   the clip, so it is measured once per streamer and reused — but a new
+   streamer, or one who moves their webcam, needs it measured again. This is
+   the single human step left in the Resolve path, and the one thing standing
+   between "automated for gofns" and "automated for anyone".
+2. **The content crop is hand-chosen.** 92px removes this browser's chrome.
+   Different content, different number.
+3. **Audio is not normalised.** Every clip still ships ~7dB under the −12 LUFS
+   target. Not implemented anywhere in the Resolve path.
+4. **Caption text is raw Whisper.** It gets "Global Esports" right but will
+   garble handles and team names, and 117 cards a clip is a lot of surface for
+   that to show. No correction pass against `roster.yaml` exists.
+5. **Resolve must be open**, with Playback frame rate set by hand, and only
+   one project can be driven at a time.
