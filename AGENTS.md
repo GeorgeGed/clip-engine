@@ -376,6 +376,62 @@ non-black box gives position to 5px with no numpy. Two grabs pinned convention
 timeline, `SetCurrentTimecode` lands on the timeline END the first time; call
 it twice.
 
+### Captions in Resolve
+
+**The subtitle track and Auto Captions cannot be styled from Python. At all.**
+Font, size, colour, stroke and position are unreachable — confirmed by three
+independent passes over the 3525-line API stub plus a direct grep: there is no
+text-style property anywhere, and `TimelineItemProperties` is transform/crop
+only. You can create a subtitle track, put per-word timed text on it with
+`SetTranscription`, and burn it in at render — and it will look like Resolve's
+default subtitle. That is not the house style, so captions go through Fusion.
+
+**Fusion Text+ is the only styled path, and these four facts make it work:**
+
+1. **`StyledText` does not keyframe.** Three writes at three times leave one
+   static value, the last one. Numeric inputs (`Size`) do not keyframe either.
+2. **`StyledText` DOES accept a Fusion expression**, evaluated per frame. This
+   is the whole trick: `tool.StyledText.SetExpression('iif(time >= 0 and time
+   < 30, "WORD", …)')`. Verified switching on exact frame boundaries.
+3. **A title is 300 frames and there is no `SetDuration`.** So one Text+ per
+   300-frame window, chained — 14 for a 67s clip at 60fps, ~10 cards each.
+4. **`InsertFusionTitleIntoTimeline` always lands on V1 and RIPPLES every
+   unlocked track**, shoving existing clips right by 300. Locking V1 to stop
+   that makes the insert fail outright and return None.
+
+So the build order is **captions first, video second**: insert each title
+while V1 is still empty, with V3 LOCKED across the insert (otherwise each new
+title shoves the already-placed ones right — the first run left 1 title of 14,
+sitting at frame 3900), then `SetPosition({'trackIndex': 3, 'startFrame': …})`
+and unlock. Append the video to V1/V2 afterwards.
+
+Other traps:
+- **Shading element 2 is the outline, and its inputs are `None` until
+  `Enabled2 = 1`.** Only then do Red2/Green2/Blue2/Thickness2/ElementShape2
+  exist. Element 1 is the fill, named "White Solid Fill"; element 2 is named
+  "Red Outline" and is off by default.
+- **Fusion's `Center` y is measured from the BOTTOM.** A caption at y 0.44
+  from the top is `Center = {1: 0.5, 2: 0.56, 3: 0.0}`.
+- **Stroke 0.14, not 0.30.** At 0.30 the outline merges into a solid slab and
+  the letterforms disappear. 0.14 follows the glyphs and still reads over
+  anything.
+- `timelinePlaybackFrameRate` is **not settable from Python** — not as a
+  string, a float, at project or timeline level, nor on a fresh empty project.
+  A 60fps timeline left at the default 24 plays at 0.4x in the viewer. It is a
+  monitoring setting and does not affect the render, but it must be fixed by
+  hand in Project Settings before anyone reviews the edit.
+
+**Measured on clip 8:** 196 words → **117 cards**, median 0.46s, **1.74
+cards/second** — the reference cadence is "roughly twice a second", so the
+grouping rule (≤3 words, ≤0.55s, break on a 0.6s gap) lands in the right place
+without tuning.
+
+**Fonts.** The repo's `fonts/LuckiestGuy-Regular.ttf` is NOT installed, so
+Fusion cannot address it by name. George's machine already has **Tungsten
+Black/Bold**, Proxima Nova Extrabold and Compacta — Tungsten is a broadcast
+sports face and is what the reference build uses. Install a font to
+`~/Library/Fonts` before naming it in `Style.font`.
+
 ### The clip 8 reference build
 
 Project `fns-clip08-reference`, timeline `clip08-L2`, 1080×1920 @ 60.
