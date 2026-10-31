@@ -17,7 +17,8 @@ from engine.resolve_layout import Frame, plan, apply
 from engine.resolve_captions import (cards, plan_windows, expression, colour_expression,
                                      style_tool, Style, emphasis_keys, mark_emphasis,
                                      _frame_to_tc)
-from engine.cuts import cut_points, framings
+from engine.cuts import (cut_points, framings, content_framings,
+                         content_scenes, exhibit_framings)
 from engine.render_ffmpeg import _finish_audio
 from engine import qc
 
@@ -33,6 +34,8 @@ r = connect()
 r.OpenPage("edit")                     # never leave it on Color while scripting
 proj = r.GetProjectManager().GetCurrentProject()
 mp = proj.GetMediaPool()
+import glob as _glob
+clip = _glob.glob(str(ROOT / "jobs/fns-2905408276/clips_1080/08_*.mp4"))[0]
 item = next(i for i in mp.GetRootFolder().GetClipList() if i.GetName().startswith("08_"))
 frames = int(item.GetClipProperty("Frames"))
 dur = frames / FPS
@@ -44,6 +47,14 @@ cs = cards(words)
 n_emph = mark_emphasis(cs, emphasis_keys(meta["claim"], meta["consequence"]))
 
 cuts = cut_points(words, dur, min_shot=MIN_SHOT)
+# A document change in the content pane is a MANDATORY cut: a shot that
+# straddles it shows the wrong exhibit for half its length.
+scenes = content_scenes(clip)
+for s in scenes:
+    if 0.5 < s < dur - 0.5 and all(abs(s - c) > 1.0 for c in cuts):
+        cuts.append(s)
+cuts.sort()
+print(f"document changes at {scenes} -> forced cuts")
 bounds = [0.0] + cuts + [dur]
 shots = list(zip(bounds, bounds[1:]))
 rects = framings(len(shots), CAM)
@@ -86,36 +97,50 @@ print(f"captions {time.time()-t0:.0f}s")
 # 2. video. Content is one unbroken clip; the facecam is cut into shots so the
 #    FRAME cuts while the audio runs continuous underneath. Audio rides with
 #    the content clip only -- the facecam copies are video-only.
-entries = [{"mediaPoolItem": item, "startFrame": 0, "endFrame": frames - 1,
-            "trackIndex": 1, "recordFrame": start}]
+# endFrame is EXCLUSIVE. Measured: startFrame=0 endFrame=100 yields a
+# 100-frame clip. Subtracting 1 drops a frame from every shot, and at a cut
+# that shows as ONE BLACK FRAME in the pane -- which is what "the screen
+# randomly goes black" was. It was black at exactly the five cut points.
+entries = []
 for (a, b) in shots:
-    sf, ef = round(a * FPS), round(b * FPS) - 1
-    entries.append({"mediaPoolItem": item, "startFrame": sf, "endFrame": ef,
-                    "trackIndex": 2, "recordFrame": start + sf, "mediaType": 1})
+    sf, ef = round(a * FPS), round(b * FPS)
+    for track in (1, 2):
+        entries.append({"mediaPoolItem": item, "startFrame": sf, "endFrame": ef,
+                        "trackIndex": track, "recordFrame": start + sf,
+                        **({} if track == 1 else {"mediaType": 1})})
 mp.AppendToTimeline(entries)
 
 seam_y = SEAM * CANVAS.canvas_h
-apply(tl.GetItemListInTrack("video", 1)[0],
-      plan(CANVAS, (0, CHROME, 1920, 1080), (0, seam_y, 1080, 1920)))
+# Scene 0 is the news tweet he is reading; frame it as the exhibit it is.
+# Measured off the source frame: the post column is x 600-1190, y 170-950.
+# Match the PANE's aspect (1080/1114 = 0.969) or fill crops the headline off:
+# a 590x780 rect scaled to 1080 wide becomes 1427 tall in a 1114 pane and
+# loses 313px top and bottom. 590 wide needs 609 tall.
+TWEET = (600, 200, 1190, 809)
+_pan = content_framings(len(shots), chrome=CHROME)
+crects = exhibit_framings(shots, scenes, {0: TWEET}, lambda i: _pan[i])
+con_items = sorted(tl.GetItemListInTrack("video", 1) or [], key=lambda i: i.GetStart())
+for it, rect in zip(con_items, crects):
+    apply(it, plan(CANVAS, rect, (0, seam_y, 1080, 1920)))
 cam_items = sorted(tl.GetItemListInTrack("video", 2) or [], key=lambda i: i.GetStart())
 for it, rect in zip(cam_items, rects):
     apply(it, plan(CANVAS, rect, (0, 0, 1080, seam_y)))
     it.SetCDL(GRADE)
-print(f"video: V1 1 clip, V2 {len(cam_items)} shots")
+print(f"video: V1 {len(con_items)} shots, V2 {len(cam_items)} shots")
 
 # 3. render + loudness
 t0 = time.time()
 proj.LoadRenderPreset("H.264 Master")
 proj.SetRenderSettings({"TargetDir": str(ROOT / "renders"),
-                        "CustomName": "clip08_cuts_raw", "SelectAllFrames": True})
+                        "CustomName": "clip08_v6_raw", "SelectAllFrames": True})
 job = proj.AddRenderJob()
 proj.StartRendering([job])
 while proj.IsRenderingInProgress():
     time.sleep(1)
 print(f"render {time.time()-t0:.0f}s {(proj.GetRenderJobStatus(job) or {}).get('JobStatus')}")
 
-out = ROOT / "renders/clip08_MASTER_v2.mp4"
-_finish_audio(ROOT / "renders/clip08_cuts_raw.mov",
+out = ROOT / "renders/clip08_MASTER_v6.mp4"
+_finish_audio(ROOT / "renders/clip08_v6_raw.mov",
               {"audio": {"target_lufs": -12.0, "true_peak_dbtp": -1.0},
                "render": {"audio_codec": "aac"}}, out)
 print()

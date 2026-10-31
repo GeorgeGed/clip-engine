@@ -368,6 +368,17 @@ in `engine/resolve_layout.py`; the reasoning is here so it is not re-derived.
 entry in ONE call. Give the second copy `mediaType: 1` (video only) or the
 audio doubles.
 
+5. **`endFrame` is EXCLUSIVE.** Measured: `startFrame=0, endFrame=100` yields a
+   100-frame clip. Writing `endFrame = round(t*fps) - 1` therefore drops one
+   frame from every segment, and between two adjacent shots that shows as
+   **one black frame in the pane**. George reported "the screen randomly goes
+   black" and a full-rate scan found the top pane at 0 luminance on exactly
+   frames 485, 1153, 2029, 2302, 3318 — precisely the five cut points. The
+   source clip itself measured clean, so every black frame was self-inflicted.
+   **Scan the render at full rate, not 10fps**: a one-frame drop is invisible
+   to a 10fps sample and `blackdetect` misses it too, because only one PANE
+   goes black while the rest of the frame is lit.
+
 **Verify with a still, not with the maths.** `timeline.GrabStill()` then
 `album.ExportStills(...)` writes a PNG of the actual program output. Measure it
 — `ffmpeg -vf scale=216:384 -pix_fmt gray -f rawvideo -` and scan for the
@@ -485,6 +496,63 @@ NOT help: the hang is inside `fusionscript.so`, a C extension that never
 yields to Python signals. Budget a real subprocess timeout instead, leave the
 app on the Edit page rather than Color when scripting, and avoid invalid
 timecodes (`01:00:60:00` is not a time and appeared to start the trouble).
+
+### Emulating the references — measured, clip 8 v6
+
+| | ours | R1 receipts | R2 take |
+|---|---|---|---|
+| Duration | 67.2s | 80.3s | 20.2s |
+| Cuts / min | **5.4** | 6.0 | 0 |
+| Mean shot | **9.6s** | 8.9s | — |
+| Speech coverage | 84% | 50% | 96% |
+| Loudness | −12.50 LUFS | −11.79 | −14.26 |
+| True peak | −0.75 dBTP | +1.25 | −0.44 |
+| Loudness range | 5.00 LU | 13.70 | 1.30 |
+| Seam | 0.42 | 0.418 | 0.4422 |
+
+**The loudness range is NOT a mixing fault — do not try to fix it.** Measured
+on mute-free spans the speech runs **LRA 0.5–0.8**, *flatter than R2's 1.30*.
+Strip the silence from the whole clip and it reads 2.90. The 5.00 is the
+digital-silence holes. This is why neither a `loudnorm` LRA target (11→2 moved
+it 5.00→5.20) nor an `acompressor` at up to 6:1 changed anything: there is no
+speech dynamic to compress. **On muted source, LRA measures the mutes.**
+
+**Cut on a document change.** R1 ran seven exhibits through its lower pane.
+`cuts.content_scenes()` diffs the content region at 2fps and returns the times
+the on-screen document changes; those become MANDATORY cuts, because a shot
+straddling the change reframes the wrong document for half its length. Clip 8
+changes at 6.0s — he reads the Global Esports announcement tweet, then
+switches to the roster board. Adding that cut took the clip from 5 cuts /
+11.2s mean to **6 cuts / 9.6s mean**, which is R1's cadence.
+
+**Frame an exhibit as an exhibit.** The tweet is a document, so the content
+pane punches onto it (source x 600–1190, y 200–809) instead of showing the
+whole desktop. **The rect must match the PANE's aspect** — 1080/1114 = 0.969 —
+or `fill` crops it: a 590×780 rect scaled to 1080 wide becomes 1427 tall in a
+1114 pane and loses 313px top and bottom, which ate the headline's first line.
+
+### Dead air: 0 of 6 removals survived review
+
+George asked for dead space to be cut. Six candidate removals (10.4s, taking
+the clip to 56.7s) went to an independent judge each, then every one judged
+safe went to an adversarial second opinion. **All four that passed the first
+pass were refuted. Nothing was cut.**
+
+The refutations measured the waveform rather than reading the transcript, and
+found things the first pass could not:
+
+- **Ten of eleven mutes resume into full-level speech** (−7 dBFS within 300ms
+  of the gate opening) — he is mid-word when the audio returns, so the removed
+  span holds speech.
+- The one exception, at 6.49s, opens onto **room tone at −23.4 dBFS** — he had
+  stopped and drawn breath inside it, so that gap held a completed thought.
+- At 18.04s the word "kind" is **not audibly spoken** before the mute, so the
+  proposed join was not the join that had been judged.
+
+**On a DMCA-muted VOD, dead air is not dead — it is speech you cannot hear.**
+Removing it is not tightening, it is splicing. The engine is in
+`engine/tighten.py` with `joins()` reporting every splice for review; it stays
+available for clips whose silence is genuinely empty.
 
 ### Grading and loudness
 

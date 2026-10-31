@@ -56,3 +56,62 @@ if __name__ == "__main__":
         lens = [b - a for a, b in zip(segs, segs[1:])]
         print(f"min_shot {ms}: {len(c)} cuts, {len(lens)} shots, "
               f"mean {sum(lens)/len(lens):4.1f}s, {len(c)/(DUR/60):.1f} cuts/min")
+
+
+def content_framings(n, src_w=1920, src_h=1080, *, chrome=92,
+                     cycle=((0.50, 1.00), (0.34, 1.12), (0.62, 1.06),
+                           (0.44, 1.18), (0.58, 1.02))):
+    """One source rect per shot for the CONTENT pane.
+
+    R1 ran seven different exhibits through its lower pane — gameplay, a
+    scoreboard, a Steam profile, a stats card, a chat log, the report dialog,
+    a banner. The pane is a document viewer and it MOVES. With a single static
+    document all we can do is read different parts of it, so each shot gets its
+    own horizontal centre and zoom, which both matches the reference behaviour
+    and stops the bottom 58% of frame sitting still for a minute.
+
+    Each cycle entry is (centre_x as a fraction of width, zoom). Zoom > 1
+    narrows the window, which makes the text BIGGER and more legible, not less.
+    """
+    out = []
+    for i in range(n):
+        cx, z = cycle[i % len(cycle)]
+        vis_w = src_w / z
+        x0 = min(max(cx * src_w - vis_w / 2, 0.0), src_w - vis_w)
+        out.append((x0, chrome, x0 + vis_w, src_h))
+    return out
+
+
+def content_scenes(clip, *, region=(0, 0, 1400, 1080), fps=2.0, thresh=12.0):
+    """Times where the DOCUMENT in the content pane changes.
+
+    R1's lower pane ran seven exhibits. Where the source switches document,
+    that is the strongest cut motivation available — AGENTS.md's "cut when the
+    point changes" is literally true here — and it must be a cut, because a
+    shot that straddles the change reframes the wrong document for half its
+    length.
+    """
+    import subprocess
+    import numpy as np
+    x, y, w, h = region
+    raw = subprocess.run(
+        ["ffmpeg", "-v", "error", "-i", str(clip), "-vf",
+         f"fps={fps},crop={w}:{h}:{x}:{y},scale=64:48",
+         "-pix_fmt", "gray", "-f", "rawvideo", "-"], capture_output=True).stdout
+    n = len(raw) // (64 * 48)
+    a = np.frombuffer(raw, dtype=np.uint8)[: n * 64 * 48].reshape(n, 48, 64).astype(float)
+    d = np.abs(np.diff(a, axis=0)).mean(axis=(1, 2))
+    return [round((i + 1) / fps, 2) for i, v in enumerate(d) if v > thresh]
+
+
+def exhibit_framings(shots, scenes, rects_by_scene, default):
+    """Pick a content rect per shot from which document is on screen.
+
+    `rects_by_scene` maps a scene index to a source rect; anything unmapped
+    falls back to `default(i)`, which is the pan-across-the-document cycle.
+    """
+    out = []
+    for i, (a, _b) in enumerate(shots):
+        idx = sum(1 for s in scenes if s <= a + 0.05)
+        out.append(rects_by_scene.get(idx) or default(i))
+    return out
