@@ -77,3 +77,30 @@ def banner(text: str, out: Path, *, width=1080, size=46, pad_x=30, pad_y=16):
            font=font, fill=WHITE)
     img.save(out)
     return img.size
+
+
+def chip(text: str, out: Path, *, width=1080, size=46,
+         pad_x=28, pad_y=16, accent=ACCENT):
+    """A small supporting popup that tracks the argument.
+
+    George: "I'd prefer to have popups with low volume dings." The sound
+    belongs to a VISUAL event — a chip arriving — which is why the earlier
+    cues read as random: they fired with nothing on screen to explain them.
+
+    Filled accent with dark text, deliberately INVERTED against the banner.
+    First pass drew both as outlined dark cards and they read as two
+    banners; the popup has to be visibly a different kind of object from the
+    thing that sits there all clip.
+    """
+    font = _font(size)
+    probe = ImageDraw.Draw(Image.new("RGBA", (8, 8)))
+    tw = probe.textlength(text.upper(), font=font)
+    bw, bh = int(tw) + pad_x * 2, int(size * 1.45) + pad_y
+    img = Image.new("RGBA", (bw + 8, bh + 8), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle([5, 6, bw + 5, bh + 6], radius=9, fill=(0, 0, 0, 120))  # drop shadow
+    d.rounded_rectangle([0, 0, bw, bh], radius=9, fill=accent)
+    d.text(((bw - tw) / 2, (bh - size * 1.2) / 2 - 1), text.upper(),
+           font=font, fill=(12, 12, 14))
+    img.save(out)
+    return img.size

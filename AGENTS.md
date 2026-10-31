@@ -621,6 +621,53 @@ Dropped deliberately: **flashes on cuts** (a cut is already an edit event, and
 neither reference uses flashes at all) and **shake** (decoration on a speaker
 this measured).
 
+### Sound belongs to a VISUAL event, not a vocal peak
+
+Three designs were rejected in a row — ding-on-entrance, whoosh-on-cut,
+impact-on-vocal-peak — and the third was the informative one, because by then
+the placement was *correctly measured*. The three `impact` cues sat on real
+RMS peaks of +5.0, +3.7 and +3.8 dB over the speaker's own baseline, and
+George still called them "random sound effect out of place and useless".
+
+**A measured peak is not a motivation the viewer can see.** The `motivation`
+field was satisfied and the sound was still wrong, because nothing on screen
+changed when it fired. A sound explains itself when the viewer watches the
+thing that made it arrive.
+
+So: **no sound without a visual event**. Current set is five cues, all of them
+a popup landing — the tweet card plus four chips. Nothing fires on a peak, a
+cut, or a word.
+
+**Low means ~13 dB under the speech, and the arithmetic is worth keeping.**
+The bed is mixed before `loudnorm`, so a cue's gain is not its level in the
+master. Measured on clip 8: bed peak 0.099 (−20.1 dBFS), loudnorm applied
++6.2 dB (−20.2 → −14.0 LUFS), so the ding peaks at **−13.9 dBFS** against
+speech at −0.75 dBTP. The rejected ding at gain 0.45–0.80 works out to −0.7 to
+**+4.3** dBFS — louder than the speech it was punctuating, which is exactly
+what "way too loud" meant. Compute the post-normalisation level before
+choosing a gain.
+
+`sfx.pop` is the popup sound: 0.22s, two partials, centroid 2232 Hz. `ding` is
+a 0.55s four-partial bell at 5984 Hz and is too much event for a chip.
+
+**Make a popup a different OBJECT from the banner.** First pass drew the chip
+as a dark card with a gold outline — the same thing the persistent banner is —
+and at 1180 vs 1500 they read as two banners rather than a popup over a
+banner. Inverting the chip (solid accent, dark text, drop shadow) separates
+them instantly. `titles.chip`.
+
+**Pop motion is a MOVE, not a grow.** `scale` cannot animate for the same
+reason `crop` cannot (below) — constant output dimensions. But `overlay`'s
+`y` takes `t`, so the chip settles 14px over 0.16s under a 0.10s alpha fade.
+Measured on the render: top edge at row 1186 at t+0.07, 1180 by t+0.17.
+
+Chips carry the argument, not the caption — the captions already show the
+words. On clip 8 the four are "BLOWN OUT OF PROPORTION", "NO JOB SECURITY",
+"1-YEAR CONTRACTS", "REPLACED = NO JOB", each over the line it compresses,
+each verified against the burned captions in the render rather than against a
+reconstructed timeline. No chip on the payoff: the hook title already says
+those words.
+
 ### `crop` CANNOT animate a zoom — it has to be zoompan
 
 This cost two wrong renders and a wrong conclusion, so it is worth stating

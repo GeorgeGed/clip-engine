@@ -256,3 +256,27 @@ and a raw cut sounds raw — it is not the absence of sound effects. Fix:
 against 48 kHz references — our file had no content above 8 kHz by
 construction. **Always extract every file at the same sample rate** before
 comparing spectra.
+
+
+## Skill 15 — The popup chip (extrapolated, not observed)
+
+**Honest provenance: no reference contains this exact element.** R2 and R4
+have persistent banners (skill 7) and R4 has tilted screenshot cards (skill
+3); the chip is those two scaled down into a transient callout, built because
+George asked for "popups with low volume dings". It is an extrapolation from
+the references, not a measurement of them — treat it as taste until a
+reference shows otherwise.
+
+| | |
+|---|---|
+| Form | solid accent fill, dark text, 9px radius, drop shadow |
+| Type | Tungsten Bold, 46px, ALL CAPS |
+| Position | y 1180 at 1080x1920 — below the captions, above the banner |
+| Entrance | 14px settle over 0.16s under a 0.10s alpha fade |
+| Hold | 2.6s |
+| Sound | `sfx.pop`, gain 0.11 pre-loudnorm (-13.9 dBFS in the master) |
+| Density | 4 in 51.5s, min gap 5.4s |
+
+Content rule: the chip states the ARGUMENT, not the words — the captions
+already carry the words. Verify its text against the burned captions in the
+render, not against a reconstructed timeline.

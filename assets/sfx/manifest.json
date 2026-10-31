@@ -46,5 +46,13 @@
   "centroid_hz": 6028,
   "rights_basis": "synthesised",
   "source": "engine/sfx.py \u2014 generated, no third-party audio"
+ },
+ "pop": {
+  "file": "pop.wav",
+  "seconds": 0.22,
+  "peak": 1.0,
+  "centroid_hz": 2232,
+  "rights_basis": "synthesised",
+  "source": "engine/sfx.py \u2014 generated, no third-party audio"
  }
 }

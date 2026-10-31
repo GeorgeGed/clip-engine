@@ -119,8 +119,22 @@ def riser(dur=0.8):
     return (y / np.max(np.abs(y))).astype(np.float32)
 
 
+def pop(dur=0.22, f0=1650.0):
+    """A small soft ding for a popup appearing.
+
+    `ding` is a 0.55s bell with four partials — far too much event for a chip
+    sliding in. This is short, two partials, gentle attack, and it is meant to
+    sit well under the speech: the sound belongs to the popup, it is not an
+    effect in its own right.
+    """
+    n = int(dur * SR); t = np.arange(n) / SR
+    y = (np.sin(2 * np.pi * f0 * t) * _env(n, 0.004, 0.10)
+         + 0.35 * np.sin(2 * np.pi * f0 * 2.4 * t) * _env(n, 0.003, 0.05))
+    return (y / np.max(np.abs(y))).astype(np.float32)
+
+
 PALETTE = {"ding": ding, "sparkle": sparkle, "impact": impact,
-           "boom": boom, "whoosh": whoosh, "riser": riser}
+           "boom": boom, "whoosh": whoosh, "riser": riser, "pop": pop}
 
 
 def build(out: Path = ASSETS) -> dict:
