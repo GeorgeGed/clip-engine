@@ -554,6 +554,52 @@ Removing it is not tightening, it is splicing. The engine is in
 `engine/tighten.py` with `joins()` reporting every splice for review; it stays
 available for clips whose silence is genuinely empty.
 
+### Effects must be MOTIVATED, and the footage decides how many
+
+George: "the transitions and punches and flashes are so random same with the
+shakes." He was reading it correctly. The first version put **22 effect events
+into 51 seconds** — a punch and a flash on every cut regardless of content,
+plus shakes on `emphasis[:14]`, literally the first fourteen caption cards,
+seven of them inside the opening five seconds. Effects landed on STRUCTURE
+(cuts) rather than on anything happening in the footage. That is the
+definition of decoration the contract warns about.
+
+**Measure the emphasis; do not guess it.** Per-window RMS against the
+speaker's own baseline. On clip 8 the baseline is −23.3 dBFS and the peak
+−18.3 — a **5 dB total range** — so there are exactly FOUR moments above
++3.5 dB. A clip this evenly delivered cannot carry more than a handful of
+effects, and the measurement says so before any are placed.
+
+Final: **4 effects, 4.7/min** (was 26/min), each tied to a measured peak or to
+the payoff, each carrying its motivation in `clip08_effects.json`.
+`juice.Beat` **raises** on an empty motivation, and `juice.check()` warns on
+effects closer than 3s, on the WCAG 3/s flash rate, and on anything over
+20/min.
+
+Dropped deliberately: **flashes on cuts** (a cut is already an edit event, and
+neither reference uses flashes at all) and **shake** (decoration on a speaker
+this measured).
+
+### `crop` CANNOT animate a zoom — it has to be zoompan
+
+This cost two wrong renders and a wrong conclusion, so it is worth stating
+flatly. A filter's output dimensions must be constant for the encoder, so
+`crop` evaluates `w`/`h` ONCE at init; only `x`/`y` can move. That is why
+ffmpeg 9 removed crop's `eval` option. A crop-based punch renders silently at
+zoom 1.00 and looks plausible in a still — **measured against the source it
+came back identical, residual 0.3.**
+
+`zoompan` scales internally and emits a constant size, which is the entire
+reason the filter exists. Its evaluator has **no `t`**; it offers `it` (input
+timestamp) and errors with "Undefined constant" otherwise. `eq` later in the
+chain does use `t`.
+
+**Verify a transform by measuring it, not by looking at it.** Best-fit a
+centre-crop of the ungraded source against the processed frame across a range
+of zooms: expected 1.19 / 1.00 / 1.17 / 1.21, measured 1.19 / 1.00 / 1.14 /
+1.17. Two earlier eyeball checks on stills had passed a filter that was doing
+nothing.
+
 ### The juice layer lives in ffmpeg, not Resolve
 
 Resolve's Edit page has **no keyframe API for transforms**. `SetProperty`

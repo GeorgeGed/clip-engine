@@ -1,80 +1,122 @@
-"""The visual punctuation layer, applied after the Resolve render.
+"""Visual punctuation, applied after the Resolve render.
 
-It lives here rather than in Resolve because the Edit page has NO keyframe API
-for transforms — `SetProperty` writes a static value, numeric Fusion inputs
-refuse keyframes, and the only animation Resolve exposes to Python is a Fusion
-expression. ffmpeg gives frame-level control of the whole frame, so the
-structural edit stays in Resolve and the juice is a finishing pass.
+**Every effect carries a motivation and the code refuses one without it.**
+That is the contract's rule and the first version broke it: 22 effect events
+across 51 seconds, a punch and a flash on every cut regardless of what was
+being said, and shakes on `emphasis[:14]` — literally the first fourteen
+caption cards, seven of them inside the opening five seconds. George's note
+was "so random", and he was reading it correctly. Effects landed on structure
+(cuts) rather than on anything happening in the footage.
 
-Every effect is tied to something in the footage, per the contract: punches
-and flashes land on CUTS, shake lands on an emphasised caption. An effect that
-punctuates nothing is decoration.
+What actually motivates an effect here, measured rather than assumed:
 
-The flash is deliberately gentle. WCAG's general flash threshold is 3 per
-second at intensity <= 0.8 and `gates.py` rejects beyond it; a cut flash at
-0.22 over 0.18s is far inside that, and cuts here are ~4.7/min, not 3/s.
+* **Vocal emphasis.** Per-word RMS against the speaker's own baseline. On
+  clip 8 the baseline is −23.3 dBFS and the peak −18.3: a **5 dB** total
+  range, so there are exactly FOUR moments above +3.5 dB. The footage does
+  not support more than a handful of effects, and spraying 22 at it is what
+  made them read as noise.
+* **The payoff.** The clip's last claim beat gets the signature move, the
+  same way a frag clip gets one slow-mo on the kill.
+
+Deliberately NOT motivated, so deliberately absent:
+
+* **Flashes on cuts.** A cut is already an edit event; flashing it punctuates
+  nothing. Neither reference clip uses flashes at all.
+* **Shake.** It was decoration on a speaker this measured.
+
+It lives in ffmpeg because Resolve's Edit page has no keyframe API for
+transforms — `SetProperty` writes a static value and numeric Fusion inputs
+refuse keyframes, so smooth motion cannot come from the Edit page at all.
 """
 
 from __future__ import annotations
 
-PUNCH_AMOUNT = 0.16      # 0.085 was there but barely readable in motion
-PUNCH_DECAY = 5.5        # e-folds per second; ~0.5s to settle
-FLASH_AMOUNT = 0.07      # measured: 0.22 lifted luma 57->112, a blowout
-FLASH_DECAY = 26.0
-SHAKE_AMOUNT = 5.0       # pixels
-SHAKE_HZ = 11.0
+from dataclasses import dataclass
+
+MIN_SPACING = 3.0        # two effects closer than this read as one jitter
+FLASH_CAP = 0.8          # WCAG, enforced by gates.py
+FLASH_RATE_CAP = 3.0     # per second
 
 
-def _terms(times, amount, decay, window, var="t"):
-    """Sum of decaying impulses, as an ffmpeg expression.
+@dataclass
+class Beat:
+    """One motivated effect."""
+    at: float
+    kind: str                 # 'punch' | 'flash'
+    intensity: float          # 0..1
+    motivation: str           # what in the footage this punctuates
 
-    CLAMP THE EXPONENT. Writing exp(-k*(t-C)) and gating it with gte(t,C)
-    looks right and is not: ffmpeg does not short-circuit, so the exponential
-    is evaluated anyway, and for t far BEFORE C it overflows. At t=0 with
-    C=39.861 and k=26, exp(1036) is +inf, inf*0 is NaN, and a NaN brightness
-    crushed the first 12.5 seconds of a 51s clip to black. max(0, t-C) keeps
-    the exponent at or below zero so the term is always finite.
+    def __post_init__(self):
+        if not (self.motivation or "").strip():
+            raise ValueError(
+                f"{self.kind} at {self.at}s has no motivation. An effect that "
+                f"punctuates nothing is decoration — see AGENTS.md.")
+        if self.kind == "flash" and self.intensity > FLASH_CAP:
+            raise ValueError(f"flash intensity {self.intensity} exceeds the "
+                             f"WCAG cap of {FLASH_CAP}")
+
+
+def check(beats: list[Beat], duration: float) -> list[str]:
+    """Warnings a human should see before this renders."""
+    out = []
+    ordered = sorted(beats, key=lambda b: b.at)
+    for a, b in zip(ordered, ordered[1:]):
+        if b.at - a.at < MIN_SPACING:
+            out.append(f"{a.kind}@{a.at:.2f} and {b.kind}@{b.at:.2f} are "
+                       f"{b.at - a.at:.2f}s apart (min {MIN_SPACING}s)")
+    flashes = [b for b in ordered if b.kind == "flash"]
+    for i, f in enumerate(flashes):
+        window = [g for g in flashes[i:] if g.at - f.at < 1.0]
+        if len(window) > FLASH_RATE_CAP:
+            out.append(f"{len(window)} flashes within 1s at {f.at:.2f} — "
+                       f"over the WCAG {FLASH_RATE_CAP}/s threshold")
+    if duration and len(ordered) / (duration / 60) > 20:
+        out.append(f"{len(ordered)} effects over {duration:.0f}s is "
+                   f"{len(ordered)/(duration/60):.0f}/min — likely decoration")
+    return out
+
+
+def _impulse(var, at, amount, decay, window):
+    """A decaying impulse, gated and CLAMPED.
+
+    max(0, t-C) is not cosmetic. ffmpeg does not short-circuit, so a gated
+    exp(-k*(t-C)) still evaluates the exponential for t far before C; at t=0
+    with C=39.9 and k=26 that is exp(1036) = +inf, inf*0 = NaN, and a NaN
+    brightness blacked out the first 12.5s of a 51s clip.
     """
-    if not times:
-        return "0"
-    return "+".join(
-        f"{amount}*exp(-{decay}*max(0,{var}-{x:.3f}))*gte({var},{x:.3f})"
-        f"*lt({var},{x + window:.3f})" for x in times)
+    return (f"{amount}*exp(-{decay}*max(0,{var}-{at:.3f}))"
+            f"*gte({var},{at:.3f})*lt({var},{at + window:.3f})")
 
 
-def punch_expr(cuts, *, amount=PUNCH_AMOUNT, decay=PUNCH_DECAY) -> str:
-    return f"1+({_terms(cuts, amount, decay, 0.7)})"
+def filtergraph(beats: list[Beat], *, w=1080, h=1920, fps=60) -> str:
+    """Punch via zoompan, flash via eq.
 
+    It has to be zoompan. `crop` CANNOT animate a zoom: a filter's output
+    dimensions must stay constant for the encoder, so crop evaluates w/h once
+    at init and only x/y can move — which is why ffmpeg 9 dropped crop's
+    `eval` option entirely. A crop-based "punch" silently renders at zoom
+    1.00; measured against the ungraded source it came back identical,
+    residual 0.3. zoompan scales internally and emits a constant size, which
+    is the whole reason the filter exists.
 
-def flash_expr(cuts, *, amount=FLASH_AMOUNT, decay=FLASH_DECAY) -> str:
-    return f"({_terms(cuts, amount, decay, 0.25)})"
-
-
-def shake_expr(beats, *, amount=SHAKE_AMOUNT, hz=SHAKE_HZ) -> str:
-    """Decaying wobble on an emphasised beat."""
-    if not beats:
-        return "0"
-    return "+".join(
-        f"{amount}*sin({hz}*6.2832*(t-{x:.3f}))*exp(-9*max(0,t-{x:.3f}))"
-        f"*gte(t,{x:.3f})*lt(t,{x + 0.45:.3f})" for x in beats)
-
-
-def filtergraph(cuts, beats, *, w=1080, h=1920, fps=60) -> str:
-    """Punch and shake by animating a CROP, then the cut flash via eq.
-
-    `crop` rather than zoompan: zoompan needs `it` instead of `t` and brings
-    its own warmup quirks, while crop exposes `t` directly. Crop dimensions
-    are forced even for yuv420p.
-
-    ffmpeg 9 note: `crop` no longer takes `eval`. Its w/h/x/y are flagged `T`
-    (runtime-tunable) and are evaluated every frame already; passing
-    `eval=frame` fails with "Option not found". `eq` still needs it.
+    zoompan's evaluator has NO `t` — it offers `it` (input timestamp) and
+    errors with "Undefined constant" on `t`. `eq`, later in the chain, does
+    use `t`.
     """
-    z = f"min(max({punch_expr(cuts)},1.0),1.30)"
-    sx = shake_expr(beats)
-    return (
-        f"crop=w='2*floor(iw/(2*({z})))':h='2*floor(ih/(2*({z})))'"
-        f":x='(iw-ow)/2+({sx})':y='(ih-oh)/2',"
-        f"scale={w}:{h},"
-        f"eq=brightness='{flash_expr(cuts)}':eval=frame"
-    )
+    punches = [b for b in beats if b.kind == "punch"]
+    flashes = [b for b in beats if b.kind == "flash"]
+
+    z = "1"
+    if punches:
+        z = "1+(" + "+".join(
+            _impulse("it", b.at, round(0.10 + 0.14 * b.intensity, 4),
+                     5.0, 0.9) for b in punches) + ")"
+    zc = f"min(max({z},1.0),1.35)"
+
+    chain = (f"zoompan=z='{zc}':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
+             f":s={w}x{h}:fps={fps}")
+    if flashes:
+        fx = "+".join(_impulse("t", b.at, round(0.09 * b.intensity, 4), 26.0, 0.25)
+                      for b in flashes)
+        chain += f",eq=brightness='({fx})':eval=frame"
+    return chain
