@@ -554,6 +554,60 @@ Removing it is not tightening, it is splicing. The engine is in
 `engine/tighten.py` with `joins()` reporting every splice for review; it stays
 available for clips whose silence is genuinely empty.
 
+### The juice layer lives in ffmpeg, not Resolve
+
+Resolve's Edit page has **no keyframe API for transforms**. `SetProperty`
+writes a static value, numeric Fusion inputs refuse keyframes, and the only
+animation reachable from Python is a Fusion expression on a tool input. So
+smooth motion cannot come from the Edit page: the structural edit is built in
+Resolve, rendered, and `engine/juice.py` applies punches, flashes and shake as
+a finishing pass alongside the loudness pass.
+
+Three traps, each cost a bad render:
+
+1. **CLAMP THE EXPONENT.** `exp(-k*(t-C))` gated by `gte(t,C)` looks correct
+   and is not — ffmpeg does not short-circuit, so the exponential evaluates
+   anyway. At t=0 with C=39.861 and k=26, `exp(1036)` is **+inf**, `inf*0` is
+   **NaN**, and a NaN brightness crushed the first 12.5s of a 51s clip to
+   black. Always `exp(-k*max(0, t-C))`.
+2. **ffmpeg 9 removed `eval` from `crop`.** Its `w/h/x/y` are flagged `T`
+   (runtime-tunable) and evaluate every frame already; passing `eval=frame`
+   fails with "Option not found". `eq` still takes it.
+3. **zoompan wants `it`, not `t`** — its evaluator has no `t` and errors with
+   "Undefined constant". `crop` exposes `t` and is the better tool anyway.
+
+Tuned values: punch **0.16** decaying at 5.5/s (0.085 was present but
+unreadable in motion), flash **0.07** (0.22 lifted luma 57→112, a blowout),
+shake 5px at 11Hz on an emphasised caption. Measured flash lift is +13 to +16
+luma over ~0.2s at roughly 4.7 cuts/min — far inside the WCAG 3/s cap.
+
+### Clip 8 v8 — the re-cut
+
+George: "extremely boring… the first part isn't about the second part… the
+deadspace should be fully cut." All three were right.
+
+**It was two narratives.** The subject line said it: "Reaction to a team
+missing the partnership cycle **and** what it means for player job security."
+The first 9s is the Global Esports announcement; everything after is an
+argument about job security. The in-point moved to **8.85s**, where the
+argument starts — which also dropped 4.2s of mute that sat in those 9s.
+
+**Dead space cut.** Four removals over the new range, 6.9s. He asked twice;
+the integrity caveat was recorded and overruled, and `tighten.joins()` printed
+every splice. Absent audio fell from **19% to 1%**.
+
+| | v6 | v8 |
+|---|---|---|
+| Duration | 67.2s | **51.5s** |
+| Narratives | 2 | **1** |
+| Absent audio | 19% | **1%** |
+| Loudness range | 5.00 LU | **2.40 LU** |
+| Motion | static per shot | punch + flash + shake |
+
+The loudness range falling 5.00 → 2.40 is the same finding from the other
+side: the range WAS the silence, and cutting the silence collapsed it toward
+R2's 1.30 without touching a compressor.
+
 ### Grading and loudness
 
 **`TimelineItem.SetCDL` is the grading API**, and it works:
