@@ -462,6 +462,20 @@ more aggressive than the closest reference, not less.
 utterances each ending exactly where the next starts, so utterance boundaries
 are useless for finding pauses. Use WORD gaps.
 
+**Built and verified.** 5 cuts at 8.09 / 19.23 / 33.84 / 38.39 / 55.31s, six
+shots, each with its own framing from the inset cycle `(0.0, 0.10, 0.04, 0.14,
+0.06)` — biased upward (`dy*0.6` top, `dy*1.4` bottom) because the face sits
+above the box centre. Sampling one frame per shot out of the RENDER confirms
+six visibly different framings.
+
+The facecam copies are `mediaType: 1` (video only) and the audio rides the
+unbroken content clip, so the picture cuts cost nothing in contiguity.
+
+**The lower pane never moves.** All the motion is in the top 42% of frame;
+the document pane holds one framing for the whole clip. That is the next lever
+if it still reads static, and it is a deliberate choice rather than an
+oversight — punching a text document around is usually worse than holding it.
+
 ### Resolve can wedge
 
 Two probes hung with no output at all, and `ps` showed Resolve at 90–105% CPU
