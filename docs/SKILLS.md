@@ -110,7 +110,47 @@ loudnorm — single-pass lands a dB off. **No music bed in any of the four.**
 
 ---
 
-## 11. Sound design *(R3, R4)* — measured 2026-10-31
+## 11. Sound design — CORRECTED, and the honest state
+
+**The earlier version of this section was wrong and led to a bad edit. Read
+the correction before using any of it.**
+
+**R1 and R2 are not on disk.** `reference/` is empty; only R3 and R4 survive
+in the session scratchpad. R1 and R2 are the ONLY two references in our
+format — facecam over content — so everything "known" about them is the
+measurement table in STYLE-BASELINE.md from an earlier session that had the
+files. **Re-supply them before making any further claim about how a clip in
+this format should sound.**
+
+**Neither R1 nor R2 is recorded as using sound effects.** STYLE-BASELINE.md
+documents both closely — act structure, caption cadence, the 0.36s median
+cut-to-sentence distance — and notes "neither reference has a music bed" and
+"no cutting on music". No SFX observation appears anywhere for either.
+
+**The SFX idea came from Pause's FEATURE LIST, not from a clip.** The row
+"Frame-timed SFX on the punchline" sits in a table mapping Pause's
+*advertised features* onto our schema. Nobody watched a clip in our format
+doing it.
+
+**R3 is an ADVERT, not a clip.** Its ~1.12 transients/second — which an
+earlier pass used as the density target — are UI text-appear clicks as "Make
+this / go viral." types on screen. Frames at 4.44/5.87/6.24/6.60/7.77s show
+exactly that. It is a product demo with typing sounds and it models nothing
+about editing a talking head.
+
+**R4's transients cannot be separated from speech by the method tried.** A
+harmonicity test misclassified 4 of 5 pure-speech control samples from our
+own clip as non-speech, so no conclusion was drawn from it.
+
+What survives: three `impact` cues on measured vocal peaks, which George
+accepted. Everything else — the opening ding, whooshes on cuts, the closing
+boom — had no reference behind it and was removed.
+
+`engine/sfx.py` and `assets/sfx/` remain as a working synthesised palette
+with a clean rights basis. The library is sound; the PLACEMENT needs a
+reference nobody can currently see.
+
+## 11b. Original measurements, kept for the record
 
 **The inventory had no sound section and that was the biggest hole in it.**
 Measured by spectral-flux onset detection on the reference audio:

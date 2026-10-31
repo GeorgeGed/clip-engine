@@ -1,62 +1,20 @@
 [
  {
-  "at": 0.03,
-  "name": "ding",
-  "gain": 0.8,
-  "motivation": "the entrance \u2014 frame scales in as the ding rings"
- },
- {
-  "at": 9.894,
-  "name": "whoosh",
-  "gain": 0.3,
-  "motivation": "transition on cut 1"
- },
- {
-  "at": 22.947000000000003,
-  "name": "whoosh",
-  "gain": 0.3,
-  "motivation": "transition on cut 2"
- },
- {
-  "at": 25.438000000000002,
-  "name": "whoosh",
-  "gain": 0.3,
-  "motivation": "transition on cut 3"
- },
- {
-  "at": 40.461,
-  "name": "whoosh",
-  "gain": 0.3,
-  "motivation": "transition on cut 4"
- },
- {
-  "at": 26.3,
+  "at": 25.7,
   "name": "impact",
-  "gain": 0.38,
+  "gain": 0.3,
   "motivation": "vocal peak +5.0 dB \u2014 \"you WILL have job stability\""
  },
  {
-  "at": 36.25,
+  "at": 35.65,
   "name": "impact",
-  "gain": 0.26,
+  "gain": 0.22,
   "motivation": "vocal peak +3.7 dB \u2014 \"going to be REPLACEMENTS\""
  },
  {
-  "at": 41.5,
+  "at": 40.9,
   "name": "impact",
-  "gain": 0.28,
+  "gain": 0.24,
   "motivation": "vocal peak +3.8 dB \u2014 \"it is HARD no matter what\""
- },
- {
-  "at": 50.9,
-  "name": "riser",
-  "gain": 0.22,
-  "motivation": "builds into the payoff"
- },
- {
-  "at": 50.9,
-  "name": "boom",
-  "gain": 0.4,
-  "motivation": "the payoff \u2014 \"end up with NOTHING\""
  }
 ]
