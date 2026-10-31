@@ -209,3 +209,50 @@ cutouts, persistent banners.
 cannot do are the four that make R4 look expensive — and three of them need
 *assets*, not code. Sourcing the right tweet screenshot at the right second is
 an editorial problem, not a rendering one.
+
+---
+
+## 13. Camera movement — measured on R1, 2026-10-31
+
+**R1 and R2 are now in `reference/`.** Keep them there; every earlier sound
+and motion claim was extrapolated from an advert and a podcast because these
+two were missing.
+
+**R1 moves on roughly 40% of its shots, by 2-10%, eased in at the head of the
+shot.** Measured by matching each shot's first frame against one 1.5s later
+across a scale sweep: **8 of 18 facecam shots** and **6 of 15 content shots**
+move; the rest are static. R2 is a single shot and does not move.
+
+It is not continuous drift and it is **not** punch-and-settle. A push eases
+in over roughly 1.5-2s and holds for the rest of the shot.
+
+**A warning about measuring this.** Integrating a per-frame Fourier-Mellin
+scale estimate drifted the cumulative zoom to **12x over 80s** with 3.5
+direction reversals per second — pure noise accumulation, and it produced a
+confident, wrong answer ("R1 moves constantly"). Match two frames seconds
+apart instead: nothing accumulates. The per-frame method also claimed R1's
+facecam moved 1.5%/frame, which the robust method shows is mostly noise.
+
+`juice.shot_push_expr` implements it. Verified on our render: pushes measured
+1.050 / 1.000 / 1.065 against 1.055 / 0 / 1.060 intended.
+
+## 14. Audio tone — our clips do not sound like the references, and it is not SFX
+
+Average spectrum, normalised at 300-1000 Hz so loudness is not the variable:
+
+| band | R1/R2 | ours before | ours after EQ |
+|---|---|---|---|
+| 2-4 kHz (presence) | — | **−4.0 dB** | −1.6 dB |
+| 6-8 kHz | — | +4.2 dB | +0.6 dB |
+| 8-11 kHz | — | **+10.7 dB** | +4.3 dB |
+
+Our source is **thin where articulation lives and hot where Twitch's AAC
+leaves artifacts.** That tonal mismatch is why a reference sounds produced
+and a raw cut sounds raw — it is not the absence of sound effects. Fix:
+`equalizer=f=3000:w=1.1:g=4` and `equalizer=f=9500:w=1.0:g=-7`.
+
+**Measurement trap:** the first comparison said we were 21 dB DULL at
+7-14 kHz. That was an artifact of comparing a 16 kHz extraction of our audio
+against 48 kHz references — our file had no content above 8 kHz by
+construction. **Always extract every file at the same sample rate** before
+comparing spectra.

@@ -120,3 +120,34 @@ def filtergraph(beats: list[Beat], *, w=1080, h=1920, fps=60) -> str:
                       for b in flashes)
         chain += f",eq=brightness='({fx})':eval=frame"
     return chain
+
+
+# ─── camera movement, measured off R1 ─────────────────────────────────────
+
+SHOT_PUSH_RAMP = 2.0      # seconds; R1's moves run 2-10% over about 1.5s
+SHOT_PUSH_RATE = 0.40     # fraction of shots that carry a move
+
+
+def shot_push_expr(shots, pushes, ramp=SHOT_PUSH_RAMP):
+    """Zoom expression for a slow push at the head of selected shots.
+
+    Measured on R1 by matching each shot's first frame against a frame 1.5s
+    later across a scale sweep: **8 of 18 facecam shots and 6 of 15 content
+    shots move, by 2-10%**; the rest are static. So the reference does NOT
+    move continuously, and it does not punch-and-settle either — it eases in
+    at the head of a shot and holds.
+
+    An earlier attempt to measure this by integrating per-frame
+    Fourier-Mellin scale drifted 12x over 80s and reported 3.5 direction
+    reversals a second: pure noise accumulation. Match two frames seconds
+    apart instead; there is nothing to accumulate.
+
+    `shots` is [(start, end)], `pushes` the fraction per shot (0 = static).
+    """
+    terms = []
+    for (s, e), p in zip(shots, pushes):
+        if p <= 0:
+            continue
+        terms.append(f"{p}*min(1,max(0,(it-{s:.3f})/{ramp}))"
+                     f"*gte(it,{s:.3f})*lt(it,{e:.3f})")
+    return "1+(" + "+".join(terms) + ")" if terms else "1"
