@@ -1,0 +1,638 @@
+[
+{
+"start": 0.24,
+"end": 0.76,
+"text": "OBVIOUSLY NON",
+"emph": false
+},
+{
+"start": 0.76,
+"end": 1.08,
+"text": "-PARTNERED",
+"emph": false
+},
+{
+"start": 1.08,
+"end": 1.62,
+"text": "ORGS ONLY",
+"emph": false
+},
+{
+"start": 1.62,
+"end": 2.1,
+"text": "PICKING UP",
+"emph": false
+},
+{
+"start": 2.1,
+"end": 2.56,
+"text": "TEAMS ONCE",
+"emph": true
+},
+{
+"start": 2.56,
+"end": 3.0,
+"text": "THEY QUALIFY",
+"emph": false
+},
+{
+"start": 3.0,
+"end": 3.54,
+"text": "FOR CUPS",
+"emph": false
+},
+{
+"start": 3.54,
+"end": 3.92,
+"text": "OR MASTERS",
+"emph": true
+},
+{
+"start": 3.92,
+"end": 4.42,
+"text": "IS KIND OF",
+"emph": false
+},
+{
+"start": 4.42,
+"end": 4.94,
+"text": "WORSE FOR THE",
+"emph": true
+},
+{
+"start": 4.94,
+"end": 5.24,
+"text": "SCENE",
+"emph": true
+},
+{
+"start": 5.24,
+"end": 5.84,
+"text": "BUT",
+"emph": false
+},
+{
+"start": 5.84,
+"end": 6.18,
+"text": "I THINK",
+"emph": false
+},
+{
+"start": 6.18,
+"end": 6.66,
+"text": "PEOPLE",
+"emph": true
+},
+{
+"start": 6.66,
+"end": 7.16,
+"text": "ARE BLOWING IT",
+"emph": true
+},
+{
+"start": 7.16,
+"end": 7.68,
+"text": "OUT OF PROPORTION",
+"emph": true
+},
+{
+"start": 7.68,
+"end": 8.3,
+"text": "ESPORTS",
+"emph": false
+},
+{
+"start": 8.3,
+"end": 8.68,
+"text": "WAS NEVER",
+"emph": false
+},
+{
+"start": 8.68,
+"end": 8.97,
+"text": "KIND",
+"emph": false
+},
+{
+"start": 9.2,
+"end": 9.74,
+"text": "TO",
+"emph": false
+},
+{
+"start": 9.74,
+"end": 10.24,
+"text": "JOB",
+"emph": false
+},
+{
+"start": 10.24,
+"end": 10.52,
+"text": "STABILITY",
+"emph": false
+},
+{
+"start": 10.52,
+"end": 11.06,
+"text": "AND",
+"emph": false
+},
+{
+"start": 11.06,
+"end": 11.6,
+"text": "THIS BRINGS YEAH",
+"emph": false
+},
+{
+"start": 11.6,
+"end": 11.96,
+"text": "I MEAN OF",
+"emph": false
+},
+{
+"start": 11.96,
+"end": 12.18,
+"text": "COURSE",
+"emph": false
+},
+{
+"start": 12.18,
+"end": 12.5,
+"text": "100",
+"emph": false
+},
+{
+"start": 12.5,
+"end": 13.0,
+"text": "WITHOUT",
+"emph": false
+},
+{
+"start": 13.0,
+"end": 13.38,
+"text": "A DOUBT",
+"emph": false
+},
+{
+"start": 13.38,
+"end": 13.9,
+"text": "THAT'S",
+"emph": false
+},
+{
+"start": 13.9,
+"end": 14.34,
+"text": "THAT PART IS",
+"emph": false
+},
+{
+"start": 14.34,
+"end": 14.88,
+"text": "100 TRUE",
+"emph": false
+},
+{
+"start": 14.88,
+"end": 15.4,
+"text": "YES YOU",
+"emph": false
+},
+{
+"start": 15.4,
+"end": 15.72,
+"text": "DON'T HAVE",
+"emph": false
+},
+{
+"start": 15.72,
+"end": 16.0,
+"text": "ENOUGH",
+"emph": false
+},
+{
+"start": 16.0,
+"end": 16.3,
+"text": "JOB",
+"emph": false
+},
+{
+"start": 16.3,
+"end": 16.66,
+"text": "SECURITY",
+"emph": true
+},
+{
+"start": 16.66,
+"end": 17.34,
+"text": "BUT",
+"emph": false
+},
+{
+"start": 17.34,
+"end": 17.71,
+"text": "IT",
+"emph": false
+},
+{
+"start": 17.71,
+"end": 18.23,
+"text": "FORCES YOU",
+"emph": true
+},
+{
+"start": 18.23,
+"end": 18.43,
+"text": "TO BE",
+"emph": false
+},
+{
+"start": 18.43,
+"end": 18.87,
+"text": "EXCEPTIONAL",
+"emph": true
+},
+{
+"start": 18.87,
+"end": 19.25,
+"text": "AND CONSISTENTLY",
+"emph": true
+},
+{
+"start": 19.25,
+"end": 19.73,
+"text": "YOU",
+"emph": false
+},
+{
+"start": 19.73,
+"end": 20.07,
+"text": "HAVE TO",
+"emph": false
+},
+{
+"start": 20.07,
+"end": 20.31,
+"text": "GRIND",
+"emph": false
+},
+{
+"start": 20.31,
+"end": 20.59,
+"text": "IT'S",
+"emph": false
+},
+{
+"start": 20.764,
+"end": 21.004,
+"text": "HARD",
+"emph": false
+},
+{
+"start": 21.004,
+"end": 21.324,
+"text": "AS",
+"emph": false
+},
+{
+"start": 21.324,
+"end": 21.954,
+"text": "THAT'S",
+"emph": false
+},
+{
+"start": 21.954,
+"end": 22.214,
+"text": "THE POINT",
+"emph": false
+},
+{
+"start": 22.214,
+"end": 22.384,
+"text": "BUT",
+"emph": false
+},
+{
+"start": 22.529,
+"end": 23.069,
+"text": "THE THING",
+"emph": false
+},
+{
+"start": 23.069,
+"end": 23.309,
+"text": "IS",
+"emph": false
+},
+{
+"start": 23.309,
+"end": 23.789,
+"text": "YOU WILL",
+"emph": false
+},
+{
+"start": 23.789,
+"end": 24.209,
+"text": "HAVE JOB",
+"emph": false
+},
+{
+"start": 24.209,
+"end": 24.509,
+"text": "STABILITY",
+"emph": false
+},
+{
+"start": 24.509,
+"end": 25.469,
+"text": "ONCE",
+"emph": false
+},
+{
+"start": 25.469,
+"end": 25.949,
+"text": "YOU GET",
+"emph": false
+},
+{
+"start": 25.949,
+"end": 26.369,
+"text": "SIGNED",
+"emph": true
+},
+{
+"start": 26.369,
+"end": 27.069,
+"text": "TO",
+"emph": false
+},
+{
+"start": 27.069,
+"end": 27.489,
+"text": "AN ORG",
+"emph": false
+},
+{
+"start": 27.489,
+"end": 27.899,
+"text": "TO",
+"emph": false
+},
+{
+"start": 27.899,
+"end": 28.259,
+"text": "THE DEGREE",
+"emph": false
+},
+{
+"start": 28.259,
+"end": 28.679,
+"text": "WHERE YOU COULD",
+"emph": false
+},
+{
+"start": 28.679,
+"end": 29.139,
+"text": "SIGN LIKE A",
+"emph": false
+},
+{
+"start": 29.139,
+"end": 29.399,
+"text": "ONE -YEAR",
+"emph": false
+},
+{
+"start": 29.399,
+"end": 29.719,
+"text": "CONTRACT",
+"emph": false
+},
+{
+"start": 29.719,
+"end": 30.179,
+"text": "BUT IF",
+"emph": false
+},
+{
+"start": 30.179,
+"end": 30.659,
+"text": "YOU JUST START",
+"emph": false
+},
+{
+"start": 30.659,
+"end": 31.079,
+"text": "SUCKING",
+"emph": false
+},
+{
+"start": 31.079,
+"end": 31.419,
+"text": "AFTER",
+"emph": false
+},
+{
+"start": 31.419,
+"end": 31.976,
+"text": "THEN",
+"emph": false
+},
+{
+"start": 31.976,
+"end": 32.296,
+"text": "THEY'RE GOING TO",
+"emph": false
+},
+{
+"start": 32.296,
+"end": 32.796,
+"text": "BE REPLACEMENTS",
+"emph": false
+},
+{
+"start": 32.796,
+"end": 33.256,
+"text": "ON YOUR TEAM",
+"emph": false
+},
+{
+"start": 33.256,
+"end": 33.736,
+"text": "AND THOSE PEOPLE",
+"emph": true
+},
+{
+"start": 33.736,
+"end": 34.256,
+"text": "THAT GET REPLACED",
+"emph": true
+},
+{
+"start": 34.256,
+"end": 34.656,
+"text": "WON'T HAVE",
+"emph": false
+},
+{
+"start": 34.656,
+"end": 34.976,
+"text": "JOBS",
+"emph": false
+},
+{
+"start": 34.976,
+"end": 35.476,
+"text": "FOR",
+"emph": false
+},
+{
+"start": 35.476,
+"end": 35.736,
+"text": "A WHILE",
+"emph": false
+},
+{
+"start": 35.736,
+"end": 35.916,
+"text": "SO",
+"emph": false
+},
+{
+"start": 36.026,
+"end": 36.506,
+"text": "IT'S HARD",
+"emph": false
+},
+{
+"start": 36.506,
+"end": 36.846,
+"text": "NO MATTER",
+"emph": false
+},
+{
+"start": 36.846,
+"end": 37.366,
+"text": "WHAT AS A",
+"emph": false
+},
+{
+"start": 37.366,
+"end": 37.946,
+"text": "PLAYER",
+"emph": false
+},
+{
+"start": 37.946,
+"end": 38.386,
+"text": "COMPETING",
+"emph": false
+},
+{
+"start": 38.386,
+"end": 38.986,
+"text": "YOU",
+"emph": false
+},
+{
+"start": 38.986,
+"end": 39.306,
+"text": "SACRIFICE",
+"emph": false
+},
+{
+"start": 39.306,
+"end": 39.646,
+"text": "A",
+"emph": false
+},
+{
+"start": 39.646,
+"end": 39.866,
+"text": "LOT",
+"emph": false
+},
+{
+"start": 39.866,
+"end": 40.446,
+"text": "YOU",
+"emph": false
+},
+{
+"start": 40.446,
+"end": 40.686,
+"text": "SACRIFICE",
+"emph": false
+},
+{
+"start": 40.686,
+"end": 41.146,
+"text": "POTENTIAL",
+"emph": false
+},
+{
+"start": 41.146,
+"end": 42.166,
+"text": "JOB",
+"emph": false
+},
+{
+"start": 42.166,
+"end": 42.466,
+"text": "SECURITY",
+"emph": true
+},
+{
+"start": 42.466,
+"end": 42.886,
+"text": "FOR",
+"emph": false
+},
+{
+"start": 42.886,
+"end": 43.266,
+"text": "LIKE SOMETHING",
+"emph": false
+},
+{
+"start": 43.266,
+"end": 44.006,
+"text": "ELSE",
+"emph": false
+},
+{
+"start": 44.006,
+"end": 44.146,
+"text": "YOU",
+"emph": false
+},
+{
+"start": 44.146,
+"end": 44.666,
+"text": "SACRIFICE A",
+"emph": false
+},
+{
+"start": 44.666,
+"end": 45.286,
+"text": "LOT OF TIME",
+"emph": false
+},
+{
+"start": 45.286,
+"end": 45.746,
+"text": "AND YOU",
+"emph": false
+},
+{
+"start": 45.746,
+"end": 46.166,
+"text": "COULD JUST END",
+"emph": false
+},
+{
+"start": 46.166,
+"end": 46.586,
+"text": "UP WITH NOTHING",
+"emph": true
+}
+]

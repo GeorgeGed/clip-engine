@@ -642,6 +642,361 @@ hand. `resolve_lean` now reads the frame count out of each `rm_*.mov` —
 gated to those, since `cap_kin.mov` is the whole caption track and
 `dip.mov` is a measured 0.567s envelope.
 
+### The exit over-corrected in four ways, and every one is reversed
+
+The section above found the real defect. The fix then went too far in four
+places, and each is measured rather than argued:
+
+| | shipped in v42 | now | why |
+|---|---|---|---|
+| Anticipation | 13px against the exit | **none** | Across every published exit curve in five systems — Material `(0.3,0,1,1)` and `(0.3,0,0.8,0.15)`, Carbon `(0.2,0,1,0.9)` and `(0.4,0.14,1,1)`, Atlassian `(0.6,0,0.8,0.6)`, Fluent `(0.9,0.1,1,0.2)` and `(1,0,1,1)` — **not one has a negative control point.** It spent 4 of 18 frames moving the wrong way, and its own first frame jumped **5.74px out of a dead-still hold (344 px/s)**: the jolt, relocated to the other end |
+| Travel | 118px, shared | **half each card's own entrance**, 9–28px | 118px on a 1080 frame is a card physically leaving the canvas, which is literally what "jolting out of the frame" described. Atlassian pairs `SlideInTop8px` with `SlideOutTop4px` and `SlideIn50PercentLeft` with `SlideOut15PercentLeft` — every published exit travels half its entrance or less |
+| Length | 18f for everything | **6 / 12 / 15f** | 18f (300ms) is longer than ANY published exit: Atlassian's ceiling is 200ms, Carbon's 240ms. Chip 100ms, card 200ms, paper 250ms, each against an entrance 1.5–2x its own exit |
+| Scale + blur | 0.94 and 5px | **off** | The scale ran about `transformOrigin: 50% <top>` — the card's top EDGE — so on a 728px story card the centre drifted **21.8px UP while the exit travelled down** and the two partly cancelled. The 5px blur was isotropic, so it blurred across the travel axis too, and at ~6.5px/frame an honest motion blur is ~3px — *less* than what was there |
+
+**A DARK CARD MUST NOT FADE.** Measured in `clip08_v42.mp4`: a fixed box
+inside the KRU card goes 17.4 → 17.0 → 18.4 → 22.8 luma across the whole
+0.3s exit — a change of 5.4 — because at 40–60% opacity the board's own team
+rows read *through* the panel while the card's crop and marker still overlap
+them. It did not leave, it dematerialised into mud for six frames. So a
+chassis card stays **fully opaque** and a clip plane sweeps across it in the
+exit direction, the exact inverse of the wipe its evidence arrives on. Paper
+and stroked type still fade: a 15.6:1 card at 50% is unambiguously a card.
+
+Opacity, where it is used, is **linear**. Material's fade pattern puts
+opacity on `motionEasingLinear` and reserves the accelerate curve for
+displacement; v42 shaped the fade as `(p−0.35)/0.60` raised to 1.3, which is
+the one thing Google explicitly does not do.
+
+---
+
+### The dark glass panel had no surface — 1.08:1 — and that was the AI-ism
+
+George: "the design is still very like AI looking in terms of the remotion …
+I just think we could perhaps change the palette a little bit … I'd like this
+to be something that we continue working towards as like a foundation."
+
+**Measured against the real board pixels of the lower pane** (a 1080×600 crop
+of `_base.mov` at t=34, per-pixel WCAG):
+
+| surface | vs board, median | % of footprint ≥1.6:1 | % under 1.25:1 |
+|---|---|---|---|
+| old panel `#1A1E28` | **1.08:1** | 4.2 | **95.1** |
+| new chassis `#413D36` | **1.67:1** | **94.1** | 1.1 |
+| accent `#F4512A` | 5.21:1 | 98.2 | 1.0 |
+| paper `#F4F1EB` | 16.02:1 | 99.2 | 0.5 |
+
+The panel could not be seen, so four devices were bolted on to compensate: a
+1px 9%-white hairline, a 28/64px shadow bloom, a 2px inset highlight and a
+gold rule. **Stacked compensation is the signature; the panel was the
+symptom.** With a surface that has an edge, all four are deleted — along with
+the 4px radius, which was only ever softening a rectangle nobody could see.
+
+**Two rules carry the palette, and together they dissolve "vibe coded":**
+
+1. **Nothing coloured is ever a number.** The accent is a key bar, a marker
+   stroke or a bar segment — structure, never data. Before, gold marked the
+   eyebrow dash, the date chip, a chip border, the bar fill, the highlighted
+   row, the sub-line, the status line *and* the emphasised caption — and its
+   meaning **inverted between adjacent cards**: `PairCounter` made 274 gold,
+   `RatioBar` made 32 gold, the same two numbers eight seconds apart. An
+   accent on everything marks nothing. White figures also read *louder*:
+   10.79:1 on the chassis.
+2. **The accent never touches a photograph or paper.** Across the eight VCT
+   press photos, 35.2% of pixels are saturated and **56.0% of those sit in
+   the 0–15° band where `#F4512A` lives** (gold's 40–60° band: 2.8%). VCT
+   stage lighting is red-magenta and Riot's own brand red is `#FF4655`, so
+   this is structural, not an artifact of eight files.
+
+Every ratio quoted here reproduces to two decimals against an independent
+WCAG implementation. Two that are worth keeping next to the tokens:
+`accent` and `accent2` are **1.06:1 — isoluminant**, which is acceptable on
+`RatioBar` only because the hues are 206° apart on the blue/yellow axis and
+bar LENGTH is the primary encoding. **Any pair encoded by colour alone must
+separate by 15–20% in luminance.** And a slab moved above the seam is
+fragile: 13.9% of facecam pixels sit within 1.25:1 of the chassis.
+
+**A theme-only edit would have been WORSE than either palette** — a warm
+chassis still wearing gold halos, a cool white press card, the marker in the
+old orange and cool-grey chrome text. 50 colour literals were spread across
+six component files with `theme.tsx` imported once per file for `ACCENT`
+alone; every secondary grey was formula-derived `(n, n+8, n+24)` with no two
+values reused, and `rgba(170,178,194,0.92)` in one file against
+`rgba(170,178,194,0.95)` in the token is that defect in miniature. The grep
+now returns **two** literals in the whole component set: a transparent
+gradient stop and the marker's pen shadow.
+
+### Type by ROLE, and Impact is the voice face — captions only
+
+Everything ≥28px was Impact and everything ≤25px was Helvetica Neue:
+**eighteen distinct Impact sizes**, nine of them (28/30/31/32/34/38/40/42/44)
+doing one job, three of those within 2px of each other in three files. And a
+44px Impact label carried the same optical weight as the figure above it.
+
+**A sourced figure set in Impact looks like a meme caption**, which is why
+the cards and the captions read as the same object. Figures and labels are
+now **Archivo** (OFL-1.1, vendored with its licence in
+`public/fonts/Archivo-OFL.txt`), which has `wght 100-900` **and**
+`wdth 62-125`, so figure / label / context separate by weight and width
+instead of by colour — and that is what frees the accent to mean one thing.
+Four sizes: figure 150 solo / 96 paired, label 40, context 30, headline 52.
+Tracking +0.4px on labels and nothing else; Riot's own production CSS has a
+0.64px ceiling, against the micro-caps' 0.2–0.3em.
+
+**`fontVariantNumeric: 'tabular-nums'` was a no-op on Impact.** Verified on
+the file: Impact's GSUB carries only `locl` — there is no `tnum` — and its
+digit advances span **780–1109/2048 upm**, so the counters visibly reflowed.
+Archivo measures **575–577/1000, a 0.35% spread**, with a real `tnum`.
+Checked and rejected: Oswald (no `tnum`, 378–517 spread), Anton (single
+weight, no axes), Big Shoulders (no width axis). **Tungsten cannot ship** —
+Hoefler&Co, licensed to one machine, not redistributable, no `tnum` (251–407,
+a 62% spread), video-distribution terms unchecked.
+
+The press headline is **Source Serif 4** (OFL-1.1, digits 500–500). It was
+Helvetica Neue 800 at 42px with `letterSpacing: -0.8` — the most generic
+headline setting on macOS, and the only lowercase text in the system, sharing
+its family with every micro-label. Nothing else in the clip is a serif, so
+one appearing reads as a publication rather than an overlay.
+
+### MEASURE THE PNG, not the coordinate map
+
+`rm_ExStrip` was going to be magnified 1.41x on the contiguous run holding
+both its figures, with the run computed from `titles.STRIP_BLOCKS` and the
+`BOARD_REGIONS["strip"]` crop. The first render showed the wrong two blocks
+underlined.
+
+Reading the ink columns straight off `crop_strip.png` instead: it holds
+**four** blocks, not six — `32 open slots | 82 bench / options | 78 staff |
+274 not yet confirmed` — and the two that matter are the **first and the
+last**, at png x 19–178 and 729–988 of 1010. So the contiguous run containing
+both is the *entire strip*, no magnification is possible without dropping
+one, and stitching them would fabricate an adjacency the page does not have.
+
+**So the card is deleted.** At 1.00x its tallest ink band measures 21px
+against 88px captions — 4.2x smaller than the subtitle over it. A graphic
+that holds the frame for 3.5s and cannot be read is decoration that looks
+like evidence. `rm_Ratio` carries the identical pair 4.3s later as two solid
+bars. Re-cropping from the source gains 4%: the strip is 670 source px wide
+and that is the ceiling. `rm_Pair` lengthens 3.45s → 4.80s to take up the
+slack, so the remaining ten graphics stay roughly one every 4.4s and **no
+card moves off the spoken line it was anchored to.**
+
+### The worst entrance in the clip was two numbers in a Python list
+
+`rm_ExKru` ran `(33.20, 4.50)`, ending 37.70, against `rm_StoryPrx` at 37.60
+— **six frames of overlap on V4, and those six frames were ExKru's exit.**
+Resolve resolves the collision by trimming the LATER clip's head, so the
+biggest graphic in the clip slammed on in one frame at ~70% opacity: luma
+23.6 at t=37.683, 165.0 at 37.700, 227 by 37.750. `rm_Pair` against
+`rm_ExStrip` was the same bug, one frame, masked by the dip at 14.80.
+
+A card that animates out over 12–15 frames cannot have those frames trimmed
+away by the schedule, so `check_schedule()` now asserts
+`prev_start*60 + prev_FILE_frames + 6 <= next_start*60` for every adjacent
+pair before `AppendToTimeline`, and raises naming both clips. It uses the
+ffprobe count `add()` already fetches, not the scheduled duration — those are
+the two numbers that drifted apart, and the file is the one Resolve places.
+
+### An odometer ticks per DIGIT TURN, so the times invert the count curve
+
+Four of nine ticks were firing **after the number had stopped**. The tick
+loop was `0.14 + 0.80*(1-(1-p)**2)` against `PairCounter`'s `1-(1-p)**3`,
+offset by 0.04s: the digits reached 274 at 0.783s and ticks 5–8 landed at
+0.828, 0.890, 0.928 and 0.940s — the last two 12ms apart, which is a buzz,
+on a frozen frame.
+
+Ticks are a digit turning, so they are evenly spaced in VALUE, not in time:
+`p = 1 − (1−k/8)^(1/3)`. Measured gaps **33, 37, 41, 47, 56, 70, 99 then
+384ms** — they *spread* as the number settles, which is what "thinning as it
+eases out" always meant, the last one lands exactly on the final digit, and
+the whole run tracks the card automatically if it is re-timed.
+
+**A side tab gets no cue.** `rm_ChipAmer` at 1.20 took the thunk and the
+2.4s dedup then swallowed `rm_Tweet` at 3.30 — so the clip's first real
+exhibit arrived silent while a 1.8s chip announced itself.
+
+### 73% of graphic screen time was a frozen frame
+
+Frames between entrance settle and exit start, per card: ChipAmer 63, Tweet
+161, StatCard 160, Pair 140, ExStrip 160, Ratio 148, ExNrg 175, Grid 165,
+ExKru 184, StoryPrx 206, StorySen 191 — **29.2s of 39.8s dead still**, with
+the identical rhythm eleven times: in, ~2.8s frozen, out. A PNG held for
+three seconds is what a viewer reads as a template.
+
+`motion.useHold()` returns 0→1 across that span. Chassis panels drift
+`translateY` **+6px linear** (2px/s — below the threshold where movement is
+noticed, above the one where a frame looks dead); evidence crops push to
+**scale 1.012** with y −7, a slow move into the document; chips and the hook
+line get **zero**, being too short and sitting over a moving face. This was
+specified once already — `overlays.exhibit_reveal` drifted ~9px while held
+"so a 3.5s card is never a still frame" — and the React rebuild dropped it.
+
+### Every graphic also ENTERED the same way
+
+Measured across all seven spring configs: zeta 1.061–1.344, **peak exactly
+1.0000 in all seven**, f50 7–8 frames, f90 15–17, settle 29–32. Not one
+overshoots, and the "different" configs (damping 15/mass 0.5 vs 16/0.48 vs
+16/0.46 vs 17/0.4) are within 2 frames of each other at every checkpoint —
+the same curve with decorative variation. Travel 34/30/26/26/28/28/26/30/38/
+38px. Eleven graphics that all arrived by rising about 30px.
+
+Four classes now, keyed to what the object **is**, not which file it is in:
+
+| class | who | entrance |
+|---|---|---|
+| **EVIDENCE** | `ExhibitFrame`, `TweetCard` | no rise. scale 0.78→1.00 over 22f on ease-out-back, **blur 9→0px**, travel from `fromX` (the horizontal position of the region it was cropped from), `clip-path` wipe at 2–18f. All four were in `overlays.exhibit_reveal` and all four were dropped in the React rebuild |
+| **FIGURE** | `StatCard`, `PairCounter`, `RatioBar` | panel `translateY` 18→0 ease-out-quint 12f, then the figure lands **separately** at f8 on `{stiffness:160, damping:12, mass:0.34}` — zeta 0.813, the only overshoot |
+| **PAPER** | `NewsStory`, `TweetCard` tilt | rotation on `{stiffness:120, damping:11, mass:0.7}` — zeta 0.600, peak 1.0947 — so −3.4° arrives via −4.4° and settles |
+| **CHIP** | `StatChip` | `translateX` 56→0 over 9f ease-out-expo, **no opacity fade at all** — a tab slides, it does not materialise |
+
+`Easing.quint` **does not exist in Remotion** — the class has
+`poly(n)`, `quad`, `cubic`, `sin`, `circle`, `exp`, `elastic`, `back`,
+`bounce`, `bezier` and the `in`/`out`/`inOut` wrappers. Passing it gives
+`TypeError: easing is not a function` at render, not at build. Use
+`Easing.out(Easing.poly(5))`.
+
+### The card geometry was drift, not intent
+
+Six radii (1/2/3/4/5/999), three near-miss shadow stacks (30 vs 28px blur,
+0.92 vs 0.85 alpha — one decision typed twice, plus a third at 66px), eleven
+padding shorthands with eight horizontal insets, nine left edges, seven tops
+and eleven widths across eleven graphics with four tops inside 40px of each
+other. 864 vs 884 vs 814 is one width typed three times.
+
+`theme.tsx` now carries `WIDTHS = {full: 1008, mid: 816, narrow: 624}` on a
+36px margin, `SLOT = {top: 1000, bottom: 1600, centre: 1300}`, `PAD = {card:
+28, tight: 20, chip: 14}` and `RADIUS = 0`. **Every card centres on y 1300**,
+verified off the alpha bounding box of its own render rather than estimated.
+
+**`NewsStory` was 103px past the platform-UI line and then exited into it.**
+At `top: 975` with 650px photos it bottomed out at 1703. The tilt allowance
+had never been computed either: a 1008-wide card at 3.4° lifts its raised
+corner `w·sin(tilt)` = 60px above its stated top, which is how `top: 975`
+rendered at 944 and how the captions clipped it. Measured body now 1002–1596.
+It exits **up**, never down.
+
+**Measure the card BODY at alpha > 250, not alpha > 8.** The paper shadow
+spreads 56px, so a plain bounding box reported the story card as 629px tall
+and overflowing when the card itself was 566 and fine.
+
+### Licences — three corrections to what this file already says
+
+* **`av/remotion-bits` is in the tooling adopt column of this file and must not be.** It has
+  **no LICENSE file of any name** on its default branch (`master`, not
+  `main`) and none in the 0.2.1 tarball's 294 files, despite an MIT field in
+  `package.json`. Move it beside `remotion-bar-race`, `lygia` and
+  `pv-tools` — and note its component vocabulary (glitch-cycle, matrix-rain,
+  counter-confetti, ken-burns, typewriter, particle fountains) *is* the tell
+  catalogue.
+* **`@remotion/transitions` declares `"license": "UNLICENSED"`** in both npm
+  and the source repo — an explicit reservation of all rights, worse than a
+  missing field. It transitively disqualifies 31 of Remocn's 286 registry
+  items. `@remotion/animation-utils` has **no `license` key at all**. The
+  first-party packages that genuinely are MIT: `captions`, `paths`, `shapes`,
+  `fonts`, `media-utils`, `noise`, `layout-utils`. **Check the field per
+  package** — everything else is `SEE LICENSE IN LICENSE.md`,
+  `Remotion License` or `UNLICENSED`.
+* **Adobe Leonardo is Apache-2.0 but hard-depends on `apca-w3`**, whose
+  licence reads "All Rights Reserved… Patent(s) pending" and grants use "for
+  web-delivered and web-based content only". A 1080×1920 clip composited in
+  Resolve is not web-delivered content. A check that stops at the repo's own
+  LICENSE waves this straight through.
+
+**Go to the npm package or the generated token file, never the marketing
+site.** Reading `atlassian.design` is how an earlier pass recorded Atlassian
+as having no licence when the package ships Apache-2.0.
+
+### Two commercial gates, and neither is a code problem
+
+1. **Remotion's licence is seat-gated.** `LICENSE.md` read in full: the Free
+   Licence covers an individual, a for-profit organisation with **up to 3
+   employees**, a non-profit, or evaluation. Above that a Company Licence is
+   required, and the gate covers `cli`, `renderer`, `bundler`, `player`,
+   `media-parser` and `webcodecs` — the entire render route. Commercial video
+   *output* is permitted within the free tier. **This is a headcount
+   question and it needs an answer before the next delivery.** Pin 4.0.390;
+   the file says the terms change at 5.0.
+2. **Riot's community-use licence is noncommercial for business entities.**
+   §2: "You may not create commercial Projects, including any Project that
+   involves a business or legal entity… without a written license agreement
+   from us." §5 on logos and marks: "No… Unless you have a written license
+   agreement with us." The written photo permission recorded above covers the
+   Flickr photos; **confirm in writing whether it extends to the VCT roster
+   board, broadcast frames and marks in paid client deliverables.** This also
+   closes the team-logo blocker as unobtainable by default.
+
+### Still open, with what would settle each
+
+* **The pane dip has to be re-solved against the new chassis.** Its depth was
+  fitted as `(1-alpha)**2.4` against a *dark* pane, and Resolve's linear-light
+  composite moves the number 12x. Re-grab two stills at two alphas with
+  `GrabStill()` + `ExportStills()` and re-fit. Do not reuse the number.
+* **The three-act CDL arc was tuned against dark overlays.** Act 1 is cool
+  and flat, act 3 warm at saturation 1.30. A warm graphite chassis and warm
+  paper reinforce act 3 and fight act 1. Render the three acts and measure
+  R−B **on a card**, not on the frame.
+* **Warm paper vs cool.** Both real documents in the clip measure cool — the
+  board at hue 218, the tweet's brightest 15% at hue 220 — so `#EFF1F5` may
+  have been right. Render one `StoryPrx` at each over the real t=37.6 frame
+  and look; the card stays 9.57:1 from the chassis either way.
+* **Type behind the speaker from a person matte.** Still the one genuinely
+  strong untried technique, and still risky for the same specific reason: the
+  facecam is a 464px-wide region upscaled 3x, so the matte comes off soft
+  pixels and there is little headroom above his head.
+
+### The captions are half the palette, and they were built by hand
+
+The first v43 render shipped warm graphite cards with vermilion accents and
+**gold captions**, because `cap_kin.mov` had no build script — it was a shell
+command typed in an earlier turn, so the palette change could not reach it.
+A card set and a caption set that disagree about their accent read as two
+videos stacked on each other, which is the hybrid this work existed to avoid.
+
+`build_captions.py` now renders it, with `ACCENT = (244, 81, 42)` matching
+`theme.tsx` — one value, two renderers. **The style is untouched**: Impact,
+88px, emphasis 1.27x, 9.5% hard black stroke, critically damped, white fill,
+riding the seam at y 0.44. George picked that after four style versions and
+only the accent moves.
+
+The emphasis has to survive its own stroke over both backgrounds, and that
+is the test the newsprint palette failed at 3.15:1. Measured: `#F4512A` is
+**6.06:1 against hard black**, against gold's 14.08:1 — lower, and well over
+the 4.5:1 floor, on 16 of 117 cards set at 1.27x.
+
+Verified on the delivered file by sampling a frame every 0.17s: **685
+gold-family pixels in 36.4 million, no frame holding more than 40** (what is
+left is G2's own brand tab on the board), against 360,861 accent pixels in
+199 of 281 sampled frames.
+
+### What v43 measured
+
+| | v42 | v43 |
+|---|---|---|
+| Peak frame-to-frame change at the out-points, mean | 17.11 | **8.24** (−52%) |
+| …excluding the ExKru collision | 8.14 | **7.01** (−14%) |
+| Share of an out-point's change in its single worst frame | 12.3% | 14.5% |
+| Black frames, per-frame YMAX, both panes | — | **none** (top min 241, bottom 152) |
+| Colour literals outside `theme.tsx` | 50 | **2** |
+| Graphics | 11 | 10 |
+| Loudness | −14.13 LUFS / −0.56 dBTP | −14.13 LUFS / −0.74 dBTP |
+
+**Be honest about the second and third rows.** Most of the −52% is the
+scheduling collision; the exits themselves are a further −14% on a v42 that
+had already fixed the big problem. And the *concentration* went slightly UP,
+because the exits are now 12–15 frames where v42 used 18 — the same change
+spread over fewer frames. Shorter exits with a lower peak is the trade the
+published durations ask for, and both numbers belong in the record.
+
+**Measure the pane with `signalstats`, not `scale=1:1`.** A 1×1 downscale
+point-samples under the default bicubic flags: it reported the content pane
+at mean 3 where the real frame measures 22.2, and it invented 270 "black"
+frames that do not exist. `signalstats` YMAX per frame is the honest read,
+and `crop` first so one pane going dark is not hidden by the other.
+
+**The odometer, verified in the bed:** gaps of 33, 37, 41, 47, 56, 70, 100
+then 383ms, spreading as the number settles. Cue peaks referred to the
+master: seven thunks at −14.3 dBFS, two shutters at −15.2.
+
 ### Facecam punches are CUTS, and the base shots come off V1
 
 George: "also need more zooms on fns' player cam in general when there's
@@ -1000,7 +1355,7 @@ A survey of the motion-graphics ecosystem against this exact pipeline:
 | verdict | what | why |
 |---|---|---|
 | **adopt** | `paper-design/shaders` (Apache-2.0) | deterministic shader backdrops — the usual blocker is that shaders are time-seeded and so not frame-reproducible; these can be mounted deterministically |
-| **adopt** | `remotion-bits` (MIT) | a component set aimed squarely at "a popup every few seconds that looks designed" |
+| ~~adopt~~ **REFUSED** | `remotion-bits` | **no LICENSE file of any name** — see "Licences — three corrections". The MIT field in package.json is not a licence document |
 | **adopt** | Remotion first-party packages | all resolve at 4.0.390, so no upgrade needed |
 | **adopt** | `@remotion/captions` | `createTikTokStyleCaptions` would replace the per-frame PIL caption pass |
 | try | `airbnb/visx`, `anime.js v4`, `three-nebula`, `simple-icons`, `pysubs2` | charts without an animation engine; text splitting; frame-exact particles; source-line logos |

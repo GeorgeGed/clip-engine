@@ -1,0 +1,6 @@
+{ "name": "clip08-kinetic", "version": "1.0.0", "private": true,
+  "scripts": { "render": "remotion render" },
+  "dependencies": {
+    "@remotion/cli": "4.0.390", "remotion": "4.0.390",
+    "react": "19.0.0", "react-dom": "19.0.0"
+  } }

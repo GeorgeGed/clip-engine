@@ -31,28 +31,36 @@ DIPS = (14.80, 32.92)
 BAIT = ("rm_Bait", 0.80, 17.00)
 
 # (clip, start seconds, duration seconds)
+#
+# EVERY ADJACENT PAIR IS CHECKED BEFORE THE APPEND, because the worst
+# entrance in the previous cut was two numbers in this list. `rm_ExKru` ran
+# (33.20, 4.50), ending 37.70, against `rm_StoryPrx` at 37.60 — six frames of
+# overlap on V4, and those six frames were ExKru's exit. Resolve resolves the
+# collision by trimming StoryPrx's HEAD, so the biggest graphic in the clip
+# slammed on in one frame at ~70% opacity: luma 23.6 at t=37.683, 165.0 at
+# 37.700, 227 by 37.750. `rm_Pair` against `rm_ExStrip` was the same bug, one
+# frame, masked by the dip at 14.80. A card that animates out over 12-15
+# frames cannot have those frames trimmed away by the schedule.
 EXHIBITS = [
     ("rm_ChipAmer",  1.20, 1.83),   # 34/40 Americas slots filled
-    ("rm_Tweet",     3.30, 3.45),   # the Global Esports announcement
+    ("rm_Tweet",     3.30, 3.57),   # the Global Esports announcement
     ("rm_StatCard",  7.60, 3.50),   # 10 -> 8 partner teams per region
-    ("rm_Pair",     11.60, 3.50),   # 139 signed vs 274 not yet confirmed
-    ("rm_ExStrip",  15.08, 3.50),   # the board's header strip
+    # Lengthened from 3.45s to take up the slack left by rm_ExStrip, which is
+    # gone: the two figures it carried sit at the extreme ends of the strip
+    # PNG, so the contiguous run containing both is the whole strip and no
+    # magnification was possible. At 1.00x its ink band measured 21px against
+    # 88px captions. rm_Ratio carries the same pair, legibly, at 19.40.
+    ("rm_Pair",     11.60, 4.80),   # 139 signed vs 274 not yet confirmed
     ("rm_Ratio",    19.40, 3.50),   # 32 open slots against 274
     ("rm_ExNrg",    24.32, 3.75),   # NRG 5/5, a full roster
     ("rm_Grid",     28.80, 4.00),   # all eight Americas teams populating
-    ("rm_ExKru",    33.20, 4.50),   # KRU 1/5, with the marker
+    ("rm_ExKru",    33.20, 4.30),   # KRU 1/5, with the marker
     # The two freshest stories, each through an independent verification
-    # pass. The free-agency card that used to close the clip is GONE —
-    # George: "last graphic dissapears too quickly but is unnecessary". It
-    # was 2.25s AND it overlapped rm_StorySen's tail by 1.5s on the same
-    # track, so it flashed; dropping it removes the collision as well.
-    # Real published headlines, tilted, players under them. The earlier
-    # version set VLR's verb as a gold fragment under a name — "PARTS
-    # WAYS AFTER FIVE YEARS" — which reads as a label nobody wrote. The
-    # headline is a sentence and works as one.
+    # pass. Real published headlines, tilted, players under them.
     ("rm_StoryPrx", 37.60, 4.25),   # Paper Rex parts ways with Jinggg
     ("rm_StorySen", 42.10, 4.00),   # Sentinels release JonahP and Jerrwin
 ]
+MIN_GAP_FRAMES = 6                  # one chip exit
 
 # Three acts, three grades: cool and flat over the news, the house grade
 # through the argument, warm on the cost. SetCDL is per CLIP, so the grade
@@ -68,6 +76,56 @@ GRADES = [
                    "Offset": "-0.015 -0.012 -0.008", "Power": "1.03 1.05 1.09",
                    "Saturation": "1.30"}),
 ]
+
+
+# PairCounter counts on `1 - (1-p)**3` over COUNT_FRAMES frames starting at
+# frame COUNT_START, and the ticks have to come off that same curve.
+#
+# They did not. The old loop was `0.14 + 0.80 * (1 - (1-p)**2)` — quadratic
+# against the card's cubic, offset by 0.04s — so FOUR OF NINE TICKS FIRED
+# AFTER THE NUMBER HAD STOPPED: the digits reached 274 at 0.783s and ticks
+# 5-8 landed at 0.828, 0.890, 0.928 and 0.940s, the last two 12ms apart,
+# which is a buzz, on a frozen frame.
+#
+# A real odometer ticks once per DIGIT TURN, i.e. at equal steps of VALUE,
+# so the times are the inverse of the count curve: p = 1 - (1-v)**(1/3).
+# That makes the ticks spread as the number settles rather than bunching,
+# which is what "thinning as it eases out" always meant, and it tracks the
+# curve automatically if the card is re-timed. Measured gaps: 33, 37, 41,
+# 47, 56, 70, 99 then 384ms, with the last tick landing exactly on the final
+# digit rather than 73ms after it.
+COUNT_START, COUNT_FRAMES, TICKS = 6, 46, 8
+
+
+def odometer(at: float, gain: float | None = None) -> list:
+    out = []
+    for k in range(TICKS + 1):
+        v = k / TICKS
+        p = 1 - (1 - v) ** (1 / 3)
+        out.append(Cue(at + (COUNT_START + COUNT_FRAMES * p) / FPS, "tick",
+                       gain if gain is not None else cue_gain("tick", -40.0, MASTER_GAIN),
+                       "a digit turns on the counter"))
+    return out
+
+
+def check_schedule(frames_of) -> None:
+    """No card may be trimmed by the one that follows it.
+
+    Measured against the FILE's frame count, not the scheduled duration —
+    those are the two numbers that drifted apart, and the file is the one
+    Resolve actually places.
+    """
+    bad = []
+    for (a, at_a, _), (b, at_b, _) in zip(EXHIBITS, EXHIBITS[1:]):
+        have = frames_of(a)
+        if have is None:
+            continue
+        end = round(at_a * FPS) + have
+        if end + MIN_GAP_FRAMES > round(at_b * FPS):
+            bad.append(f"{a} ends at frame {end}, {b} starts at "
+                       f"{round(at_b * FPS)} — needs {MIN_GAP_FRAMES} clear")
+    if bad:
+        raise SystemExit("schedule collision:\n  " + "\n  ".join(bad))
 
 
 def main():
@@ -111,8 +169,15 @@ def main():
     shut = cue_gain_peak("shutter", -14.3, MASTER_GAIN)
     tck  = cue_gain("tick", -40.0, MASTER_GAIN)
     STORIES = {"rm_StoryPrx", "rm_StorySen"}
+    # A SIDE TAB GETS NO CUE. rm_ChipAmer at 1.20 used to take the thunk and
+    # then the 2.4s dedup swallowed rm_Tweet at 3.30 — so the clip's FIRST
+    # REAL EXHIBIT arrived silent while a 1.8s chip announced itself. Sound
+    # marks a card landing; a tab sliding in off the frame edge is not one.
+    SILENT = {"rm_ChipAmer"}
     cues, last = [], -9.0
     for n, at, _d in EXHIBITS:
+        if n in SILENT:
+            continue
         if at - last < 2.4:             # keep two cues off each other's tail
             continue
         if n in STORIES:
@@ -123,11 +188,7 @@ def main():
         else:
             cues.append(Cue(at + 0.05, "thunk", gain, f"{n} lands"))
         if n == "rm_Pair":
-            # the odometer: ticks across the count, thinning as it eases out
-            for k in range(9):
-                p = k / 8
-                cues.append(Cue(at + 0.14 + 0.80 * (1 - (1 - p) ** 2), "tick", tck,
-                                "a digit turns on the counter"))
+            cues += odometer(at, tck)
         last = at
     print("sfx:", bed(cues, total / FPS, out=OUT / "sfx.wav"))
 
@@ -136,17 +197,19 @@ def main():
     r.GetMediaStorage().AddItemListToMediaPool([str(OUT / n) for n in names])
     pool = {c.GetName(): c for c in mp.GetRootFolder().GetClipList()}
 
-    # Now that every card animates OUT over its last 16 frames, a clip that
-    # Resolve trims short loses the end of that exit — which is the jolt the
-    # exit was built to remove. Two were already short (rm_Bait 1020 of 1060,
-    # rm_Tweet 207 of 210), so the length comes from the FILE, not from a
-    # number typed here.
+    # Every card animates OUT over its last 6-15 frames, so a clip Resolve
+    # trims short loses the end of that exit — which is the jolt the exit
+    # was built to remove. The length comes from the FILE, not from a number
+    # typed above; `check_schedule` has already proved no two files collide.
     def clip_frames(name):
         out = subprocess.run(
             ["ffprobe", "-v", "error", "-count_frames", "-select_streams", "v:0",
              "-show_entries", "stream=nb_read_frames", "-of", "csv=p=0",
              str(OUT / f"{name}.mov")], capture_output=True, text=True).stdout.strip()
         return int(out) if out.isdigit() else None
+
+    check_schedule(clip_frames)
+    print(f"schedule clear: {len(EXHIBITS)} graphics, no card trimmed by the next")
 
     ents = []
 

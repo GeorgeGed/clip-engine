@@ -8,7 +8,20 @@ jobs/*/calib/
 renders/*.mov
 jobs/fns-2905408276/overlays/*.mov
 jobs/fns-2905408276/overlays/*.wav
-vendor/
+# `vendor/` was ignored wholesale, so NONE of the Remotion source has ever
+# been committed — every component, the theme and the motion spec lived
+# only on disk, and the commits that said they added them captured only the
+# Python side. George: "I'd like this to be something that we continue
+# working towards as like a foundation." A foundation is version-controlled.
+# node_modules, the 19 MB base.mp4, the crops and the photos stay out.
+vendor/*
+!vendor/remotion-clip08/
+vendor/remotion-clip08/*
+!vendor/remotion-clip08/src/
+!vendor/remotion-clip08/public/
+!vendor/remotion-clip08/package.json
+!vendor/remotion-clip08/tsconfig.json
+!vendor/remotion-clip08/remotion.config.ts
 renders/styles/*.mov
 renders/styles/*.mp4
 vendor/remotion-clip08/node_modules/
