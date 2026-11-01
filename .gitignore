@@ -9,3 +9,7 @@ renders/*.mov
 jobs/fns-2905408276/overlays/*.mov
 jobs/fns-2905408276/overlays/*.wav
 vendor/
+renders/styles/*.mov
+renders/styles/*.mp4
+vendor/remotion-clip08/node_modules/
+vendor/remotion-clip08/public/base.mp4

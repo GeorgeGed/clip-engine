@@ -621,6 +621,47 @@ Dropped deliberately: **flashes on cuts** (a cut is already an edit event, and
 neither reference uses flashes at all) and **shake** (decoration on a speaker
 this measured).
 
+### Four style versions, four tools
+
+George: "give me 4 different versions of the video edited using different
+tools - i want new editing styles." All four run off one clean base —
+`renders/styles/_base.mov`, the tightened 46.9s cut in L2 with the facecam
+graded and NO graphics — so the styles differ by treatment, not by edit.
+
+| | style | tool | what makes it that style |
+|---|---|---|---|
+| **A** | Receipts | **DaVinci Resolve** | the lower pane punches FULL-PANE onto each exhibit with a dip either side; no cards, no titles — the document carries the argument, which is R1's actual structure |
+| **B** | Take | **ffmpeg** | R2's language: one framing, zero picture cuts, white-on-blue box captions at y 0.747, and a persistent banner carrying his CLAIM in his own words |
+| **C** | Kinetic | **Remotion** (React) | type is the hero — each card springs in at 104-136px across the seam, emphasis in accent with a tilt, a running kicker |
+| **D** | Broadcast news | **HTML + headless Chrome** | a red-spine lower third, stat chips and a source strip, all authored in CSS and screenshotted to alpha PNGs, composited in ffmpeg |
+
+All four: 46.9-47.1s, -14.1 LUFS, under -1 dBTP, QC pass.
+
+**`engine/captions_video.track()`** renders a whole caption track to ONE
+alpha movie from a style dict. 106 cards as 106 ffmpeg inputs is not
+workable and Resolve's Fusion route costs a 300-frame title per 5s window;
+one clip restyled by a dict is simpler than both, and it is what let the
+same captions become blue boxes in B and a news bar in D.
+
+Four things worth keeping:
+
+1. **Remotion cannot fetch its own headless shell here** — it dies with "No
+   browser found for rendering frames". System Chrome works:
+   `--browser-executable="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"`.
+   A 2822-frame 1080x1920 render then takes a few minutes at concurrency 4.
+2. **HyperFrames is unavailable**: `npx hyperframes usage --json` returns
+   `{"status":"unknown","reason":"unsupported_auth"}` — it needs George's
+   account. Plain HTML through headless Chrome does the same job for static
+   furniture.
+3. **Chrome screenshots the whole PAGE, not an element.** Four elements in
+   one file gave four identical PNGs. One element per HTML file, then crop
+   to the alpha bounding box.
+4. **An exhibit rect far from the pane's aspect renders BLACK.** The pane is
+   1080x1114 (0.969). Punching onto the 670x28 stat strip needs ~11x, which
+   Resolve clamps, and the pane came back black. Rects near 0.969 work:
+   (10,100,680,790) for the strip in context, (958,240,1417,715) for KRU.
+   Check the aspect before the zoom.
+
 ### The four outside skills — what was taken and what was refused
 
 George sent `scenario-auto-edit` (zip, installed to `~/.claude/skills/`),
