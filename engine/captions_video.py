@@ -80,3 +80,73 @@ def track(cards, out: Path, *, style: dict, dur: float, canvas=CANVAS, fps=60) -
     if proc.wait() != 0:
         raise RuntimeError(f"ffmpeg failed writing {out}")
     return out
+
+
+def kinetic(cards, out: Path, *, dur: float, size=78, y=0.44, canvas=CANVAS, fps=60,
+            settle=0.085, lift=12, grow=0.055, accent=ACCENT, tilt_emph=1.4):
+    """The C style, damped.
+
+    George: "number three probably has the best subtitle style, if it was a
+    little bit smaller and less bouncy." So: 78px instead of 104-136, the
+    scale travel cut from 0.24 to 0.055, the lift from 26px to 12, the tilt
+    from 4.5 degrees to 1.4, and a critically-damped ease instead of a
+    spring that overshoots. It still arrives; it no longer bounces.
+    """
+    import math
+
+    import numpy as np
+    from PIL import Image, ImageDraw
+
+    w, h = canvas
+    n = int(round(dur * fps))
+    font = _font(size)
+    big = _font(int(size * 1.16))
+
+    by_frame = {}
+    for c in cards:
+        a, b = int(c["start"] * fps), int(c["end"] * fps)
+        for f in range(max(0, a), min(n, b)):
+            by_frame.setdefault(f, (c, (f - a) / fps))
+
+    proc = subprocess.Popen(
+        ["ffmpeg", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgba",
+         "-s", f"{w}x{h}", "-r", str(fps), "-i", "-",
+         "-c:v", "qtrle", "-pix_fmt", "argb", str(out)],
+        stdin=subprocess.PIPE)
+    blank = np.zeros((h, w, 4), np.uint8).tobytes()
+
+    for f in range(n):
+        hit = by_frame.get(f)
+        if hit is None:
+            proc.stdin.write(blank)
+            continue
+        c, age = hit
+        # critically damped: fast in, no overshoot
+        k = 1.0 - math.exp(-age / max(1e-4, settle * 0.38))
+        k = min(1.0, k)
+        fnt = big if c.get("emph") else font
+        col = accent if c.get("emph") else (255, 255, 255, 255)
+
+        layer = Image.new("RGBA", canvas, (0, 0, 0, 0))
+        d = ImageDraw.Draw(layer)
+        tw = d.textlength(c["text"], font=fnt)
+        cy = int(y * h) + int(lift * (1 - k))
+        d.text(((w - tw) / 2, cy), c["text"], font=fnt, fill=col,
+               stroke_width=max(4, int(size * 0.085)), stroke_fill=(0, 0, 0, 255))
+
+        s = 1.0 - grow * (1 - k)
+        if c.get("emph"):
+            layer = layer.rotate(tilt_emph * k, resample=Image.BICUBIC, center=(w // 2, cy))
+        if s < 0.999:
+            nw, nh = int(w * s), int(h * s)
+            layer = layer.resize((nw, nh), Image.LANCZOS)
+            pad = Image.new("RGBA", canvas, (0, 0, 0, 0))
+            pad.paste(layer, ((w - nw) // 2, (h - nh) // 2), layer)
+            layer = pad
+        if k < 0.999:
+            layer.putalpha(layer.getchannel("A").point(lambda v: int(v * k)))
+        proc.stdin.write(np.asarray(layer, dtype=np.uint8).tobytes())
+    proc.stdin.close()
+    if proc.wait() != 0:
+        raise RuntimeError(f"ffmpeg failed writing {out}")
+    return out

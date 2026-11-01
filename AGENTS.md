@@ -621,6 +621,71 @@ Dropped deliberately: **flashes on cuts** (a cut is already an edit event, and
 neither reference uses flashes at all) and **shake** (decoration on a speaker
 this measured).
 
+### The reference rule became the thing blocking the work
+
+George: "you're literally just changing the fucking subtitle ... no
+transitions, no sounds, no background effects, no coloring ... no storyline
+... there's literally nothing."
+
+Accurate. Across four style versions the only real differences were caption
+treatment, a banner, a lower third and one pane punch.
+
+**The cause is a rule in this file.** "Only use what is measurable in the
+references" was written to stop invented decoration, and it worked — but
+R1 and R2 are both RESTRAINED talking-head clips, so measuring against them
+caps the work at a two-pane layout with captions. Every rejection tightened
+the filter until nothing could get through. The per-second sweep even found
+R1 running 72 documents and 40 overlays in 80s and the filter still blocked
+acting on it.
+
+**The rule now has a limit: it governs whether a technique is HOUSE STYLE,
+not whether it may be used at all.** When George asks for something the
+references do not contain, build it. The earlier note that "a cut is already
+an edit event, so no flashes on cuts" is overruled by his instruction.
+
+What went into the loaded cut, all in Resolve:
+
+| | |
+|---|---|
+| Transitions | a 0.20s light sweep on each of the 10 splices (`build_loaded.sweep`) |
+| Colour arc | three CDLs by act — cool and flat, house, then warm. Measured R-B: **-3.3 -> +3.8 -> +25.4** |
+| Storyline | three act cards: "GLOBAL ESPORTS IS OUT", "SO WHAT HAPPENS TO THE PLAYERS", "YOU CAN END UP WITH NOTHING" |
+| Background | an accent rule and glow on the seam, plus a soft vignette |
+| Captions | C's kinetic style at 78px with the bounce damped out — his note |
+| Sound | a cue on each sweep, now a visible event, spaced >= 2.5s |
+
+**`SetCDL` per CLIP is how you get an arc without keyframes.** The grade
+cannot ramp, but the cut is already 11 segments, so it can STEP by act. That
+is the one place Resolve's lack of keyframes does not bite.
+
+**An act card and a caption cannot share a line.** Both sat at y~820 and
+collided on all three. The caption track is baked, so the fix is to drop the
+cards that fall inside an act window when rendering it (20 of 106 here),
+not to move either element.
+
+**Resolve wedged again**, this time at 3% CPU with the API blocked — not a
+busy loop, so most likely a modal dialog. A `SIGALRM` watchdog does not
+help (the hang is inside `fusionscript.so`). `render()` also appends a NEW
+job every call without clearing the queue, which is a likely source of an
+overwrite prompt; it should clear stale jobs first.
+
+### What this project needs from George to go further
+
+The source is one static roster board and one tweet. No amount of technique
+makes b-roll, memes or imagery out of that. Asked directly, these are the
+blockers, in order:
+
+1. **Reference clips in the style he actually wants.** R1 and R2 are
+   restrained, which is why every measurement says "do less". Two or three
+   clips of the heavily-produced style would re-aim every number here.
+2. **B-roll with a rights basis** — VCT broadcast, gameplay, press shots.
+3. **Team and org logos**, licensed.
+4. **A licensed SFX library.** Synthesised cues have been rejected four
+   times; `finish-standard.md` says the same ("never synthesize effects in
+   code").
+5. **A music bed** he has the rights to.
+6. **A meme / reaction pack**, if memes are wanted.
+
 ### Four style versions, four tools
 
 George: "give me 4 different versions of the video edited using different
