@@ -621,6 +621,57 @@ Dropped deliberately: **flashes on cuts** (a cut is already an edit event, and
 neither reference uses flashes at all) and **shake** (decoration on a speaker
 this measured).
 
+### Exhibits, not text. And the motion is what makes an exhibit land
+
+George: "i like the kru thing thats a good idea - we need more graphics and
+motion like that but in a cooler style ... i dont need random text popping
+up during the video makes no sense."
+
+**The dividing line is authorship.** A crop of what is on his screen, or a
+sourced outside fact, is EVIDENCE. A phrase I wrote is text popping up.
+"WHAT IT MEANS FOR PLAYERS" and "THE TRADE-OFF" were mine; they are gone.
+The hook stays because it is his own closing line, verbatim, at the head.
+
+Five exhibits now, every one of them real:
+
+| at | exhibit |
+|---|---|
+| 3.30 | the Global Esports announcement tweet |
+| 7.60 | **10 -> 8 partner teams per region**, sourced |
+| 15.08 | the board's 32 open slots / 274 not yet confirmed |
+| 24.32 | **NRG 5/5** — a full roster, over the line about getting signed |
+| 33.20 | **KRU 1/5** with the marker on the four unconfirmed |
+
+NRG replaces a second showing of the same strip. A full 5/5 roster against
+KRU's 1/5 is the contrast the argument is actually about.
+
+**Check the news; the best fact is often not on his screen.** Riot is
+cutting each VCT region from **10 partner teams to 8** for 2027-28, and
+Global Esports, Cloud9 and FlyQuest were among those rejected. That also
+explains the board: its "32 teams" IS the reduced field, 8 x 4 regions.
+Riot has published no official list, so the card is attributed to the
+outlets that reported it, not stated as fact.
+
+**`overlays.exhibit_reveal` is the "cooler style".** A fade plus a 16px
+settle is why the cards read flat. What changed:
+
+* **scale 0.78 -> 1.0 on ease-out-back**, so it overshoots slightly and
+  settles rather than simply appearing at size;
+* it travels from `from_x`, the horizontal position of the region it was
+  cropped from, so it reads as pulled out of that part of the board;
+* it **resolves from a 9px blur**, which is what sells a scale as depth
+  instead of as a size change;
+* it drifts ~9px while held, so a 3.5s card is never a still frame.
+
+Easing lives in `engine/overlays` (`ease_out_expo`, `ease_out_back`,
+`ease_in_out_cubic`). No library needed: the Python motion frameworks
+surveyed (movis, pymotion) are these curves plus a compositor we already
+have, and the broadcast-graphics repos found are OBS live-production tools,
+not file-based.
+
+**Tungsten has no arrow glyph** — "10 -> 8" rendered as tofu. Draw the
+arrow as a rectangle plus a triangle.
+
 ### The caption style George likes is IMPACT, and the edit sits at ~10 events
 
 Two separate notes, one turn: "way too much in the edit there, and didnt

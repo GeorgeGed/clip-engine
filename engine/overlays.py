@@ -171,3 +171,81 @@ def pane_dip(out: Path, *, dur: float = 0.56, down: float = 0.13, up: float = 0.
     # No extra fades: the envelope above IS the fade.
     return sequence_clip(fn, out, dur=dur, canvas=canvas, fps=fps,
                          fade_in=0.0, fade_out=0.0)
+
+
+# --- easing ---------------------------------------------------------------
+# The reveal was a linear fade plus a 16px settle, which is why the cards
+# read as flat. These are the curves that make a graphic feel thrown rather
+# than faded. No dependency needed — the surveyed Python motion libraries
+# (movis, pymotion) are mostly these functions plus a compositor we already
+# have.
+
+def ease_out_expo(p: float) -> float:
+    return 1.0 if p >= 1 else 1 - 2 ** (-10 * p)
+
+
+def ease_out_back(p: float, overshoot: float = 1.34) -> float:
+    c3 = overshoot + 1
+    return 1 + c3 * (p - 1) ** 3 + overshoot * (p - 1) ** 2
+
+
+def ease_in_out_cubic(p: float) -> float:
+    return 4 * p ** 3 if p < 0.5 else 1 - (-2 * p + 2) ** 3 / 2
+
+
+def exhibit_reveal(png: Path, out: Path, *, dur: float, y: int,
+                   from_x: float = 0.5, grow_in: float = 0.34,
+                   hold_drift: int = 9, canvas=CANVAS, fps: int = FPS,
+                   fade_out: float = 0.26, start_scale: float = 0.78,
+                   blur_px: float = 9.0) -> Path:
+    """A card thrown out of the document, not faded onto it.
+
+    George liked the KRU card and asked for "more graphics and motion like
+    that but in a cooler style". The motion is the part that was missing:
+
+    * it SCALES UP from 0.78 on an ease-out-back, so it overshoots a touch
+      and settles, instead of arriving at its final size;
+    * it comes from `from_x`, the horizontal position of the region it was
+      cropped from, so it reads as pulled out of that part of the board;
+    * it resolves from a 9px blur as it lands, which is what sells a scale
+      as depth rather than as a size change;
+    * it drifts a few px while held, so a 3.5s card is never a still.
+    """
+    from PIL import Image, ImageFilter
+
+    card = Image.open(png).convert("RGBA")
+    w, h = canvas
+    cw, ch = card.size
+    n = int(round(dur * fps))
+    hold_end = dur - fade_out
+    x_from = from_x * w
+
+    def fn(t, i):
+        frame = Image.new("RGBA", canvas, (0, 0, 0, 0))
+        p = min(1.0, t / grow_in)
+        e = ease_out_back(p) if p < 1 else 1.0
+        s = start_scale + (1.0 - start_scale) * e
+        drift = hold_drift * ease_in_out_cubic(min(1.0, t / max(dur, 1e-3)))
+
+        nw, nh = max(2, int(cw * s)), max(2, int(ch * s))
+        layer = card.resize((nw, nh), Image.LANCZOS)
+        if p < 1.0 and blur_px > 0:
+            layer = layer.filter(ImageFilter.GaussianBlur(blur_px * (1 - p)))
+
+        # travel from the source region's x toward centre as it grows
+        cx = x_from + (w / 2 - x_from) * ease_out_expo(p)
+        px = int(cx - nw / 2)
+        py = int(y + (h * 0.012) * (1 - e) - drift)
+        frame.alpha_composite(layer, (max(-nw, px), max(-nh, py)))
+
+        a = 1.0
+        if t < 0.08:
+            a = t / 0.08
+        elif t > hold_end:
+            a = max(0.0, (dur - t) / fade_out)
+        if a < 1.0:
+            frame.putalpha(frame.getchannel("A").point(lambda v: int(v * a)))
+        return frame
+
+    return sequence_clip(fn, out, dur=dur, canvas=canvas, fps=fps,
+                         fade_in=0.0, fade_out=0.0)

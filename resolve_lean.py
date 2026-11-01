@@ -31,7 +31,7 @@ FPS = 60
 OUT = ROOT / "jobs/fns-2905408276/overlays"
 MASTER_GAIN, TARGET_RMS = 6.2, -29.0
 CARDS = {o["name"]: o for o in OPLAN}
-DIPS = (12.03, 17.27, 31.55, 35.64)
+DIPS = (14.80, 32.92)
 
 GRADES = [
     (0.0, 17.55, {"NodeIndex": "1", "Slope": "1.02 1.03 1.09",
@@ -79,12 +79,14 @@ def main():
     print(f"colour arc on {len(v2)} shots")
 
     gain = cue_gain("thunk", TARGET_RMS, MASTER_GAIN)
-    cues = [Cue(CARDS[n]["at"] + 0.02, "thunk", gain, f"{n} card arrives")
-            for n in ("tweet", "strip1", "strip2", "kru") if n in CARDS]
+    cues = [Cue(at + 0.02, "thunk", gain, f"{n} exhibit lands")
+            for n, at, _d in [("tweet", 3.30, 0), ("news", 7.60, 0),
+                              ("strip1", 15.08, 0), ("nrg", 24.32, 0),
+                              ("kru", 33.20, 0)]]
     print("sfx:", bed(cues, total / FPS, out=OUT / "sfx.wav"))
 
     names = ["dip.mov", "cap_kin.mov", "sfx.wav", "tweet.mov",
-             "strip1.mov", "strip2.mov", "kru.mov", "sec1.mov", "sec2.mov"]
+             "news.mov", "strip1.mov", "nrg.mov", "kru.mov"]
     r.GetMediaStorage().AddItemListToMediaPool([str(OUT / n) for n in names])
     pool = {c.GetName(): c for c in mp.GetRootFolder().GetClipList()}
 
@@ -102,13 +104,16 @@ def main():
 
     for d in DIPS:
         add("dip.mov", d, 0.567, 3)
-    for n in ("tweet", "strip1", "strip2", "kru"):
-        if n in CARDS:
-            o = CARDS[n]
-            add(f"{n}.mov", 3.30 if n == "tweet" else o["at"], o["dur"], 4)
-    for n in ("sec1", "sec2"):
-        if n in CARDS:
-            add(f"{n}.mov", CARDS[n]["at"], CARDS[n]["dur"], 5)
+    # George: "i dont need random text popping up during the video makes no
+    # sense." sec1/sec2 were words I wrote, not evidence — they are gone.
+    # Every graphic here is now either a crop of what is on his screen or a
+    # sourced fact. strip2 (the same strip a second time) is replaced by NRG,
+    # a full 5/5 roster, over the line about getting signed.
+    EXHIBITS = [("tweet", 3.30, 3.00), ("news", 7.60, 3.40),
+                ("strip1", 15.08, 3.40), ("nrg", 24.32, 3.60),
+                ("kru", 33.20, 4.40)]
+    for n, at, dur in EXHIBITS:
+        add(f"{n}.mov", at, dur, 4)
     add("cap_kin.mov", 0.0, total / FPS, 6)
     add("sfx.wav", 0.0, total / FPS, 2, media=2)
 
