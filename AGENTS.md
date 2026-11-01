@@ -621,6 +621,70 @@ Dropped deliberately: **flashes on cuts** (a cut is already an edit event, and
 neither reference uses flashes at all) and **shake** (decoration on a speaker
 this measured).
 
+### Verify a news fact INDEPENDENTLY before a name goes on screen
+
+The fortnight's roster news was the timeliest material available and half
+of it did not survive checking. Eight claims went to an independent pass
+(search for corroboration elsewhere, do not just re-read the cited page);
+**four held, four failed.**
+
+Held, and shipped:
+
+| stamp | card | source |
+|---|---|---|
+| 31 Oct | PRX PART WAYS WITH JINGGG / FIVE YEARS AT THE ORG | VLR.gg |
+| 31 Oct | SENTINELS RELEASE JONAHP AND JERRWIN | VLR.gg |
+| tomorrow | FREE AGENCY OPENS 2 NOV / WHEN MOST VCT CONTRACTS EXPIRE | Riot schedule |
+
+**The one I was most excited about failed.** "KRU cut mwzera and heat" would
+have closed the loop on the exhibit already in the clip — the board shows
+those two unconfirmed and the marker circles them. It did not corroborate,
+and shipping it would have named real people as released on one outlet's
+word. This is why the names wait for the check and the figures do not.
+
+**The checker's wording is the wording.** It was stricter than I would have
+been and it was right every time:
+
+* **"part ways with", never "cut"** — no org stated a reason, and Jinggg's
+  contract ran to the end of 2026, so it may be a non-renewal;
+* **"five years at the org", not "five-year starter"** — he was a reserve
+  from Oct 2023 to Mar 2024;
+* **keep PRX's slot retention on its own card**, because the sources say
+  the departures are unrelated to league status, so the two must not share
+  a sentence;
+* **an absolute date, not "tomorrow", in the headline** — a relative word
+  goes stale between render and post. (The stamp chip may say TOMORROW; the
+  claim itself says 2 NOV.)
+
+**Aggregate player counts from trackers do not survive.** "109 of 270 VCT
+players unsigned" failed on six independent grounds — single-source, both
+halves drifting between snapshots, the tracker's own page admitting an
+overcount, "unsigned" conflating contract-expiry with having no team,
+a denominator from a different season, and a figure that moves the day
+free agency opens. Riot publishes expiry as a YEAR, so no tracker can
+distinguish "out of contract" from "without a team". The corroborated
+version of that story is the structural one: **40 -> 32 partner teams, 8
+per region, down from 10.**
+
+### Tooling worth adopting, and the licences worth avoiding
+
+A survey of the motion-graphics ecosystem against this exact pipeline:
+
+| verdict | what | why |
+|---|---|---|
+| **adopt** | `paper-design/shaders` (Apache-2.0) | deterministic shader backdrops — the usual blocker is that shaders are time-seeded and so not frame-reproducible; these can be mounted deterministically |
+| **adopt** | `remotion-bits` (MIT) | a component set aimed squarely at "a popup every few seconds that looks designed" |
+| **adopt** | Remotion first-party packages | all resolve at 4.0.390, so no upgrade needed |
+| **adopt** | `@remotion/captions` | `createTikTokStyleCaptions` would replace the per-frame PIL caption pass |
+| try | `airbnb/visx`, `anime.js v4`, `three-nebula`, `simple-icons`, `pysubs2` | charts without an animation engine; text splitting; frame-exact particles; source-line logos |
+
+**Licence traps, flagged so they are not vendored by accident:**
+`hylarucoder/remotion-bar-race` has **no licence file at all**;
+`patriciogonzalezvivo/lygia` is **Prosperity** (non-commercial);
+`DanteAlighieri13210914/pv-tools` is **non-commercial**. On an agency clip
+these are unusable whatever they do. `motion-canvas` and `tsparticles` are
+fine licences but the wrong shape — both would be a rewrite.
+
 ### Density: ten graphics, and where the figures come from
 
 George: "I like the fact that we're kind of having pop-ups like every other

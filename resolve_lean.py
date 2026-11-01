@@ -36,7 +36,14 @@ EXHIBITS = [
     ("rm_ExNrg",    24.32, 3.75),   # NRG 5/5, a full roster
     ("rm_Grid",     28.80, 4.00),   # all eight Americas teams populating
     ("rm_ExKru",    33.20, 4.50),   # KRU 1/5, with the marker
-    ("rm_ChipKru",  38.40, 1.83),   # that figure again, as a chip
+    # The three freshest facts, each through an independent verification
+    # pass. Wording is the checker's, not mine: "part ways with" because no
+    # org stated a reason, "five years at the org" because he was a reserve
+    # for part of it. The free-agency card closes the clip on the hardest
+    # fact available — it happens tomorrow.
+    ("rm_NewsPrx",  37.90, 3.75),   # PRX part ways with Jinggg
+    ("rm_NewsSen",  41.90, 3.50),   # Sentinels release JonahP and Jerrwin
+    ("rm_NewsFA",   44.60, 2.25),   # free agency opens 2 Nov
 ]
 
 # Three acts, three grades: cool and flat over the news, the house grade
