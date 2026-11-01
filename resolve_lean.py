@@ -18,7 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).parent
 sys.path.insert(0, str(ROOT))
 from engine.resolve_driver import connect
-from engine.sfx import Cue, bed, cue_gain
+from engine.sfx import Cue, bed, cue_gain, cue_gain_peak
 
 FPS = 60
 OUT = ROOT / "jobs/fns-2905408276/overlays"
@@ -32,7 +32,7 @@ BAIT = ("rm_Bait", 0.80, 17.00)
 # (clip, start seconds, duration seconds)
 EXHIBITS = [
     ("rm_ChipAmer",  1.20, 1.83),   # 34/40 Americas slots filled
-    ("tweet",        3.30, 3.00),   # the Global Esports announcement
+    ("rm_Tweet",     3.30, 3.45),   # the Global Esports announcement
     ("rm_StatCard",  7.60, 3.50),   # 10 -> 8 partner teams per region
     ("rm_Pair",     11.60, 3.50),   # 139 signed vs 274 not yet confirmed
     ("rm_ExStrip",  15.08, 3.50),   # the board's header strip
@@ -40,18 +40,17 @@ EXHIBITS = [
     ("rm_ExNrg",    24.32, 3.75),   # NRG 5/5, a full roster
     ("rm_Grid",     28.80, 4.00),   # all eight Americas teams populating
     ("rm_ExKru",    33.20, 4.50),   # KRU 1/5, with the marker
-    # The three freshest facts, each through an independent verification
-    # pass. Wording is the checker's, not mine: "part ways with" because no
-    # org stated a reason, "five years at the org" because he was a reserve
-    # for part of it. The free-agency card closes the clip on the hardest
-    # fact available — it happens tomorrow.
+    # The two freshest stories, each through an independent verification
+    # pass. The free-agency card that used to close the clip is GONE —
+    # George: "last graphic dissapears too quickly but is unnecessary". It
+    # was 2.25s AND it overlapped rm_StorySen's tail by 1.5s on the same
+    # track, so it flashed; dropping it removes the collision as well.
     # Real published headlines, tilted, players under them. The earlier
     # version set VLR's verb as a gold fragment under a name — "PARTS
     # WAYS AFTER FIVE YEARS" — which reads as a label nobody wrote. The
     # headline is a sentence and works as one.
     ("rm_StoryPrx", 37.60, 4.25),   # Paper Rex parts ways with Jinggg
     ("rm_StorySen", 42.10, 4.00),   # Sentinels release JonahP and Jerrwin
-    ("rm_NewsFA",   44.60, 2.25),   # free agency opens 2 Nov
 ]
 
 # Three acts, three grades: cool and flat over the news, the house grade
@@ -100,15 +99,15 @@ def main():
         t += dur
     print(f"colour arc on {len(v2)} shots")
 
-    # George: "include natural sound effects to your motion designs." The
-    # graphics arrived on a cue and then moved in silence. Now the MOTION
-    # has sound too: a paper settle under the tilted story card as it lands,
-    # and a run of ticks while the counter rolls. Each is tied to a movement
-    # a viewer can see, which is the rule that got the fourth sound design
-    # accepted after three were rejected.
+    # Sound is tied to a movement a viewer can see — the rule that got the
+    # fourth sound design accepted after three were rejected. The story
+    # cards show photographs, so they get a camera shutter; the counter
+    # gets a run of ticks that thins as it eases out.
     gain = cue_gain("thunk", TARGET_RMS, MASTER_GAIN)
-    ding = cue_gain("newsding", -28.0, MASTER_GAIN)
-    pap  = cue_gain("paper", -31.0, MASTER_GAIN)
+    # by PEAK, not RMS: the shutter's 22 dB crest put it 6.4 dB over
+    # the thunks when both were set to the same RMS. -14.3 is where
+    # the thunks measure in the master, so they now match.
+    shut = cue_gain_peak("shutter", -14.3, MASTER_GAIN)
     tck  = cue_gain("tick", -40.0, MASTER_GAIN)
     STORIES = {"rm_StoryPrx", "rm_StorySen"}
     cues, last = [], -9.0
@@ -116,9 +115,10 @@ def main():
         if at - last < 2.4:             # keep two cues off each other's tail
             continue
         if n in STORIES:
-            # the card hits the desk, then the story is marked
-            cues.append(Cue(at + 0.02, "paper", pap, f"{n}: the card settles"))
-            cues.append(Cue(at + 0.12, "newsding", ding, f"{n}: a news story lands"))
+            # a photo card gets a camera shutter, and only that — the paper
+            # settle plus a news ding was two cues stacked on one event.
+            cues.append(Cue(at + 0.04, "shutter", shut,
+                            f"{n}: the player photos land"))
         else:
             cues.append(Cue(at + 0.05, "thunk", gain, f"{n} lands"))
         if n == "rm_Pair":

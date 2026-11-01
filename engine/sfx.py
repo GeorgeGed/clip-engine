@@ -157,6 +157,21 @@ def cue_gain(name: str, target_rms_dbfs: float, master_gain_db: float) -> float:
     return float(10 ** ((target_rms_dbfs - master_gain_db - rel) / 20))
 
 
+
+def cue_gain_peak(name: str, target_peak_dbfs: float, master_gain_db: float) -> float:
+    """Gain for a cue so its PEAK lands at a chosen level in the master.
+
+    `cue_gain` solves for RMS, which is the right handle for a sound with a
+    body — a thunk, a ding. It is the wrong one for a transient. Measured
+    crest factors across this palette span 12.0 dB (`newsding`) to 22.0 dB
+    (`shutter`), so a camera shutter set to the same RMS as a thunk peaks
+    **6.4 dB louder** and reads as the loudest thing in the clip. A click's
+    audibility tracks its peak, so match that instead.
+    """
+    y = PALETTE[name]()
+    pk = 20 * float(np.log10(max(float(np.abs(y).max()), 1e-12)))
+    return float(10 ** ((target_peak_dbfs - master_gain_db - pk) / 20))
+
 def tock(dur=0.10, f0=1180.0, seed=7):
     """A dry woodblock — the popup sound.
 
@@ -347,3 +362,34 @@ def paper(dur=0.26, seed=29):
 
 PALETTE["tick"] = tick
 PALETTE["paper"] = paper
+
+
+def shutter(dur=0.16, seed=37):
+    """A camera shutter — George: "prefer the photo shutter sound basic".
+
+    Two mechanical clacks about 55ms apart (mirror up, mirror down), each a
+    short noise burst through a resonant body. It replaces `paper` on the
+    photo cards, and it is a better fit for the reason he gives: the card
+    IS a photograph, so the sound names what arrived instead of describing
+    how it moved.
+    """
+    n = int(dur * SR); t = np.arange(n) / SR
+    rng = np.random.default_rng(seed)
+    y = np.zeros(n)
+
+    def clack(start, amp, res):
+        i = int(start * SR)
+        m = n - i
+        if m <= 0:
+            return
+        tt = np.arange(m) / SR
+        burst = rng.normal(0, 1, m) * np.exp(-tt * 190)
+        body = np.sin(2 * np.pi * res * tt) * np.exp(-tt * 130)
+        y[i:] += amp * (0.75 * burst + 0.45 * body)
+
+    clack(0.000, 1.00, 2300.0)
+    clack(0.055, 0.78, 1750.0)
+    return (y / np.max(np.abs(y))).astype(np.float32)
+
+
+PALETTE["shutter"] = shutter

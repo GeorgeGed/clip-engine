@@ -595,6 +595,83 @@ progresses: use `-loop 1 -framerate N -t D`. And an overlay's own timeline
 starts at 0, so shift it with `setpts=PTS+T/TB` to meet the main one, or it
 dies before its `enable` window closes.
 
+### Facecam punches are CUTS, and the base shots come off V1
+
+George: "also need more zooms on fns' player cam in general when there's
+important bold moments."
+
+There is no keyframe API for transforms on the Edit page, so a push that
+MOVES cannot come from Resolve. What can is a cut to a tighter framing and
+a cut back — the ordinary talking-head punch-in. `resolve_punch.py` splits
+each V2 shot at the measured peaks and re-frames the punched piece at
+**1.22x** over that shot's own inset. V1 and the audio are untouched, so
+nothing is spliced and no caption timing moves.
+
+**Read the base shots off V1, not V2.** Reading them off V2 looks
+equivalent and is not: a second run then takes the already-split 22 pieces
+as its base shots, hands them `framings(22, ...)` and punches the punches.
+V1 carries the same keeps with the audio and is never touched by this pass.
+
+**+3.0 dB is not a threshold on this clip.** The whole thing spans 5.4 dB
+over his baseline, so +3.0 picks eleven moments and means nothing. At
++4.0 dB with 4.0s suppression it is eight, one every ~5.5s. Verified by
+reading `ZoomX` back off every V2 item: the eight punched segments measure
+base x 1.220 exactly, and the other fourteen hold the framing cycle.
+
+### `cue_gain` targets RMS, which is wrong for a click
+
+The shutter was set to the same RMS as the thunks and measured **6.4 dB
+louder** in the master. Measured crest factors across the palette:
+
+| newsding | thunk | paper | tick | shutter |
+|---|---|---|---|---|
+| 12.0 dB | 15.6 dB | 16.9 dB | 19.5 dB | **22.0 dB** |
+
+A camera shutter is two 3ms clacks — almost all peak, almost no RMS — so
+equal RMS puts its peak 6 dB over everything else, and a click's
+audibility tracks its peak. `sfx.cue_gain_peak` solves for the peak
+instead. The thunks measure -14.3 dBFS in the master, which is the level
+already accepted; the shutter is now set to match it.
+
+And measure the cue IN THE BED, not from the generator: predicted and
+measured levels disagreed by 13 dB here, because `bed()` is not just gain
+times waveform. The file is the one that ships.
+
+### A line of white tweet text is as bright as a photograph
+
+Two automated scans put the tweet card's bottom edge mid-paragraph. The
+first counted bright pixels per row, the second took mean luma over a
+6-row window — and a full-width line of bold white text on a dark tweet
+satisfies both. The boundary was read off the frame in the end: author row
+at source y 152, text ends 370, attached photo starts 378, panel x
+596-1196. **Crop a tweet to where its TEXT ends** — the attached image
+would have doubled the card's height, and half of one reads as "cut off"
+exactly the way the missing author row did.
+
+### Captions reach further down than their anchor says
+
+`captions_video.kinetic` draws from `y` as the TOP of the glyph, so y 0.44
+is 845px and an 88px card reaches 933 — an emphasised one, at 1.27x, 957.
+A graphic at `top: 900` is therefore underneath them, which is what
+George's "needs to be lower so it doesnt go under the subtitles" was. The
+story cards sit at 975.
+
+Their photos then cost the headline: at 42px instead of 50, with tighter
+padding, the photos go 560 -> 650 and the card 1020 -> 1064 wide. The card
+now ends around y 1740, which is inside the bottom 320px exclusion — that
+band is a CAPTION gate in `gates.py`, not a graphics one, but it is where
+platform UI sits and it is a deliberate trade for the size he asked for
+twice.
+
+### Render Remotion from a script, not a retyped command
+
+`render_remotion.py`. It existed only as a shell command retyped each turn,
+which is how a round once shipped four cards whose SOURCE had been edited
+and whose .mov files had not. One trap of its own: **Remotion zero-pads the
+PNG sequence to the sequence's width** — `element-000.png` for 210 frames,
+`element-0000.png` past 1000 — so the ffmpeg pattern has to be derived from
+the frame count, not hard-coded to `%d`.
+
 ### Effects must be MOTIVATED, and the footage decides how many
 
 George: "the transitions and punches and flashes are so random same with the

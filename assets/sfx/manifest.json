@@ -94,5 +94,13 @@
   "centroid_hz": 2007,
   "rights_basis": "synthesised",
   "source": "engine/sfx.py \u2014 generated, no third-party audio"
+ },
+ "shutter": {
+  "file": "shutter.wav",
+  "seconds": 0.16,
+  "peak": 1.0,
+  "centroid_hz": 11460,
+  "rights_basis": "synthesised",
+  "source": "engine/sfx.py \u2014 generated, no third-party audio"
  }
 }
