@@ -273,3 +273,37 @@ def bed(cues, duration, *, out: Path, assets: Path = ASSETS):
     sf.write(out, track, SR, subtype="PCM_16")
     return {"cues": len(cues), "peak": round(peak, 3),
             "seconds": round(len(track) / SR, 2)}
+
+
+def newsding(dur=0.42, f0=784.0, f1=1175.0, seed=13):
+    """A two-note news sting — George asked for "some kind of news ding".
+
+    Not the popup `thunk`, which says "a fact landed". This says "a story",
+    so it is pitched and it RESOLVES: G5 then D6, a fifth apart, the second
+    entering while the first still rings. Both are short and the pair is
+    gone in 420ms, because a sting that outstays its welcome is the thing
+    that got the first four sound designs rejected.
+    """
+    n = int(dur * SR); t = np.arange(n) / SR
+    y = np.zeros(n, dtype=np.float64)
+
+    def note(start, freq, decay, amp):
+        i = int(start * SR)
+        m = n - i
+        if m <= 0:
+            return
+        tt = np.arange(m) / SR
+        env = np.exp(-tt * decay)
+        env[:int(0.003 * SR)] *= np.linspace(0, 1, int(0.003 * SR))
+        y[i:] += amp * env * (np.sin(2 * np.pi * freq * tt)
+                              + 0.30 * np.sin(2 * np.pi * freq * 2 * tt)
+                              + 0.12 * np.sin(2 * np.pi * freq * 3 * tt))
+
+    note(0.000, f0, 13.0, 1.00)
+    note(0.105, f1, 10.0, 0.92)
+    return (y / np.max(np.abs(y))).astype(np.float32)
+
+
+# newsding is defined after PALETTE, so it registers itself here rather
+# than being named in a dict literal above its own def.
+PALETTE["newsding"] = newsding

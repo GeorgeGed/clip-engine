@@ -70,5 +70,13 @@
   "centroid_hz": 557,
   "rights_basis": "synthesised",
   "source": "engine/sfx.py \u2014 generated, no third-party audio"
+ },
+ "newsding": {
+  "file": "newsding.wav",
+  "seconds": 0.42,
+  "peak": 1.0,
+  "centroid_hz": 1556,
+  "rights_basis": "synthesised",
+  "source": "engine/sfx.py \u2014 generated, no third-party audio"
  }
 }

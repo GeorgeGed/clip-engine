@@ -621,6 +621,52 @@ Dropped deliberately: **flashes on cuts** (a cut is already an edit event, and
 neither reference uses flashes at all) and **shake** (decoration on a speaker
 this measured).
 
+### Show the published HEADLINE, not a verb lifted out of it
+
+George: *"i dont like this design it doesnt make sense 'parts ways with' ??
+use an actual news story headline for both and just add images of the
+players under the headline and make them both tilted."*
+
+He diagnosed it exactly. The card had **JINGGG** across it with *"PARTS WAYS
+AFTER FIVE YEARS"* under it in gold — VLR's verb cut out of its sentence and
+set as a standalone label. No one writes that; it reads as a caption with no
+author. The published headline *"Paper Rex parts ways with Jinggg after five
+years"* is a sentence and works as one, carries its own subject, and is
+safer, since the verification pass was strict about that verb in the first
+place.
+
+**So an outside story goes on screen as the outlet published it**: a
+masthead (`VLR.GG` + a date stamp), the headline verbatim in sentence case,
+the people it is about underneath, and the photo credit. `NewsStory` in
+`vendor/remotion-clip08/src/NewsStory.tsx`.
+
+**Tilted, per the R4 reference** — the tilted card at 4-8 degrees with a
+shadow is already in `docs/SKILLS.md` as skill 3 and it was never used here.
+The two run -3.4 and +3.1 degrees, opposite ways, so two stories in five
+seconds do not read as one repeated element. The tilt animates in with the
+spring rather than being baked, so the card settles into its angle.
+
+A white card is also the point: every other graphic here is a dark glass
+panel, so a press story arriving as **white paper** separates "what the
+outlet published" from "what the board says" without a label explaining it.
+
+**Two sounds, two meanings.** `sfx.thunk` (87ms, low, dry) says a FIGURE
+landed. `sfx.newsding` says a STORY landed — two notes a fifth apart, G5
+then D6, the second entering while the first rings, gone in 312ms. George
+asked for "some kind of news ding"; the distinction is what stops a fifth
+sound design being noise. It sits at **-16.9 dBFS** in the master, under the
+thunk's -14.2.
+
+**`PALETTE` is a dict literal, so a function defined after it cannot be
+named inside it.** Appending `newsding` to the end of `sfx.py` and adding it
+to the literal gives `NameError: name 'newsding' is not defined` at import.
+Register it after the definition: `PALETTE["newsding"] = newsding`.
+
+**Measure a cue in the BED, not the master.** Windowing the finished mp4
+around a cue reported +2.0 dBFS, which is impossible in a file limited to
+-0.65 dBTP — the window was catching speech, and AAC decode overshoot puts
+float samples above 1.0. The bed is the only place a cue is isolated.
+
 ### Player photos: the Flickr client already exists, in the quote desk
 
 George: "include images of players that go along with the graphics ... Use

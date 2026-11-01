@@ -45,8 +45,12 @@ EXHIBITS = [
     # org stated a reason, "five years at the org" because he was a reserve
     # for part of it. The free-agency card closes the clip on the hardest
     # fact available — it happens tomorrow.
-    ("rm_PlJinggg", 37.90, 4.00),   # Jinggg, with his VCT photo
-    ("rm_PlSen",    42.00, 3.75),   # JonahP, with his VCT photo
+    # Real published headlines, tilted, players under them. The earlier
+    # version set VLR's verb as a gold fragment under a name — "PARTS
+    # WAYS AFTER FIVE YEARS" — which reads as a label nobody wrote. The
+    # headline is a sentence and works as one.
+    ("rm_StoryPrx", 37.60, 4.25),   # Paper Rex parts ways with Jinggg
+    ("rm_StorySen", 42.10, 4.00),   # Sentinels release JonahP and Jerrwin
     ("rm_NewsFA",   44.60, 2.25),   # free agency opens 2 Nov
 ]
 
@@ -96,12 +100,21 @@ def main():
         t += dur
     print(f"colour arc on {len(v2)} shots")
 
+    # Two sounds, two meanings. `thunk` says a FIGURE landed; `newsding`, a
+    # two-note sting, says a STORY landed — George asked for "some kind of
+    # news ding" on the story cards specifically.
     gain = cue_gain("thunk", TARGET_RMS, MASTER_GAIN)
+    ding = cue_gain("newsding", -28.0, MASTER_GAIN)
+    STORIES = {"rm_StoryPrx", "rm_StorySen"}
     cues, last = [], -9.0
     for n, at, _d in EXHIBITS:
-        if at - last >= 2.4:            # keep two cues off each other's tail
+        if at - last < 2.4:             # keep two cues off each other's tail
+            continue
+        if n in STORIES:
+            cues.append(Cue(at + 0.06, "newsding", ding, f"{n}: a news story lands"))
+        else:
             cues.append(Cue(at + 0.05, "thunk", gain, f"{n} lands"))
-            last = at
+        last = at
     print("sfx:", bed(cues, total / FPS, out=OUT / "sfx.wav"))
 
     names = ["dip.mov", "cap_kin.mov", "sfx.wav", f"{BAIT[0]}.mov"] + \
