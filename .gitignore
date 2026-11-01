@@ -8,3 +8,4 @@ jobs/*/calib/
 renders/*.mov
 jobs/fns-2905408276/overlays/*.mov
 jobs/fns-2905408276/overlays/*.wav
+vendor/

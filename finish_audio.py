@@ -21,7 +21,23 @@ SRC = ROOT / "renders/clip08_v27_resolve.mov"
 EQD = ROOT / "renders/clip08_v27_eq.mov"
 OUT = ROOT / "renders/clip08_v27.mp4"
 
-EQ = "equalizer=f=3000:t=q:w=1.1:g=4,equalizer=f=9500:t=q:w=1.0:g=-7"
+# Voice chain. Two bands are ours, measured against R1/R2's average spectrum.
+# Two more come from the scenario-auto-edit finish standard — but only the two
+# its six that MEASURE as needed on this audio:
+#
+#   below 85 Hz   -5.1 dB vs the speech body -> rumble is there. High-pass.
+#   230-330 Hz    +1.6 dB                    -> slightly boxy. Cut 2.5 dB.
+#   5.5-8 kHz    -20.2 dB                    -> no sibilance. NO de-esser.
+#   10-14 kHz    -35.7 dB                    -> we cut the top deliberately,
+#                                               it measured +10.7 dB hot vs
+#                                               the references. NO "air".
+#   3:1 compression                          -> speech here runs LRA 0.5-0.8
+#                                               on mute-free spans, flatter
+#                                               than R2. Nothing to compress.
+EQ = ("highpass=f=85,"
+      "equalizer=f=280:t=q:w=1.0:g=-2.5,"
+      "equalizer=f=3000:t=q:w=1.1:g=4,"
+      "equalizer=f=9500:t=q:w=1.0:g=-7")
 
 # Trim to the PICTURE. A caption title is a fixed 300 frames and cannot be
 # trimmed through the API, so the last one overhangs V1 by however much the

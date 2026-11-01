@@ -621,6 +621,71 @@ Dropped deliberately: **flashes on cuts** (a cut is already an edit event, and
 neither reference uses flashes at all) and **shake** (decoration on a speaker
 this measured).
 
+### The four outside skills — what was taken and what was refused
+
+George sent `scenario-auto-edit` (zip, installed to `~/.claude/skills/`),
+remotion, motionvideo.xyz and videoeditskill.synteq.app, and asked for a
+better video without "anything ridiculous". Most of the value is in one of
+them; the rest are already here or are styling.
+
+| source | what it is | verdict |
+|---|---|---|
+| **scenario-auto-edit** | talking-head auto-edit: word-level cutting, Apple Vision person matte, type behind the head, captions, ElevenLabs sound, Seedance world rebuild | the substance. Needs the Scenario MCP (not connected), so the paid cloud steps are unavailable; its **finish standard** is the useful part |
+| **remotion** | React programmatic video | **already installed** here as `remotion` / `remotion-editor`. A different rendering stack, not a technique |
+| **motionvideo.xyz** | library of AI motion videos + MCP + skill | a catalogue; no concrete parameters on the page |
+| **videoeditskill.synteq.app** | "Style Studio" — picks a type family, casing and palette, emits a configured skill | a styling layer. We already have one (Tungsten + a single gold accent) |
+
+**TAKEN, and only after measuring that this audio needed it.** Its voice
+chain lists six moves; four of them measure as unnecessary here, and
+applying all six on faith would have undone work:
+
+| move | measured on our master | verdict |
+|---|---|---|
+| high-pass 85 Hz | rumble at **-5.1 dB** vs the speech body | **applied** -> now -14.4 dB |
+| -2.5 dB @ 280 Hz | **+1.6 dB**, slightly boxy | **applied** -> now +0.4 dB |
+| de-esser | sibilance already **-20.2 dB** | refused, nothing to tame |
+| "a little air" | 10-14 kHz at -35.7 dB, and we CUT the top because it measured +10.7 dB hot vs R1/R2 | refused, it would undo a measured fix |
+| +2 dB @ 3.6 kHz | we already do +4 dB @ 3 kHz from the same measurement | kept ours |
+| 3:1 compression | speech runs LRA 0.5-0.8 on mute-free spans, flatter than R2 | refused, no dynamic to compress |
+
+**TAKEN: re-transcribe the finished cut and diff it against the source.**
+"Every word must survive." This is the check the 15 dead-space joins needed
+and we did not have. Result: **174 source words, 177 heard, similarity
+0.974**; the only differences are function words and whisper variance
+("partnered" heard as "partner"), so no splice ate anything of substance.
+Note `they're` sits exactly on a join and is worth a listen.
+
+**Already satisfied: `segment_zoom`.** Its jump-cut cover — alternate the
+base framing per segment so splices read as intentional — is what
+`cuts.framings` and `cuts.content_framings` already do on V2 and V1. (The
+older note here that "the lower pane never moves" is stale: it was true at
+v6 and the current build moves both panes.)
+
+**REFUSED, with reasons:**
+
+* **Seedance world rebuild** — regenerating the room around the speaker.
+  On a quote desk this is fabricating the record of a real person. No.
+* **"Always lay a music bed"** — contradicts the measured references:
+  neither R1 nor R2 has one. George's own references outrank a general
+  house standard.
+* **"Never synthesize effects in code"** — ours are synthesised precisely
+  so the rights basis is clean and `gates.py` can check it. A real
+  disagreement, recorded; ours stays.
+* **Odometer counters, flicker words, lights-down spotlight, light burst,
+  logo end card, character cards** — product-hook furniture. On a clip
+  about players losing their jobs they are exactly the "ridiculous" being
+  warned against.
+* **24 fps** — ours is 60, and the references are 60 and 30.
+* **A subtle vignette** — tried to verify it against R1/R2 and the test is
+  confounded: in a two-pane layout the corners sit in the bright panes, so
+  corner-vs-centre reads 1.8 on R2 and on ours. Inconclusive, so not added.
+
+**Not yet tried: type behind the speaker from a person matte**, the one
+genuinely strong technique left. The risk is specific — our facecam is a
+464px-wide source region upscaled 3x into the top 42%, so a matte would be
+cut from soft pixels, and there is little headroom above his head for type
+to rise into. Worth a test, not worth assuming.
+
 ### The black dip, and what Resolve does to an alpha overlay
 
 **Measured on R1 at 1:11, frame by frame, and all three assumptions were wrong:**
