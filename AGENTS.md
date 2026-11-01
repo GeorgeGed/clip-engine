@@ -621,6 +621,50 @@ Dropped deliberately: **flashes on cuts** (a cut is already an edit event, and
 neither reference uses flashes at all) and **shake** (decoration on a speaker
 this measured).
 
+### The caption style George likes is IMPACT, and the edit sits at ~10 events
+
+Two separate notes, one turn: "way too much in the edit there, and didnt
+include the new text style that i liked."
+
+**The text style was a real miss, and the cause was the font.** The style
+he picked out came from the Remotion version, where the CSS stack was
+`Impact, Haettenschweiler, "Arial Narrow"`. My "smaller, less bouncy"
+rebuild used `titles._font()`, which resolves to **Tungsten-Bold** — so the
+size and the damping changed but the letterforms did not, and it never
+read as the thing he liked. `captions_video.kinetic` now takes
+`font_path`, defaulting to `/System/Library/Fonts/Supplemental/Impact.ttf`.
+
+House caption spec, settled:
+
+| | |
+|---|---|
+| Face | **Impact**, tracking -1 (PIL has none; step per glyph) |
+| Size | **88px**, emphasis **1.27x**; shrink to fit at `width - 70` |
+| Stroke | 9.5% of size, hard black |
+| Entrance | critically damped — 10px lift, 0.045 scale, 1.2 degrees on emphasis |
+
+C's own numbers were 104/136px with a spring that overshoots; "a little
+bit smaller and less bouncy" is 88/112 with the overshoot removed.
+
+**Event budget: about 10 in 47s.** The loaded cut ran 23 — a sweep on all
+ten splices, three act cards, four dips, four cards, two titles — and that
+was too much. Removed: the sweeps, the act cards, the seam glow and the
+vignette. Kept: four dips, four exhibit cards, two mid-clip titles, and the
+colour arc, which is a GRADE and does not count as an event.
+
+So the swing went nothing -> 23 -> 10. Ten is the number to work from.
+
+**Do not punch the pane onto an exhibit AND show a card of it.** With both,
+the same figures appear twice in one frame. Style A's punch and the cards
+are alternatives, not layers.
+
+**Clear the render queue before rendering.** `resolve_driver.render()`
+appends a job every call and never deletes one; a stale job whose output
+file already exists is the likely source of the overwrite dialog that
+blocked the API at 3% CPU. `DeleteRenderJob` on every job in
+`GetRenderJobList()` first — doing that recovered a wedged Resolve without
+a restart.
+
 ### The reference rule became the thing blocking the work
 
 George: "you're literally just changing the fucking subtitle ... no

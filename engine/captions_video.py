@@ -82,8 +82,16 @@ def track(cards, out: Path, *, style: dict, dur: float, canvas=CANVAS, fps=60) -
     return out
 
 
-def kinetic(cards, out: Path, *, dur: float, size=78, y=0.44, canvas=CANVAS, fps=60,
-            settle=0.085, lift=12, grow=0.055, accent=ACCENT, tilt_emph=1.4):
+# C's look came from IMPACT, not the repo's Tungsten stack — that is why the
+# "smaller, less bouncy" rebuild did not read as the style George liked. Same
+# typeface, same tight tracking, same heavy stroke; only the scale and the
+# spring change.
+IMPACT = "/System/Library/Fonts/Supplemental/Impact.ttf"
+
+
+def kinetic(cards, out: Path, *, dur: float, size=88, y=0.44, canvas=CANVAS, fps=60,
+            settle=0.085, lift=10, grow=0.045, accent=ACCENT, tilt_emph=1.2,
+            font_path=IMPACT, emph_scale=1.27, track=-1):
     """The C style, damped.
 
     George: "number three probably has the best subtitle style, if it was a
@@ -99,14 +107,29 @@ def kinetic(cards, out: Path, *, dur: float, size=78, y=0.44, canvas=CANVAS, fps
 
     w, h = canvas
     n = int(round(dur * fps))
-    font = _font(size)
-    big = _font(int(size * 1.16))
+    from PIL import ImageFont
+    if font_path and Path(font_path).exists():
+        font = ImageFont.truetype(font_path, size)
+        big = ImageFont.truetype(font_path, int(size * emph_scale))
+    else:
+        font, big = _font(size), _font(int(size * emph_scale))
 
     by_frame = {}
     for c in cards:
         a, b = int(c["start"] * fps), int(c["end"] * fps)
         for f in range(max(0, a), min(n, b)):
             by_frame.setdefault(f, (c, (f - a) / fps))
+
+    def draw_tracked(d, xy, s, fnt, fill, sw):
+        """C set letterSpacing -1; PIL has no tracking, so step per glyph."""
+        x, yy = xy
+        for ch in s:
+            d.text((x, yy), ch, font=fnt, fill=fill, stroke_width=sw,
+                   stroke_fill=(0, 0, 0, 255))
+            x += d.textlength(ch, font=fnt) + track
+
+    def tracked_w(d, s, fnt):
+        return sum(d.textlength(c, font=fnt) for c in s) + track * (len(s) - 1)
 
     proc = subprocess.Popen(
         ["ffmpeg", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgba",
@@ -129,10 +152,17 @@ def kinetic(cards, out: Path, *, dur: float, size=78, y=0.44, canvas=CANVAS, fps
 
         layer = Image.new("RGBA", canvas, (0, 0, 0, 0))
         d = ImageDraw.Draw(layer)
-        tw = d.textlength(c["text"], font=fnt)
+        tw = tracked_w(d, c["text"], fnt)
+        # Shrink to fit rather than letting a long emphasis card run off the
+        # frame — "OUT OF PROPORTION" at 1.27x is 970px of a 1080px frame.
+        if tw > w - 70:
+            shrunk = max(44, int((fnt.size if hasattr(fnt, "size") else size)
+                                 * (w - 70) / tw))
+            fnt = ImageFont.truetype(font_path, shrunk) if font_path and Path(font_path).exists() else _font(shrunk)
+            tw = tracked_w(d, c["text"], fnt)
         cy = int(y * h) + int(lift * (1 - k))
-        d.text(((w - tw) / 2, cy), c["text"], font=fnt, fill=col,
-               stroke_width=max(4, int(size * 0.085)), stroke_fill=(0, 0, 0, 255))
+        draw_tracked(d, ((w - tw) / 2, cy), c["text"], fnt, col,
+                     max(5, int(size * 0.095)))
 
         s = 1.0 - grow * (1 - k)
         if c.get("emph"):
