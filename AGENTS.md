@@ -621,6 +621,69 @@ Dropped deliberately: **flashes on cuts** (a cut is already an edit event, and
 neither reference uses flashes at all) and **shake** (decoration on a speaker
 this measured).
 
+### Density: ten graphics, and where the figures come from
+
+George: "I like the fact that we're kind of having pop-ups like every other
+second. I think that keeps retention quite well." Five graphics became ten,
+roughly one every four seconds, and the earlier "way too much" still holds
+because that was about EFFECTS — sweeps, act cards, a vignette. Graphics
+carrying a real figure are the opposite: they are the reason to watch.
+
+The rule that makes density safe is the one from the turn before: **every
+figure is read off the board or sourced, and nothing on screen is a phrase
+I wrote.** Ten graphics with no invented text is fine; three with invented
+text was not.
+
+| at | graphic | figure |
+|---|---|---|
+| 1.20 | side chip | 34/40 Americas slots filled |
+| 3.30 | the announcement screenshot | — |
+| 7.60 | stat card | 10 -> 8 partner teams per region |
+| 11.60 | counter | 274, counting up |
+| 15.08 | the header strip | 32 open / 274 unconfirmed |
+| 19.40 | ratio bar | 32 against 274 |
+| 24.32 | NRG card | 5/5 |
+| 28.80 | the Americas grid, populating | eight real counts |
+| 33.20 | KRU card + marker | 1/5 |
+| 38.40 | side chip | 1/5 again |
+
+New component types in `vendor/remotion-clip08/src/Chips.tsx`: `StatChip`
+(small, side-anchored, ~1.8s, one figure — the thing that makes a high
+cadence possible), `CounterCard` (eases out so the last digits settle on
+the beat), `RatioBar` (32 against 274 renders as a 10% sliver, which is the
+point), and `RosterGrid` (all eight Americas teams landing in turn, so
+KRU's 1/5 is SEEN against seven others instead of asserted).
+
+The eight counts, read off the board: 100 Thieves 5/5, G2 5/5, **KRU 1/5**,
+Leviatan 5/5, LOUD 5/5, MIBR 4/5, NRG 5/5, Sentinels 4/5 — 34 of 40.
+
+### The news is where the clip gets its timeliness, and it moves fast
+
+George: "the news needs to be a bit more timely." A research pass over the
+fortnight to 1 Nov 2026 turned up far fresher material than the partnership
+story, and one item lands directly on the graphic already built:
+
+| days old | item |
+|---|---|
+| 0 | PRX cut Jinggg after five years |
+| 1 | Sentinels released JonahP and Jerrwin |
+| **3** | **KRU cut mwzera and heat** |
+| 4 | NAVI released its entire roster and coach |
+| 5 | Gentle Mates dropped all five players and two coaches |
+| 7 | MIBR benched all five, aspas included |
+
+**The KRU item closes the loop on the exhibit we already show**: the board
+has mwzera and heat sitting unconfirmed, the marker circles them, and three
+days later they were cut. Likewise MIBR is on the board at 4/5 with aspas
+listed.
+
+**Do not put a player's name on screen on one source.** Almost all of these
+are single-source (VLR.gg), which is the standard roster-news outlet but
+still one outlet, and naming a real person as released when they were not
+is the worst error this pipeline can make. They go through an independent
+verification pass first; until that clears, the figures stay and the names
+do not.
+
 ### Outside graphics are built in REMOTION, not drawn in PIL
 
 George: "when we are introducing graphics from outside of what we're doing
