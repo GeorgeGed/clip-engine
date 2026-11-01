@@ -307,3 +307,43 @@ def newsding(dur=0.42, f0=784.0, f1=1175.0, seed=13):
 # newsding is defined after PALETTE, so it registers itself here rather
 # than being named in a dict literal above its own def.
 PALETTE["newsding"] = newsding
+
+
+def tick(dur=0.030, f0=2600.0, seed=21):
+    """A tiny click — one digit of an odometer turning.
+
+    George: "include natural sound effects to your motion designs." The
+    graphics had one cue on arrival and then moved in silence. A counter
+    that rolls should tick, and the tick has to be nearly nothing: 30ms, a
+    short pitched body under a noise edge, so twenty of them in two seconds
+    read as a mechanism rather than as twenty effects.
+    """
+    n = int(dur * SR); t = np.arange(n) / SR
+    body = np.sin(2 * np.pi * f0 * t) * np.exp(-t * 300)
+    cl = int(0.0012 * SR)
+    edge = np.zeros(n)
+    edge[:cl] = np.random.default_rng(seed).normal(0, 1, cl) * np.linspace(1, 0, cl)
+    return ((body + 0.5 * edge) / np.max(np.abs(body + 0.5 * edge))).astype(np.float32)
+
+
+def paper(dur=0.26, seed=29):
+    """A card settling on a desk — a soft broadband rustle with a low thud.
+
+    For the tilted news story, which is drawn as paper. Natural rather than
+    synthetic: no pitch to speak of, mostly filtered noise, and the body is
+    low enough to sit under speech instead of beside it. NOT a whoosh —
+    that family was rejected and this has no sweep.
+    """
+    n = int(dur * SR); t = np.arange(n) / SR
+    rng = np.random.default_rng(seed)
+    noise = rng.normal(0, 1, n)
+    for _ in range(4):                       # roll off the top; paper is dull
+        noise = np.convolve(noise, np.ones(5) / 5, mode="same")
+    rustle = noise * np.exp(-t * 16) * (1 - np.exp(-t * 180))
+    thud = np.sin(2 * np.pi * 120 * np.exp(-t * 6) * t) * np.exp(-t * 26)
+    y = 1.0 * rustle / (np.max(np.abs(rustle)) or 1) + 0.55 * thud
+    return (y / np.max(np.abs(y))).astype(np.float32)
+
+
+PALETTE["tick"] = tick
+PALETTE["paper"] = paper

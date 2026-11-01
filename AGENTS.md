@@ -621,6 +621,65 @@ Dropped deliberately: **flashes on cuts** (a cut is already an edit event, and
 neither reference uses flashes at all) and **shake** (decoration on a speaker
 this measured).
 
+### The small grey source line IS the AI-ism
+
+George pointed at one strip — `VCT ROSTER BOARD · ALL REGIONS`, small grey
+letter-spaced caps under a card — and called it "an ai-ism design". Then,
+separately: "remove vlr part - sources dont matter - same with the other
+one."
+
+He is identifying a tell, and it is a real one. A tracked-out micro-caps
+attribution under every card is the house style of generated design: it
+looks like provenance, it costs a line of screen space on every graphic,
+and nobody watching a 47-second clip reads it. **Every source line is now
+off** — the exhibit eyebrows, the counter notes, the chip notes, the news
+card's outlet line.
+
+**The sourcing did not go away, it went off-screen.** The photo manifest
+still records every photo's id, account, licence and page URL, and this
+file still records where each figure came from. A quote desk has to be able
+to answer "where did that number come from"; it does not have to answer it
+in 15px grey type on every card.
+
+**Other things that read as generated, for the same reason:** a kicker over
+every panel, a pill-shaped tag on every element, a two-line label where one
+word would do, and an accent dash before a heading. If a line is there to
+look like information rather than to BE information, it is this tell.
+
+### Sound on the MOTION, not only on the arrival
+
+George: "include natural sound effects to your motion designs."
+
+Every cue so far fired once, on arrival, and the graphic then moved in
+silence — a card tilting into place, a counter spinning through 274, and
+nothing to hear. Two sounds now follow the movement itself:
+
+| | |
+|---|---|
+| `sfx.paper` | a card settling on a desk — filtered noise rolled off four times plus a 120 Hz thud, 260ms. Under the tilted story card as it lands. NOT a whoosh: no sweep, that family was rejected |
+| `sfx.tick` | 30ms, a pitched body under a noise edge. Nine of them across the counter roll, spaced on the same ease-out curve as the digits, so they thin as the number settles |
+
+Levels, measured in the bed and referred to the master: ticks **-21.5
+dBFS**, paper+ding **-15.0**, thunk **-14.2**, speech peaks -0.6. A sound
+that accompanies motion sits below one that marks an event.
+
+**Re-render the COMPOSITIONS, not just the stills.** Editing the `.tsx` and
+checking `remotion still` proves the source changed; it does not change the
+`.mov` files on the timeline. Four source lines were "removed" and still
+shipped in the render because only the previews were regenerated. Any edit
+to a component means re-rendering every composition that uses it.
+
+### Where a card sits is a function of the captions
+
+The tweet card sat at y 900 and occupied 913-1472. The captions sit at
+y 845 and their glyphs reach about 960, so the card's top 45px ran under
+them — George: "looks like youve cut off the story at the top". Moved to
+y 1010 (occupies 1023-1582), which clears the captions and still ends
+inside the 1600 safe-area line.
+
+**The usable band for a lower-pane graphic is y 980-1600.** Above 980 the
+captions own it; below 1600 is the platform's UI.
+
 ### "274 what?" — the pair rule applies to a COUNTER too
 
 George, on the counter card: *"274 what? doesnt make sense."*

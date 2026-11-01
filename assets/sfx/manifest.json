@@ -78,5 +78,21 @@
   "centroid_hz": 1556,
   "rights_basis": "synthesised",
   "source": "engine/sfx.py \u2014 generated, no third-party audio"
+ },
+ "tick": {
+  "file": "tick.wav",
+  "seconds": 0.03,
+  "peak": 1.0,
+  "centroid_hz": 3160,
+  "rights_basis": "synthesised",
+  "source": "engine/sfx.py \u2014 generated, no third-party audio"
+ },
+ "paper": {
+  "file": "paper.wav",
+  "seconds": 0.26,
+  "peak": 1.0,
+  "centroid_hz": 2007,
+  "rights_basis": "synthesised",
+  "source": "engine/sfx.py \u2014 generated, no third-party audio"
  }
 }

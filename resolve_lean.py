@@ -100,20 +100,33 @@ def main():
         t += dur
     print(f"colour arc on {len(v2)} shots")
 
-    # Two sounds, two meanings. `thunk` says a FIGURE landed; `newsding`, a
-    # two-note sting, says a STORY landed — George asked for "some kind of
-    # news ding" on the story cards specifically.
+    # George: "include natural sound effects to your motion designs." The
+    # graphics arrived on a cue and then moved in silence. Now the MOTION
+    # has sound too: a paper settle under the tilted story card as it lands,
+    # and a run of ticks while the counter rolls. Each is tied to a movement
+    # a viewer can see, which is the rule that got the fourth sound design
+    # accepted after three were rejected.
     gain = cue_gain("thunk", TARGET_RMS, MASTER_GAIN)
     ding = cue_gain("newsding", -28.0, MASTER_GAIN)
+    pap  = cue_gain("paper", -31.0, MASTER_GAIN)
+    tck  = cue_gain("tick", -40.0, MASTER_GAIN)
     STORIES = {"rm_StoryPrx", "rm_StorySen"}
     cues, last = [], -9.0
     for n, at, _d in EXHIBITS:
         if at - last < 2.4:             # keep two cues off each other's tail
             continue
         if n in STORIES:
-            cues.append(Cue(at + 0.06, "newsding", ding, f"{n}: a news story lands"))
+            # the card hits the desk, then the story is marked
+            cues.append(Cue(at + 0.02, "paper", pap, f"{n}: the card settles"))
+            cues.append(Cue(at + 0.12, "newsding", ding, f"{n}: a news story lands"))
         else:
             cues.append(Cue(at + 0.05, "thunk", gain, f"{n} lands"))
+        if n == "rm_Pair":
+            # the odometer: ticks across the count, thinning as it eases out
+            for k in range(9):
+                p = k / 8
+                cues.append(Cue(at + 0.14 + 0.80 * (1 - (1 - p) ** 2), "tick", tck,
+                                "a digit turns on the counter"))
         last = at
     print("sfx:", bed(cues, total / FPS, out=OUT / "sfx.wav"))
 
