@@ -79,14 +79,13 @@ def main():
     print(f"colour arc on {len(v2)} shots")
 
     gain = cue_gain("thunk", TARGET_RMS, MASTER_GAIN)
-    cues = [Cue(at + 0.02, "thunk", gain, f"{n} exhibit lands")
-            for n, at, _d in [("tweet", 3.30, 0), ("news", 7.60, 0),
-                              ("strip1", 15.08, 0), ("nrg", 24.32, 0),
-                              ("kru", 33.20, 0)]]
+    cues = [Cue(at + 0.05, "thunk", gain, f"{n} exhibit lands")
+            for n, at in (("tweet", 3.30), ("stat", 7.60), ("strip", 15.08),
+                          ("nrg", 24.32), ("kru", 33.20))]
     print("sfx:", bed(cues, total / FPS, out=OUT / "sfx.wav"))
 
     names = ["dip.mov", "cap_kin.mov", "sfx.wav", "tweet.mov",
-             "news.mov", "strip1.mov", "nrg.mov", "kru.mov"]
+             "rm_StatCard.mov", "rm_ExStrip.mov", "rm_ExNrg.mov", "rm_ExKru.mov"]
     r.GetMediaStorage().AddItemListToMediaPool([str(OUT / n) for n in names])
     pool = {c.GetName(): c for c in mp.GetRootFolder().GetClipList()}
 
@@ -109,9 +108,14 @@ def main():
     # Every graphic here is now either a crop of what is on his screen or a
     # sourced fact. strip2 (the same strip a second time) is replaced by NRG,
     # a full 5/5 roster, over the line about getting signed.
-    EXHIBITS = [("tweet", 3.30, 3.00), ("news", 7.60, 3.40),
-                ("strip1", 15.08, 3.40), ("nrg", 24.32, 3.60),
-                ("kru", 33.20, 4.40)]
+    # The outside graphics are built in Remotion now. George: the screenshot
+    # crops look fine because they are real; the cards I DREW in PIL "just
+    # don't look good at all". CSS gives a gradient surface, a layered
+    # shadow, an inner highlight and a type scale that PIL cannot; the
+    # marker is an SVG stroke drawn on by dashoffset.
+    EXHIBITS = [("tweet", 3.30, 3.00), ("rm_StatCard", 7.60, 3.50),
+                ("rm_ExStrip", 15.08, 3.50), ("rm_ExNrg", 24.32, 3.75),
+                ("rm_ExKru", 33.20, 4.50)]
     for n, at, dur in EXHIBITS:
         add(f"{n}.mov", at, dur, 4)
     add("cap_kin.mov", 0.0, total / FPS, 6)

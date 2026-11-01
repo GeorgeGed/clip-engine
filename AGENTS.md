@@ -621,6 +621,46 @@ Dropped deliberately: **flashes on cuts** (a cut is already an edit event, and
 neither reference uses flashes at all) and **shake** (decoration on a speaker
 this measured).
 
+### Outside graphics are built in REMOTION, not drawn in PIL
+
+George: "when we are introducing graphics from outside of what we're doing
+... we're doing it in a way that actually looks designed, like we're using
+ReMotion ... because the ones that you're implementing just don't look good
+at all."
+
+The split he is pointing at is real. A **crop of his screen** looks fine
+because it is a photograph of a designed thing. A **card I draw** has to be
+designed, and PIL cannot do the things that make a card look designed: a
+gradient fill, a layered shadow, an inner highlight, a clip-path reveal, a
+type scale with real optical sizes. CSS does all of them in a line each.
+
+So anything not cropped from the footage is now a Remotion composition in
+`vendor/remotion-clip08/src/Graphics.tsx`, rendered with alpha and dropped
+on a Resolve track like any other overlay.
+
+What the rebuild actually gained, beyond "nicer":
+
+* one **shared surface** token, so the stat card and the exhibit frames read
+  as a set rather than as separate drawings;
+* **staggered reveals** — eyebrow, figure, label, source each land ~0.15s
+  apart, which is what makes a card feel composed instead of pasted;
+* the superseded figure **dims and blurs as the new one arrives**, so
+  "10 -> 8" is a transition rather than two numbers side by side;
+* the marker is an **SVG stroke drawn on by `stroke-dashoffset`**, with a
+  wobble and a 1.1-turn overshoot — smoother than redrawing an ellipse per
+  frame in PIL, and it keeps the pen taper;
+* the screenshot inside the frame **wipes up via `clip-path`** so the
+  evidence arrives rather than appears.
+
+**Remotion will not write alpha from the CLI here.** `--codec=prores
+--prores-profile=4444` produces `yuv422p12le` — no alpha plane — and
+passing `--pixel-format=yuva444p10le` errors out. The route that works is
+`--sequence --image-format=png`, then encode the frames to `qtrle` with
+ffmpeg. PNG keeps the alpha and the encode is ours to control.
+
+Also: `npx remotion render --help` does not list the transparency flags, so
+do not go looking for them there — check the output's `pix_fmt` instead.
+
 ### Exhibits, not text. And the motion is what makes an exhibit land
 
 George: "i like the kru thing thats a good idea - we need more graphics and
