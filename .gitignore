@@ -15,3 +15,5 @@ vendor/remotion-clip08/node_modules/
 vendor/remotion-clip08/public/base.mp4
 vendor/remotion-clip08/public/crop_*.png
 jobs/fns-2905408276/overlays/rm_*.mov
+jobs/fns-2905408276/photos/
+vendor/remotion-clip08/public/p_*.jpg

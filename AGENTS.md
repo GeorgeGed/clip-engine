@@ -621,6 +621,67 @@ Dropped deliberately: **flashes on cuts** (a cut is already an edit event, and
 neither reference uses flashes at all) and **shake** (decoration on a speaker
 this measured).
 
+### Player photos: the Flickr client already exists, in the quote desk
+
+George: "include images of players that go along with the graphics ... Use
+the Flickr API that's seen in the Valorant Work channel."
+
+**It is already built.** `~/valorant-quote-desk/worker/hermes_images` is a
+working Flickr client for the four official accounts —
+`valorantesports` (global), `vctamericas`, `vctemea`, `vctpacific` — with
+per-photo licence reading, a 7-day cache, 1s rate limiting and retry
+backoff. `ImageFinder(api_key, roster, stars).for_quote(handle)` returns
+`Image(path, photo_id, subject, solo, account, uploaded, licence,
+page_url)`. Reuse it; do not write a second client, or the licence handling
+does not come along.
+
+**The key lives in the environment, not in the code.** `DEFAULT_API_KEY` is
+`os.environ.get("FLICKR_API_KEY", "")`, so running from another directory
+gives an empty key and the finder reports "no photo found on any account" —
+which looks like a search miss and is not. Export it from
+`~/valorant-quote-desk/.env` first. (Both that file and
+`~/quotes-pipeline/.env` carry one.)
+
+**RIGHTS: these are All Rights Reserved.** The quote desk says so in its own
+comment — "Riot's photos are All Rights Reserved. Used here with the
+operator's own permission; the licence is still read and logged per photo
+so nothing goes out on an assumption." Same operator, same material, and he
+asked for them here, so that basis carries over — but a still quote card
+and a distributed video clip are different uses, and every card now prints
+`PHOTO: <account> / FLICKR · ALL RIGHTS RESERVED`. Worth his explicit
+confirmation before anything ships publicly.
+
+**Check what the photo actually shows.** The top-ranked Jinggg result was
+the back of his head — identifiable only by the jersey name. The second
+candidate was a clean face-forward shot. `for_quote` returns several;
+look at them.
+
+`PlayerCard` in `vendor/remotion-clip08/src/People.tsx`: portrait wiping in
+from the side it sits on, a gradient into the panel so the photo has no
+hard edge, the handle, the team, the one-line fact, and the credit.
+
+### The clickbait line, and a reversal recorded as a reversal
+
+George: "a line of text that says what the video is talking about, like FNS
+talking about whatever it may be ... include an emoji at the end ... an
+Apple emoji or like a shocking face ... It needs to be clickbaity ... and
+that can be like slightly under his face cam."
+
+**This reverses two earlier notes and that is fine — his call.** He
+rejected "FNS ON JOB SECURITY IN VALORANT" as a banner that "doesn't make
+sense", and later said "i dont need random text popping up". This is text I
+write, and it stays: a clickbait hook line is a different object from a
+neutral banner or a mid-clip title, and he asked for it directly.
+
+Shipped: **"FNS ON VALORANT'S JOB SECURITY PROBLEM 😳"** at y 700 — inside
+the facecam pane, under his face, clear of the captions at 845. It runs
+0.8-17.8s, the stretch where a scroller decides, rather than the whole clip.
+
+**The emoji is why it has to be Remotion.** PIL cannot render colour emoji
+at all; Chrome on macOS has Apple Color Emoji and draws it natively. The
+emoji also lands a beat after the line and gives one small scale-and-rotate
+kick, so it reads as a reaction rather than a character.
+
 ### Verify a news fact INDEPENDENTLY before a name goes on screen
 
 The fortnight's roster news was the timeliest material available and half

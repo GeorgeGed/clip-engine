@@ -24,6 +24,10 @@ FPS = 60
 OUT = ROOT / "jobs/fns-2905408276/overlays"
 MASTER_GAIN, TARGET_RMS = 6.2, -29.0
 DIPS = (14.80, 32.92)
+# The clickbait line George asked for: what the video is about, with an
+# Apple emoji, sitting just under the facecam. It runs over the opening
+# stretch where a scroller decides, then leaves.
+BAIT = ("rm_Bait", 0.80, 17.00)
 
 # (clip, start seconds, duration seconds)
 EXHIBITS = [
@@ -41,8 +45,8 @@ EXHIBITS = [
     # org stated a reason, "five years at the org" because he was a reserve
     # for part of it. The free-agency card closes the clip on the hardest
     # fact available — it happens tomorrow.
-    ("rm_NewsPrx",  37.90, 3.75),   # PRX part ways with Jinggg
-    ("rm_NewsSen",  41.90, 3.50),   # Sentinels release JonahP and Jerrwin
+    ("rm_PlJinggg", 37.90, 4.00),   # Jinggg, with his VCT photo
+    ("rm_PlSen",    42.00, 3.75),   # JonahP, with his VCT photo
     ("rm_NewsFA",   44.60, 2.25),   # free agency opens 2 Nov
 ]
 
@@ -100,7 +104,8 @@ def main():
             last = at
     print("sfx:", bed(cues, total / FPS, out=OUT / "sfx.wav"))
 
-    names = ["dip.mov", "cap_kin.mov", "sfx.wav"] + [f"{n}.mov" for n, _a, _d in EXHIBITS]
+    names = ["dip.mov", "cap_kin.mov", "sfx.wav", f"{BAIT[0]}.mov"] + \
+            [f"{n}.mov" for n, _a, _d in EXHIBITS]
     r.GetMediaStorage().AddItemListToMediaPool([str(OUT / n) for n in names])
     pool = {c.GetName(): c for c in mp.GetRootFolder().GetClipList()}
 
@@ -121,6 +126,7 @@ def main():
         add("dip.mov", d, 0.567, 3)
     for n, at, dur in EXHIBITS:
         add(f"{n}.mov", at, dur, 4)
+    add(f"{BAIT[0]}.mov", BAIT[1], BAIT[2], 5)
     add("cap_kin.mov", 0.0, total / FPS, 6)
     add("sfx.wav", 0.0, total / FPS, 2, media=2)
 
