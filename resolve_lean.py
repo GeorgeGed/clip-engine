@@ -12,6 +12,7 @@ the line he drew earlier ("i dont need random text popping up").
 Everything not cropped from the footage is a Remotion composition rendered
 to an alpha clip; PIL cannot make a card look designed.
 """
+import subprocess
 import sys
 from pathlib import Path
 
@@ -135,6 +136,18 @@ def main():
     r.GetMediaStorage().AddItemListToMediaPool([str(OUT / n) for n in names])
     pool = {c.GetName(): c for c in mp.GetRootFolder().GetClipList()}
 
+    # Now that every card animates OUT over its last 16 frames, a clip that
+    # Resolve trims short loses the end of that exit — which is the jolt the
+    # exit was built to remove. Two were already short (rm_Bait 1020 of 1060,
+    # rm_Tweet 207 of 210), so the length comes from the FILE, not from a
+    # number typed here.
+    def clip_frames(name):
+        out = subprocess.run(
+            ["ffprobe", "-v", "error", "-count_frames", "-select_streams", "v:0",
+             "-show_entries", "stream=nb_read_frames", "-of", "csv=p=0",
+             str(OUT / f"{name}.mov")], capture_output=True, text=True).stdout.strip()
+        return int(out) if out.isdigit() else None
+
     ents = []
 
     def add(name, at, dur, track, media=None):
@@ -142,7 +155,16 @@ def main():
         if c is None:
             print(f"  !! {name} missing from the media pool")
             return
-        e = {"mediaPoolItem": c, "startFrame": 0, "endFrame": int(round(dur * FPS)),
+        want = int(round(dur * FPS))
+        # Only the Remotion cards. `cap_kin.mov` is the whole caption track
+        # and `dip.mov` is a measured 0.567s envelope — taking either from the
+        # file would overrun the timeline or stretch the dip.
+        have = clip_frames(name[:-4]) if name.startswith("rm_") else None
+        if have and have != want:
+            print(f"  {name}: {want} asked, {have} in the file — using the file "
+                  f"so the exit is not cut")
+            want = have
+        e = {"mediaPoolItem": c, "startFrame": 0, "endFrame": want,
              "recordFrame": s + int(round(at * FPS)), "trackIndex": track}
         if media:
             e["mediaType"] = media

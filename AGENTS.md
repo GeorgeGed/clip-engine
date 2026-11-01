@@ -595,6 +595,53 @@ progresses: use `-loop 1 -framerate N -t D`. And an overlay's own timeline
 starts at 0, so shift it with `setpts=PTS+T/TB` to meet the main one, or it
 dies before its `enable` window closes.
 
+### Nothing had an exit, which is why everything jolted out
+
+George: "the remotion video effect animations need to slide out in a more
+efficient way ... right now it's just kind of jolting out of the frame."
+
+Literal, not a matter of taste. **Not one component referenced
+`durationInFrames`** — every card sprang in, held, and the composition
+ended at full opacity, so Resolve cut from a fully lit card to nothing in a
+single frame. There was no exit to be smooth.
+
+`src/motion.tsx` holds one exit for the whole set, applied in `Root.tsx` by
+wrapping each composition rather than editing twelve components. Each card
+already takes a `top` prop, which becomes the `transformOrigin` — without
+it the scale happens about the CANVAS centre and a card at y 1000 drifts
+upward as it shrinks, because the transform sits on a full-frame layer and
+not on the card.
+
+| | |
+|---|---|
+| Length | **18 frames (0.30s)**, against a ~20-frame entrance — a graphic takes longer to arrive, where the viewer is reading it, than to go |
+| Shape | ease-out pull-back over the first 22%, then travel accelerating as `q^2.3` |
+| Anticipation | **13px against the exit direction** |
+| Travel | 118px, in the direction the card is anchored — down for lower-pane cards, sideways for a side chip, up for the line under the facecam |
+| Opacity | holds to p 0.35, zero at p 0.95 |
+| Also | scale to 0.94 and a 5px blur, both tied to the travel, not to p |
+
+**A single `easeInBack` is the obvious implementation and it is wrong.**
+That curve stays negative until `p = c1/(c1+1)`, so at c1 1.9 the card is
+still moving BACKWARDS for the first 65% of its exit and does all its
+travel in the last few frames — by which point the fade has it at 4%
+coverage. Measured on the alpha: -13.8px at p 0.69, then +56px crammed into
+four frames. It reads as a fade. Separating the pull-back from the travel
+puts ~75px of movement on screen while the card is still visible.
+
+**Measure an exit on the ALPHA CHANNEL**, not by watching it:
+`alphaextract`, then per frame take coverage and the centroid. A real exit
+has three signatures — coverage falling to zero, the centroid travelling,
+and the centroid moving the WRONG WAY first. The third is the one that
+separates a designed exit from a fade, and it is invisible at a glance.
+
+**A clip Resolve trims short loses the end of its exit**, which is the jolt
+the exit exists to remove. Two were already short (`rm_Bait` 1020 of 1060,
+`rm_Tweet` 207 of 210) because the durations were typed into `EXHIBITS` by
+hand. `resolve_lean` now reads the frame count out of each `rm_*.mov` —
+gated to those, since `cap_kin.mov` is the whole caption track and
+`dip.mov` is a measured 0.567s envelope.
+
 ### Facecam punches are CUTS, and the base shots come off V1
 
 George: "also need more zooms on fns' player cam in general when there's
