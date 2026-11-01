@@ -621,6 +621,43 @@ Dropped deliberately: **flashes on cuts** (a cut is already an edit event, and
 neither reference uses flashes at all) and **shake** (decoration on a speaker
 this measured).
 
+### "274 what?" — the pair rule applies to a COUNTER too
+
+George, on the counter card: *"274 what? doesnt make sense."*
+
+He is right and it breaks a rule written down in this very file: **a lone
+figure can argue the opposite of the point, so a card shows a PAIR.** I
+wrote that after three judges caught "32 OPEN SLOTS" alone, then shipped
+"274 / NOT YET CONFIRMED" as a solo counter anyway.
+
+The earlier reasoning was sound but incomplete. The board's own label has
+no noun, and the verification pass was right that inventing one ("274
+PLAYERS") asserts something the source does not say — staff and bench are
+separate columns, and 139+32+82+78 does not equal 274, so the figure is not
+a simple sum of the others. The mistake was concluding that the card
+therefore had to stand alone.
+
+**The subject comes from the CONTRAST, not from a noun.** `PairCounter`
+shows **139 SIGNED** beside **274 NOT YET CONFIRMED**, both the board's own
+labels, the second counting up against the static first. No noun invented,
+and the question "274 what?" answers itself.
+
+### A news card is cleaner without its chrome
+
+Three notes in one, all right:
+
+* **"remove the bar which is black and yellow, makes it cleaner."** The
+  masthead slab was borrowed TV-news furniture sitting on a press card that
+  did not need it. Attribution stays — a headline needs a source — but as a
+  quiet grey `VLR.GG · 31 OCT` line inside the card.
+* **"make sure it takes up more of the lower screen."** 880 -> 1000 wide,
+  photos 250 -> 330 tall, headline 46 -> 54px, sitting at y 960. The lower
+  pane is 1114px tall and the card was using half of it.
+* **"remove credits we have full permissions."** Confirmed by George that
+  his Riot photo permission covers video, so the per-photo credit line is
+  gone. The licence is still read and logged per photo in the manifest —
+  the record stays even though the overlay does not.
+
 ### Show the published HEADLINE, not a verb lifted out of it
 
 George: *"i dont like this design it doesnt make sense 'parts ways with' ??

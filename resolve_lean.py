@@ -34,7 +34,7 @@ EXHIBITS = [
     ("rm_ChipAmer",  1.20, 1.83),   # 34/40 Americas slots filled
     ("tweet",        3.30, 3.00),   # the Global Esports announcement
     ("rm_StatCard",  7.60, 3.50),   # 10 -> 8 partner teams per region
-    ("rm_Counter",  11.60, 3.50),   # 274 not yet confirmed, counting up
+    ("rm_Pair",     11.60, 3.50),   # 139 signed vs 274 not yet confirmed
     ("rm_ExStrip",  15.08, 3.50),   # the board's header strip
     ("rm_Ratio",    19.40, 3.50),   # 32 open slots against 274
     ("rm_ExNrg",    24.32, 3.75),   # NRG 5/5, a full roster
