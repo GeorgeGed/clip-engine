@@ -1093,6 +1093,114 @@ region of the VOD frame, already a 3x upscale to fill 1080×806; cropping to
 1.16:1 would mean taking 304×262 and blowing it up 3.55x. The seam stays at
 0.42 and the chat card goes below the captions instead.
 
+### The blue mount is gone, and my test for "can you see the box" was wrong
+
+George: *"twitch chat does not need a blue border."*
+
+He is right, and the measurement I used to justify the plate was testing the
+wrong property. **A contrast ratio along a panel's outline tells you whether
+you can see the RECTANGLE. It does not tell you whether you can see the
+BOX.** Measured on the bare version composited over the real board: the
+outline is legible along 6.3% of its perimeter against the board outside it,
+13.1% against the board content it covers, 14.3% either way — and the box
+reads immediately and unmistakably anyway.
+
+What actually carries it is the contents. Local texture (mean
+`|pixel - 9x9 mean|`) inside the chat box measures **26.27 against the
+board's 4.35** — the box is 36px white type at 17:1 on its own fill, sitting
+on a board whose own type is small and dim. **A panel is legible when what
+is IN it is louder than what is AROUND it**, and the perimeter test cannot
+see that at all. The old 1.08:1 dark-glass panel failed because it was a
+near-empty surface with nothing in it to be louder, not because its edge
+was invisible — the two cases look identical to a contrast ratio and are
+nothing alike.
+
+So the chat is Twitch's own `#18181B`, square corners like Twitch's own
+column, no border, no plate, no shadow. The 52px top radius goes with the
+plate: it only ever existed to cut the blue into R5's shoulder triangles,
+and without it that is a sixth radius in a system whose geometry is
+`RADIUS = 0`.
+
+### The chat arrives once and stays, and the cycle was an artefact
+
+George: *"why does it randomly disappear and come back at the start of the
+video? ... keep the twitch chat in place but make sure there's a sound
+effect as it pops in."*
+
+**"Randomly" is the accurate word.** The cycle was an arbitrary clock with no
+relation to anything on screen, and it could not have had one: the content
+pane's frame-to-frame delta is median 0.0005 with zero frames above 0.5
+across all 2822, so there is nothing in that pane for it to punctuate. The
+first thing a viewer saw was the box vanishing at 8.75s for no nameable
+reason.
+
+It only existed because the chat used to live in the GAPS between cards, and
+with ten cards gone there were no gaps left — **a scheduling rule that
+outlived the thing it was scheduling around.** Worth generalising: when the
+element a rule was dodging is deleted, delete the rule, do not re-tune it.
+Two versions were spent tuning ON/OFF on a cycle that should not have
+existed.
+
+**It does not need to dodge the two cards either.** Measured off their own
+alpha, `rm_StoryPrx` and `rm_StorySen` each cover **100% of the chat box
+footprint at alpha > 250** — 1008 wide at top 1029 against a 580-wide box at
+1090 — so a card lands on the chat and lifts off it.
+
+| | windows | chat on screen | state changes |
+|---|---|---|---|
+| v49 | 4 | 29.9s (64%) | 7 |
+| v50 | 4 | 34.6s (74%) | 7 |
+| **v51** | **1** | **46.8s (100%)** | **1** |
+
+**THE CUE IS `paper`, PICKED ON THE ENVELOPE.** The box's entrance runs
+0.34s — a 34px lift, a 0.90->1.00 scale, the tilt springing in. Effective
+durations across the palette: tock 65ms, shutter 82ms, thunk 88ms, pop
+220ms, **paper 260ms**, newsding 420ms, ding 550ms. `paper` is the only one
+whose envelope matches a 340ms settle, and an 87ms thunk would fire and be
+gone while the box was still moving — the "sound on the MOTION, not only on
+the arrival" note. It is also what `paper` was built for (a card settling on
+a desk) and it was free, because the stories take the shutter and only the
+shutter.
+
+So the whole sound design is **two sounds with one meaning each**: `paper`
+= the chat panel settles in (once), `shutter` = a photo card lands (twice).
+Measured in the bed: paper **-13.91 dBFS** in the master against the
+shutters' -10.42, so the resting state arriving sits 3.5 dB under an event
+landing, and lands where the thunks used to at -14.3.
+
+### THE PUNCH PLAN WAS MEASURED FROM THE LAST DELIVERY, WHICH GETS OVERWRITTEN
+
+A real bug, not a verification wrinkle, and it had been there since the
+punches were built. `resolve_punch.py` read `renders/clip08_FINAL.mp4` —
+the file `render_and_finish.py` overwrites every version. So each run
+measured whatever shipped last.
+
+**v49 and v50 hold identical speech and returned different plans:**
+`[10.5, 20.8, 26.2, 31.9, 39.6]` and `[10.5, 22.6, 28.2, 36.7]`.
+
+Two causes, both fixed:
+
+1. **The source.** Now `renders/styles/_base.mov` — the tightened cut with
+   PCM audio, no graphics and no sfx bed, which does not change between
+   versions. It is also the speaker's own delivery rather than our mix: the
+   EQ's +4dB at 3kHz re-weights which windows read loudest, and his emphasis
+   is a property of his speech, not of our tone shaping.
+2. **The selector was knife-edge.** Every candidate sits +4.0 to +5.5 dB
+   inside a 5.5 dB total range, so a hard threshold at +4.0 chooses between
+   near-ties — a fraction of a dB flips which qualify — and suppression ran
+   in TIME order, so one flip cascaded through every later pick and a weaker
+   early peak could suppress a stronger later one. Now: **rank by dB,
+   suppress in rank order, take the top `MAX_PUNCHES`**, with `MIN_DB` kept
+   only as a floor. That is invariant to any global level shift. Verified
+   across every delivered version v42-v50: all now return the same plan.
+
+**And the clip has THREE bold moments, not five or eight.** Ranked on the
+clean cut: 23.80s +5.5, 36.90s +4.9, 13.10s +4.5, then a clear step down to
+29.20s +3.5 and 44.60s +3.5. The break is real and the floor lands on it.
+Three punches, 10.7s and 13.1s apart, none before 9.0s, each 1.136x held
+2.20s. Verified by reading `ZoomX` off all 17 V2 items: every piece at its
+shot's base or exactly 1.1364x, max one per shot, shot 0 unpunched.
+
 ### The chat goes back to Twitch's own black, and it is MOUNTED
 
 George: *"no the twitch chat needs to stay black with the normal colours of

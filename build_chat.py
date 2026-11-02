@@ -66,34 +66,37 @@ WINDOWS = ROOT / "vendor/remotion-clip08/public/chat_windows.json"
 # yields nine windows instead of two.
 MIN_GAP = 1.5
 
-# THE GAP IS DEAD SPACE, AND SHORTENING IT IS NOT THE SAME LEVER AS SPEEDING
-# THE CLIP UP.
+# THE CHAT DOES NOT CYCLE ANY MORE. IT ARRIVES ONCE AND STAYS.
 #
-# George: "the twitch chat needs to come back quicker make sure there's no
-# dead space maybe at the end its fine."
+# George: "why does it randomly disappear and come back at the start of the
+# video? we're almost there - keep the twitch chat in place."
 #
-# He is right about what an OFF gap IS here. The content pane's frame-to-frame
-# delta over this cut measures **median 0.0005, max 0.27, zero frames above
-# 0.5 across all 2822** — one motionless roster board start to finish. So
-# while the chat is away the lower pane is a frozen frame, and 2.5s of that
-# three times over is 7.5s of nothing happening.
+# He is reading it exactly right, and "randomly" is the accurate word. The
+# cycle was an arbitrary clock: ON seconds of chat, OFF seconds of board,
+# repeating, with no relation to anything on screen. It cannot punctuate the
+# lower pane because the lower pane never changes — measured, the content
+# pane's frame-to-frame delta is median 0.0005 with zero frames above 0.5
+# across all 2822. So the first thing the viewer saw was the box vanishing
+# at 8.75s for no reason they could name.
 #
-# THE FIX IS LONGER WINDOWS, NOT MORE OF THEM, and that distinction is the
-# whole lesson from v47. Cutting OFF alone would have made n go 4 -> 5 and
-# added two state changes, which is exactly the "going way too quickly" that
-# removing two cards was meant to solve. Raising ON by the same amount holds
-# n at 4, so the switching rate is IDENTICAL and only the dead air moves:
+# The cycle only ever existed because the chat used to live in the GAPS
+# between cards, and with ten cards gone there were no gaps left to live in.
+# That was a scheduling artefact surviving the thing it was scheduling
+# around.
 #
-#            ON    OFF   windows   each    gaps    chat      changes
-#   v49      7.0   2.5      4      7.48s   7.5s    29.9s        7
-#   v50      9.0   0.9      4      8.68s   2.7s    34.7s        7
+# IT DOES NOT NEED TO DODGE THE TWO CARDS EITHER. Measured off their own
+# alpha, `rm_StoryPrx` and `rm_StorySen` each cover **100% of the chat box
+# footprint at alpha > 250** — the cards are 1008 wide at top 1029 and the
+# box is 580 wide at 1090 — so a card simply lands on the chat and lifts
+# off it. Nothing to schedule.
 #
-# 4.8s of frozen pane becomes 4.8s of chat for no extra cut. 0.9s is still a
-# beat and not a blink — 54 frames, against a 0.34s entrance — so the board
-# keeps the pause it earns without the pane going still.
-ON, OFF = 9.0, 0.9   # the chat's own cycle inside a long free stretch
+#            windows   chat on screen        changes
+#   v49         4       29.9s (64%)             7
+#   v50         4       34.6s (74%)             7
+#   v51         1       46.8s (100%)            1
 LEAD, TAIL = 0.10, 0.08      # the chat is on V3 BELOW the cards, so a few
                              # frames of overlap are covered, not collided
+IN_AT = 0.08                 # the one entrance, which the `paper` cue marks
 
 # THE CHATTER'S OWN COLOUR, MADE READABLE THE WAY TWITCH MAKES IT READABLE.
 #
@@ -210,33 +213,19 @@ def main():
     # ON seconds of chat, OFF seconds of bare board, repeating. The board is
     # what he is looking at, so the gaps are not empty, they are the pane
     # doing its own job for a moment.
+    # ONE WINDOW, the whole clip. The cards are still read off
+    # `resolve_lean.EXHIBITS` so the occlusion claim above can be checked
+    # against what is actually scheduled rather than taken on trust.
     import resolve_lean
     cards = sorted((at, at + dur) for _n, at, dur in resolve_lean.EXHIBITS)
-    free, prev = [], 0.0
-    for a, b in cards:
-        if a - prev >= MIN_GAP:
-            free.append((prev + TAIL, a - LEAD))
-        prev = max(prev, b)
-    if FRAMES_S - prev >= MIN_GAP:
-        free.append((prev + TAIL, FRAMES_S))
-
-    edges = []
-    for a, b in free:
-        span = b - a
-        if span <= ON + OFF:                 # short enough to hold in one go
-            edges.append({"from": round(a, 2), "to": round(b, 2)})
-            continue
-        # share the leftover out across the cycles so the last one is not a stub
-        n = max(1, int(round((span + OFF) / (ON + OFF))))
-        each = (span - OFF * (n - 1)) / n
-        t0 = a
-        for _ in range(n):
-            edges.append({"from": round(t0, 2), "to": round(t0 + each, 2)})
-            t0 += each + OFF
+    edges = [{"from": IN_AT, "to": round(FRAMES_S, 2)}]
     WINDOWS.write_text(json.dumps(edges, indent=1))
+    covered = sum(b - a for a, b in cards)
+    print(f"  cards on top of it: {len(cards)}, {covered:.2f}s "
+          f"({', '.join(f'{a:.2f}-{b:.2f}' for a, b in cards)})")
     on = sum(w["to"] - w["from"] for w in edges)
-    print(f"  {len(edges)} chat windows, {on:.1f}s of {FRAMES_S:.1f}s "
-          f"({100 * on / FRAMES_S:.0f}%), cycling {ON}s on / {OFF}s off")
+    print(f"  {len(edges)} chat window, {on:.1f}s of {FRAMES_S:.1f}s "
+          f"({100 * on / FRAMES_S:.0f}%) — one presence, no cycle")
     prev_to = None
     dead, lost = 0.0, 0
     for w in edges:

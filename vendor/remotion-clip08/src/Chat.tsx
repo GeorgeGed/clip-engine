@@ -29,33 +29,35 @@ import {C, TEXT, RADIUS} from './theme';
 // into the angle rather than arriving at it.
 //
 // ─────────────────────────────────────────────────────────────────────────
-// IT IS BLACK AGAIN, AND IT IS MOUNTED, AND THOSE ARE ONE DECISION.
+// TWITCH'S OWN BLACK, AND NOTHING DRAWN ON IT.
 //
 // George: "the twitch chat needs to stay black with the normal colours of
-// the twitch chatters."
+// the twitch chatters" — then, on the mounted version: "twitch chat does
+// not need a blue border."
 //
 // The blue panel with white usernames was a graphic that QUOTED chat. This
-// is chat: Twitch's own `#18181B` and the chatters' own colours. But a
-// near-black panel on this near-black board is the 1.08:1 defect the palette
-// pass deleted four devices for — measured here, its outline is
-// distinguishable along only **7.2% of its own perimeter** (#070C11 7.0%,
-// pure black 7.2%), so the box and the tilt both disappear into the roster
-// rows. `C.blue` reads 3.41:1 there with **97.5% of the outline visible**.
+// is chat: Twitch's own `#18181B`, the chatters' own colours, square
+// corners like Twitch's own column, and no border, no plate, no shadow.
 //
-// So the black card sits on a blue PLATE: square corners against the card's
-// top radius, so the blue shows as a rule down the sides and as two
-// triangles at the shoulders. That is R5's own construction — its near-black
-// card sits on a cyan plate with square corners — in the Polymarket palette,
-// and it is ONE element carrying the edge rather than a hairline, a bloom,
-// an inset highlight and a rule stacked on a panel nobody can see.
+// WHAT THAT COSTS, recorded rather than argued, because it was measured
+// before he ruled on it: against the real board under this footprint the
+// panel reads 1.03:1 and its OUTLINE is distinguishable along about 7% of
+// its own perimeter, so the edge and the tilt are nearly invisible and the
+// box reads as its text block rather than as a box. The blue plate (R5's
+// own construction) fixed that at 97.5%. He has seen both and wants it
+// bare, so bare it is — the fill still gives the text its ground, which is
+// the job the box came back for, and the shadow goes because a
+// rgba(0,0,0,0.55) bloom does nothing over board pixels at Y' 22.
 //
-// The drop shadow went with the blue. A rgba(0,0,0,0.55) bloom does nothing
-// over board pixels at Y' 22, which is the vestigial prosthetic this file
-// keeps warning about.
+// IT NO LONGER CYCLES. George: "why does it randomly disappear and come
+// back at the start of the video? ... keep the twitch chat in place." The
+// 9s-on / 0.9s-off cycle punctuated nothing — it was an arbitrary clock on
+// a pane whose board never changes — so the chat is now ONE presence for
+// the whole clip. It does not need to dodge the two story cards: measured
+// off their own alpha, each covers **100% of this footprint at alpha > 250**,
+// so a card lands on the chat and lifts off it.
 
 const BOX = {x: 64, y: 1090, w: 580, h: 420};
-const MOUNT = 12;         // how much blue shows around the card
-const CARD_R = 52;        // R5's top radius, scaled to our 580 (it ran ~64 at 654)
 const TILT = -2.4;
 const PAD = 22;
 const SIZE = 36;
@@ -119,30 +121,16 @@ export const ChatScroll: React.FC<{
 
   return (
     <AbsoluteFill style={{opacity: Math.min(1, p * 4)}}>
-      {/* THE PLATE. Square corners, and the card's radius is what turns it
-          from a keyline into a mount. */}
-      <div style={{
-        position: 'absolute',
-        left: BOX.x - MOUNT, top: BOX.y - MOUNT,
-        width: BOX.w + MOUNT * 2, height: BOX.h + MOUNT * 2,
-        background: C.blue,
-        borderRadius: RADIUS,
-        transform: `translateY(${lift.toFixed(2)}px) scale(${scale.toFixed(4)}) `
-                 + `rotate(${(TILT * p).toFixed(3)}deg)`,
-        // THE SAME PAGE POINT AS THE CARD'S, expressed in the plate's own
-        // box. '50% 60%' of the plate is 9.6px below '50% 60%' of the card,
-        // and at -2.4deg that shears the two apart — which rendered as a
-        // mount visibly thicker on the top-left than on the bottom-right.
-        transformOrigin: `${(BOX.w / 2 + MOUNT).toFixed(1)}px `
-                       + `${(BOX.h * 0.6 + MOUNT).toFixed(1)}px`,
-      }} />
-
       <div style={{
         position: 'absolute', left: BOX.x, top: BOX.y,
         width: BOX.w, height: BOX.h,
         // Twitch's own dark chat column. Not a restyle of it.
         background: C.twitchBg,
-        borderRadius: `${CARD_R}px ${CARD_R}px 0 0`,
+        // Square, like Twitch's own column and like every other card in the
+        // system. The 52px top radius only ever existed to cut the blue
+        // plate into R5's shoulder triangles; with the plate gone it is a
+        // sixth radius in a system whose geometry is RADIUS = 0.
+        borderRadius: RADIUS,
         overflow: 'hidden',
         display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
         padding: `0 ${PAD}px ${PAD}px`,

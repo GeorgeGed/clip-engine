@@ -12,6 +12,7 @@ the line he drew earlier ("i dont need random text popping up").
 Everything not cropped from the footage is a Remotion composition rendered
 to an alpha clip; PIL cannot make a card look designed.
 """
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -23,6 +24,7 @@ from engine.sfx import Cue, bed, cue_gain, cue_gain_peak
 
 FPS = 60
 OUT = ROOT / "jobs/fns-2905408276/overlays"
+VENDOR = ROOT / "vendor/remotion-clip08/public"
 MASTER_GAIN, TARGET_RMS = 6.2, -29.0
 # NO DIPS. The pane dip was built on the note that it is "the ONLY
 # transition anywhere in the four references". Re-measured, it punctuates
@@ -239,13 +241,46 @@ def main():
     # competing with a thunk any more, it is the whole sound design.
     shut = cue_gain_peak("shutter", -9.5, MASTER_GAIN)
     tck  = cue_gain("tick", -40.0, MASTER_GAIN)
+
+    # THE CHAT BOX GETS ONE, AND `paper` IS THE ONE IT GETS.
+    #
+    # George: "keep the twitch chat in place but make sure there's a sound
+    # effect as it pops in." It arrives once now instead of cycling, so this
+    # is a single cue at the head of the clip.
+    #
+    # Picked on the envelope, not on taste. The box's entrance runs 0.34s —
+    # a 34px lift, a 0.90->1.00 scale and the tilt springing in — and
+    # measured across the palette the effective durations are thunk 88ms,
+    # tock 65ms, shutter 82ms, pop 220ms, **paper 260ms**, newsding 420ms,
+    # ding 550ms. `paper` is the only one whose envelope matches a 340ms
+    # settle; an 87ms thunk fires and is gone while the box is still moving,
+    # which is the "sound on the MOTION, not only on the arrival" note.
+    # It is also what `paper` was BUILT for — a card settling on a desk —
+    # and it is free, because the stories take the shutter and only the
+    # shutter.
+    #
+    # So the whole sound design is two sounds with one meaning each:
+    # `paper` = the chat panel settles in (once), `shutter` = a photo card
+    # lands (twice).
+    #
+    # By PEAK, like the shutter, so the two are stated in the same units.
+    # -13.0 sits 3.5 dB under the shutter's -9.5 — the chat is the resting
+    # state arriving, not an event — and lands about where the thunks used
+    # to, at -14.3 dBFS, which is the level that was accepted for a card.
+    chat_in = cue_gain_peak("paper", -13.0, MASTER_GAIN)
     STORIES = {"rm_StoryPrx", "rm_StorySen"}
     # A SIDE TAB GETS NO CUE. rm_ChipAmer at 1.20 used to take the thunk and
     # then the 2.4s dedup swallowed rm_Tweet at 3.30 — so the clip's FIRST
     # REAL EXHIBIT arrived silent while a 1.8s chip announced itself. Sound
     # marks a card landing; a tab sliding in off the frame edge is not one.
     SILENT = {"rm_ChipAmer"}
+    # the chat's single entrance, read off the window file so the cue cannot
+    # drift from the frame the box actually arrives on
+    chat_win = json.loads((VENDOR / "chat_windows.json").read_text())
     cues, last = [], -9.0
+    if chat_win:
+        cues.append(Cue(chat_win[0]["from"] + 0.02, "paper", chat_in,
+                        "the chat box settles in"))
     for n, at, _d in EXHIBITS:
         if n in SILENT:
             continue

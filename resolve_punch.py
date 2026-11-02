@@ -70,13 +70,36 @@ PUNCH_HOLD = 2.20         # how long it stays tight — a shot, not a flick
 PUNCH_LEAD = 0.12         # in just before the peak
 MIN_PIECE = 0.40          # a sliver shorter than this reads as a glitch
 MIN_SEP = 5.0             # two punches closer than this are one moment
-MIN_DB = 4.0              # over his own baseline
+MIN_DB = 4.0              # a floor, not the selector — see below
+MAX_PUNCHES = 5           # the selector
 SKIP_HEAD = 9.0           # past the end of shot 0, which is 0.00-8.97s
 MAX_PER_SHOT = 1          # a shot that goes in-out-in-out is chopped, not punched
 
+# MEASURE THE CLEAN CUT, NEVER THE LAST DELIVERY.
+#
+# This read `renders/clip08_FINAL.mp4` — which `render_and_finish.py`
+# OVERWRITES every version. So each run measured whatever shipped last, and
+# the plan moved underneath the build: v49 and v50 hold identical speech and
+# returned [10.5, 20.8, 26.2, 31.9, 39.6] and [10.5, 22.6, 28.2, 36.7].
+# `_base.mov` is the tightened cut with PCM audio, no graphics and no sfx
+# bed, and it does not change between versions.
+SRC = "renders/styles/_base.mov"
 
-def bold_moments(path, *, min_db=MIN_DB, min_sep=MIN_SEP, skip_head=SKIP_HEAD):
-    """Local RMS maxima at least `min_db` over the speaker's own baseline."""
+
+def bold_moments(path=SRC, *, min_db=MIN_DB, min_sep=MIN_SEP,
+                 skip_head=SKIP_HEAD, limit=MAX_PUNCHES):
+    """The `limit` loudest local RMS maxima at least `min_db` over baseline.
+
+    RANKED, NOT THRESHOLDED, and that is a stability fix rather than a taste
+    one. Every candidate on this clip sits +4.0 to +4.9 dB inside a 5.4 dB
+    total range, so a hard cut at +4.0 is choosing between near-ties: a
+    fraction of a dB — an encode difference, a changed sfx bed — flips which
+    ones qualify, and because suppression ran in TIME order a single flip
+    cascaded through every later pick. Taking the loudest `limit` after
+    suppressing in RANK order is invariant to any global level shift, and a
+    weaker peak can no longer suppress a stronger one that follows it.
+    `min_db` stays as a floor so a clip with no bold moments gets none.
+    """
     raw = subprocess.run(
         ["ffmpeg", "-v", "error", "-i", str(path), "-ac", "1", "-ar", "16000",
          "-f", "f32le", "-"], capture_output=True).stdout
@@ -89,17 +112,23 @@ def bold_moments(path, *, min_db=MIN_DB, min_sep=MIN_SEP, skip_head=SKIP_HEAD):
             rms.append(20 * np.log10(v)); times.append(i / sr)
     rms, times = np.array(rms), np.array(times)
     base = float(np.percentile(rms, 40))
-    out = []
+    cand = []
     for i in range(2, len(rms) - 2):
         d = rms[i] - base
         if d < min_db or times[i] < skip_head:
             continue
         if rms[i] < max(rms[i - 2:i + 3]):
             continue
-        if out and times[i] - out[-1][0] < min_sep:
+        cand.append((round(float(times[i]), 2), round(float(d), 1)))
+    # loudest first, each one suppressing everything within min_sep of it
+    out = []
+    for t, d in sorted(cand, key=lambda c: (-c[1], c[0])):
+        if any(abs(t - u) < min_sep for u, _ in out):
             continue
-        out.append((round(float(times[i]), 2), round(d, 1)))
-    return base, out
+        out.append((t, d))
+        if len(out) >= limit:
+            break
+    return base, sorted(out)
 
 
 def inset(rect, f):
@@ -177,8 +206,7 @@ def main():
     print(f"cut has {len(segs)} shots, "
           f"{sum(d for _o, d, _s in segs):.2f}s total (V2 currently {len(v2)})")
 
-    render = ROOT / "renders/clip08_FINAL.mp4"
-    base, moments = bold_moments(render)
+    base, moments = bold_moments(ROOT / SRC)
     print(f"baseline {base:.1f} dBFS; {len(moments)} bold moments at +{MIN_DB} dB:")
     for t, d in moments:
         print(f"   {t:6.2f}s  +{d} dB")
