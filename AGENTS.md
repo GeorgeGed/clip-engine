@@ -1093,6 +1093,82 @@ region of the VOD frame, already a 3x upscale to fill 1080×806; cropping to
 1.16:1 would mean taking 304×262 and blowing it up 3.55x. The seam stays at
 0.42 and the chat card goes below the captions instead.
 
+### A dark panel over the board must not go translucent — AGAIN
+
+George: *"i didn't mean the twitch chat should be overlayed completely on
+the screen, it should be inside of a box so you can see the text itself, im
+just saying always keep the bottom screen for what fns is looking at - tilt
+the chat slightly put it on an axis a bit, remove the NRG popup, rest are
+all good, also i like the way you handled these animations here - make the
+twitch chat a bit smaller too, make sure it has animations coming in and
+out."*
+
+**"Remove the border" was over-read.** He was pointing at R5's chrome — the
+64px radius and the cyan shoulder plate — not asking for the chat to be set
+loose on the board. Borderless over a busy roster board leaves the text with
+no ground and the pane with no owner. The box is back, and a SMALL box is
+what satisfies "always keep the bottom screen for what fns is looking at":
+the board stays the pane's subject and the chat is a visitor on it.
+
+**580×420 at 36px**, against the borderless 716-wide full-height band at
+46px. It occupies 23% of the content pane where the previous version
+effectively claimed all of it. Tilted **−2.4°**, shallower than the story
+cards' −3.4/+3.1 so three tilted objects in one clip do not read as one
+repeated gesture, and spring-driven so it settles into the angle.
+
+**AND THE REPEATED MISTAKE, which is the thing worth keeping.** The previous
+build dimmed the box to 0.32 behind a drawn card. This file already contains
+the finding — *a dark card must not fade, because at 40-60% opacity the
+board's own rows read through it and it dematerialises into mud* — written
+for card exits, and it was repeated here within two turns. Measured on the
+transition frames: at partial opacity the chat text was ghosting over the
+roster rows with nothing behind it, on both the entrance and the exit.
+
+So the chat is now **present or absent, never see-through.** `presence`
+drives SHAPE only — a 34px lift, a 0.90→1.00 scale and the tilt settling in
+— while opacity reaches full in the first quarter of the entrance and stays
+there. Verified on the alpha: the box measures **82.2% fully-opaque pixels
+at every sampled frame** of entrance, hold and exit, the remainder being
+the shadow and the antialiased tilted edge. There is no frame where the
+board shows through it.
+
+The general rule, now stated twice because it was learned twice:
+**anything dark composited over this board transitions by GEOMETRY — a
+scale, a travel, a clip — and never by opacity.** Paper and stroked type
+may fade; a dark panel may not.
+
+### Nine graphics, and the chat gets 7.6 seconds
+
+`rm_ExNrg` is gone on George's instruction. It was the weakest exhibit of
+the set anyway: the crop is mostly an empty BENCH / OPTIONS column, so a
+full 5/5 roster read as white space next to KRU's 1/5.
+
+Dropping it opens **22.90–28.80, the clip's only long gap**, and that is
+where the chat now gets the pane to itself.
+
+The chat lives in the gaps between graphics, entering after one leaves and
+exiting before the next lands (0.30s tail, 0.34s lead). A gap has to be
+worth an entrance — under `MIN_GAP = 1.8s` the box would appear and go
+inside a second, which is the flicker, not the feature. That leaves:
+
+| window | length |
+|---|---|
+| 16.70–19.06 | 2.36s |
+| 23.20–28.46 | 5.26s |
+| **total** | **7.6s of 46.9s (16%)** |
+
+**Be straight about that number.** Two appearances is not much chat, and it
+is a direct consequence of nine graphics covering 76% of the clip. The pane
+cannot hold both at once: measured, the 816-wide cards span x 132–948 and
+the 1008-wide ones x 36–1044, so there is no horizontal lane for a box to
+live in beside them, and below the cards there are only 80px before the
+platform-UI line. **The dial is card durations, not chat opacity** — the
+previous attempt to buy more chat by making it translucent is exactly the
+defect above.
+
+The windows are generated from `resolve_lean.EXHIBITS`, so they cannot
+drift from the cards they are dodging.
+
 ### The chat overlay, developed — and three reversals of what R5 measured
 
 George, on the first test: *"the overlay looks good was that taken directly
@@ -1746,7 +1822,6 @@ text was not.
 | 11.60 | counter | 274, counting up |
 | 15.08 | the header strip | 32 open / 274 unconfirmed |
 | 19.40 | ratio bar | 32 against 274 |
-| 24.32 | NRG card | 5/5 |
 | 28.80 | the Americas grid, populating | eight real counts |
 | 33.20 | KRU card + marker | 1/5 |
 | 38.40 | side chip | 1/5 again |
@@ -1846,7 +1921,6 @@ Five exhibits now, every one of them real:
 | 3.30 | the Global Esports announcement tweet |
 | 7.60 | **10 -> 8 partner teams per region**, sourced |
 | 15.08 | the board's 32 open slots / 274 not yet confirmed |
-| 24.32 | **NRG 5/5** — a full roster, over the line about getting signed |
 | 33.20 | **KRU 1/5** with the marker on the four unconfirmed |
 
 NRG replaces a second showing of the same strip. A full 5/5 roster against

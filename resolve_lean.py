@@ -46,10 +46,11 @@ BAIT = ("rm_Bait", 0.80, 17.00)
 # when the pictures of jingg and jonah come up the chat should fade out -
 # so the chat can come in and out you know?"
 #
-# It goes on V3, BELOW the graphics on V4, so a card lands on top of it
-# rather than beside it. The stepping out of the way is baked into the clip
-# itself from `chat_fades.json`, because opacity in Resolve is one static
-# value per clip and this needs ten of them.
+# It goes on V3, BELOW the graphics on V4. The box is PRESENT OR ABSENT and
+# never translucent — a dark panel at partial opacity lets the board read
+# through it, which is the same defect the card exits already record. Its
+# windows are baked into the clip itself from `chat_windows.json`, since
+# Resolve's Opacity is one static value per timeline item.
 CHAT = ("rm_Chat", 0.0, None)        # None: the whole picture length
 
 # (clip, start seconds, duration seconds)
@@ -74,7 +75,11 @@ EXHIBITS = [
     # 88px captions. rm_Ratio carries the same pair, legibly, at 19.40.
     ("rm_Pair",     11.60, 4.80),   # 139 signed vs 274 not yet confirmed
     ("rm_Ratio",    19.40, 3.50),   # 32 open slots against 274
-    ("rm_ExNrg",    24.32, 3.75),   # NRG 5/5, a full roster
+    # rm_ExNrg is GONE. George: "remove the NRG popup, rest are all good."
+    # It was the weakest exhibit of the set anyway — the crop is mostly an
+    # empty BENCH / OPTIONS column, so a full 5/5 roster read as white
+    # space. Dropping it also opens 22.90-28.80, the clip's only long gap,
+    # which is where the chat now gets the pane to itself.
     ("rm_Grid",     28.80, 4.00),   # all eight Americas teams populating
     ("rm_ExKru",    33.20, 4.30),   # KRU 1/5, with the marker
     # The two freshest stories, each through an independent verification
