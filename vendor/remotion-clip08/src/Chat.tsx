@@ -95,10 +95,16 @@ export const ChatScroll: React.FC<{
       <div style={{
         position: 'absolute', left: BOX.x, top: BOX.y,
         width: BOX.w, height: BOX.h,
-        background: C.surfaceDeep,
-        border: `2px solid ${C.keyline}`,
+        // POLYMARKET BLUE, WHITE TEXT — the brand, and the recurring element
+        // that carries it, since the chat is on screen more than anything
+        // else. Measured: white on this blue is 5.13:1, and the blue sits at
+        // 3.52:1 median against the roster board with 98.2% of its footprint
+        // above 1.6:1. The 2px keyline is gone because a panel that separates
+        // by 3.5:1 does not need an edge drawn on it — that was only ever
+        // needed by the graphite, at 1.67:1.
+        background: C.blue,
         borderRadius: RADIUS,
-        boxShadow: '0 22px 48px -16px rgba(0,0,0,0.92)',
+        boxShadow: '0 22px 48px -16px rgba(0,0,0,0.55)',
         overflow: 'hidden',
         display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
         padding: `0 ${PAD}px ${PAD}px`,
@@ -125,7 +131,7 @@ export const ChatScroll: React.FC<{
                 overflow: 'hidden',
                 opacity: Math.min(1, q * 1.5),
                 transform: `translateY(${((1 - q) * 14).toFixed(2)}px)`,
-                color: '#FFFFFF',
+                color: 'rgba(255,255,255,0.93)',
               }}>
                 {m.badges.map((b) => badgeMap[b] ? (
                   <Img key={b} src={staticFile(badgeMap[b])} style={{
@@ -133,11 +139,16 @@ export const ChatScroll: React.FC<{
                     marginRight: 7, borderRadius: 3,
                   }} />
                 ) : null)}
+                {/* A Twitch user colour is picked to read on Twitch's near
+                    black, and most of them die on #2E5CFF — a mid blue
+                    username on a mid blue panel is invisible. On the brand
+                    panel the name is WHITE and the weight carries it
+                    instead, which is also what "blue and white" means. */}
                 <span style={{
-                  color: m.colour, fontWeight: 700,
-                  fontVariationSettings: '"wght" 700, "wdth" 100',
+                  color: C.white, fontWeight: 700,
+                  fontVariationSettings: '"wght" 700',
                 }}>{m.author}</span>
-                <span style={{color: m.colour, fontWeight: 700}}>: </span>
+                <span style={{color: 'rgba(255,255,255,0.62)', fontWeight: 700}}>: </span>
                 {m.frags.map((f, k) => f.emote ? (
                   <Img key={k} src={f.emote} style={{
                     height: SIZE * 1.1, verticalAlign: '-9px', margin: '0 2px',

@@ -42,6 +42,7 @@ import {continueRender, delayRender, staticFile} from 'remotion';
 const handle = delayRender('loading Archivo and Source Serif 4');
 
 const FACES: [string, string, FontFaceDescriptors][] = [
+  ['Inter', 'fonts/Inter.ttf', {weight: '100 900'}],
   ['Archivo', 'fonts/Archivo.ttf', {weight: '100 900', stretch: '62% 125%'}],
   ['Source Serif 4', 'fonts/SourceSerif4.ttf', {weight: '200 900'}],
 ];

@@ -65,26 +65,27 @@ CHAT = ("rm_Chat", 0.0, None)        # None: the whole picture length
 # frame, masked by the dip at 14.80. A card that animates out over 12-15
 # frames cannot have those frames trimmed away by the schedule.
 EXHIBITS = [
+    # George: "i want the twitch chat visible with no other animations
+    # other than the story pop ups of jingg and jonahp/jerwwin as they are
+    # relevent to what he's saying". Everything drawn is gone — the tweet,
+    # the figure pair, the ratio bar, the roster grid and the KRU exhibit.
+    # What is left is his own chat and two published news stories.
+
     # rm_ChipAmer and rm_StatCard are GONE. George: "now it's going way
     # too quickly - keep the twitch chat and remove chip amer, stat card
     # is pointless". The chip was also the one card the rhythm could not
     # accommodate — it started 1.20 and the tweet 3.30, too close to fit a
     # chat window between them.
-    ("rm_Tweet",     3.30, 3.57),   # the Global Esports announcement
     # Lengthened from 3.45s to take up the slack left by rm_ExStrip, which is
     # gone: the two figures it carried sit at the extreme ends of the strip
     # PNG, so the contiguous run containing both is the whole strip and no
     # magnification was possible. At 1.00x its ink band measured 21px against
     # 88px captions. rm_Ratio carries the same pair, legibly, at 19.40.
-    ("rm_Pair",     11.60, 4.80),   # 139 signed vs 274 not yet confirmed
-    ("rm_Ratio",    19.40, 3.50),   # 32 open slots against 274
     # rm_ExNrg is GONE. George: "remove the NRG popup, rest are all good."
     # It was the weakest exhibit of the set anyway — the crop is mostly an
     # empty BENCH / OPTIONS column, so a full 5/5 roster read as white
     # space. Dropping it also opens 22.90-28.80, the clip's only long gap,
     # which is where the chat now gets the pane to itself.
-    ("rm_Grid",     28.80, 4.00),   # all eight Americas teams populating
-    ("rm_ExKru",    33.20, 4.30),   # KRU 1/5, with the marker
     # The two freshest stories, each through an independent verification
     # pass. Real published headlines, tilted, players under them.
     ("rm_StoryPrx", 37.60, 4.25),   # Paper Rex parts ways with Jinggg
@@ -229,10 +230,14 @@ def main():
     # thunks it measured -15.2 dBFS in the bed, 0.9 dB UNDER them. Target
     # -12.0 lands it around -12.9 — roughly +2.3 dB, a step you hear without
     # it becoming the loudest thing in the clip, and it leaves the shutter
-    # about 1.4 dB over a thunk. That ordering is right: a thunk says a
-    # figure landed, a shutter says the two biggest graphics in the clip
-    # just arrived with photographs on them.
-    shut = cue_gain_peak("shutter", -12.0, MASTER_GAIN)
+    # about 1.4 dB over a thunk.
+    #
+    # Then, again: "make the snapshot noise louder". -12.0 -> -9.5, a
+    # further +2.5 dB. It is now the loudest thing in the clip after
+    # the speech, which is defensible because it is the ONLY cue left:
+    # the two story cards are the only graphics, so the shutter is not
+    # competing with a thunk any more, it is the whole sound design.
+    shut = cue_gain_peak("shutter", -9.5, MASTER_GAIN)
     tck  = cue_gain("tick", -40.0, MASTER_GAIN)
     STORIES = {"rm_StoryPrx", "rm_StorySen"}
     # A SIDE TAB GETS NO CUE. rm_ChipAmer at 1.20 used to take the thunk and

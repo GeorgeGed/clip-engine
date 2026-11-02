@@ -31,8 +31,13 @@ ROOT = Path(__file__).parent
 CARDS = ROOT / "vendor/remotion-clip08/public/cards.json"
 OUT = ROOT / "jobs/fns-2905408276/overlays/cap_kin.mov"
 
-# theme.tsx `C.accent`. One value, two renderers.
-ACCENT = (244, 81, 42, 255)
+# theme.tsx `C.blueLight`. One value, two renderers.
+#
+# NOT the brand blue. #2E5CFF reads 4.09:1 against the caption's own
+# hard black stroke, under the 4.5 floor; #5C80FF is the same hue and
+# saturation lifted to L 0.68 and reads 5.99:1, which matches the
+# 6.06:1 of the vermilion it replaces.
+ACCENT = (92, 128, 255, 255)
 DUR = 2812 / 60          # the delivered picture length
 
 

@@ -69,7 +69,7 @@ export const NewsStory: React.FC<{
         opacity: interpolate(frame, [0, 6], [0, 1], {extrapolateRight: 'clamp'}),
       }}>
         {/* the outlet, as a mark */}
-        <div style={{width: 72, height: 3, background: C.ink, opacity: st(2)}} />
+        <div style={{width: 72, height: 4, background: C.blue, opacity: st(2)}} />
 
         {/* the published headline, verbatim, in sentence case */}
         <div style={{

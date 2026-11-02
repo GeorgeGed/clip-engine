@@ -38,50 +38,44 @@ import React from 'react';
 //      is structural, not an artifact of these eight files.
 
 export const C = {
-  // The chassis. Flat, fully opaque, no gradient. 1.67:1 median against the
-  // board, which is the entire point — a surface instead of a tint.
-  surface: '#413D36',
-  // The well an exhibit crop sits in.
-  surfaceDeep: '#2B2823',
-  // 2px, all four sides. 1px at 1.84:1 goes sub-pixel on a 720x1280
-  // re-encode and aliases frame to frame; top-and-left-only is the oldest
-  // bevel convention there is. Against an exhibit crop (Y~0.011) it reads
-  // 2.51:1, so it frames the crop on both sides.
-  keyline: '#6B6458',
+  // POLYMARKET. George sent the logo and asked for "polymarket blue colours
+  // and their design typography ... blue and white text for example - blue
+  // and white for animations etc". Sampled off the file he sent: the mark is
+  // exactly two colours, #2E5CFF over 96.1% of it and #FFFFFF over 3.0%.
+  blue: '#2E5CFF',
+  // The same hue and saturation (227 deg, S 1.00) lifted from L 0.59 to
+  // 0.68. The brand blue reads 4.09:1 against a hard black caption stroke,
+  // under the 4.5 floor; this reads 5.99:1, which matches the 6.06:1 of the
+  // vermilion it replaces. Use it for anything that has to hold against
+  // dark; use `blue` on white and as a fill.
+  blueLight: '#5C80FF',
 
-  textPrimary: '#FFFFFF',      // every figure, every time. 10.79:1
-  textSecondary: '#BDB5A8',    // the ONE second-rank line. 5.31:1
-  // There is no third text tier. `textMuted` is deleted rather than kept
-  // unused: its only jobs were the micro-caps source strips, the kicker over
-  // every panel and the name under a photo, all of which George rejected by
-  // name. A token that exists gets reached for.
+  white: '#FFFFFF',
+  paper: '#FFFFFF',        // the press cards. Polymarket's white is pure.
+  ink: '#0B0B0C',
+  inkSecondary: 'rgba(11,11,12,0.62)',
 
-  accent: '#F4512A',           // 3.11:1 on chassis, 5.21:1 median on the board
-  accent2: '#818EA7',          // 3.27:1 on chassis
-  // HARD CONSTRAINTS ON accent2: it never touches the board and is never a
-  // figure. Its hue is 219.5 degrees against the board's 217 — the exact
-  // fault diagnosed in gold — so it is defensible inside a chassis slab and
-  // nowhere else.
-  //
-  // And on the pair: accent Y 0.2529, accent2 Y 0.2680 — **1.06:1,
-  // isoluminant**. On RatioBar that is fine, because the hues are 206 apart
-  // on the blue/yellow axis (intact under both deuteranopia and protanopia),
-  // the figures above the bars are white, and 32 against 274 is a 10% sliver
-  // against a full bar, so LENGTH is the primary encoding. The rule, for
-  // anything else: any pair encoded by colour alone must separate by 15-20%
-  // in luminance.
+  // Measured per-pixel against the real roster board: the brand blue sits at
+  // **3.52:1 median with 98.2% of its footprint above 1.6:1**, against the
+  // warm graphite chassis it replaces at 1.67:1. A blue panel does not need
+  // a keyline to be seen on this board — it has its own edge — which is why
+  // the 2px keyline is gone with everything else.
+  hairline: 'rgba(255,255,255,0.14)',
 
-  paper: '#F4F1EB',            // the press cards. Flat; the gradient goes.
-  ink: '#1A1611',              // 15.97:1 on paper
-  inkSecondary: 'rgba(26,22,17,0.68)',
-
-  // The three neutrals that are not text: a row divider, an un-highlighted
-  // row tab, and an unfilled roster pip. Tokens for the same reason as the
-  // rest — five formula-derived greys `(n, n+8, n+24)` with no two values
-  // reused is how the old set drifted.
-  hairline: 'rgba(255,255,255,0.07)',
+  // The cards this cut no longer uses — the figure cards, the exhibits, the
+  // chips — are still in the component files and still import these names.
+  // Mapping them onto the Polymarket palette rather than deleting them means
+  // the build does not break AND a card put back comes back blue, instead of
+  // re-appearing in the warm graphite that is no longer the house look.
+  surface: '#2E5CFF',
+  surfaceDeep: '#1E3FCC',
+  keyline: 'rgba(255,255,255,0.22)',
+  textPrimary: '#FFFFFF',
+  textSecondary: 'rgba(255,255,255,0.74)',
+  accent: '#FFFFFF',          // on blue, the accent IS white
+  accent2: '#5C80FF',
   tab: 'rgba(255,255,255,0.45)',
-  pipOff: 'rgba(255,255,255,0.12)',
+  pipOff: 'rgba(255,255,255,0.22)',
 } as const;
 
 // A slab moved above the seam is fragile: 13.9% of facecam pixels sit within
@@ -111,7 +105,20 @@ export const BOARD_SAFE_TOP = 975;
 // digits are 575-577/1000 upm, a **0.35% spread**, tabular before the
 // feature is even enabled.
 export const CAPTION = 'Impact, Haettenschweiler, "Arial Narrow", sans-serif';
-export const TEXT = 'Archivo, "Helvetica Neue", system-ui, sans-serif';
+// INTER, not Archivo. Archivo was chosen for a measured reason — a width
+// axis and default-tabular digits, so a figure, its label and a context
+// line could separate by weight and width instead of colour, and so the
+// counters stopped reflowing. **That reason is gone**: this cut has no
+// counters and no figure cards left, only the chat and two press stories.
+// What is left to serve is Polymarket's register, and their wordmark is a
+// neo-grotesque. Inter is OFL, it is the de facto UI face of this category,
+// and it is the closer match. Archivo stays vendored: if figure cards come
+// back, its `wdth` axis and 0.35% digit spread are the better tool (Inter's
+// digits run a 37% spread by default and need `tnum` switched on).
+//
+// Their wordmark itself is probably custom and is not ours to redistribute,
+// so this matches the register, not the exact letterforms.
+export const TEXT = 'Inter, "Helvetica Neue", system-ui, sans-serif';
 export const SERIF = '"Source Serif 4", Charter, Georgia, serif';
 
 // Four sizes. Not nine near-but-never-equal values for one role.
@@ -185,8 +192,8 @@ export const PAPER_SHADOW =
 /** The chassis every drawn card is built on. Flat, square, opaque, 2px
  *  keyline on all four sides, and nothing else. */
 export const surface: React.CSSProperties = {
-  background: C.surface,
-  border: `2px solid ${C.keyline}`,
+  background: C.blue,
+  border: 'none',            // the blue is 3.52:1 on the board; it needs no edge
   borderRadius: RADIUS,
   overflow: 'hidden',
 };

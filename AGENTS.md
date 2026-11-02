@@ -1093,6 +1093,99 @@ region of the VOD frame, already a 3x upscale to fill 1080×806; cropping to
 1.16:1 would mean taking 304×262 and blowing it up 3.55x. The seam stays at
 0.42 and the chat card goes below the captions instead.
 
+### POLYMARKET: #2E5CFF and white, and what each colour can carry
+
+George sent the logo: *"let's use polymarket blue colours and their design
+typography for this - blue and white text for example - blue and white for
+animations etc"*.
+
+**Sampled off the file he sent rather than guessed.** The mark is exactly
+two colours: **#2E5CFF over 96.1% of the image and #FFFFFF over 3.0%.**
+Everything else in it is antialiasing.
+
+| | ratio | |
+|---|---|---|
+| white on `#2E5CFF` | **5.13:1** | the chat box. Clears the 4.5 body floor |
+| `#2E5CFF` vs the real roster board | **3.52:1 median**, 98.2% of footprint ≥1.6 | the blue needs no keyline — it has its own edge |
+| the graphite chassis it replaces | 1.67:1 | for comparison |
+| `#2E5CFF` on white paper | 5.13:1 | the press card's outlet rule |
+| `#2E5CFF` vs a hard black caption stroke | **4.09:1** | **under the 4.5 floor** |
+
+**So there are two blues, and the second one is not decoration.** The brand
+blue fails as caption emphasis against the captions' own hard black stroke.
+`C.blueLight` **#5C80FF** is the same hue (227°) and the same saturation
+(1.00) lifted from L 0.59 to 0.68, and reads **5.99:1** — which matches the
+6.06:1 of the vermilion it replaces almost exactly. Rule: **`blue` on white
+and as a fill; `blueLight` for anything that has to hold against dark.**
+
+**A Twitch user colour cannot survive on the brand blue.** Those colours are
+chosen to read on Twitch's near-black, and a mid-blue username on a mid-blue
+panel is invisible. On the panel the name is WHITE and its weight carries
+the hierarchy instead — which is also what "blue and white text" asks for.
+The real colours are still in `chat.json`; they are simply not used while
+the panel is blue.
+
+**The 2px keyline is gone.** It existed because the graphite chassis
+measured 1.67:1 against the board and needed an edge drawn on it. At 3.52:1
+the blue does not, and leaving it would be the stacked compensation this
+file keeps warning about.
+
+**Typography: Inter, and the reason Archivo was chosen no longer applies.**
+Archivo was picked on measurement — a `wdth` axis so figure/label/context
+could separate by weight and width instead of colour, and digits at a 0.35%
+spread so the counters stopped reflowing. **This cut has no counters and no
+figure cards**, so neither argument survives. What is left to serve is
+Polymarket's register, and their wordmark is a neo-grotesque; Inter is OFL,
+is the de facto UI face of this category, and is the closer match. Archivo
+stays vendored — if figure cards come back it is still the better tool,
+because Inter's digits run a **37% spread** by default and need `tnum`
+switched on explicitly.
+
+Their wordmark is probably custom and not ours to redistribute. This matches
+the register, not the letterforms, and should be described that way.
+
+**The dead cards were re-pointed, not deleted.** `Chips.tsx`, `Graphics.tsx`,
+`People.tsx` and `Tweet.tsx` are out of the cut but still import `C.surface`,
+`C.keyline`, `C.accent` and the rest. Those names now map onto the Polymarket
+palette, so the build does not break AND a card put back comes back blue
+instead of reappearing in a warm graphite that is no longer the house look.
+
+### Only the chat and two stories — so the chat has to cycle itself
+
+George: *"i want the twitch chat visible with no other animations other
+than the story pop ups of jingg and jonahp/jerwwin as they are relevent to
+what he's saying ... keep the chat visible on these clips."*
+
+Gone: the tweet, the figure pair, the ratio bar, the roster grid and the
+KRU exhibit. Left: his own chat, and two published news stories at 37.60
+and 42.10.
+
+**Which breaks the scheduling model that has run for four versions.** The
+chat used to live in the GAPS between cards. With two cards the first free
+stretch is **37.6 seconds**, and one unbroken 37-second window is not "let
+it come in and out" — it is just leaving it on.
+
+So a long stretch is now CYCLED: `ON = 7.0s` of chat, `OFF = 2.5s` of bare
+board, repeating, with the leftover shared across the cycles so the last one
+is not a stub. The gaps are not empty — the board is the thing he is looking
+at, and it gets a beat to itself.
+
+| | |
+|---|---|
+| chat windows | **4**, 7.48s each |
+| chat on screen | **29.9s of 46.9s (64%)** |
+| cards | 2, 8.25s |
+| states | 6 — one change every 7.8s |
+
+For comparison the complaint that started this was v47 at one change every
+2.6s. This is three times slower again.
+
+**The shutter is the whole sound design now.** "Make the snapshot noise
+louder" a second time: −12.0 → **−9.5 dBFS** target peak. That is
+defensible here in a way it would not have been before — with every drawn
+card gone there are no thunks left for it to sit against, so it is not
+competing with another cue, it is the only one.
+
 ### Buying chat time out of card durations was the wrong lever
 
 George, on v47: *"now it's going way too quickly - keep the twitch chat and

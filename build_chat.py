@@ -64,6 +64,7 @@ WINDOWS = ROOT / "vendor/remotion-clip08/public/chat_windows.json"
 # re-timed to open a gap after each one — see Root.tsx — so this now
 # yields nine windows instead of two.
 MIN_GAP = 1.5
+ON, OFF = 7.0, 2.5   # the chat's own cycle inside a long free stretch
 LEAD, TAIL = 0.10, 0.08      # the chat is on V3 BELOW the cards, so a few
                              # frames of overlap are covered, not collided
 
@@ -115,21 +116,42 @@ def main():
 
     OUT.write_text(json.dumps(kept, indent=1))
 
-    # the windows, read off resolve_lean's own EXHIBITS so the two cannot
-    # drift apart the way a hand-typed copy would
+    # The windows, read off resolve_lean's own EXHIBITS so the two cannot
+    # drift apart.
+    #
+    # WITH ONLY TWO CARDS LEFT the free stretches are enormous — 37.6s before
+    # the first story — and one unbroken 37-second window is not "let it come
+    # in and out", it is just leaving it on. So a long stretch is CYCLED:
+    # ON seconds of chat, OFF seconds of bare board, repeating. The board is
+    # what he is looking at, so the gaps are not empty, they are the pane
+    # doing its own job for a moment.
     import resolve_lean
     cards = sorted((at, at + dur) for _n, at, dur in resolve_lean.EXHIBITS)
-    edges, prev = [], 0.0
+    free, prev = [], 0.0
     for a, b in cards:
         if a - prev >= MIN_GAP:
-            edges.append({"from": round(prev + TAIL, 2), "to": round(a - LEAD, 2)})
+            free.append((prev + TAIL, a - LEAD))
         prev = max(prev, b)
     if FRAMES_S - prev >= MIN_GAP:
-        edges.append({"from": round(prev + TAIL, 2), "to": round(FRAMES_S, 2)})
+        free.append((prev + TAIL, FRAMES_S))
+
+    edges = []
+    for a, b in free:
+        span = b - a
+        if span <= ON + OFF:                 # short enough to hold in one go
+            edges.append({"from": round(a, 2), "to": round(b, 2)})
+            continue
+        # share the leftover out across the cycles so the last one is not a stub
+        n = max(1, int(round((span + OFF) / (ON + OFF))))
+        each = (span - OFF * (n - 1)) / n
+        t0 = a
+        for _ in range(n):
+            edges.append({"from": round(t0, 2), "to": round(t0 + each, 2)})
+            t0 += each + OFF
     WINDOWS.write_text(json.dumps(edges, indent=1))
     on = sum(w["to"] - w["from"] for w in edges)
     print(f"  {len(edges)} chat windows, {on:.1f}s of {FRAMES_S:.1f}s "
-          f"({100 * on / FRAMES_S:.0f}%) — gaps under {MIN_GAP}s are skipped")
+          f"({100 * on / FRAMES_S:.0f}%), cycling {ON}s on / {OFF}s off")
     for w in edges:
         print(f"    {w['from']:5.2f}-{w['to']:5.2f}  ({w['to']-w['from']:.2f}s)")
     vis = [m for m in kept if m["t"] >= 0]

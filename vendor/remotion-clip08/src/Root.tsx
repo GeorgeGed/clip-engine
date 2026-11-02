@@ -110,9 +110,6 @@ export const Root: React.FC = () => (
         exitH: 435}} />
 
 
-    <Composition id="Pair" component={XPair} durationInFrames={288} {...V}
-      defaultProps={{aValue: 139, aLabel: 'SIGNED', bValue: 274,
-        bLabel: 'NOT YET CONFIRMED', top: 1211, exitH: 178}} />
 
     {/* `ExStrip` IS DELETED, and the measurement is why. The card showed
         the board's own header line, and its job was the pair "32 open slots"
@@ -136,30 +133,12 @@ export const Root: React.FC = () => (
         remaining ten graphics stay roughly one every 4.4s and no card moves
         off the spoken line it was anchored to. */}
 
-    <Composition id="Ratio" component={XRatio} durationInFrames={210} {...V}
-      defaultProps={{aLabel: 'OPEN SLOTS', aValue: 32, bLabel: 'NOT YET CONFIRMED',
-        bValue: 274, top: 1153, exitH: 294}} />
 
     <Composition id="ExNrg" component={XExhibit} durationInFrames={225} {...V}
       defaultProps={{src: staticFile('crop_nrg.png'), width: 816, top: 1057,
         fromX: 668, exitH: 486}} />
 
-    <Composition id="Grid" component={XGrid} durationInFrames={240} {...V}
-      defaultProps={{top: 1090, highlight: 'KRÜ ESPORTS', exitH: 420, rows: [
-        {team: '100 THIEVES', signed: 5, of: 5},
-        {team: 'G2 ESPORTS',  signed: 5, of: 5},
-        {team: 'KRÜ ESPORTS', signed: 1, of: 5},
-        {team: 'LEVIATÁN',   signed: 5, of: 5},
-        {team: 'LOUD',        signed: 5, of: 5},
-        {team: 'MIBR',        signed: 4, of: 5},
-        {team: 'NRG',         signed: 5, of: 5},
-        {team: 'SENTINELS',   signed: 4, of: 5},
-      ]}} />
 
-    <Composition id="ExKru" component={XExhibit} durationInFrames={258} {...V}
-      defaultProps={{src: staticFile('crop_kru.png'), width: 816, top: 1057,
-        fromX: 668, exitH: 486,
-        marker: {cx: 560, cy: 212, rx: 150, ry: 128}}} />
 
     <Composition id="StoryPrx" component={XStory} durationInFrames={255} {...V}
       defaultProps={{tilt: -3.4,
