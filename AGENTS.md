@@ -1093,6 +1093,53 @@ region of the VOD frame, already a 3x upscale to fill 1080×806; cropping to
 1.16:1 would mean taking 304×262 and blowing it up 3.55x. The seam stays at
 0.42 and the chat card goes below the captions instead.
 
+## WHISPER HALLUCINATES OVER A MUTE, AT p = 1.000 — AND WE BURNED IT ON SCREEN
+
+**The worst defect this project has shipped, and it was found by accident.**
+An adversarial pass asked whether FNS was answering a chat message kept
+reporting that the line it turned on does not exist.
+
+Measured on clip 6's source with `qc.dead_audio(min_run=0.1)`: digital zero
+at **36.086-36.773 (0.687s)** and **37.437-38.146 (0.709s)**, about -113
+dBFS against speech at -19. Whisper placed **"agree" at 36.240-37.000 and
+"we" at 37.000-38.020 across them, with confidence 1.000 and 0.999.** So
+1.40s of the 2.80s it renders as *"i agree we agree on this"* is silence —
+and the delivered clip burned those words on screen as captions.
+
+A caption is read as a verbatim quote. This breaks the oldest rule in this
+file (nothing on screen is a phrase nobody said) and it is worse than an
+invented card, because an invented card at least announces itself as a
+graphic.
+
+**WHISPER'S CONFIDENCE IS WORTHLESS HERE.** It is *highest* exactly where
+there is nothing to transcribe. The audio is the check, not the model.
+
+`make_clip._drop_hallucinated()` removes any caption card whose own span is
+more than 50% digital zero. Measured:
+
+| | cards | dropped | the clip |
+|---|---|---|---|
+| clip 6 | 99 | **3** — AGREE (70% silence), WE (62%), IT (67%) | 7% absent |
+| clip 8 (v51, SHIPPED) | 117 | **8** — I, LIKE, KIND, IT'S, BUT, THEN, SO, YOU | 22% absent |
+
+**AND THIS FILE ALREADY KNEW.** The dead-air review recorded, turns ago:
+*"At 18.04s the word 'kind' is not audibly spoken before the mute."* The
+gate independently rediscovers exactly that card. A finding was written
+down, nothing acted on it, and it shipped in every version since — which is
+the argument for a GATE over a note.
+
+**It also poisoned everything downstream.** Clip 6's tier3 risk note
+"multiple speakers in the last few lines" traces to this same
+hallucination: "i agree we agree on this" reads like a second voice because
+it is half absent. Four independent judges had to measure pitch (median f0
+131 Hz, consistent across the whole clip), mouth motion against the audio
+envelope, and the facecam itself to establish there is no co-host and FNS
+is alone throughout. **A hallucinated transcript becomes a false fact in
+the clip's metadata**, and then that fact gets reasoned from.
+
+Clip 8 is still on the old bespoke scripts and has NOT had the gate
+applied; its eight cards are still in the shipped file.
+
 ## A SHOT IS NOT A KEEP — which is how to cut ALL the dead space
 
 George, for the third time: *"remember i said cut ALL dead space too"*, on a

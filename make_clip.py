@@ -132,6 +132,39 @@ def _clamp_in_point(kp, in_point, min_first=0.40):
         del kp[1]
     return kp
 
+# WHISPER HALLUCINATES OVER A MUTE, AND IT DOES IT AT p = 1.000.
+#
+# Found by an adversarial pass that was asked something else entirely —
+# whether FNS was answering a chat message — and which kept reporting that
+# the line it turned on does not exist. Measured on clip 6's source:
+# `qc.dead_audio` finds digital zero at 36.086-36.773 (0.687s) and
+# 37.437-38.146 (0.709s), at about -113 dBFS against speech at -19, and
+# whisper placed "agree" at 36.240-37.000 and "we" at 37.000-38.020 across
+# them with **confidence 1.000 and 0.999**. 1.40s of the 2.80s rendered as
+# "i agree we agree on this" is silence.
+#
+# The clip then BURNED THOSE WORDS ON SCREEN. That breaks the oldest rule in
+# this file — nothing on screen is a phrase nobody said — and it is worse
+# than an invented card, because a caption is read as a verbatim quote. It
+# also poisoned everything downstream: the clip's tier3 risk note "multiple
+# speakers in the last few lines" traces to this same hallucination, and
+# four independent judges had to measure pitch, mouth motion and the facecam
+# to establish that there is no co-host and FNS is alone for the whole clip.
+#
+# **Whisper's confidence is worthless here** — it is highest exactly where
+# there is nothing to transcribe. The audio is the check, not the model.
+HALLUCINATION_SHARE = 0.5     # of a card's own span sitting in digital zero
+
+
+def _drop_hallucinated(cs, absent, min_share=HALLUCINATION_SHARE):
+    """Remove caption cards whose span is mostly absent audio."""
+    kept, dropped = [], []
+    for c in cs:
+        span = max(c.end - c.start, 1e-6)
+        mute = sum(max(0.0, min(c.end, b) - max(c.start, a)) for a, b in absent)
+        (dropped if mute / span > min_share else kept).append((c, mute / span))
+    return [c for c, _ in kept], dropped
+
 def _phrase_starts(clip, ch, st):
     """Phrase starts in OUTPUT time, for snapping a punch off its RMS peak.
 
@@ -313,6 +346,12 @@ def stage_captions(clip, ch, st):
     st["words"] = words
     meta = st["meta"]
     cs = cards(words)
+    absent = qc.dead_audio(clip.source(ROOT), min_run=0.1)["runs"]
+    cs, dropped = _drop_hallucinated(cs, absent)
+    if dropped:
+        log(f"  {len(dropped)} card(s) DROPPED as whisper hallucination over a mute:")
+        for c, share in dropped:
+            log(f"     {c.start:6.2f}-{c.end:6.2f}  {c.text!r}  ({share:.0%} silence)")
     mark_emphasis(cs, emphasis_keys(meta.get("claim", ""),
                                     meta.get("consequence", "")))
     out = []
