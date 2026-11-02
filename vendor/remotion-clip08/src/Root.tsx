@@ -14,6 +14,26 @@ import {Stage, Dir, Kind, EXIT} from './motion';
 
 const V = {fps: 60, width: 1080, height: 1920} as const;
 
+// CARD DURATIONS ARE SET BY THE CHAT, not by how long a card wants.
+//
+// George: "it needs to be more apparent throughout the whole video ... it
+// needs to be on the screen, and then it needs to go out when we're putting
+// an animation in. Then the animation needs to go out. Then the chat comes
+// back in. So it's like constantly there."
+//
+// That is an ALTERNATION, and the lower pane holds one thing at a time, so
+// the chat's share has to come out of the cards. A card's START is anchored
+// to the line it supports and must not move, so the room comes out of
+// DURATIONS: 33.75s of card becomes 26.30s, which opens a ~1.7s gap after
+// every card that has the spacing for one.
+//
+// Each shortened card was checked against its own animation rather than cut
+// to a round number — settled hold after the entrance completes and before
+// the exit begins: Tweet 1.98s, StatCard 1.50s, Grid 1.77s, ExKru 1.43s,
+// StoryPrx 2.15s, StorySen 2.42s. ExKru is the tightest because its marker
+// takes a full second to draw on; Pair and Ratio were already short enough
+// against their own spacing and are untouched.
+
 // ONLY THE COMPOSITIONS IN THE CUT ARE REGISTERED. `render_remotion.py
 // --all` regexes every `Composition id` out of this file, so the stale ones
 // were costing a render each — including all 2822 frames of `Kinetic`, a
@@ -82,11 +102,11 @@ export const Root: React.FC = () => (
       defaultProps={{figure: '34/40', label: 'AMERICAS SLOTS FILLED', side: 'left',
         top: 1230, exitH: 110}} />
 
-    <Composition id="Tweet" component={XTweet} durationInFrames={214} {...V}
+    <Composition id="Tweet" component={XTweet} durationInFrames={156} {...V}
       defaultProps={{src: staticFile('tweet_full.png'), top: 1104, tilt: -2.6,
         exitH: 435}} />
 
-    <Composition id="StatCard" component={XStatCard} durationInFrames={210} {...V}
+    <Composition id="StatCard" component={XStatCard} durationInFrames={138} {...V}
       defaultProps={{from: '10', to: '8',
         label: 'PARTNER TEAMS PER REGION', top: 1205, exitH: 190}} />
 
@@ -124,7 +144,7 @@ export const Root: React.FC = () => (
       defaultProps={{src: staticFile('crop_nrg.png'), width: 816, top: 1057,
         fromX: 668, exitH: 486}} />
 
-    <Composition id="Grid" component={XGrid} durationInFrames={240} {...V}
+    <Composition id="Grid" component={XGrid} durationInFrames={162} {...V}
       defaultProps={{top: 1090, highlight: 'KRÜ ESPORTS', exitH: 420, rows: [
         {team: '100 THIEVES', signed: 5, of: 5},
         {team: 'G2 ESPORTS',  signed: 5, of: 5},
@@ -136,18 +156,18 @@ export const Root: React.FC = () => (
         {team: 'SENTINELS',   signed: 4, of: 5},
       ]}} />
 
-    <Composition id="ExKru" component={XExhibit} durationInFrames={258} {...V}
+    <Composition id="ExKru" component={XExhibit} durationInFrames={162} {...V}
       defaultProps={{src: staticFile('crop_kru.png'), width: 816, top: 1057,
         fromX: 668, exitH: 486,
         marker: {cx: 560, cy: 212, rx: 150, ry: 128}}} />
 
-    <Composition id="StoryPrx" component={XStory} durationInFrames={255} {...V}
+    <Composition id="StoryPrx" component={XStory} durationInFrames={168} {...V}
       defaultProps={{tilt: -3.4,
         headline: 'Paper Rex parts ways with Jinggg after five years',
         photos: [{src: staticFile('p_jinggg.jpg')}],
         top: 1029, photoHeight: 430, exitH: 600}} />
 
-    <Composition id="StorySen" component={XStory} durationInFrames={240} {...V}
+    <Composition id="StorySen" component={XStory} durationInFrames={184} {...V}
       defaultProps={{tilt: 3.1,
         headline: 'Sentinels release JonahP and Jerrwin',
         photos: [{src: staticFile('p_jonahp.jpg')},

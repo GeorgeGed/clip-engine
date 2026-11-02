@@ -60,9 +60,12 @@ WINDOWS = ROOT / "vendor/remotion-clip08/public/chat_windows.json"
 # So the chat is PRESENT OR ABSENT, never see-through. It lives in the gaps
 # between graphics and leaves before each one lands. A gap has to be long
 # enough to be worth an entrance: under MIN_GAP the box would appear and go
-# inside a second, which is the flicker, not the feature.
-MIN_GAP = 1.8
-LEAD, TAIL = 0.34, 0.30      # clear of the next card's entrance and the last one's exit
+# inside a second, which is the flicker, not the feature. The cards were
+# re-timed to open a gap after each one — see Root.tsx — so this now
+# yields nine windows instead of two.
+MIN_GAP = 1.0
+LEAD, TAIL = 0.10, 0.08      # the chat is on V3 BELOW the cards, so a few
+                             # frames of overlap are covered, not collided
 
 # The words the clip is actually about, for the relevance read.
 TOPIC = re.compile(

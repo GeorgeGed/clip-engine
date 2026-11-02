@@ -1093,6 +1093,71 @@ region of the VOD frame, already a 3x upscale to fill 1080×806; cropping to
 1.16:1 would mean taking 304×262 and blowing it up 3.55x. The seam stays at
 0.42 and the chat card goes below the captions instead.
 
+### The chat is the DEFAULT state; the graphics interrupt it
+
+George: *"it needs to be more apparent throughout the whole video. So it
+needs to be like on the screen, and then it needs to go out when we're
+putting an animation in. Then the animation needs to go out. Then the chat
+comes back in. So it's like constantly there."*
+
+That is an **alternation**, and it inverts which element owns the lower
+pane. Up to now the cards owned it and the chat took what was left — two
+windows, 7.6s. Now the chat is the resting state and a card is the
+interruption.
+
+**The pane holds one thing at a time, so the chat's share has to come out
+of the cards.** A card's START is anchored to the line it supports and must
+not move — that rule is already in this file and it still holds — so the
+room comes out of DURATIONS only.
+
+| | before | after |
+|---|---|---|
+| card time | 33.75s (72%) | **26.30s (56%)** |
+| chat time | 7.6s (16%) | **18.8s (40%)** |
+| chat appearances | 2 | **9** |
+| lower pane occupied | 88% | **96%** |
+
+**Shorten against the card's own animation, not to a round number.** Each
+one was checked for the frame its entrance completes and the frame its exit
+begins, and the settled hold between them:
+
+| card | frames | entrance done | settled hold |
+|---|---|---|---|
+| Tweet | 214 → **156** | f22 | 1.98s |
+| StatCard | 210 → **138** | f36 | 1.50s |
+| Grid | 240 → **162** | f44 | 1.77s |
+| ExKru | 258 → **162** | f64 | **1.43s** |
+| StoryPrx | 255 → **168** | f24 | 2.15s |
+| StorySen | 240 → **184** | f24 | 2.42s |
+
+`ExKru` is the tightest and the reason is its own marker: the ring draws
+from frame 34 to 64, a full second, so a 2.70s card spends 37% of itself
+being annotated. `Pair` and `Ratio` already had more spacing than they used
+and are untouched.
+
+**The one place the rhythm breaks is structural.** `ChipAmer` starts 1.20
+and `Tweet` starts 3.30 — 2.10s apart, which cannot hold a card AND a chat
+window. Those two run back to back and the chat sits either side. Nothing
+to fix there short of dropping a card or moving an anchor, and both are
+worse.
+
+**LEAD and TAIL came down to 0.10 / 0.08**, from 0.34 / 0.30. The chat is
+on V3 *below* the cards, so a few frames of overlap are covered, not
+collided — the generous margins were protecting against a collision that
+the track order already prevents, and they were eating a third of every
+short window.
+
+The resulting rhythm, which is the thing to look at rather than the table:
+
+```
+ 0.08  chat        1.20  ChipAmer    3.30  Tweet
+ 5.98  chat        7.60  StatCard    9.98  chat
+11.60  Pair       16.48  chat       19.40  Ratio
+22.98  chat       28.80  Grid       31.58  chat
+33.20  ExKru      35.98  chat       37.60  StoryPrx
+40.48  chat       42.10  StorySen   45.25  chat
+```
+
 ### A dark panel over the board must not go translucent — AGAIN
 
 George: *"i didn't mean the twitch chat should be overlayed completely on
@@ -1137,7 +1202,11 @@ The general rule, now stated twice because it was learned twice:
 scale, a travel, a clip — and never by opacity.** Paper and stroked type
 may fade; a dark panel may not.
 
-### Nine graphics, and the chat gets 7.6 seconds
+### Nine graphics, and the chat gets 7.6 seconds — SUPERSEDED
+
+**Re-timed; see the section above.** The cards gave back 7.45s and
+the chat went from two windows to nine. Kept for the reasoning about
+why the pane cannot hold both at once, which is unchanged.
 
 `rm_ExNrg` is gone on George's instruction. It was the weakest exhibit of
 the set anyway: the crop is mostly an empty BENCH / OPTIONS column, so a
