@@ -30,3 +30,9 @@ vendor/remotion-clip08/public/crop_*.png
 jobs/fns-2905408276/overlays/rm_*.mov
 jobs/fns-2905408276/photos/
 vendor/remotion-clip08/public/p_*.jpg
+# Real viewers' usernames and messages. Regenerable with `build_chat.py`,
+# and third parties' words do not need to live in this repository.
+# `src/Root.tsx` imports chat.json, so run build_chat.py before a render.
+jobs/*/chat_*.json
+vendor/remotion-clip08/public/chat.json
+vendor/remotion-clip08/public/badges/

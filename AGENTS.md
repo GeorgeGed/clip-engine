@@ -995,6 +995,104 @@ and `crop` first so one pane going dark is not hidden by the other.
 then 383ms, spreading as the number settles. Cue peaks referred to the
 master: seven thunks at −14.3 dBFS, two shutters at −15.2.
 
+### R5: the chat-overlay reference, and what the test found
+
+George sent a Short — AloneVal's "Is NRG Ethan THE GOAT of VCT? FNS
+Explains" — and asked for a test: find that part of the stream, overlay the
+streamer's chat so you can see the reaction, animate it in the lower half.
+**This is also the first reference in the heavily-produced style the file
+has been asking for since the "what this project needs from George" list.**
+
+| | **R5** |
+|---|---|
+| Duration | 32.2s, 1080×1920 @60 |
+| Seam | **0.485 (y 932)** — a taller facecam than R1/R2's 0.42 |
+| Lower pane | the streamer's own Twitch chat, replayed |
+| Chat card | x 212-865 (654 wide), top ~1055 to the frame bottom; near-black, ~64px top radius, over a **cyan plate with square corners** so two triangles of colour show at the shoulders |
+| Type | ~54px geometric sans; line pitch **68px**, message gap **43px**, so a one-line message occupies 111px |
+| Rate | ~75 messages/min |
+| Captions | in the band between the seam and the card, same white-on-heavy-stroke treatment |
+
+**THE CHAT DOES NOT SCROLL, AND THAT IS THE WHOLE POINT.** Correlating
+successive frames of the chat column, the stack moves in exactly ONE frame
+per message, by a whole message height — measured jumps of 110, 178, 206,
+220 and 240px, with a post-shift residual of 2.0-2.9, i.e. the new state is
+already fully formed. Ten jumps in eight seconds, no intermediate frames
+anywhere, no fade on the arriving message. That is how Twitch's own chat
+renders, and it is why the reference reads as chat rather than as a
+graphic. **An eased scroll would be the tell.** Build it instant.
+
+#### 1. Finding the moment — the method works, this VOD is gone
+
+The Short was uploaded **11 July 2026** by a clips channel. FNS's oldest
+surviving VOD is **4 September**, exactly **59 days old** on 2 November. So
+the archive is a rolling ~60-day window and the source stream fell out of it
+around 9 September. **It cannot be found, and neither can its chat.**
+
+**CHAT REPLAY IS PERISHABLE — it dies with the VOD.** That is the binding
+constraint on this whole feature, not the API. A chat overlay has to be
+built within ~60 days of the stream, or from chat captured live at the time.
+Worth saying to George directly: if he wants chat on clips, the chat has to
+be pulled while the VOD is still up, as part of ingest, not at edit time.
+
+What does work, for anything inside the window:
+- **Helix `Get Videos`** lists what still exists (28 VODs, 4 Sep onward).
+- **Clip DENSITY beats clip titles.** Viewer-written titles are useless
+  ("davai", "something goat", "how."). Bucketing `vod_offset` into 120s
+  bins and ranking by count + views found the real crowd moments —
+  17 clips in one 2-minute bucket.
+- **Chat is the cheap search index.** One GQL call covers ~75s, against
+  transcribing 5-hour VODs. Searching chat text for a reaction burst is
+  roughly 100x cheaper than searching audio for the line that caused it.
+
+#### 2. Chat replay — reachable, and the old note here was wrong
+
+See `engine/twitch_chat.py`. The 2026-10-29 note said VOD chat was not
+reachable; it had tested one abandoned package with a rotated persisted
+hash. The endpoint returns text, offsets, user colours, badges and emotes.
+**Address pages by OFFSET, never by cursor** — the cursor follow-up returns
+`IntegrityCheckFailed`, which looks exactly like a rotated hash and is not.
+
+Badges come from Helix (`Get Global Chat Badges` + the channel's own); this
+window needed 14 of the 434 sets.
+
+#### 3. The overlay — built, and the measurement that says when to use it
+
+`src/Chat.tsx`, `build_chat.py`. Two things it gets right:
+
+**Anchor to SOURCE time.** A message happened at a VOD second; the cut
+removed 15 dead spans, so output seconds are not source seconds.
+`build_overlays.at()` remaps through the same keeps `build_v7.py` used.
+Messages landing inside a removed span are **dropped, not nudged** — a
+reaction on the wrong line is worse than a missing one. On clip 8: 41 of 48
+mapped, 7 dropped.
+
+**Open mid-flow.** Messages from before the in-point get negative times so
+the card is already half full at frame 0. A chat panel that starts empty
+and fills up reads as a graphic booting, not as a stream you joined.
+
+**AND THE FINDING THAT MATTERS MOST: measure whether the chat is actually
+REACTING.** Clip 8's window runs 43 messages/min against the reference's 75,
+and only **24% mention the clip's subject at all**. Reading them, they are a
+Q&A queue — "are nrg partnered??", "who would you bring in?", "will u watch
+nations world cup?" — people asking FNS questions during a casual stream,
+not reacting to his job-security argument. R5's chat is the opposite
+("ethan does everything ngl guy shoots, guy calls", "nrg have to watch out
+for loverscock and lacock"): it is responding to the thing being said.
+
+So a chat overlay is **not a treatment you apply to a clip, it is a property
+of the window.** `build_chat.py` prints the on-topic share before anything
+renders, and that number belongs in clip selection: a window with reacting
+chat is a better clip than one without, and the same measurement says
+whether the overlay is worth building at all. Clip 8 scores badly and is a
+poor candidate — which the test demonstrates rather than hides.
+
+**One thing our source cannot do.** R5's facecam fills 1080×932, an aspect
+of 1.16:1 — a near-square crop of the streamer's webcam. Ours is a 464×262
+region of the VOD frame, already a 3x upscale to fill 1080×806; cropping to
+1.16:1 would mean taking 304×262 and blowing it up 3.55x. The seam stays at
+0.42 and the chat card goes below the captions instead.
+
 ### The pane dip is REMOVED, and the obvious argument for it is wrong
 
 Asked to re-solve the dip's depth against the new chassis, the measurement
@@ -1747,9 +1845,10 @@ The source is one static roster board and one tweet. No amount of technique
 makes b-roll, memes or imagery out of that. Asked directly, these are the
 blockers, in order:
 
-1. **Reference clips in the style he actually wants.** R1 and R2 are
-   restrained, which is why every measurement says "do less". Two or three
-   clips of the heavily-produced style would re-aim every number here.
+1. ~~Reference clips in the style he actually wants.~~ **ONE ARRIVED** —
+   R5, the chat-overlay Short, measured in "R5: the chat-overlay
+   reference" above. Still worth two or three more; R5 re-aims the
+   lower pane and the seam but says nothing about cutting or pacing.
 2. **B-roll with a rights basis** — VCT broadcast, gameplay, press shots.
 3. **Team and org logos**, licensed.
 4. **A licensed SFX library.** Synthesised cues have been rejected four

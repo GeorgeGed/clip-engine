@@ -6,6 +6,9 @@ import {StatChip, RatioBar, RosterGrid, PairCounter} from './Chips';
 import {PlayerCard, ClickbaitLine} from './People';
 import {NewsStory} from './NewsStory';
 import {TweetCard} from './Tweet';
+import {ChatScroll} from './Chat';
+import chat from '../public/chat.json';
+import badgeMap from '../public/badgemap.json';
 import {Stage, Dir, Kind, EXIT} from './motion';
 
 const V = {fps: 60, width: 1080, height: 1920} as const;
@@ -67,6 +70,12 @@ const XBait     = exits(ClickbaitLine, {dir: 'up', kind: 'plain', travel: 0,
 
 export const Root: React.FC = () => (
   <>
+    {/* The streamer's own chat, replayed under the facecam. A TEST, not
+        part of the delivered cut — it replaces the lower pane rather than
+        sitting over it, so it is rendered opaque and composited on its own. */}
+    <Composition id="Chat" component={ChatScroll} durationInFrames={2812} {...V}
+      defaultProps={{messages: chat as any, badgeMap: badgeMap as any}} />
+
     <Composition id="ChipAmer" component={XChipLeft} durationInFrames={110} {...V}
       defaultProps={{figure: '34/40', label: 'AMERICAS SLOTS FILLED', side: 'left',
         top: 1230, exitH: 110}} />
