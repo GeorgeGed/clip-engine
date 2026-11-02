@@ -415,3 +415,20 @@ if __name__ == "__main__":
         edit = res.edit
 
     print(json.dumps(render(edit, a.out, keep_work=a.keep_work), indent=2))
+
+
+# THE VOICE CHAIN, measured on this source rather than applied on faith.
+# `scenario-auto-edit` lists six moves; four measured as unnecessary here and
+# were refused (de-esser: sibilance already -20.2 dB; "a little air": we CUT
+# the top because it measured +10.7 dB hot against R1/R2; +2 dB at 3.6 kHz:
+# we already do +4 at 3 k; 3:1 compression: speech runs LRA 0.5-0.8 on
+# mute-free spans, flatter than R2, so there is no dynamic to compress).
+# These two measured as needed: rumble sat -5.1 dB against the speech body
+# and 280 Hz was +1.6 dB boxy.
+#
+# It lived at module scope in `finish_audio.py` next to a `print(qc.check(...))`
+# on a hardcoded v27 render, so importing it re-QC'd an unrelated old file.
+HOUSE_EQ = ("highpass=f=85,"
+      "equalizer=f=280:t=q:w=1.0:g=-2.5,"
+      "equalizer=f=3000:t=q:w=1.1:g=4,"
+      "equalizer=f=9500:t=q:w=1.0:g=-7")

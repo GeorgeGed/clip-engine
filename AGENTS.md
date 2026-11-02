@@ -1093,6 +1093,171 @@ region of the VOD frame, already a 3x upscale to fill 1080×806; cropping to
 1.16:1 would mean taking 304×262 and blowing it up 3.55x. The seam stays at
 0.42 and the chat card goes below the captions instead.
 
+## MASS PRODUCTION: the spec, the screen, and what is actually in the way
+
+George, locking clip 8 in: *"all of this logic ... I want us to develop
+this into other clips ... I want to mass produce these clips for different
+channels. So figure out how you can kind of do that from here."*
+
+Clip 8's pipeline was eight top-level scripts with its constants at the top
+of each — the VOD id in four, the facecam rect in two, the in-point in two,
+the duration typed into `Root.tsx`. `engine/clipspec.py` splits those into
+a **`Channel`** (seam, chrome, grade, fps — measured once per streamer) and
+a **`Clip`** (which cut, where it starts, what the chat did, what goes in
+the pane). `make_clip.py` runs the whole pipeline off them in six skippable
+stages. The house style — captions, exits, punch geometry, sound, palette —
+stays in CODE, because it is the same on every clip for every channel by
+definition. If a value differs per channel it goes in `Channel`; per clip,
+in `Clip`; if it is a decision we made once about how our clips look, it is
+not a spec field at all.
+
+**Proved by building a second clip end to end from a spec**: `fns-06`, "open
+qualifiers are going to be a shit show", 43.1s, **7.0 cuts/min** against
+clip 8's 12.8 and R1's 6.0, −14.09 LUFS, −0.87 dBTP, no black frame in
+either pane.
+
+### THE BOTTLENECK IS CHOOSING, NOT RENDERING — 4 of 12 are buildable
+
+Ranking by virality picks clips the pipeline cannot cut. Measured across
+the top twelve of this VOD:
+
+| | |
+|---|---|
+| buildable | **4 of 12** (files 04, 06, 08, 12) |
+| rejected for muting | 7, at **32–44% absent audio** |
+| rejected for cadence | 4 of those also exceeded 15 cuts/min |
+| rejected as too short | 1 (19s left after tightening) |
+
+**The second clip chosen by virality had to be abandoned.** File 07 ranked
+#6 and has the best chat burst in the entire set (x4.83) — and it is 44.4%
+muted, cutting to 36.2s in 13 shots at **19.9 cuts/min**. Clip 8 at 12.8
+was already recorded here as twice the reference; 19.9 is a strobe.
+
+`screen_clips.py` gates on what decides buildability — muting share,
+cuts/min after tightening, seconds left, the chat profile, the facecam
+confidence — and prints a verdict and a reason per clip. **Run it before
+picking anything.** The editorial call (is this one narrative, does it
+explain itself) is still a human reading the subject line; this only
+removes the clips that cannot be cut at all.
+
+Clip 8 was not a lucky pick: at 20.8% absent it is the least-muted long
+clip in the top ten. The highest-strength clip in the set (file 12, 0.70,
+"telling complaining players they have it easy") is buildable and unbuilt.
+
+### THE FACECAM RECT IS NOT A CHANNEL CONSTANT — and assuming it was shipped a broken clip
+
+The most useful thing the generalisation pass found. Clip 8 (VOD 1:39:38)
+has FNS bottom-right at (1456, 818, 1920, 1080); clip 6 (VOD 0:36:34), the
+**same streamer on the same stream**, has him at (1436, 344, 1920, 616) —
+higher and a different size. Reusing clip 8's rect rendered clip 6's top
+pane as a corner of a browser sidebar with no face in it. A streamer moves
+their own layout between scenes.
+
+`engine/facecam.py` detects it per clip by MOTION, which needs no face
+model, no download and no per-game tuning, and still works when the
+streamer is turned away. Two measurements got it right, and the first
+version of each was wrong:
+
+1. **ADJACENT FRAMES IN SHORT BURSTS, not variance across the clip.** The
+   first version took the per-pixel standard deviation of 24 frames spread
+   over the whole clip — which measures "did this change over a minute".
+   On clip 8 the PAGE scored a higher median (5.52) than the facecam
+   (3.99), because he switches document once and a one-off change of the
+   whole page dwarfs a webcam. Consecutive frames separate them completely.
+2. **THE THRESHOLD IS LOW AND ABSOLUTE.** Measured at the analysis scale,
+   inside the facecam the adjacent-frame delta runs median 0.125; outside
+   it median **0.000**, 99th percentile 0.050. At a floor of 0.15 the cam
+   is 46.3% lit and the page 0.1%. A HIGH threshold finds only the
+   streamer's FACE — the room behind him is as still as the page — which is
+   how clip 8 first came back as a 128x72 box on his hands.
+
+Validated against known ground truth: on clip 8 it lands **within 6px on
+every corner** of the hand-measured rect. Confidence is motion inside the
+rect over motion outside it — clip 8 50x, clip 6 391x — and the failure
+mode it catches is a page PLAYING VIDEO (a watch party, a VOD review),
+which moves too and drags the ratio toward 1.
+
+### WHEN the chat belongs on screen, and the gameplay case
+
+George: *"if it's a gameplay video ... after the streamer has like got a 3K
+or 3 kills, then we can see the Twitch chat's reaction ... we have to pick
+the right moments for when the Twitch chat is on the screen."*
+
+**The frag does not have to be detected.** A 3K produces a burst of chat,
+and the burst is the signal. Reading the chat is ~100x cheaper than reading
+the footage, it needs no per-game detector, and it generalises to anything
+a crowd reacts to — a frag, a fail, a reveal, a guest. Detecting the kill
+would say a kill happened; measuring the burst says the crowd CARED, which
+is what the overlay is for. `engine/chat_reaction.py`.
+
+Two modes, and a clip is one or the other:
+
+* **continuous** — no burst. The chat is the lower pane's resting state and
+  stays up. Clip 8 and clip 6 are both this.
+* **reactive** — the chat spikes, so the box goes up ON the spikes and is
+  away otherwise, and its arrival means "look what they said".
+
+**BASELINE FROM OUTSIDE THE CLIP.** A 20s ace clip is hype end to end and
+reads as flat against its own mean, so the resting rate comes from ±180s of
+context around the clip.
+
+Measured across the top seven windows of this VOD: the stream's resting
+rate is **72–87 messages/min** (R5's reference is ~75), bursts run **x2.09
+to x4.83** over it, and two of the seven have no burst at all. So the
+signal is real and it discriminates.
+
+**THE HONEST LIMIT: this VOD cannot demonstrate the reactive mode.** Every
+clip in it is `take` genre — a talking-head stream with no gameplay — and
+the clips that DO have bursts are the ones the muting destroys (file 01
+with three bursts is 43% muted; file 07 with the x4.83 burst is 44%). The
+reactive path is built, measured and unexercised, and it stays that way
+until a gameplay VOD arrives. Worth saying plainly rather than claiming it
+works.
+
+Also worth knowing: **clip 8's chat is the least reactive in the set** — 43
+messages/min against the stream's 78, with 24% on-topic — and it got the
+most chat screen time (100%). It earned that on a different basis: there
+was nothing else to put in the pane.
+
+### Four bugs the second clip found, which one clip could never have
+
+* **`MarkIn` RENDERS ONE FRAME BEFORE THE MARK.** Measured: marking
+  [216000..218586] gave 2587 frames whose frame 0 was pure black (timeline
+  215999, where nothing is); marking [216001..218587] gave a frame 0 of
+  real picture. Every clip rendered with marks opens on a black frame until
+  it is compensated.
+* **The timeline is as long as its LONGEST track**, so an overlay sized
+  from `round(out_dur * fps)` outran V1 by 2 frames and those rendered
+  black at the tail. The overlays are now cut to what V1 holds — the
+  picture is V1, by definition.
+* **A chat message's offset is a VOD second; the keeps are in CLIP-FILE
+  time.** Passing the raw offset to the remap matched no keep and silently
+  dropped every message inside the clip — 60 of 116, with the 56 survivors
+  all pre-roll, which looks like a thin window rather than a bug.
+* **`finish_audio.py` ran `print(qc.check(...))` on a hardcoded v27 render
+  at module scope**, so importing its EQ string re-QC'd an unrelated old
+  file mid-build. The chain moved to `engine.render_ffmpeg.HOUSE_EQ`.
+
+### What mass production still needs from George
+
+Not code. In order:
+
+1. **A gameplay VOD**, so the reactive chat mode can be exercised and the
+   "after a 3K" case proved rather than asserted.
+2. **Chat is perishable — pull it at INGEST.** Replay dies with the VOD and
+   FNS's archive is a rolling ~60-day window. Any clip built more than two
+   months after the stream has no chat overlay available at all. This
+   should be part of fetching a VOD, not part of editing it.
+3. **The rights basis per channel.** `permission` is required on every
+   source, and a viewer's chat message is their words on screen.
+4. **Headcount, for the Remotion licence.** The free tier covers an
+   organisation of up to 3 employees and the gate covers the entire render
+   route.
+5. **Cards are editorial and stay that way.** A sourced exhibit or a
+   verified news story needs a human deciding what the clip argues and an
+   independent check on any name that goes on screen. A clip with
+   `cards: []` is fully automatic, and that is what clip 6 is.
+
 ### The blue mount is gone, and my test for "can you see the box" was wrong
 
 George: *"twitch chat does not need a blue border."*

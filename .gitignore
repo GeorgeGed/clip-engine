@@ -36,3 +36,4 @@ vendor/remotion-clip08/public/p_*.jpg
 jobs/*/chat_*.json
 vendor/remotion-clip08/public/chat.json
 vendor/remotion-clip08/public/badges/
+jobs/*/overlays_*/

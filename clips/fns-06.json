@@ -1,0 +1,38 @@
+{
+ "channel": {
+  "name": "fns",
+  "cam": [
+   1456,
+   818,
+   1920,
+   1080
+  ],
+  "seam": 0.42,
+  "chrome": 92,
+  "fps": 60,
+  "grade": {
+   "NodeIndex": "1",
+   "Slope": "1.06 1.06 1.07",
+   "Offset": "-0.012 -0.012 -0.010",
+   "Power": "1.06 1.06 1.06",
+   "Saturation": "1.18"
+  },
+  "arc": null,
+  "vod_id": "2905408276"
+ },
+ "clip": {
+  "job": "fns-2905408276",
+  "index": 6,
+  "channel": "fns",
+  "in_point": 0.0,
+  "region": [
+   2194.8,
+   2241.87
+  ],
+  "hook": "FNS: OPEN QUALIFIERS WILL BE A MESS",
+  "emoji": "\ud83d\ude33",
+  "cards": [],
+  "chat_mode": null,
+  "notes": "Open qualifiers in the new circuit will be plagued by tech issues, but still beat franchising"
+ }
+}

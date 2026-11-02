@@ -10,6 +10,11 @@ import {ChatScroll} from './Chat';
 import chat from '../public/chat.json';
 import badgeMap from '../public/badgemap.json';
 import chatWindows from '../public/chat_windows.json';
+// PER-CLIP, written by make_clip.py before each render. The
+// compositions used to hardcode clip 8's 2812 frames and its hook
+// line, which is exactly the kind of constant that has to become
+// data before a second clip can be built.
+import clip from '../public/clip.json';
 import {Stage, Dir, Kind, EXIT} from './motion';
 
 const V = {fps: 60, width: 1080, height: 1920} as const;
@@ -100,7 +105,8 @@ export const Root: React.FC = () => (
     {/* The streamer's own chat, replayed OVER what he is looking at. It is
         an alpha overlay on V3 like any other, and it steps out of the way
         when a graphic lands — see chat_windows.json. */}
-    <Composition id="Chat" component={ChatScroll} durationInFrames={2812} {...V}
+    <Composition id="Chat" component={ChatScroll}
+      durationInFrames={clip.durationInFrames} {...V}
       defaultProps={{messages: chat as any, badgeMap: badgeMap as any,
         windows: chatWindows as any}} />
 
@@ -153,8 +159,9 @@ export const Root: React.FC = () => (
                  {src: staticFile('p_jerrwin.jpg')}],
         top: 1029, photoHeight: 430, exitH: 600}} />
 
-    <Composition id="Bait" component={XBait} durationInFrames={1020} {...V}
-      defaultProps={{text: "FNS ON VALORANT'S JOB SECURITY PROBLEM",
-        emoji: '😳', top: 700, exitH: 60}} />
+    <Composition id="Bait" component={XBait}
+      durationInFrames={clip.baitFrames} {...V}
+      defaultProps={{text: clip.hook ?? '', emoji: clip.emoji ?? '😳',
+        top: 700, exitH: 60}} />
   </>
 );
