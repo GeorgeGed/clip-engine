@@ -24,6 +24,7 @@ anything is rendered and leaves the editorial call to a human.
 
 Usage:  ./.venv/bin/python build_chat.py
 """
+import colorsys
 import json
 import re
 import sys
@@ -64,9 +65,91 @@ WINDOWS = ROOT / "vendor/remotion-clip08/public/chat_windows.json"
 # re-timed to open a gap after each one — see Root.tsx — so this now
 # yields nine windows instead of two.
 MIN_GAP = 1.5
-ON, OFF = 7.0, 2.5   # the chat's own cycle inside a long free stretch
+
+# THE GAP IS DEAD SPACE, AND SHORTENING IT IS NOT THE SAME LEVER AS SPEEDING
+# THE CLIP UP.
+#
+# George: "the twitch chat needs to come back quicker make sure there's no
+# dead space maybe at the end its fine."
+#
+# He is right about what an OFF gap IS here. The content pane's frame-to-frame
+# delta over this cut measures **median 0.0005, max 0.27, zero frames above
+# 0.5 across all 2822** — one motionless roster board start to finish. So
+# while the chat is away the lower pane is a frozen frame, and 2.5s of that
+# three times over is 7.5s of nothing happening.
+#
+# THE FIX IS LONGER WINDOWS, NOT MORE OF THEM, and that distinction is the
+# whole lesson from v47. Cutting OFF alone would have made n go 4 -> 5 and
+# added two state changes, which is exactly the "going way too quickly" that
+# removing two cards was meant to solve. Raising ON by the same amount holds
+# n at 4, so the switching rate is IDENTICAL and only the dead air moves:
+#
+#            ON    OFF   windows   each    gaps    chat      changes
+#   v49      7.0   2.5      4      7.48s   7.5s    29.9s        7
+#   v50      9.0   0.9      4      8.68s   2.7s    34.7s        7
+#
+# 4.8s of frozen pane becomes 4.8s of chat for no extra cut. 0.9s is still a
+# beat and not a blink — 54 frames, against a 0.34s entrance — so the board
+# keeps the pause it earns without the pane going still.
+ON, OFF = 9.0, 0.9   # the chat's own cycle inside a long free stretch
 LEAD, TAIL = 0.10, 0.08      # the chat is on V3 BELOW the cards, so a few
                              # frames of overlap are covered, not collided
+
+# THE CHATTER'S OWN COLOUR, MADE READABLE THE WAY TWITCH MAKES IT READABLE.
+#
+# George: "the normal colours of the twitch chatters." Those colours are the
+# record and they stay in `colour` untouched. But raw hex is not what a viewer
+# sees: Twitch ships **"Readable Colors" ON by default**, which lifts a dark
+# user colour against the dark chat column, so #0000FF already reaches the
+# viewer's screen lifted. Rendering the raw value would be LESS faithful to
+# what the chatter looks like on Twitch, not more.
+#
+# Measured against Twitch's own #18181B, 17 of the window's 41 names (41%)
+# sit under the 4.5:1 body floor and four of them are unreadable: #0000FF at
+# 2.06:1, #000000 at 1.19:1, #B22222 at 2.65:1, #8A2BE2 at 2.97:1.
+#
+# The lift holds HUE AND SATURATION and raises lightness to the floor by
+# bisection — the identical move `theme.tsx` makes for `blueLight`, so there
+# is one rule in the project for this and not two. Most moves are invisible
+# (#FF0000 -> #FF1010, #2E8B57 -> #30915B); the four that matter become
+# #6E6EFF, #808080, #DD4F4F and #A55DE9.
+PANEL_BG = (0x18, 0x18, 0x1B)
+CONTRAST_FLOOR = 4.5
+
+
+def _rel_l(rgb):
+    def ch(v):
+        v /= 255.0
+        return v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4
+    r, g, b = (ch(float(v)) for v in rgb)
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+def _ratio(a, b):
+    la, lb = _rel_l(a), _rel_l(b)
+    return (max(la, lb) + 0.05) / (min(la, lb) + 0.05)
+
+
+def readable(hex_colour, bg=PANEL_BG, floor=CONTRAST_FLOOR):
+    """`hex_colour` with its lightness raised until it clears `floor` on `bg`."""
+    s = hex_colour.lstrip("#")
+    rgb = [int(s[i:i + 2], 16) / 255 for i in (0, 2, 4)]
+    if _ratio([v * 255 for v in rgb], bg) >= floor:
+        return hex_colour.upper()
+    h, l, sat = colorsys.rgb_to_hls(*rgb)
+    if sat < 0.02:
+        sat = 0.0                      # a grey has no hue to preserve
+    lo, hi = l, 1.0
+    for _ in range(40):
+        mid = (lo + hi) / 2
+        out = [v * 255 for v in colorsys.hls_to_rgb(h, mid, sat)]
+        if _ratio(out, bg) < floor:
+            lo = mid
+        else:
+            hi = mid
+    out = [v * 255 for v in colorsys.hls_to_rgb(h, hi, sat)]
+    return "#%02X%02X%02X" % tuple(int(round(v)) for v in out)
+
 
 # The words the clip is actually about, for the relevance read.
 TOPIC = re.compile(
@@ -104,11 +187,13 @@ def main():
         kept.append({
             "t": round(out_t, 2),
             "author": m["author"],
-            "colour": m["colour"],
+            "colour": m["colour"],              # the raw value: the record
+            "display": readable(m["colour"]),   # what Twitch itself would draw
             "badges": m["badges"][:2],
             "frags": [{"text": f["text"], "emote": f["emote"]} for f in m["fragments"]],
         })
     kept.sort(key=lambda m: m["t"])
+    lifted = [m for m in kept if m["display"] != m["colour"].upper()]
 
     text = " ".join("".join(f["text"] for f in m["frags"]) for m in kept)
     on_topic = [m for m in kept
@@ -152,8 +237,22 @@ def main():
     on = sum(w["to"] - w["from"] for w in edges)
     print(f"  {len(edges)} chat windows, {on:.1f}s of {FRAMES_S:.1f}s "
           f"({100 * on / FRAMES_S:.0f}%), cycling {ON}s on / {OFF}s off")
+    prev_to = None
+    dead, lost = 0.0, 0
     for w in edges:
+        if prev_to is not None and w["from"] > prev_to:
+            g = w["from"] - prev_to
+            dead += g
+            lost += sum(1 for m in kept if prev_to <= m["t"] < w["from"])
+            print(f"          gap {g:.2f}s")
         print(f"    {w['from']:5.2f}-{w['to']:5.2f}  ({w['to']-w['from']:.2f}s)")
+        prev_to = w["to"]
+    # What a gap COSTS, both ways: a frozen lower pane, and the messages
+    # written during it that nobody sees.
+    print(f"  dead space between windows: {dead:.2f}s, "
+          f"{lost} messages written while the box was away")
+    print(f"  {len(lifted)} of {len(kept)} names lifted for readability on "
+          f"{'#%02X%02X%02X' % PANEL_BG}")
     vis = [m for m in kept if m["t"] >= 0]
     span = vis[-1]["t"] - vis[0]["t"] if vis else 0
     print(f"  {len(kept)} mapped onto the cut ({pre} of them pre-roll, already "

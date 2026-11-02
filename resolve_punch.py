@@ -16,6 +16,39 @@ baseline, the same measurement that cut 22 effects to 4 back at v6. The
 whole clip spans 5.4 dB, so +3.0 dB picks eleven moments and means almost
 nothing; the five here are the ones at +4.0 dB or more, thinned to 3.5s
 apart. One every ~9s reads as a device rather than a tic.
+
+THE HEAD WAS BEING CHOPPED, NOT PUNCHED — and the numbers name it exactly.
+
+George: "some of the zooms on the player cams are a bit quick and harsh
+toward the start of the video."
+
+Three separate measurements, all of them agreeing with him:
+
+  * **SHOT 0 RUNS 0.00-8.97s, ONE CONTINUOUS SHOT**, the longest in the
+    clip's first half — and BOTH head punches landed inside it, at 2.90 and
+    7.00. That split one shot into five pieces (2.78 / 1.50 / 2.60 / 1.50 /
+    0.58) with four cuts between them, every one of them the same framing
+    jumping in, back, in and back again before a single real cut had
+    happened. A punch is supposed to tighten a shot; two of them restructure
+    it. Hence **one punch per base shot**, which is structural and fixes the
+    in-out-in-out wherever it appears, not just here.
+  * **THE JUMP WAS 97px.** At 0.18 inset (1.220x) a feature at the pane edge
+    moves 97 canvas px in ONE frame. 0.12 (1.136x) moves 65 — a third less,
+    and inside the 10-15% a cut punch normally runs on a talking head.
+  * **1.50s IS A FLICK, NOT A SHOT.** The base shots it sat between run
+    2.6-3.3s, so the punched piece was conspicuously the shortest thing on
+    V2 every time. 2.20s makes it a shot.
+
+And `skip_head` goes to 9.0, past the end of shot 0, so the opening shot is
+never punched at all. The first punch now lands at 12.80s inside shot 2 —
+which is fine: a device does not have to introduce itself in the first three
+seconds, and the opening is where the viewer is still reading the frame.
+
+`MIN_SEP` 4.0 -> 5.0 for the same reason the head read dense: the first two
+sat at 4.10s, the floor, against 4.6-8.0s for the rest. Note all eight peaks
+measured +4.1 to +4.5 dB — a 0.4 dB spread — so the threshold was not
+picking BOLDER moments, it was picking the eight loudest windows of a flat
+read. Five is what this docstring always claimed and eight was the drift.
 """
 import json, subprocess, sys
 from pathlib import Path
@@ -32,15 +65,17 @@ FPS, SEAM = 60, 0.42
 CAM = (1456, 818, 1920, 1080)
 CANVAS = Frame(1080, 1920, 1920, 1080)
 
-PUNCH_INSET = 0.18        # extra crop on top of the shot's own framing: 1.22x
-PUNCH_HOLD = 1.50         # how long it stays tight
+PUNCH_INSET = 0.12        # extra crop on top of the shot's own framing: 1.136x
+PUNCH_HOLD = 2.20         # how long it stays tight — a shot, not a flick
 PUNCH_LEAD = 0.12         # in just before the peak
 MIN_PIECE = 0.40          # a sliver shorter than this reads as a glitch
-MIN_SEP = 4.0             # two punches closer than this are one moment
+MIN_SEP = 5.0             # two punches closer than this are one moment
 MIN_DB = 4.0              # over his own baseline
+SKIP_HEAD = 9.0           # past the end of shot 0, which is 0.00-8.97s
+MAX_PER_SHOT = 1          # a shot that goes in-out-in-out is chopped, not punched
 
 
-def bold_moments(path, *, min_db=MIN_DB, min_sep=MIN_SEP, skip_head=2.5):
+def bold_moments(path, *, min_db=MIN_DB, min_sep=MIN_SEP, skip_head=SKIP_HEAD):
     """Local RMS maxima at least `min_db` over the speaker's own baseline."""
     raw = subprocess.run(
         ["ffmpeg", "-v", "error", "-i", str(path), "-ac", "1", "-ar", "16000",
@@ -82,16 +117,27 @@ def split(segments, punches):
     A punch window is clamped to its parent segment, and a leading or
     trailing remainder under MIN_PIECE is absorbed rather than left as a
     sliver.
+
+    AT MOST `MAX_PER_SHOT` PUNCHES IN ONE BASE SHOT. Two punches inside one
+    shot is not emphasis, it is the same framing cutting in, back, in and
+    back — which is what read as "quick and harsh" at the head, where shot 0
+    (0.00-8.97s, the longest shot in the clip's first half) was being split
+    into five pieces by two of them. Where a shot holds more than one
+    candidate, the LOUDEST wins; the rest are dropped rather than nudged,
+    because a punch moved off its peak marks nothing.
     """
     out = []
     for idx, (o0, dur, s0) in enumerate(segments):
         o1 = o0 + dur
+        inside = [(t, db) for t, db in punches if o0 <= t < o1]
+        inside.sort(key=lambda p: -p[1])
         marks = []
-        for t, _db in punches:
+        for t, _db in inside[:MAX_PER_SHOT]:
             a = max(o0, t - PUNCH_LEAD)
             b = min(o1, a + PUNCH_HOLD)
-            if b - a >= 0.5 and o0 <= t < o1:
+            if b - a >= 0.5:
                 marks.append((a, b))
+        marks.sort()
         if not marks:
             out.append((o0, dur, s0, idx, False)); continue
         cur = o0

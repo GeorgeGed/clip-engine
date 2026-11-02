@@ -11,25 +11,51 @@ import {C, TEXT, RADIUS} from './theme';
 // tilt the chat slightly put it on an axis a bit ... make the twitch chat a
 // bit smaller too, make sure it has animations coming in and out."
 //
-// **I over-read "remove the border" last time.** He was pointing at R5's
-// chrome — the 64px radius and the cyan shoulder plate — not asking for the
-// chat to be set loose on the board. Borderless over a busy roster board
-// means the text has no ground and the pane has no owner. A box fixes both,
-// and a SMALL box is what satisfies "always keep the bottom screen for what
-// fns is looking at": the board stays the pane's subject and the chat is a
-// visitor on it.
+// **I over-read "remove the border" once.** He was pointing at R5's chrome —
+// the 64px radius and the cyan shoulder plate — not asking for the chat to
+// be set loose on the board. Borderless over a busy roster board means the
+// text has no ground and the pane has no owner. A box fixes both, and a
+// SMALL box is what satisfies "always keep the bottom screen for what fns is
+// looking at": the board stays the pane's subject and the chat is a visitor.
 //
 // 580x420 against the old 716-wide full-height band, 36px type against 46.
 // It occupies 23% of the content pane where the borderless version
 // effectively claimed all of it.
 //
-// TILTED, on the R4 precedent already in docs/SKILLS.md — 4-8 degrees with
-// a shadow is what stops a rectangle reading as a UI panel. -2.4 here,
+// TILTED, on the R4 precedent already in docs/SKILLS.md — 4-8 degrees with a
+// shadow is what stops a rectangle reading as a UI panel. -2.4 here,
 // shallower than the story cards' -3.4/+3.1 so three tilted things in one
 // clip do not read as one repeated gesture, and spring-driven so it settles
 // into the angle rather than arriving at it.
+//
+// ─────────────────────────────────────────────────────────────────────────
+// IT IS BLACK AGAIN, AND IT IS MOUNTED, AND THOSE ARE ONE DECISION.
+//
+// George: "the twitch chat needs to stay black with the normal colours of
+// the twitch chatters."
+//
+// The blue panel with white usernames was a graphic that QUOTED chat. This
+// is chat: Twitch's own `#18181B` and the chatters' own colours. But a
+// near-black panel on this near-black board is the 1.08:1 defect the palette
+// pass deleted four devices for — measured here, its outline is
+// distinguishable along only **7.2% of its own perimeter** (#070C11 7.0%,
+// pure black 7.2%), so the box and the tilt both disappear into the roster
+// rows. `C.blue` reads 3.41:1 there with **97.5% of the outline visible**.
+//
+// So the black card sits on a blue PLATE: square corners against the card's
+// top radius, so the blue shows as a rule down the sides and as two
+// triangles at the shoulders. That is R5's own construction — its near-black
+// card sits on a cyan plate with square corners — in the Polymarket palette,
+// and it is ONE element carrying the edge rather than a hairline, a bloom,
+// an inset highlight and a rule stacked on a panel nobody can see.
+//
+// The drop shadow went with the blue. A rgba(0,0,0,0.55) bloom does nothing
+// over board pixels at Y' 22, which is the vestigial prosthetic this file
+// keeps warning about.
 
 const BOX = {x: 64, y: 1090, w: 580, h: 420};
+const MOUNT = 12;         // how much blue shows around the card
+const CARD_R = 52;        // R5's top radius, scaled to our 580 (it ran ~64 at 654)
 const TILT = -2.4;
 const PAD = 22;
 const SIZE = 36;
@@ -43,16 +69,17 @@ export type Win = {from: number; to: number};
 
 export type Frag = {text: string; emote: string | null};
 export type Msg = {t: number; author: string; colour: string;
-                   badges: string[]; frags: Frag[]};
+                   display?: string; badges: string[]; frags: Frag[]};
 
 /**
  * PRESENT OR ABSENT, NEVER SEE-THROUGH.
  *
- * The previous build dimmed this box to 0.32 behind a drawn card, and both
- * its transition states were unreadable: at partial opacity the roster rows
- * read straight through the panel and the text lost its ground. That is the
- * same finding already written down for card exits — a dark panel over this
- * board must not fade — and it was repeated here.
+ * An early build dimmed this box to 0.32 behind a drawn card, and both its
+ * transition states were unreadable: at partial opacity the roster rows read
+ * straight through the panel and the text lost its ground. That is the same
+ * finding already written down for card exits — a dark panel over this board
+ * must not fade — and it was repeated here. It matters MORE now that the
+ * panel is black again, not less.
  *
  * So the box is opaque the whole time it exists. `presence` drives SHAPE
  * only: a lift, a scale and the tilt settling in. Opacity reaches full in
@@ -92,26 +119,42 @@ export const ChatScroll: React.FC<{
 
   return (
     <AbsoluteFill style={{opacity: Math.min(1, p * 4)}}>
+      {/* THE PLATE. Square corners, and the card's radius is what turns it
+          from a keyline into a mount. */}
+      <div style={{
+        position: 'absolute',
+        left: BOX.x - MOUNT, top: BOX.y - MOUNT,
+        width: BOX.w + MOUNT * 2, height: BOX.h + MOUNT * 2,
+        background: C.blue,
+        borderRadius: RADIUS,
+        transform: `translateY(${lift.toFixed(2)}px) scale(${scale.toFixed(4)}) `
+                 + `rotate(${(TILT * p).toFixed(3)}deg)`,
+        // THE SAME PAGE POINT AS THE CARD'S, expressed in the plate's own
+        // box. '50% 60%' of the plate is 9.6px below '50% 60%' of the card,
+        // and at -2.4deg that shears the two apart — which rendered as a
+        // mount visibly thicker on the top-left than on the bottom-right.
+        transformOrigin: `${(BOX.w / 2 + MOUNT).toFixed(1)}px `
+                       + `${(BOX.h * 0.6 + MOUNT).toFixed(1)}px`,
+      }} />
+
       <div style={{
         position: 'absolute', left: BOX.x, top: BOX.y,
         width: BOX.w, height: BOX.h,
-        // POLYMARKET BLUE, WHITE TEXT — the brand, and the recurring element
-        // that carries it, since the chat is on screen more than anything
-        // else. Measured: white on this blue is 5.13:1, and the blue sits at
-        // 3.52:1 median against the roster board with 98.2% of its footprint
-        // above 1.6:1. The 2px keyline is gone because a panel that separates
-        // by 3.5:1 does not need an edge drawn on it — that was only ever
-        // needed by the graphite, at 1.67:1.
-        background: C.blue,
-        borderRadius: RADIUS,
-        boxShadow: '0 22px 48px -16px rgba(0,0,0,0.55)',
+        // Twitch's own dark chat column. Not a restyle of it.
+        background: C.twitchBg,
+        borderRadius: `${CARD_R}px ${CARD_R}px 0 0`,
         overflow: 'hidden',
         display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
         padding: `0 ${PAD}px ${PAD}px`,
+        // Twitch's own UI face is Inter, so `TEXT` is already the right one.
         fontFamily: TEXT, fontSize: SIZE, lineHeight: LINE,
+        // A pasted link is one unbreakable token, and at 580px wide it ran
+        // straight through the padding and was clipped mid-word by the
+        // panel edge — which reads as a broken render, not as chat.
+        overflowWrap: 'anywhere',
         transform: `translateY(${lift.toFixed(2)}px) scale(${scale.toFixed(4)}) `
                  + `rotate(${(TILT * p).toFixed(3)}deg)`,
-        transformOrigin: '50% 60%',
+        transformOrigin: `${(BOX.w / 2).toFixed(1)}px ${(BOX.h * 0.6).toFixed(1)}px`,
       }}>
         {shown.map((m, i) => {
           // The message arrival George approved: a spring, a 14px rise and a
@@ -131,7 +174,7 @@ export const ChatScroll: React.FC<{
                 overflow: 'hidden',
                 opacity: Math.min(1, q * 1.5),
                 transform: `translateY(${((1 - q) * 14).toFixed(2)}px)`,
-                color: 'rgba(255,255,255,0.93)',
+                color: C.twitchText,
               }}>
                 {m.badges.map((b) => badgeMap[b] ? (
                   <Img key={b} src={staticFile(badgeMap[b])} style={{
@@ -139,16 +182,19 @@ export const ChatScroll: React.FC<{
                     marginRight: 7, borderRadius: 3,
                   }} />
                 ) : null)}
-                {/* A Twitch user colour is picked to read on Twitch's near
-                    black, and most of them die on #2E5CFF — a mid blue
-                    username on a mid blue panel is invisible. On the brand
-                    panel the name is WHITE and the weight carries it
-                    instead, which is also what "blue and white" means. */}
+                {/* THE CHATTER'S OWN COLOUR. `display` is that colour with
+                    its lightness raised to clear 4.5:1 on #18181B, hue and
+                    saturation untouched — which is not a liberty, it is what
+                    Twitch itself renders: "Readable Colors" is ON by default
+                    in dark mode, so #0000FF is already lifted on the viewer's
+                    own screen. Measured here, 17 of 41 names (41%) sat under
+                    the floor raw, and only four move enough to see.
+                    `colour` keeps the raw value so the record stays true. */}
                 <span style={{
-                  color: C.white, fontWeight: 700,
+                  color: m.display ?? m.colour, fontWeight: 700,
                   fontVariationSettings: '"wght" 700',
                 }}>{m.author}</span>
-                <span style={{color: 'rgba(255,255,255,0.62)', fontWeight: 700}}>: </span>
+                <span style={{fontWeight: 700}}>: </span>
                 {m.frags.map((f, k) => f.emote ? (
                   <Img key={k} src={f.emote} style={{
                     height: SIZE * 1.1, verticalAlign: '-9px', margin: '0 2px',

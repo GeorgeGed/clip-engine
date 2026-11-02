@@ -1093,6 +1093,147 @@ region of the VOD frame, already a 3x upscale to fill 1080×806; cropping to
 1.16:1 would mean taking 304×262 and blowing it up 3.55x. The seam stays at
 0.42 and the chat card goes below the captions instead.
 
+### The chat goes back to Twitch's own black, and it is MOUNTED
+
+George: *"no the twitch chat needs to stay black with the normal colours of
+the twitch chatters."*
+
+The blue panel with white usernames was a graphic that QUOTED chat. This is
+chat: Twitch's own `#18181B` and the chatters' own colours.
+
+**WHICH COSTS IT ITS EDGE, and the number is the one this file already
+knows.** Measured per-pixel against the real board under the box footprint:
+
+| panel | vs board, median | outline visible (>=1.6:1) |
+|---|---|---|
+| `#18181B` (Twitch's own) | 1.03:1 | — |
+| pure black | 1.16:1 | **7.2% of its own perimeter** |
+| `#070C11` (the first chat box) | 1.09:1 | 7.0% |
+| `C.blue` | 3.41:1 | **97.5%** |
+
+A box whose outline is distinguishable along 7% of its length is not a box.
+The panel disappears into the roster rows and the tilt George liked goes
+with it — the identical 1.08:1 defect the palette pass deleted four devices
+for.
+
+**So the black card sits on a BLUE PLATE**, square corners against the
+card's 52px top radius, so the blue reads as a rule down the sides and as
+two triangles at the shoulders. **That is R5's own construction** — its
+near-black chat card sits on a cyan plate with square corners — in the
+Polymarket palette. One element carrying the edge, not a hairline plus a
+bloom plus an inset highlight plus a rule stacked on a panel nobody can see.
+The drop shadow went with the blue: a rgba(0,0,0,0.55) bloom does nothing
+over board pixels at Y' 22.
+
+**THE USER COLOURS ARE LIFTED, AND THAT IS MORE FAITHFUL, NOT LESS.** Twitch
+ships **"Readable Colors" ON by default**, so a dark user colour is already
+lifted on the viewer's own screen — rendering raw hex would show something
+no Twitch viewer ever saw. Measured against `#18181B`, **17 of the window's
+41 names (41%) sit under the 4.5:1 floor** and four are unreadable: `#0000FF`
+2.06:1, `#000000` 1.19:1, `#B22222` 2.65:1, `#8A2BE2` 2.97:1. The lift holds
+HUE AND SATURATION and bisects lightness to the floor — the identical move
+`theme.tsx` makes for `blueLight`, so the project has one rule for this and
+not two. Most moves are invisible (`#FF0000` -> `#FF1010`, `#2E8B57` ->
+`#30915B`); the four that matter become `#6E6EFF`, `#808080`, `#DD4F4F`,
+`#A55DE9`. `chat.json` keeps the raw value in `colour` and the drawn one in
+`display`, so the record stays true.
+
+Verified on the delivered file: **67,704 coloured username pixels across 8
+sampled frames, spanning every 30-degree hue band** — the names are not
+white. The card interior reads modal (8,8,11) against the board's (17,26,39);
+the limited-range encode darkens `#18181B`'s (24,24,27) uniformly, which
+RAISES the text contrast, so the lift floor is conservative.
+
+Two defects caught by compositing over the real board before shipping, both
+invisible in the component preview:
+
+* **the plate and the card rotated about different points.** `50% 60%` of
+  the plate is 9.6px below `50% 60%` of the card, and at -2.4deg that sheared
+  them — the mount rendered visibly thicker top-left than bottom-right.
+* **a pasted link is one unbreakable token** and at 580px ran through the
+  padding to be clipped mid-word by the panel edge, which reads as a broken
+  render rather than as chat. `overflowWrap: anywhere`.
+
+### The punches were chopping the opening shot, not punching it
+
+George: *"some of the zooms on the player cams are a bit quick and harsh
+toward the start of the video."* Three measurements, all agreeing with him:
+
+1. **SHOT 0 RUNS 0.00-8.97s, ONE CONTINUOUS SHOT** — the longest in the
+   clip's first half — and BOTH head punches landed inside it, at 2.90 and
+   7.00. That split one shot into five pieces (2.78 / 1.50 / 2.60 / 1.50 /
+   0.58) with four cuts between them, every one the same framing jumping in,
+   back, in and back, before a single real cut had happened.
+2. **THE JUMP WAS 97px.** At 0.18 inset (1.220x) a feature at the pane edge
+   moves 97 canvas px in ONE frame.
+3. **1.50s IS A FLICK.** The base shots around it run 2.6-3.3s, so the
+   punched piece was conspicuously the shortest thing on V2 every time.
+
+| | v49 | v50 |
+|---|---|---|
+| inset / zoom | 0.18 / 1.220x | **0.12 / 1.136x** |
+| edge jump in one frame | 97px | **65px** |
+| hold | 1.50s | **2.20s** |
+| `skip_head` / `MIN_SEP` | 2.5 / 4.0 | **9.0 / 5.0** |
+| punches | 8 | **5** |
+| punches in the first 9s | 2 | **0** |
+| V2 pieces | 22 | **16** |
+
+**ONE PUNCH PER BASE SHOT, which is the structural half of the fix.** A
+punch tightens a shot; two of them restructure it. Where a shot holds more
+than one candidate the LOUDEST wins and the rest are dropped, never nudged —
+a punch moved off its peak marks nothing.
+
+**All eight old peaks measured +4.1 to +4.5 dB — a 0.4 dB spread.** The
+threshold was not picking BOLDER moments, it was picking the eight loudest
+windows of a flat read. Five is what `resolve_punch`'s own docstring always
+claimed ("one every ~9s reads as a device rather than a tic"); eight was
+drift.
+
+Verified by reading `ZoomX` back off all 16 V2 items: every piece sits at
+its shot's own base framing or at **exactly 1.1364x**, max one punch per
+shot, and shot 0 is a single unpunched piece.
+
+**A GOTCHA THAT INVALIDATED THE FIRST VERIFICATION.** `resolve_punch.py`
+measures its peaks from `renders/clip08_FINAL.mp4`, and `render_and_finish.py`
+OVERWRITES that same file. So after a render, re-deriving the plan measures a
+different file than the build did, and zipping the fresh plan against the
+timeline items misaligns them — which looked like four punches at wrong
+ratios and was nothing of the kind. Verify against the `punches.json` the
+build wrote, not against a re-measurement.
+
+### No dead space between chat windows, and the lever is window LENGTH
+
+George: *"the twitch chat needs to come back quicker make sure there's no
+dead space maybe at the end its fine but we're getting there."*
+
+He is right about what an OFF gap is here. The content pane's frame-to-frame
+delta over this cut measures **median 0.0005, max 0.27, zero frames above 0.5
+across all 2822** — one motionless roster board start to finish. While the
+chat is away the lower pane is a frozen frame, and 2.5s of that three times
+is 7.5s of nothing happening.
+
+**CUTTING `OFF` ALONE WOULD HAVE REPEATED v47.** The cycle count is
+`round((span + OFF) / (ON + OFF))`, so dropping OFF to 0.9 on its own takes n
+from 4 to 5 and adds two state changes — exactly the "going way too quickly"
+that removing two cards was meant to solve. Raising `ON` by the same amount
+holds n at 4, so the switching rate is IDENTICAL and only the dead air moves:
+
+| | ON | OFF | windows | each | gaps | chat | state changes |
+|---|---|---|---|---|---|---|---|
+| v49 | 7.0 | 2.5 | 4 | 7.48s | 7.5s | 29.9s (64%) | 7 |
+| **v50** | **9.0** | **0.9** | 4 | **8.68s** | **2.7s** | **34.7s (74%)** | **7** |
+
+4.8s of frozen pane becomes 4.8s of chat for no extra cut. 0.9s is still a
+beat and not a blink — 54 frames against a 0.34s entrance — and **0 messages
+now fall into a gap**, where the 2.5s version lost a handful to it.
+
+Measured off the delivered file rather than the plan, by counting the blue
+mount per frame: **4 windows at 8.63s, gaps 0.93 / 0.95 / 0.95s, 34.55s of
+46.87s (74%), 2.83s of dead space.** The end is left as it is on his note:
+the 0.25s between the two story cards and the 0.77s after the last one are
+both under `MIN_GAP`, so no window is attempted in either.
+
 ### POLYMARKET: #2E5CFF and white, and what each colour can carry
 
 George sent the logo: *"let's use polymarket blue colours and their design
@@ -1118,12 +1259,11 @@ blue fails as caption emphasis against the captions' own hard black stroke.
 6.06:1 of the vermilion it replaces almost exactly. Rule: **`blue` on white
 and as a fill; `blueLight` for anything that has to hold against dark.**
 
-**A Twitch user colour cannot survive on the brand blue.** Those colours are
-chosen to read on Twitch's near-black, and a mid-blue username on a mid-blue
-panel is invisible. On the panel the name is WHITE and its weight carries
-the hierarchy instead — which is also what "blue and white text" asks for.
-The real colours are still in `chat.json`; they are simply not used while
-the panel is blue.
+~~**A Twitch user colour cannot survive on the brand blue.**~~ **REVERSED by
+George — see "The chat goes back to Twitch's own black" below.** The
+reasoning was sound and the premise was wrong: the answer was not to repaint
+the usernames, it was not to paint the panel blue. The blue panel stays as
+the measured record of what white-on-#2E5CFF costs; it is not what we do.
 
 **The 2px keyline is gone.** It existed because the graphite chassis
 measured 1.67:1 against the board and needed an edge drawn on it. At 3.52:1

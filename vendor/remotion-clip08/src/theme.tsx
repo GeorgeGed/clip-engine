@@ -55,6 +55,28 @@ export const C = {
   ink: '#0B0B0C',
   inkSecondary: 'rgba(11,11,12,0.62)',
 
+  // TWITCH'S OWN CHAT BLACK, and it is not ours to restyle.
+  //
+  // George: "the twitch chat needs to stay black with the normal colours of
+  // the twitch chatters." The chat is a REPLAY of a real interface, so the
+  // panel is Twitch's value (#18181B, its dark-theme chat column) and the
+  // names are the chatters' own. A blue panel with white usernames was a
+  // graphic that quoted chat; this is chat.
+  //
+  // WHICH COSTS IT ITS EDGE, measured: against the real board pixels under
+  // the box footprint this reads **1.03:1 median, and its outline is
+  // distinguishable along only 7.2% of its own perimeter** (pure black 7.2%,
+  // #070C11 7.0%). The box disappears into the board and the tilt with it —
+  // the identical 1.08:1 defect the palette pass deleted four devices for.
+  // So the black panel is MOUNTED on `blue`, which is 3.41:1 on the board
+  // with 97.5% of the outline visible. That is R5's own answer (its
+  // near-black card sits on a cyan plate with square corners) in our
+  // palette, and it is ONE element carrying the edge rather than a hairline,
+  // a bloom, an inset highlight and a rule stacked on a panel nobody can
+  // see.
+  twitchBg: '#18181B',
+  twitchText: 'rgba(255,255,255,0.95)',
+
   // Measured per-pixel against the real roster board: the brand blue sits at
   // **3.52:1 median with 98.2% of its footprint above 1.6:1**, against the
   // warm graphite chassis it replaces at 1.67:1. A blue panel does not need
