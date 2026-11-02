@@ -24,7 +24,7 @@
   "job": "fns-2905408276",
   "index": 6,
   "channel": "fns",
-  "in_point": 0.0,
+  "in_point": 2.02,
   "region": [
    2194.8,
    2241.87
@@ -33,6 +33,6 @@
   "emoji": "\ud83d\ude33",
   "cards": [],
   "chat_mode": null,
-  "notes": "Open qualifiers in the new circuit will be plagued by tech issues, but still beat franchising"
+  "notes": "Open qualifiers in the new circuit will be plagued by tech issues. in_point 2.02 drops the dangling \"in the new circuit i already said this\" so the clip opens on a complete clause and the claim lands ~3s in instead of 9.5s."
  }
 }

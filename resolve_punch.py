@@ -67,12 +67,41 @@ CANVAS = Frame(1080, 1920, 1920, 1080)
 
 PUNCH_INSET = 0.12        # extra crop on top of the shot's own framing: 1.136x
 PUNCH_HOLD = 2.20         # how long it stays tight — a shot, not a flick
-PUNCH_LEAD = 0.12         # in just before the peak
+PUNCH_LEAD = 0.12         # in just before the peak, when there is no phrase
+PHRASE_GAP = 0.25         # an inter-word gap at or over this starts a phrase
+PHRASE_BACK = 2.20        # how far back a peak may be snapped
 MIN_PIECE = 0.40          # a sliver shorter than this reads as a glitch
 MIN_SEP = 5.0             # two punches closer than this are one moment
-MIN_DB = 4.0              # a floor, not the selector — see below
-MAX_PUNCHES = 5           # the selector
-SKIP_HEAD = 9.0           # past the end of shot 0, which is 0.00-8.97s
+# THE FLOOR IS A FRACTION OF THE CLIP'S OWN RANGE, not an absolute dB.
+#
+# George, on clip 6: *"ping issues, cheaters there should be zooms because
+# it's when he's loud you know what i mean?"* He is right and there WAS a
+# peak there — 12.00s, **3.9946 dB over baseline** — rejected by `d < 4.0`
+# while the printout rounded it to "+4.0". A knife-edge absolute threshold,
+# which is the same class of bug the SELECTOR was fixed for last version and
+# which was left sitting in the floor.
+#
+# And 4.0 was never a general number: it was read off clip 8, whose range is
+# 5.5 dB over baseline. Clip 6's whole range is **4.55 dB**, so an absolute
+# 4.0 keeps only the top 12% of its dynamic and throws away the moment the
+# clip is named after. A speaker's emphasis is relative to their own
+# delivery in that clip, so the floor is too: the top 30% of the range,
+# with a small absolute minimum so a dead-flat clip still gets nothing.
+#
+#   clip 8  range 5.50 dB -> floor 3.85 -> 23.80 +5.5, 36.90 +4.9, 13.10 +4.5
+#                                          (29.20 and 44.60 at +3.5 stay out)
+#   clip 6  range 4.55 dB -> floor 3.19 -> 33.90 +4.6, 26.40 +4.1, 12.00 +4.0,
+#                                          39.80 +4.0, 18.60 +3.5
+MIN_DB = 2.5              # the absolute minimum, for a clip with no dynamic
+DB_FRAC = 0.70            # of the clip's own peak-over-baseline range
+MAX_PUNCHES = 5           # the cap
+# A SMALL GUARD, NOT A STRUCTURAL ONE. This was 9.0, set to clear clip 8's
+# 8.97s opening shot — but that attribution was wrong: swept across 9.0 /
+# 4.0 / 2.5 / 1.0 clip 8 returns the IDENTICAL plan every time, because its
+# loud moments all sit past 13s. What actually stopped its opening shot being
+# chopped was MAX_PER_SHOT. 9.0 was a coincidence doing nothing, and on a
+# shorter clip it would silently eat a real moment near the head.
+SKIP_HEAD = 2.5           # the viewer is still arriving
 MAX_PER_SHOT = 1          # a shot that goes in-out-in-out is chopped, not punched
 
 # MEASURE THE CLEAN CUT, NEVER THE LAST DELIVERY.
@@ -87,7 +116,7 @@ SRC = "renders/styles/_base.mov"
 
 
 def bold_moments(path=SRC, *, min_db=MIN_DB, min_sep=MIN_SEP,
-                 skip_head=SKIP_HEAD, limit=MAX_PUNCHES):
+                 skip_head=SKIP_HEAD, limit=MAX_PUNCHES, db_frac=DB_FRAC):
     """The `limit` loudest local RMS maxima at least `min_db` over baseline.
 
     RANKED, NOT THRESHOLDED, and that is a stability fix rather than a taste
@@ -112,10 +141,12 @@ def bold_moments(path=SRC, *, min_db=MIN_DB, min_sep=MIN_SEP,
             rms.append(20 * np.log10(v)); times.append(i / sr)
     rms, times = np.array(rms), np.array(times)
     base = float(np.percentile(rms, 40))
+    # relative to THIS speaker in THIS clip — see the DB_FRAC note above
+    floor = max(min_db, db_frac * (float(rms.max()) - base))
     cand = []
     for i in range(2, len(rms) - 2):
         d = rms[i] - base
-        if d < min_db or times[i] < skip_head:
+        if d < floor or times[i] < skip_head:
             continue
         if rms[i] < max(rms[i - 2:i + 3]):
             continue
@@ -139,7 +170,7 @@ def inset(rect, f):
     return (x0 + dx, y0 + dy * 0.6, x1 - dx, y1 - dy * 1.4)
 
 
-def split(segments, punches):
+def split(segments, punches, shot_of=None, phrase_starts=None):
     """Cut each V2 segment at the punch windows that start inside it.
 
     Returns [(out_start_s, dur_s, src_start_s, shot_index, is_punch)].
@@ -155,17 +186,44 @@ def split(segments, punches):
     candidate, the LOUDEST wins; the rest are dropped rather than nudged,
     because a punch moved off its peak marks nothing.
     """
+    # `shot_of` maps a segment to its SHOT. Since dead-space removal was
+    # decoupled from framing, one shot spans several segments, and the
+    # one-punch-per-shot rule has to count shots or it silently becomes
+    # one-punch-per-splice.
+    if shot_of is None:
+        shot_of = list(range(len(segments)))
+
+    def open_at(t):
+        """Where the punch STARTS: the beginning of the phrase he is landing.
+
+        **The RMS peak is mid-phrase, not its start.** Measured on clip 6:
+        George asked for a zoom on "ping issues, cheaters", the phrase begins
+        at output 8.78s, and the loudest 0.3s window sits at 10.10 — by which
+        point he is four words past it. Opening the punch `PUNCH_LEAD` before
+        the PEAK therefore opens it after the words it is meant to mark.
+        So the start snaps back to the first word after a real inter-word
+        gap, which is where the emphatic delivery actually begins.
+        """
+        if phrase_starts:
+            back = [p for p in phrase_starts if t - PHRASE_BACK <= p <= t]
+            if back:
+                return max(back) - 0.05
+        return t - PUNCH_LEAD
+    used = {}
     out = []
     for idx, (o0, dur, s0) in enumerate(segments):
         o1 = o0 + dur
+        shot = shot_of[idx]
+        room = MAX_PER_SHOT - used.get(shot, 0)
         inside = [(t, db) for t, db in punches if o0 <= t < o1]
         inside.sort(key=lambda p: -p[1])
         marks = []
-        for t, _db in inside[:MAX_PER_SHOT]:
-            a = max(o0, t - PUNCH_LEAD)
+        for t, _db in inside[:max(0, room)]:
+            a = max(o0, open_at(t))
             b = min(o1, a + PUNCH_HOLD)
             if b - a >= 0.5:
                 marks.append((a, b))
+                used[shot] = used.get(shot, 0) + 1
         marks.sort()
         if not marks:
             out.append((o0, dur, s0, idx, False)); continue
@@ -207,7 +265,7 @@ def main():
           f"{sum(d for _o, d, _s in segs):.2f}s total (V2 currently {len(v2)})")
 
     base, moments = bold_moments(ROOT / SRC)
-    print(f"baseline {base:.1f} dBFS; {len(moments)} bold moments at +{MIN_DB} dB:")
+    print(f"baseline {base:.1f} dBFS; {len(moments)} bold moments:")
     for t, d in moments:
         print(f"   {t:6.2f}s  +{d} dB")
 

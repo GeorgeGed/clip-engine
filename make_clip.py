@@ -68,8 +68,12 @@ CHROME_APP = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 # spec. Each number is justified in AGENTS.md next to the measurement that
 # produced it; they are repeated here only so one file can be read top to
 # bottom.
-MIN_DEAD = 0.35          # shorter removals read as jitter, not tightening
-BEAT = 0.12              # what is LEFT of each pause
+# CUT ALL THE DEAD SPACE. George, twice: *"ensure there is NO dead space"*,
+# then on clip 6: *"remember i said cut ALL dead space too"*. Measured on the
+# delivered files at a 0.20s floor, clip 6 was **21.6% quiet** and clip 8
+# **14.3%** — the 0.35/0.12 pair left a fifth of the clip as pauses.
+MIN_DEAD = 0.20          # every pause at or over this goes
+BEAT = 0.08              # what is LEFT of each one; 0 makes words collide
 CAPTION_ACCENT = (92, 128, 255, 255)      # theme.tsx C.blueLight
 MASTER_GAIN = 6.2        # what loudnorm adds; cues are solved through it
 BAIT_SECONDS = 17.0      # the hook holds the stretch where a scroller decides
@@ -79,6 +83,95 @@ STAGES = ("cut", "captions", "chat", "assemble", "punch", "render")
 def log(*a):
     print(*a, flush=True)
 
+
+# A SHOT IS NOT A KEEP, and conflating them is why cutting dead space has
+# always cost picture cadence.
+#
+# A keep is an AUDIO SPLICE — where a pause was removed. A shot is a PICTURE
+# CUT — where the framing changes. The build gave every keep its own framing,
+# so the two were forced equal and the only way to cut more dead space was to
+# cut the picture faster. Measured on clip 6 at MIN_DEAD 0.20: 14 splices,
+# which as shots would be 20.2 cuts/min, but grouped into shots of at least
+# MIN_SHOT it is **8 shots and 10.9 cuts/min** — under clip 8's shipped 12.8,
+# with 3s more dead air removed.
+#
+# What the small splices inside a shot become is an ordinary jump cut on a
+# talking head, which is the standard language of the format. The framing
+# changes at the rate a cut should happen; the splices happen at the rate the
+# pauses do.
+MIN_SHOT = 3.5
+
+
+def _shot_index(lengths, min_shot=MIN_SHOT):
+    """Group consecutive keeps into shots. Returns a shot index per keep."""
+    out, shot, acc = [], 0, 0.0
+    for L in lengths:
+        out.append(shot)
+        acc += L
+        if acc >= min_shot:
+            shot += 1
+            acc = 0.0
+    return out
+
+def _clamp_in_point(kp, in_point, min_first=0.40):
+    """Clamp the keeps to `in_point` without leaving a sliver first shot.
+
+    Moving an in-point onto a word often lands it a fraction of a second
+    before a removal, and the first keep then becomes a 0.1s stub that gets
+    its own framing — a six-frame flash before the clip proper. When that
+    happens the honest fix is to KEEP THE PAUSE: merge the stub forward so
+    the clip opens on one continuous shot. A natural breath at the head of a
+    clip costs nothing; a six-frame shot is a glitch.
+    """
+    kp = [k for k in kp if k.end > in_point]
+    if not kp:
+        return kp
+    kp[0].start = max(kp[0].start, in_point)
+    if len(kp) > 1 and kp[0].length < min_first:
+        kp[0].end = kp[1].end          # swallow the removal between them
+        del kp[1]
+    return kp
+
+def _phrase_starts(clip, ch, st):
+    """Phrase starts in OUTPUT time, for snapping a punch off its RMS peak.
+
+    **UTTERANCE starts, not inter-word gaps.** Whisper's VAD gives contiguous
+    word timings — measured on clip 6, the median inter-word gap is 0.000s
+    and only 1 of 150 reaches 0.25s — so a gap-based phrase detector finds
+    almost nothing. This file already records that trap for finding pauses
+    ("whisper's VAD merges utterances ... use WORD gaps") and the inverse is
+    true here: for phrase BOUNDARIES the utterance list is the only usable
+    signal, because the word timings have none. Clip 6's "ping issues
+    cheaters" is utterance 3, starting exactly where George wants the zoom.
+    """
+    wf = clip.words(ROOT)
+    if not wf.exists():
+        return []
+    tr = json.loads(wf.read_text())
+    kp = st["keeps"]
+
+    def remap(t):
+        acc = 0.0
+        for k in kp:
+            if k.start <= t < k.end:
+                return acc + (t - k.start)
+            acc += k.length
+        return None
+
+    marks = [u["start"] for u in tr["utterances"]]
+    prev_end = None
+    for u in tr["utterances"]:
+        for w in u["words"]:
+            if prev_end is not None and w["start"] - prev_end >= rp_gap():
+                marks.append(w["start"])
+            prev_end = w["end"]
+    out = sorted({round(remap(t), 3) for t in marks if remap(t) is not None})
+    return out
+
+
+def rp_gap():
+    import resolve_punch as rp
+    return rp.PHRASE_GAP
 
 def _cut_audio(clip, ch, st):
     """The tightened cut's audio, straight from the source.
@@ -90,8 +183,11 @@ def _cut_audio(clip, ch, st):
     carries no sfx bed and no loudnorm — his delivery, not our mix.
     """
     dst = st["base_wav"]
-    if dst.exists():
-        return dst
+    # NO CACHE. This is derived from the keeps, and the keeps change whenever
+    # the in-point or the dead-space floor moves. A stale copy put the punch
+    # plan's last moment at 39.80s on a 38.57s clip — measured against a cut
+    # that no longer existed.
+    dst.unlink(missing_ok=True)
     src = clip.source(ROOT)
     parts = "".join(
         f"[0:a]atrim=start={k.start:.4f}:end={k.end:.4f},asetpts=PTS-STARTPTS[a{i}];"
@@ -143,9 +239,7 @@ def stage_cut(clip, ch, st):
     quiet = qc.quiet_runs(src, min_run=MIN_DEAD)["runs"]
     dead = sorted([r for r in absent + quiet if r[0] >= clip.in_point])
     spans = removals(dead, src_dur, min_remove=MIN_DEAD, beat=BEAT)
-    kp = [k for k in keeps(spans, src_dur) if k.end > clip.in_point]
-    if kp:
-        kp[0].start = max(kp[0].start, clip.in_point)
+    kp = _clamp_in_point(keeps(spans, src_dur), clip.in_point)
     out_dur = sum(k.length for k in kp)
     log(f"  {src.name}")
     log(f"  in-point {clip.in_point}s | {len(spans)} dead removals "
@@ -187,16 +281,21 @@ def stage_cut(clip, ch, st):
 
     canvas = Frame(1080, 1920, 1920, 1080)
     seam_y = ch.seam * canvas.canvas_h
-    rects = framings(len(kp), _cam(clip, ch, st))
-    crects = content_framings(len(kp), chrome=ch.chrome)
+    sidx = _shot_index([k.length for k in kp])
+    nshots = sidx[-1] + 1 if sidx else 1
+    st["shot_index"] = sidx
+    rects = framings(nshots, _cam(clip, ch, st))
+    crects = content_framings(nshots, chrome=ch.chrome)
     for trk, rl, pane in ((1, crects, (0, seam_y, 1080, 1920)),
                           (2, rects, (0, 0, 1080, seam_y))):
         items = sorted(tl.GetItemListInTrack("video", trk) or [],
                        key=lambda i: i.GetStart())
-        for it, rect in zip(items, rl):
-            apply(it, plan(canvas, rect, pane))
+        for it, si in zip(items, sidx):
+            apply(it, plan(canvas, rl[si], pane))
             if trk == 2 and ch.grade:
                 it.SetCDL(ch.grade)
+    log(f"  {len(kp)} audio splices ({(len(kp)-1)/(out_dur/60):.1f}/min) grouped "
+        f"into {nshots} shots ({(nshots-1)/(out_dur/60):.1f} picture cuts/min)")
     log(f"  V1 {len(tl.GetItemListInTrack('video',1))} / "
         f"V2 {len(tl.GetItemListInTrack('video',2))} shots, "
         f"{(tl.GetEndFrame()-start)/fps:.1f}s")
@@ -266,7 +365,8 @@ def stage_chat(clip, ch, st):
             acc += k.length
         return None
 
-    mode, wins, info = cr.windows(raw, t0, t1, remap=remap, mode=clip.chat_mode)
+    mode, wins, info = cr.windows(raw, t0, t1, remap=remap, mode=clip.chat_mode,
+                                  out_dur=st['out_dur'])
     log(f"  resting {info['resting_rate']:.0f}/min, clip {info['clip_rate']:.0f}/min "
         f"(x{info['clip_rate']/info['resting_rate']:.2f}), hype {info['hype_share']:.2f}")
     log(f"  MODE: {mode}  ({len(info['bursts'])} bursts, "
@@ -381,7 +481,7 @@ def stage_assemble(clip, ch, st):
     # `shutter` when a photo card lands.
     cues = []
     wins = st.get("chat_windows")
-    if wins is None and (PUBLIC / "chat_windows.json").exists():
+    if not wins and (PUBLIC / "chat_windows.json").exists():
         # the chat stage ran in an earlier invocation; its windows are the
         # truth about when the box arrives, so read them rather than
         # silently shipping no cue (which is what the first run did)
@@ -456,15 +556,20 @@ def stage_punch(clip, ch, st):
     segs = [((it.GetStart() - start) / ch.fps,
              (it.GetEnd() - it.GetStart()) / ch.fps,
              it.GetLeftOffset() / ch.fps) for it in v1]
+    # the SAME grouping the cut used, recomputed from the placed items so the
+    # two stages cannot drift
+    sidx = _shot_index([d for _o, d, _s in segs])
+    nshots = sidx[-1] + 1 if sidx else 1
     # Measure the CLEAN CUT, never the last delivery — see AGENTS.md.
     base, moments = rp.bold_moments(_cut_audio(clip, ch, st))
     log(f"  baseline {base:.1f} dBFS; {len(moments)} bold moments:")
     for t, d in moments:
         log(f"     {t:6.2f}s  +{d} dB")
-    pieces = rp.split(segs, moments)
+    pieces = rp.split(segs, moments, shot_of=sidx,
+                      phrase_starts=_phrase_starts(clip, ch, st))
     tl.DeleteClips(v2)
     canvas = Frame(1080, 1920, 1920, 1080)
-    rects = framings(len(segs), _cam(clip, ch, st))
+    rects = framings(nshots, _cam(clip, ch, st))
     ents = [{"mediaPoolItem": item, "startFrame": round(s0 * ch.fps),
              "endFrame": round(s0 * ch.fps) + round(d * ch.fps),
              "recordFrame": start + round(o0 * ch.fps),
@@ -474,13 +579,16 @@ def stage_punch(clip, ch, st):
     seam_y = ch.seam * canvas.canvas_h
     items = sorted(tl.GetItemListInTrack("video", 2) or [], key=lambda i: i.GetStart())
     for it, (o0, d, _s, idx, isp) in zip(items, pieces):
-        rect = rects[idx]
+        rect = rects[sidx[idx]]
         if isp:
             rect = rp.inset(rect, rp.PUNCH_INSET)
         apply(it, plan(canvas, rect, (0, 0, 1080, seam_y)))
         if ch.grade:
             it.SetCDL(ch.grade)
-    log(f"  V2 {len(segs)} shots -> {len(pieces)} "
+    (st["overlays"] / "punches.json").write_text(json.dumps(
+        {"punches": [t for t, _d in moments], "zoom": round(1/(1-rp.PUNCH_INSET), 3),
+         "applied": [round(o0, 2) for o0, _d, _s, _i, p in pieces if p]}, indent=1))
+    log(f"  V2 {len(segs)} splices in {nshots} shots -> {len(pieces)} pieces "
         f"({sum(1 for *_x, p in pieces if p)} punched at "
         f"{1/(1-rp.PUNCH_INSET):.3f}x)")
 
@@ -588,9 +696,7 @@ def _plan_only(clip, ch, st):
     quiet = qc.quiet_runs(src, min_run=MIN_DEAD)["runs"]
     dead = sorted([r for r in absent + quiet if r[0] >= clip.in_point])
     spans = removals(dead, src_dur, min_remove=MIN_DEAD, beat=BEAT)
-    kp = [k for k in keeps(spans, src_dur) if k.end > clip.in_point]
-    if kp:
-        kp[0].start = max(kp[0].start, clip.in_point)
+    kp = _clamp_in_point(keeps(spans, src_dur), clip.in_point)
     st["keeps"] = kp
     st["out_dur"] = sum(k.length for k in kp)
     st["total"] = round(st["out_dur"] * ch.fps)

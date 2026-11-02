@@ -1093,6 +1093,188 @@ region of the VOD frame, already a 3x upscale to fill 1080×806; cropping to
 1.16:1 would mean taking 304×262 and blowing it up 3.55x. The seam stays at
 0.42 and the chat card goes below the captions instead.
 
+## A SHOT IS NOT A KEEP — which is how to cut ALL the dead space
+
+George, for the third time: *"remember i said cut ALL dead space too"*, on a
+clip 6 that measured **21.6% quiet** at a 0.20s floor (clip 8: 14.3%).
+
+He has asked this three times and each time the answer has been "yes, but it
+costs picture cadence". **That trade was an artefact of the code, not a
+fact about editing.** `framings(len(keeps))` gave every keep its own
+framing, so an audio splice and a picture cut were the same event, and the
+only way to remove more pauses was to cut the picture faster — which is
+exactly the complaint recorded at v47 and at "12.8 cuts/min against R1's
+6.0".
+
+They are different things:
+
+* a **keep** is an AUDIO SPLICE — where a pause was removed;
+* a **shot** is a PICTURE CUT — where the framing changes.
+
+`make_clip._shot_index()` groups consecutive keeps until `MIN_SHOT` (3.5s)
+accumulates, and the framing changes per SHOT. Measured on clip 6:
+
+| | MIN_DEAD 0.35 / BEAT 0.12 | **0.20 / 0.08** |
+|---|---|---|
+| duration | 41.5s | **38.6s** |
+| audio splices | 5 | **14** (20.3/min) |
+| picture cuts | 5 (5.8/min) | **7 (9.3/min)** |
+| quiet at the 0.20 floor | 21.6% | **12.8%** |
+| quiet at the 0.35 floor | 12.9% | **4.3%** |
+
+So 8.5s of dead air comes out and the picture cuts SLOWER than clip 8 ships
+at. What the small splices become inside a shot is an ordinary jump cut on
+a talking head, which is the native language of the format.
+
+## Clip 6's three notes, and what each one measured
+
+George: *"clip starts off weirdly - feels like it's too late - also ping
+issues, cheaters there should be zooms because it's when he's loud ... also
+where's the story images?"*
+
+### The opening was a dangling fragment
+
+The clip opened on *"in the new circuit i already said this i've said this
+on every single stream..."* — a prepositional phrase with no sentence, then
+a repetition of itself, and the claim ("an absolute shit show") did not
+land until **9.5s**. `in_point` moves to **2.02**, which drops the fragment
+and opens on a complete clause: *"I've said this on every single stream
+since we found out that franchise is ending — I said these open qualifiers
+are going to be an absolute shit show."*
+
+**A clamped in-point can leave a SLIVER first shot.** 2.02 sits 0.10s before
+a removal, so the first keep became a six-frame stub with its own framing —
+a flash before the clip proper. `_clamp_in_point()` now swallows that
+removal instead: a natural breath at the head costs nothing, a six-frame
+shot is a glitch.
+
+### The punch floor was clip 8's number, and it was knife-edge
+
+George is right that he is loud on "ping issues, cheaters", and there WAS a
+peak there — **3.9946 dB over baseline**, rejected by `if d < 4.0` while the
+printout rounded it to "+4.0". The same knife-edge class that was fixed in
+the SELECTOR last version and left sitting in the floor.
+
+And 4.0 was never general: it was read off clip 8, whose range is 5.5 dB
+over baseline. **Clip 6's entire range is 4.55 dB**, so an absolute 4.0
+keeps only the top 12% of its dynamic and throws away the moment the clip is
+named after. A speaker's emphasis is relative to their own delivery in that
+clip, so the floor is: `max(2.5, 0.70 x range)`.
+
+| | range | floor | picked |
+|---|---|---|---|
+| clip 8 | 5.50 dB | 3.85 | 13.10 +4.5, 23.80 +5.5, 36.90 +4.9 — **unchanged** |
+| clip 6 | 4.55 dB | 3.19 | 12.00 +4.0 (**"cheaters"**), 18.60, 26.40, 33.90, 39.80 |
+
+**`SKIP_HEAD = 9.0` was a false attribution.** It was set to clear clip 8's
+8.97s opening shot, but swept across 9.0 / 4.0 / 2.5 / 1.0 clip 8 returns
+the IDENTICAL plan every time — its loud moments all sit past 13s. What
+actually stopped its opening being chopped was `MAX_PER_SHOT`. 9.0 was a
+coincidence doing nothing, and on a shorter clip it would silently eat a
+real moment near the head. Now 2.5.
+
+### A PUNCH OPENS ON THE PHRASE, NOT ON THE RMS PEAK
+
+The peak is mid-phrase. "ping issues, cheaters" begins at output 8.78s and
+the loudest 0.3s window sits at **10.10** — four words later — so opening
+`PUNCH_LEAD` before the PEAK opened the zoom after the words it was meant to
+mark. The start now snaps back to the phrase containing the peak.
+
+**And the phrase boundary is the UTTERANCE list, not an inter-word gap.**
+Whisper's VAD gives contiguous word timings: measured on clip 6 the median
+inter-word gap is **0.000s and only 1 of 150 reaches 0.25s**, so a
+gap-based detector found one boundary in the whole clip and the snap did
+nothing. This file already records the inverse trap for finding pauses
+("whisper's VAD merges utterances ... use WORD gaps"); for finding phrase
+STARTS the utterance list is the only usable signal.
+
+### Stories: this clip has none that belong on it
+
+George: *"where's the story images? we should always include some stories
+sometimes where appropriate - but perhaps this one is fine."*
+
+Checked rather than skipped. The two verified stories in the system are
+roster departures — PRX/Jinggg and Sentinels/JonahP+Jerrwin — and clip 6 is
+about open-qualifier tech chaos. Neither is on topic, and the one genuinely
+relevant item (the 10 -> 8 partner-team reduction) has no verified published
+headline with photos; it shipped on clip 8 as a figure card, not a story.
+**A story card goes on a clip when a verified, on-topic published story
+exists — it is not a default slot to fill**, and inventing one to fill it
+would be the "random text cards" defect under a nicer name.
+
+## THE QUESTION CARD: built, and lexical overlap is the WRONG retrieval
+
+George: *"ideally we should have something where fns has seen the twitch
+chatter's question and we have an animation of it shown on screen while he
+answers it - then the twitch chat should come in like normal."*
+
+**This reframes the "chat is not reacting" finding.** Clip 8's chat measured
+43 msg/min with 24% on-topic and was recorded as a poor overlay candidate
+because it is a Q&A queue. It is the opposite: a chat that ASKS is the
+material for this card. Reacting chat wants the burst overlay; asking chat
+wants the question card.
+
+`src/Question.tsx` is built — Twitch's own `#18181B` and the chatter's own
+colour, like the chat box, because a viewer must read it as a message from
+chat; what separates it is SCALE AND POSITION (full width, centred,
+untilted, 1.5x the type) rather than a second visual language. A third tilt
+in one clip would read as one repeated gesture.
+
+**THE CARD ASSERTS AN INTERACTION BETWEEN TWO REAL PEOPLE** — the only
+claim of that kind anything here makes — so nothing reaches it on a score.
+
+**Six candidates ranked by shared words were put to independent judges and
+ALL SIX WERE REFUTED.** The judges read the raw chat themselves and found
+what a similarity score cannot:
+
+* the overlap runs the WRONG WAY — chat was paraphrasing the streamer, who
+  says in the clip he has made this argument "on every single stream". Three
+  chatters reached for "ping / issues / tech" inside a 16-second span while
+  he independently ran a prepared talking point;
+* **Ferruxx asks the same question again 105 seconds later**, which is proof
+  nobody answered it — a check no lexical method would ever make;
+* Zehi's single shared token was "out", in an idiom ("out of jail") against
+  a phrasal verb ("locking players out"), from a chatter-to-chatter joke
+  about an unrelated story.
+
+**So high overlap is evidence AGAINST a response, not for it** — in a chat
+and a streamer locked on one subject, shared vocabulary is the null
+hypothesis. And the one pair that looks genuine has **zero words in
+common**:
+
+    Perrysuxker_17 +30.2s : "so how can you say the format is good"
+    spoken         +33.84s: "i agree we agree on this i know that the open
+                             qualifier system is going to have its own issues
+                             ... it is still better than locking players out
+                             of franchise forever"
+
+A question and its answer use DIFFERENT words — that is what makes it an
+answer rather than an echo. `chat_reaction.answering()` now retrieves every
+QUESTION within the lookback, ranked by RECENCY, and reports overlap only as
+evidence for the judge. The question test also matches a question word in
+the first few tokens rather than at position 0, because chat opens with a
+discourse marker constantly — anchoring to the start missed this exact
+message.
+
+## Four more bugs, all of them stale or empty state
+
+* **`_cut.wav` was cached and never invalidated.** It is derived from the
+  keeps, so moving the in-point or the dead-space floor changes it — but a
+  stale 43.14s copy put the punch plan's last moment at **39.80s on a 38.57s
+  clip**, measured against a cut that no longer existed.
+* **The continuous chat window came back EMPTY on any clip with a non-zero
+  in-point.** It was derived as `remap(0.0)`, and 0.0 is before the first
+  keep when the in-point is not 0, so the whole window list was `[]` — the
+  chat left the screen entirely and took its entrance cue with it.
+  "Continuous" means the whole clip by definition; there is nothing to look
+  up.
+* **`punches.json` is written to one shared path**, so reading it back after
+  a second clip's build returns the FIRST clip's plan. It now lands in the
+  clip's own overlays directory.
+* **The one-punch-per-shot cap counted segments.** Once dead-space removal
+  was decoupled from framing, one shot spans several segments and the rule
+  silently became one-punch-per-SPLICE.
+
 ## MASS PRODUCTION: the spec, the screen, and what is actually in the way
 
 George, locking clip 8 in: *"all of this logic ... I want us to develop

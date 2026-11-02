@@ -165,7 +165,8 @@ TAIL = 1.2
 
 
 def windows(messages, t0: float, t1: float, *, remap=None, mode: str | None = None,
-            min_window: float = MIN_WINDOW, lead: float = LEAD, tail: float = TAIL):
+            out_dur: float | None = None, min_window: float = MIN_WINDOW,
+            lead: float = LEAD, tail: float = TAIL):
     """The chat's on-screen windows, in OUTPUT time.
 
     `remap(src_t) -> out_t | None` maps VOD seconds onto the finished cut,
@@ -186,10 +187,15 @@ def windows(messages, t0: float, t1: float, *, remap=None, mode: str | None = No
         return remap(max(0.0, x - t0))
 
     if mode == "continuous":
-        a = out(t0)
-        b = out(t1 - 0.05)
-        return mode, ([{"from": round(a, 2), "to": round(b, 2)}]
-                      if a is not None and b is not None else []), info
+        # THE WHOLE OUTPUT, and it must not be derived through `remap`.
+        # `remap(0.0)` is None whenever the clip has a non-zero in-point —
+        # 0.0 is then before the first keep — so routing the continuous case
+        # through the remap silently produced an EMPTY window list, which
+        # took the chat off screen entirely and the entrance cue with it.
+        # "Continuous" means the whole clip by definition; there is nothing
+        # to look up.
+        end = out_dur if out_dur is not None else (t1 - t0)
+        return mode, [{"from": 0.0, "to": round(end, 2)}], info
 
     wins = []
     for b in info["bursts"]:
@@ -198,8 +204,118 @@ def windows(messages, t0: float, t1: float, *, remap=None, mode: str | None = No
         a, bb = out(a_src), out(b_src)
         if a is None or bb is None or bb - a < min_window:
             continue
+        if out_dur is not None:
+            bb = min(bb, out_dur)
+            if bb - a < min_window:
+                continue
         if wins and a - wins[-1]["to"] < min_window:
             wins[-1]["to"] = round(bb, 2)      # too close to be two visits
             continue
         wins.append({"from": round(a, 2), "to": round(bb, 2)})
     return mode, wins, info
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# WHICH MESSAGE HE IS ANSWERING
+#
+# George: *"ideally we should have something where fns has seen the twitch
+# chatter's question and we have an animation of it shown on screen while he
+# answers it - then the twitch chat should come in like normal."*
+#
+# This REFRAMES the finding that clip 8's chat "is not reacting". Measured
+# then: 43 messages/min, only 24% on-topic, and reading them they are a Q&A
+# queue — "are nrg partnered??", "who would you bring in?". That was recorded
+# as the overlay being a poor fit. It is the opposite: a chat that ASKS is
+# exactly the material for this card. Reacting chat wants the burst overlay;
+# asking chat wants the question card.
+#
+# **THIS PROPOSES, IT DOES NOT DECIDE.** The card asserts that a specific
+# viewer asked something and the streamer answered it — a factual claim about
+# two real people, and the only claim about an interaction anything in this
+# system makes. Lexical overlap cannot establish one: a streamer and his chat
+# discuss the same subject continuously and reuse the same words without
+# either responding to the other, so overlap is the NULL hypothesis, not
+# evidence. Measured on clip 6, the top-scoring pair by overlap (0.75) was a
+# chatter writing "it has everything to do with tech and ping issues" shortly
+# before FNS says "ping issues, cheaters" — which is equally well explained
+# by both of them reacting to the same thing on screen.
+#
+# So this returns CANDIDATES with their evidence, and a judged-then-
+# adversarially-refuted pass decides. Nothing reaches the screen on a score.
+STOP = set(
+    "the a an and or but if is are was were be been being to of in on at for with "
+    "that this these those it its i you he she we they them his her their my your "
+    "do does did will would can could should have has had not no yes so as by from "
+    "what when where who why how which u ur im dont like just get got go going gonna "
+    "think know really about than then there here all any more most some".split())
+# A question word in the FIRST FEW TOKENS, not only at the start. Chat opens
+# with a discourse marker constantly, and anchoring to position 0 missed the
+# clip's single best candidate: "so how can you say the format is good".
+_Q = (r"can|could|would|will|should|do|does|did|is|are|was|were|who|what|when|"
+      r"where|why|how|which|any|anyone|someone|whats|whos|hows")
+ASK = re.compile(r"\?|^(?:\W*\w+){0,2}\W*\b(?:" + _Q + r")\b", re.I)
+LOOKBACK = 75.0          # how far back a message can be and still be the prompt
+MIN_CHARS = 8
+
+
+def _words(s: str) -> set[str]:
+    return {w for w in re.findall(r"[a-z0-9']+", s.lower())
+            if w not in STOP and len(w) > 2}
+
+
+def answering(messages, utterances, *, t0: float, lookback: float = LOOKBACK,
+              questions_only: bool = True):
+    """Candidate (message -> utterance he may be answering) pairs.
+
+    **LEXICAL OVERLAP IS THE WRONG RETRIEVAL SIGNAL, and the adversarial pass
+    proved it both ways.** Ranking clip 6's candidates by shared words put
+    six pairs up and ALL SIX were refuted as topic co-occurrence — the
+    judges found that chat was paraphrasing the streamer, not the other way
+    round, so a high overlap is evidence AGAINST a response. Meanwhile the
+    one pair that looks genuine has **zero words in common**:
+
+        Perrysuxker_17, +30.2s : "so how can you say the format is good"
+        FNS,            +33.84s: "i agree we agree on this i know that the
+                                  open qualifier system is going to have its
+                                  own issues ... it is still better than
+                                  locking players out of franchise forever"
+
+    A question and its answer use DIFFERENT words — that is what makes it an
+    answer rather than an echo. So retrieval is now: every message that is a
+    QUESTION, within `lookback` of a line, ranked by recency. Overlap is
+    still reported, as evidence for the judge to weigh, but it no longer
+    selects.
+
+    `utterances` are dicts with `start`/`end` in CLIP-FILE time and `text`;
+    `t0` is the clip's VOD offset, so a message's offset can be compared with
+    them. Returns one candidate per message, best utterance only, sorted by
+    overlap — **for judging, not for shipping.**
+    """
+    out = []
+    for m in messages:
+        text = _text(m).strip()
+        if len(text) < MIN_CHARS:
+            continue
+        asking = bool(ASK.search(text))
+        if questions_only and not asking:
+            continue
+        mw = _words(text)
+        best = None
+        for u in utterances:
+            gap = (t0 + u["start"]) - _offset(m)
+            # a message sent after he began the line cannot have prompted it
+            if not (0 < gap <= lookback):
+                continue
+            ov = mw & _words(u["text"])
+            # RECENCY selects; overlap is only reported as evidence
+            if best is None or gap < best["gap_s"]:
+                best = {"score": round(len(ov) / max(len(mw), 1), 3),
+                        "answer": u["text"].strip(),
+                        "answer_t": round(u["start"], 2), "gap_s": round(gap, 1),
+                        "overlap": sorted(ov)}
+        if best:
+            out.append({"author": m["author"] if isinstance(m, dict) else m.author,
+                        "msg": text, "msg_t": round(_offset(m) - t0, 2),
+                        "is_question": asking, **best})
+    out.sort(key=lambda c: c["gap_s"])
+    return out
