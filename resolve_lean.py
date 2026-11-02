@@ -1,6 +1,6 @@
 """Assemble clip 08 on the Resolve timeline.
 
-    V1 content   V2 facecam (colour arc)   V3 dips
+    V1 content   V2 facecam (colour arc)   V3 (empty)
     V4 graphics  V6 captions               A2 sound
 
 George: "I like the fact that we're kind of having pop-ups like every other
@@ -24,7 +24,18 @@ from engine.sfx import Cue, bed, cue_gain, cue_gain_peak
 FPS = 60
 OUT = ROOT / "jobs/fns-2905408276/overlays"
 MASTER_GAIN, TARGET_RMS = 6.2, -29.0
-DIPS = (14.80, 32.92)
+# NO DIPS. The pane dip was built on the note that it is "the ONLY
+# transition anywhere in the four references". Re-measured, it punctuates
+# nothing here: the content pane's frame-to-frame delta is median 0.0005,
+# max 0.27, with ZERO frames above 0.5 across all 2822 — one static roster
+# board start to finish — and the dip's own rule is "where a document
+# changes and nowhere else". Both had also drifted onto a card: dip 1 fired
+# mid-hold under a card whose body measured 82.3361 before and 82.3371
+# during, so for 0.567s everything except the card got 41% darker and came
+# back, with no event to mark; dip 2 ramped straight through rm_ExKru's
+# 22-frame entrance, so the biggest graphic in the clip arrived on a pane
+# that was changing exposure.
+DIPS = ()
 # The clickbait line George asked for: what the video is about, with an
 # Apple emoji, sitting just under the facecam. It runs over the opening
 # stretch where a scroller decides, then leaves.
@@ -62,19 +73,47 @@ EXHIBITS = [
 ]
 MIN_GAP_FRAMES = 6                  # one chip exit
 
-# Three acts, three grades: cool and flat over the news, the house grade
-# through the argument, warm on the cost. SetCDL is per CLIP, so the grade
-# cannot ramp — but the cut is already 11 segments, so it can step.
+# Three acts, three grades, re-solved against the new palette. SetCDL is per
+# CLIP so the grade cannot ramp, but the cut is already 22 segments on V2, so
+# it steps by act. It reaches the FACECAM ONLY — V1 is a document and V4 are
+# the cards.
+#
+# WHAT WAS WRONG. Inverting the CDL off the delivered frames recovers the
+# ungraded facecam at R-B +5 to +7: his room is naturally warm and already
+# sits where the chassis (+11) and the paper (+9) sit. The arc then pushed
+# act 1 to -4.8, a 12-point swing into cool away from BOTH, and act 3 to
+# +28.0. The clash with the graphics was manufactured by the grade.
+#
+# THE MEASUREMENT THAT DECIDED IT is a white in his own room — the IKEA
+# shelf, the picture frame, the YouTube plaque. Mask the near-neutral brights
+# (luma > 165, chroma < 45) on the RECOVERED UNGRADED pixels, so the same
+# pixel set is tracked through every candidate, then read their R-B back.
+# Measured against their own source value, the old arc moved a real white by
+# 18.1 / 6.0 / 29.8 points across the three acts. A white that swings 24
+# points across a clip is the definition of footage that has been graded.
+# Now: 0.2 / 6.0 / 2.3, and the 6.0 is act 2, untouched.
+#
+# AND COUNT BLOWN FACE PIXELS PER CHANNEL. Act 3 of the old grade put
+# **2.18% of his face at R >= 254** — a solid slab on the cheekbone, not a
+# speckle of specular highlights. The replacement puts 0.000% there. The
+# candidate that won the panel's vote outright was rejected on this: it moved
+# the same defect into act 2, 15.93% of his face at one dead value.
+#
+# PUT THE WARMTH IN OFFSET, NOT SLOPE. Slope is gain, so it scales the
+# highlights hardest and lands the warmth on exactly the white objects the
+# test is watching. Act 3 moves R from slope to offset; act 1's cool was a
+# BLUE GAIN of 1.09 and taking it to 1.00 removes it with red left byte-
+# identical to before, so no new clipping is even possible.
 GRADES = [
-    (0.0, 17.55, {"NodeIndex": "1", "Slope": "1.02 1.03 1.09",
+    (0.0, 17.55, {"NodeIndex": "1", "Slope": "1.02 1.03 0.969",
                   "Offset": "-0.008 -0.008 0.005", "Power": "1.09 1.09 1.06",
-                  "Saturation": "0.92"}),
+                  "Saturation": "0.92"}),      # act 1, the news: flat, neutral
     (17.55, 35.92, {"NodeIndex": "1", "Slope": "1.06 1.06 1.07",
                     "Offset": "-0.012 -0.012 -0.010", "Power": "1.06 1.06 1.06",
-                    "Saturation": "1.18"}),
-    (35.92, 99.0, {"NodeIndex": "1", "Slope": "1.12 1.07 0.99",
-                   "Offset": "-0.015 -0.012 -0.008", "Power": "1.03 1.05 1.09",
-                   "Saturation": "1.30"}),
+                    "Saturation": "1.18"}),    # act 2, the argument: UNTOUCHED
+    (35.92, 99.0, {"NodeIndex": "1", "Slope": "1.000 1.070 1.090",
+                   "Offset": "0.012 -0.012 -0.034", "Power": "1.03 1.05 1.09",
+                   "Saturation": "1.30"}),     # act 3, the cost: warm, no blowout
 ]
 
 
@@ -163,10 +202,18 @@ def main():
     # cards show photographs, so they get a camera shutter; the counter
     # gets a run of ticks that thins as it eases out.
     gain = cue_gain("thunk", TARGET_RMS, MASTER_GAIN)
-    # by PEAK, not RMS: the shutter's 22 dB crest put it 6.4 dB over
-    # the thunks when both were set to the same RMS. -14.3 is where
-    # the thunks measure in the master, so they now match.
-    shut = cue_gain_peak("shutter", -14.3, MASTER_GAIN)
+    # by PEAK, not RMS: the shutter's 22 dB crest put it 6.4 dB over the
+    # thunks when both were set to the same RMS.
+    #
+    # George: "those sound effects for the image popups toward the end is
+    # perfect - needs to be slightly louder and it's great." Matched to the
+    # thunks it measured -15.2 dBFS in the bed, 0.9 dB UNDER them. Target
+    # -12.0 lands it around -12.9 — roughly +2.3 dB, a step you hear without
+    # it becoming the loudest thing in the clip, and it leaves the shutter
+    # about 1.4 dB over a thunk. That ordering is right: a thunk says a
+    # figure landed, a shutter says the two biggest graphics in the clip
+    # just arrived with photographs on them.
+    shut = cue_gain_peak("shutter", -12.0, MASTER_GAIN)
     tck  = cue_gain("tick", -40.0, MASTER_GAIN)
     STORIES = {"rm_StoryPrx", "rm_StorySen"}
     # A SIDE TAB GETS NO CUE. rm_ChipAmer at 1.20 used to take the thunk and
@@ -192,7 +239,7 @@ def main():
         last = at
     print("sfx:", bed(cues, total / FPS, out=OUT / "sfx.wav"))
 
-    names = ["dip.mov", "cap_kin.mov", "sfx.wav", f"{BAIT[0]}.mov"] + \
+    names = ["cap_kin.mov", "sfx.wav", f"{BAIT[0]}.mov"] + \
             [f"{n}.mov" for n, _a, _d in EXHIBITS]
     r.GetMediaStorage().AddItemListToMediaPool([str(OUT / n) for n in names])
     pool = {c.GetName(): c for c in mp.GetRootFolder().GetClipList()}
@@ -219,9 +266,9 @@ def main():
             print(f"  !! {name} missing from the media pool")
             return
         want = int(round(dur * FPS))
-        # Only the Remotion cards. `cap_kin.mov` is the whole caption track
-        # and `dip.mov` is a measured 0.567s envelope — taking either from the
-        # file would overrun the timeline or stretch the dip.
+        # Only the Remotion cards. `cap_kin.mov` is the whole caption
+        # track, so taking its length from the file would overrun the
+        # timeline.
         have = clip_frames(name[:-4]) if name.startswith("rm_") else None
         if have and have != want:
             print(f"  {name}: {want} asked, {have} in the file — using the file "
@@ -233,8 +280,6 @@ def main():
             e["mediaType"] = media
         ents.append(e)
 
-    for d in DIPS:
-        add("dip.mov", d, 0.567, 3)
     for n, at, dur in EXHIBITS:
         add(f"{n}.mov", at, dur, 4)
     add(f"{BAIT[0]}.mov", BAIT[1], BAIT[2], 5)

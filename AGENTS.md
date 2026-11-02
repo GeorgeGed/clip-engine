@@ -927,14 +927,12 @@ as having no licence when the package ships Apache-2.0.
 
 ### Still open, with what would settle each
 
-* **The pane dip has to be re-solved against the new chassis.** Its depth was
-  fitted as `(1-alpha)**2.4` against a *dark* pane, and Resolve's linear-light
-  composite moves the number 12x. Re-grab two stills at two alphas with
-  `GrabStill()` + `ExportStills()` and re-fit. Do not reuse the number.
-* **The three-act CDL arc was tuned against dark overlays.** Act 1 is cool
-  and flat, act 3 warm at saturation 1.30. A warm graphite chassis and warm
-  paper reinforce act 3 and fight act 1. Render the three acts and measure
-  R−B **on a card**, not on the frame.
+* ~~The pane dip has to be re-solved against the new chassis.~~ **SETTLED:
+  the dip is removed** — it punctuates nothing, and the pixel test that
+  looked decisive does not discriminate. See above.
+* ~~The three-act CDL arc was tuned against dark overlays.~~ **SETTLED:
+  re-solved against a white in his own room; the white-point swing across
+  the clip goes 48.0 → 5.9 points.** See above.
 * **Warm paper vs cool.** Both real documents in the clip measure cool — the
   board at hue 218, the tweet's brightest 15% at hue 220 — so `#EFF1F5` may
   have been right. Render one `StoryPrx` at each over the real t=37.6 frame
@@ -996,6 +994,136 @@ and `crop` first so one pane going dark is not hidden by the other.
 **The odometer, verified in the bed:** gaps of 33, 37, 41, 47, 56, 70, 100
 then 383ms, spreading as the number settles. Cue peaks referred to the
 master: seven thunks at −14.3 dBFS, two shutters at −15.2.
+
+### The pane dip is REMOVED, and the obvious argument for it is wrong
+
+Asked to re-solve the dip's depth against the new chassis, the measurement
+removed the dip instead. **But the argument that first looked decisive is
+false, and it must not go in this file as a reusable test.**
+
+**THE TEST THAT DOES NOT WORK.** "An alpha overlay multiplies every pixel in
+the pane, so the brightest pixel must fall with the mean — R1 holding YMAX
+255 through its dark runs proves those are the game's own black frames, not
+an edit." Four independent judges led with this. It is disproved by **our
+own dip**: dip 1 at 14.80s holds YMAX at a dead-flat 255 and p99.9 at a
+dead-flat 253.0 on every one of its 34 frames while the pane mean falls
+31.85 → 15.65. 15,120 pixels — 1.556% of the pane, bounding box y1003-1614,
+i.e. the card — hold their exact pre-dip values, median ratio 1.0000.
+Anything composited ABOVE the dip is untouched, and a dip on V3 under cards
+on V4 is built to do exactly that. R1's protected block is one connected
+region at frame y1486-1560, visually confirmed as the `renyan` Twitch
+watermark, which OBS composites above the game. **Consistent with a content
+change or with an editorial dip. The pixels do not discriminate.**
+
+**THE GROUNDS THAT HOLD** are independent of the reference, which matters
+because the standing rule is that "the reference does not do this" is not by
+itself a reason to remove anything.
+
+1. **It punctuates nothing.** The content pane's frame-to-frame delta
+   measures **median 0.0005, max 0.27, with ZERO frames above 0.5 across all
+   2822** — one static roster board start to finish. The dip's own rule when
+   it was built was "it goes where a document changes and nowhere else", and
+   in this cut there is nowhere. (The older note recording a change at 5.5s
+   was true of the 67.2s cut, which began before the tweet-to-board switch.)
+2. **Dip 1 fired mid-hold under a motionless card.** Measured across it: the
+   board falls uniformly — right edge 94.0 → 54.7, left edge 50.2 → 29.5,
+   board top 40.8 → 24.1, all ×0.58-0.59 — while the card body reads
+   **82.3361 before and 82.3371 during**. Identical to four decimals. For
+   0.567s everything except the card got 41% darker and came back, with
+   nothing arriving or leaving. That reads as a brightness glitch.
+3. **Dip 2 ramped through an entrance.** It sits in a real card gap, but its
+   hold runs past 33.20 where `rm_ExKru` begins, so the biggest graphic in
+   the clip played its 22-frame reveal — scale 0.78→1.00, blur 9→0,
+   clip-path wipe — on a backdrop that was changing exposure.
+4. **The act boundaries cannot rescue it.** The CDL steps on V2, the
+   facecam; the dip darkens V1, the content pane. Different panes, so it
+   cannot cover the grade step.
+
+**And the one alternative worth naming was rejected on merit, not missed:**
+holding dip 1 as a permanent scrim under the card. Dimming the board so a
+card can land is the same stacked compensation the palette pass deleted the
+hairline, the shadow bloom, the inset highlight and the gold rule for. The
+chassis measures 1.67:1 against the board with its own 2px keyline; it does
+not need the board to get out of the way.
+
+**What survives from the original dip work:** Resolve composites in linear
+light and the transfer is `(1 - alpha) ** 2.4` — the identical clip measures
+0.189 luma ratio in ffmpeg and 0.015 in Resolve, a 12x difference — so
+anything composited in Resolve with an intended opacity still has to be
+solved through that gamma. The track order it motivated is unaffected.
+
+### Re-solving the colour arc: a white in his own room is the measurement
+
+**Invert the CDL rather than re-render.** ASC CDL is `(in*S + O)^P` then a
+saturation lerp toward luma, and every step is invertible, so a candidate
+grade can be applied to the *recovered ungraded* pixels of a delivered frame.
+`scratchpad/v44/cdl.py` is nine lines. It made twelve candidates comparable
+in minutes instead of twelve renders — **but see the warning below; it is a
+screening tool, not the answer.**
+
+**The first thing it showed is that the clash was manufactured.** The
+ungraded facecam measures **R−B +5 to +7**: his room is naturally warm and
+already sits where the chassis (+11) and the paper (+9) sit. The arc pushed
+act 1 to −4.8, a 12-point swing into cool away from both.
+
+**THE MEASUREMENT THAT DISCRIMINATED is a real white in his room** — the
+IKEA shelf, the picture frame, the YouTube plaque. Mask the near-neutral
+brights (luma > 165, chroma < 45) **on the recovered ungraded pixels**, so
+the identical pixel set is tracked through every candidate, then read their
+R−B back off each one. Pane-mean R−B separated nothing; this separated
+everything. A white that swings across a clip is the definition of footage
+that has been graded.
+
+| | act 1 | act 2 | act 3 | swing |
+|---|---|---|---|---|
+| white-point error, before | −18.1 | −6.0 | +29.8 | **48.0** |
+| after | **−4.6** | −6.0 | **−0.1** | **5.9** |
+| face pixels at R ≥ 254, before | 0.003% | 0.330% | **2.327%** | |
+| after | 0.002% | 0.393% | **0.730%** | |
+| pane R−B, after | +7.4 | +5.1 | +18.9 | |
+| saturation, after | 31.3 | 41.3 | 49.6 | |
+
+The arc survives and still grows on both axes; what went is the swing.
+
+**COUNT BLOWN FACE PIXELS PER CHANNEL, AND CHECK WHETHER THEY ARE A SLAB.**
+Act 3 of the old grade put 2.33% of his face at R ≥ 254 with a red standard
+deviation of **1.53** across the top luminance decile — approaching one dead
+value, which renders as a solid blown patch on the cheekbone rather than a
+speckle of specular highlights. Now 0.73% at sd **7.60**: real variation.
+This is also what rejected the candidate that won the panel's vote outright
+— it moved the same defect into act 2, putting **15.93% of his face at one
+dead value** at t=30, on the act that is 39% of the clip.
+
+**PUT THE WARMTH IN OFFSET, NOT SLOPE.** Slope is gain, so it scales the
+highlights hardest and lands the warmth on exactly the white objects the
+test is watching. Act 3 moves red from slope to offset and mirrors it in
+blue, which holds the skin and cools only the highlights. Act 1's cool was a
+**blue gain of 1.09**; taking it down removes the cool with red left
+untouched, so no new face clipping is even possible.
+
+**ACT 2 IS UNTOUCHED AND SHOULD HAVE STAYED THAT WAY ALL ALONG.** Measured
+in S-CIELAB on the real graded pixels, one R−B point of pane shift is worth
+0.249 ΔE00 (sd 0.018 across seven pairs), so act 2's spread across all
+candidates is at or inside the just-noticeable difference. It is also the
+grade that has shipped for many versions. Changing it could only lose.
+
+**THE MODEL IS NOT THE RENDER, AND THAT COST A CYCLE.** The inversion
+round-trips to 0.000/255 — which proves only that the arithmetic is
+self-consistent, not that Resolve grades in the same space. Measured against
+the actual render, **Resolve responds about half as much as the code-value
+model predicts**: the model said act 1's whites would land 0.2 off source
+and act 3's 2.3 off; the render gave 9.1 and 8.3. Use the model to screen
+candidates, then **take two real renders, measure the sensitivity, and solve
+from that** — one iteration of exactly this took 9.1/8.3 to 4.6/0.1.
+
+**One judge's pivotal evidence did not reproduce, and it is worth
+recording.** It reported the ungraded skin arc as 73.5 → 49.6 → 37.8 — "his
+face is warmest in the news and coolest on the cost" — and three of four
+judges ranked its pick first partly downstream of that. Measured across
+eleven frames the skin is **72.3 / 77.6 / 75.3, flat**; what cools is the
+room's *neutrals* (−0.8 → −8.8 → −14.7). A white-balance drift read as a
+skin arc. The conclusions survived on other evidence; the reasoning did not,
+which is the reason to run the adversarial pass at all.
 
 ### Facecam punches are CUTS, and the base shots come off V1
 
@@ -1736,7 +1864,14 @@ genuinely strong technique left. The risk is specific — our facecam is a
 cut from soft pixels, and there is little headroom above his head for type
 to rise into. Worth a test, not worth assuming.
 
-### The black dip, and what Resolve does to an alpha overlay
+### The black dip — SUPERSEDED, see "The pane dip is REMOVED" above
+
+**Its premise is withdrawn.** R1's two dark runs are not established as
+edits, the pixel test below cannot tell an overlay from a content change,
+and the dip punctuates nothing in this cut. What survives is the
+linear-light transfer. Kept for the reasoning, not as instruction.
+
+#### (superseded) The black dip, and what Resolve does to an alpha overlay
 
 **Measured on R1 at 1:11, frame by frame, and all three assumptions were wrong:**
 
