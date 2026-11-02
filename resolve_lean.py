@@ -65,9 +65,12 @@ CHAT = ("rm_Chat", 0.0, None)        # None: the whole picture length
 # frame, masked by the dip at 14.80. A card that animates out over 12-15
 # frames cannot have those frames trimmed away by the schedule.
 EXHIBITS = [
-    ("rm_ChipAmer",  1.20, 1.83),   # 34/40 Americas slots filled
-    ("rm_Tweet",     3.30, 2.60),   # the Global Esports announcement
-    ("rm_StatCard",  7.60, 2.30),   # 10 -> 8 partner teams per region
+    # rm_ChipAmer and rm_StatCard are GONE. George: "now it's going way
+    # too quickly - keep the twitch chat and remove chip amer, stat card
+    # is pointless". The chip was also the one card the rhythm could not
+    # accommodate — it started 1.20 and the tweet 3.30, too close to fit a
+    # chat window between them.
+    ("rm_Tweet",     3.30, 3.57),   # the Global Esports announcement
     # Lengthened from 3.45s to take up the slack left by rm_ExStrip, which is
     # gone: the two figures it carried sit at the extreme ends of the strip
     # PNG, so the contiguous run containing both is the whole strip and no
@@ -80,12 +83,12 @@ EXHIBITS = [
     # empty BENCH / OPTIONS column, so a full 5/5 roster read as white
     # space. Dropping it also opens 22.90-28.80, the clip's only long gap,
     # which is where the chat now gets the pane to itself.
-    ("rm_Grid",     28.80, 2.70),   # all eight Americas teams populating
-    ("rm_ExKru",    33.20, 2.70),   # KRU 1/5, with the marker
+    ("rm_Grid",     28.80, 4.00),   # all eight Americas teams populating
+    ("rm_ExKru",    33.20, 4.30),   # KRU 1/5, with the marker
     # The two freshest stories, each through an independent verification
     # pass. Real published headlines, tilted, players under them.
-    ("rm_StoryPrx", 37.60, 2.80),   # Paper Rex parts ways with Jinggg
-    ("rm_StorySen", 42.10, 3.07),   # Sentinels release JonahP and Jerrwin
+    ("rm_StoryPrx", 37.60, 4.25),   # Paper Rex parts ways with Jinggg
+    ("rm_StorySen", 42.10, 4.00),   # Sentinels release JonahP and Jerrwin
 ]
 MIN_GAP_FRAMES = 6                  # one chip exit
 

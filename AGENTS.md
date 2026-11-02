@@ -1093,7 +1093,75 @@ region of the VOD frame, already a 3x upscale to fill 1080×806; cropping to
 1.16:1 would mean taking 304×262 and blowing it up 3.55x. The seam stays at
 0.42 and the chat card goes below the captions instead.
 
-### The chat is the DEFAULT state; the graphics interrupt it
+### Buying chat time out of card durations was the wrong lever
+
+George, on v47: *"now it's going way too quickly - keep the twitch chat and
+remove chip amer, stat card is pointless, just keep the stories for future
+reference, keep chat on the screen and let it come in and out."*
+
+The previous pass took **7.45s out of the card durations** to open a chat
+window after every card. It worked arithmetically and failed on screen,
+and the reason is measurable: **it is the SWITCHING RATE that reads as
+fast, not the individual durations.**
+
+| | v47 | v48 |
+|---|---|---|
+| cards | 9 | **7** |
+| chat windows | 9 | **4** |
+| states in 46.9s | **18** | **11** |
+| one change every | **2.6s** | **4.3s** |
+| card durations | shortened to 2.3–3.1s | **back to full, 3.5–4.8s** |
+
+So the room comes from **removing cards, not from shortening them.**
+Dropping `rm_ChipAmer` and `rm_StatCard` buys the same chat time as
+shortening six cards did, and nothing is rushed. The lesson generalises:
+when a pane has to carry two kinds of element, cut the count before you cut
+the durations — a shorter card still costs a state change, and the state
+changes are what the viewer feels.
+
+`rm_ChipAmer` was also the one card the rhythm could never accommodate: it
+started at 1.20 against the tweet's 3.30, and 2.10s cannot hold a card and
+a chat window.
+
+**And a note on the other direction.** The card durations restored here
+(Tweet 3.57, Pair 4.80, Ratio 3.50, Grid 4.00, ExKru 4.30, StoryPrx 4.25,
+StorySen 4.00) are the ones that shipped through v44 and v46 without a
+pacing complaint. The shortened set was never independently wrong — every
+card still cleared its own animation with 1.4s+ of settled hold — it was
+wrong *in aggregate*.
+
+### The back half has no room for chat, and the anchors are why
+
+With the two cards out, three remain back to back: **Grid → ExKru →
+StoryPrx → StorySen**, 28.80 to 46.10, 17.3s of continuous card. Their
+anchors sit 4.4s apart and the cards are 4.0–4.3s, so there is no gap to
+put chat in without shortening them again — which is the lever that just
+failed.
+
+Two honest options, both modelled before choosing:
+
+| | cards | states | change every | longest chat stretch |
+|---|---|---|---|---|
+| **A** (shipped as v48) | 7 | 11 | 4.3s | 5.7s |
+| **B** — Grid and ExKru out too | 5 | 9 | 5.2s | **14.5s** |
+
+B reads more calmly and gives the chat 25s, but it opens a 14.5s unbroken
+chat stretch in the middle, which is not "come in and out" either. B only
+works if a story card moves earlier to break it — and the story cards CAN
+move, unlike the exhibits: `rm_ExKru` is anchored to "those people that get
+replaced", while the two news stories are free-floating inserts with no
+line of their own. Moving `StoryPrx` to ~28.0 and `StorySen` to ~37.0 gives
+5 cards, 4 chat windows, a change every 5.2s and a longest stretch of 5.9s.
+
+Recorded rather than decided, because which cards survive is George's call
+and "just keep the stories" reads both ways.
+
+### The chat is the DEFAULT state; the graphics interrupt it — PARTLY SUPERSEDED
+
+**The inversion stands; the way it was paid for does not.** Buying chat
+time out of card durations made the clip read fast — see the section
+above. The durations are back at full and the room comes from removing
+two cards instead.
 
 George: *"it needs to be more apparent throughout the whole video. So it
 needs to be like on the screen, and then it needs to go out when we're

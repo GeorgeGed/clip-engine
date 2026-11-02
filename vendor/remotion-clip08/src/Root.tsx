@@ -14,7 +14,13 @@ import {Stage, Dir, Kind, EXIT} from './motion';
 
 const V = {fps: 60, width: 1080, height: 1920} as const;
 
-// CARD DURATIONS ARE SET BY THE CHAT, not by how long a card wants.
+// CARD DURATIONS ARE BACK AT FULL. The previous pass took 7.45s out of
+// them to buy chat windows and George's verdict was "now it's going way
+// too quickly" — measured, that build changed state every 2.6s. Removing
+// ChipAmer and StatCard buys the same room without rushing anything:
+// 11 states instead of 18, one change every 4.3s.
+//
+// (kept for the record) CARD DURATIONS WERE SET BY THE CHAT:
 //
 // George: "it needs to be more apparent throughout the whole video ... it
 // needs to be on the screen, and then it needs to go out when we're putting
@@ -98,17 +104,11 @@ export const Root: React.FC = () => (
       defaultProps={{messages: chat as any, badgeMap: badgeMap as any,
         windows: chatWindows as any}} />
 
-    <Composition id="ChipAmer" component={XChipLeft} durationInFrames={110} {...V}
-      defaultProps={{figure: '34/40', label: 'AMERICAS SLOTS FILLED', side: 'left',
-        top: 1230, exitH: 110}} />
 
-    <Composition id="Tweet" component={XTweet} durationInFrames={156} {...V}
+    <Composition id="Tweet" component={XTweet} durationInFrames={214} {...V}
       defaultProps={{src: staticFile('tweet_full.png'), top: 1104, tilt: -2.6,
         exitH: 435}} />
 
-    <Composition id="StatCard" component={XStatCard} durationInFrames={138} {...V}
-      defaultProps={{from: '10', to: '8',
-        label: 'PARTNER TEAMS PER REGION', top: 1205, exitH: 190}} />
 
     <Composition id="Pair" component={XPair} durationInFrames={288} {...V}
       defaultProps={{aValue: 139, aLabel: 'SIGNED', bValue: 274,
@@ -144,7 +144,7 @@ export const Root: React.FC = () => (
       defaultProps={{src: staticFile('crop_nrg.png'), width: 816, top: 1057,
         fromX: 668, exitH: 486}} />
 
-    <Composition id="Grid" component={XGrid} durationInFrames={162} {...V}
+    <Composition id="Grid" component={XGrid} durationInFrames={240} {...V}
       defaultProps={{top: 1090, highlight: 'KRÜ ESPORTS', exitH: 420, rows: [
         {team: '100 THIEVES', signed: 5, of: 5},
         {team: 'G2 ESPORTS',  signed: 5, of: 5},
@@ -156,18 +156,18 @@ export const Root: React.FC = () => (
         {team: 'SENTINELS',   signed: 4, of: 5},
       ]}} />
 
-    <Composition id="ExKru" component={XExhibit} durationInFrames={162} {...V}
+    <Composition id="ExKru" component={XExhibit} durationInFrames={258} {...V}
       defaultProps={{src: staticFile('crop_kru.png'), width: 816, top: 1057,
         fromX: 668, exitH: 486,
         marker: {cx: 560, cy: 212, rx: 150, ry: 128}}} />
 
-    <Composition id="StoryPrx" component={XStory} durationInFrames={168} {...V}
+    <Composition id="StoryPrx" component={XStory} durationInFrames={255} {...V}
       defaultProps={{tilt: -3.4,
         headline: 'Paper Rex parts ways with Jinggg after five years',
         photos: [{src: staticFile('p_jinggg.jpg')}],
         top: 1029, photoHeight: 430, exitH: 600}} />
 
-    <Composition id="StorySen" component={XStory} durationInFrames={184} {...V}
+    <Composition id="StorySen" component={XStory} durationInFrames={240} {...V}
       defaultProps={{tilt: 3.1,
         headline: 'Sentinels release JonahP and Jerrwin',
         photos: [{src: staticFile('p_jonahp.jpg')},

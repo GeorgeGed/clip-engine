@@ -63,7 +63,7 @@ WINDOWS = ROOT / "vendor/remotion-clip08/public/chat_windows.json"
 # inside a second, which is the flicker, not the feature. The cards were
 # re-timed to open a gap after each one — see Root.tsx — so this now
 # yields nine windows instead of two.
-MIN_GAP = 1.0
+MIN_GAP = 1.5
 LEAD, TAIL = 0.10, 0.08      # the chat is on V3 BELOW the cards, so a few
                              # frames of overlap are covered, not collided
 
