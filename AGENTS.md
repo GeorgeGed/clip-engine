@@ -1093,6 +1093,138 @@ region of the VOD frame, already a 3x upscale to fill 1080×806; cropping to
 1.16:1 would mean taking 304×262 and blowing it up 3.55x. The seam stays at
 0.42 and the chat card goes below the captions instead.
 
+### The chat overlay, developed — and three reversals of what R5 measured
+
+George, on the first test: *"the overlay looks good was that taken directly
+from the moment of fns talking? - also it doesn't look animated at all, add
+the remotion stuff, remove the border, make it so it APPEARS over what he's
+looking at on stream, and make it so the other pop ups you did for the
+earlier version show up too - when the pictures of jingg and jonah come up
+the chat should fade out - so the chat can come in and out you know?"*
+
+**Yes, it is his own chat from that moment.** VOD 2905408276, offsets
+5978.8–6045.9, which is clip 8's source window, each message remapped
+through the same keeps `build_v7.py` cut with. The messages sit on the line
+he was speaking when they were typed.
+
+**THREE REVERSALS, all his call, all recorded as reversals.** The first
+build was instant, borderless-less and self-contained because that is what
+R5 measures. He has watched it and wants otherwise:
+
+| | R5 measures | we now do | why |
+|---|---|---|---|
+| arrival | one frame, whole message height, no fade | spring over 11f, rise 16px, fade in | "it doesn't look animated at all" |
+| container | dark card, 64px radius, cyan shoulder plate | nothing drawn | "remove the border" |
+| placement | replaces the lower pane | floats over the board | "make it so it APPEARS over what he's looking at" |
+
+The R5 measurements stay in this file as a record of what R5 does. They are
+no longer what we do.
+
+**ANIMATING A STACK WITHOUT MEASURING IT.** A new message has to displace
+the ones above, and its height is unknown until the browser has wrapped it
+— so there is nothing to interpolate. The grid trick does it: a single-row
+grid whose `grid-template-rows` goes `0fr -> 1fr` animates from zero to the
+child's natural height with the child clipped meanwhile. No ref, no measure
+pass, correct for every wrap and every emote. Animate the gap on the same
+progress or the spacing opens before the text arrives. Verified on the
+alpha: across one arrival the stack centroid moves −17.3, +35.0, −3.0px over
+successive samples and coverage goes 122080 → 101422 → 131913, i.e. it is
+genuinely growing rather than cutting.
+
+**With no panel behind it, the text needs a ground.** A coloured username
+over a busy roster board is unreadable on its own, and a scrim would be the
+border he asked to remove. A two-layer text shadow does it instead, plus a
+`drop-shadow` on the badge images.
+
+### Ten graphics and a chat do not both fit, and the number says so
+
+Taking "the chat should fade out" literally and applying it to every card
+puts the chat at full strength for **0.35 seconds of 47** — the ten cards
+cover 76% of the clip, so a blanket rule makes the chat a flicker rather
+than a presence. The first attempt did exactly that and was invisible.
+
+So the fade is graded by what the graphic IS, in `build_chat.py`'s `LEVEL`:
+
+| level | which | reasoning |
+|---|---|---|
+| **0.00** | `Tweet`, `StoryPrx`, `StorySen` | a photograph or a whole document. George named these two by name; a face on screen takes the eye completely |
+| **0.32** | the drawn exhibits and figure cards | the chat survives as movement behind them, which is what keeps the pane alive. 0.15 was tried and is not there at all |
+| **0.70** | `ChipAmer` | a 1.8s tab anchored off the frame edge. It displaces nothing |
+
+**It blurs as it dims.** Dimming alone leaves it legible, and legible text
+behind a graphic is still competing for the eye — 2.4px at full dim.
+Leaving takes 0.35s and returning 0.5s, the same asymmetry as a card exit
+and for the same reason: the viewer is reading the graphic, not the chat.
+
+The schedule is generated from `resolve_lean.EXHIBITS` rather than typed,
+so it cannot drift from the cards it is reacting to.
+
+**The honest caveat.** Even graded, this is a crowded pane: ten graphics and
+a chat track in 47 seconds, with the chat at full strength only in the gaps.
+If it reads busy the fix is fewer cards on a chat build, not a lower chat —
+and that is an editorial call, not a measurement.
+
+### Track order, with the chat in it
+
+`V1 content | V2 facecam | V3 chat | V4 cards | V5 titles | V6 captions`
+
+V3 is the slot the pane dip used to occupy, which is now free. The chat
+belongs **below** the cards: a graphic should land on top of it, not beside
+it. The dimming is baked into the clip because Resolve's `Opacity` is one
+static value per timeline item and this needs ten of them.
+
+### Emotes come back, but almost none of them are Twitch's
+
+`twitch_chat.py` reads emote fragments and the component renders them from
+the CDN. In practice they barely appear: **0 of 47 fragments** in the
+densest crowd burst found in the archive (vod 2882589453 @15965, an ace),
+and 0 across clip 8's whole window. The hype there is typed as words —
+"gg", "ACE", "WWWW", "Hooolyyy".
+
+The limit to know about: Twitch's GQL returns **first-party emotes only**
+(global and channel subscriber). **BTTV, FFZ and 7TV do not appear** — a
+big channel's chat is mostly those, and they would need their own APIs and
+their own emote-name-to-image maps. Until that is built, an emote-heavy
+window will render as plain text where the viewer saw pictures. Not a
+blocker for this clip; it would be for a hype moment.
+
+### LottieFiles — licence-clean, and mostly the wrong shape for this project
+
+George sent the free-animations library. Checked rather than assumed,
+because this file has recorded two licence traps already.
+
+* **The Lottie Simple License permits commercial use** — "download,
+  reproduce, modify, publish, distribute, publicly display, and publicly
+  digitally perform ... including for commercial purposes" — and
+  **attribution is not required**, only encouraged. One clause worth
+  knowing: distribution of the FILES must carry the same terms, a
+  share-alike on the asset. Rendering an animation into pixels is not
+  redistributing the file, so a delivered clip is clear; shipping the .json
+  to a client is not.
+* **Check per file.** The site mixes Free and Premium, and a creator can
+  set other terms. Same rule as npm: read the field on the thing you are
+  taking, not the field on the site.
+* **`@remotion/lottie` is `SEE LICENSE IN LICENSE.md`** — the Remotion
+  company licence, i.e. the same seat gate as `cli`, `renderer` and
+  `bundler`. Adding it changes nothing, because that gate already applies
+  to rendering at all. `lottie-web` itself is **MIT (5.13.0)** and can be
+  driven from a plain component if the gate ever needs avoiding — but drive
+  it with `goToAndStop(frame)`, never let it animate on rAF, or it is the
+  same determinism trap already recorded for framer-motion and anime.js.
+
+**Where it does NOT belong.** This project's rule is that nothing on screen
+is a phrase or a shape I invented — every figure is read off the board or
+independently sourced. A generic Lottie flourish is invented by
+definition, and the catalogue is full of exactly the product-hook furniture
+already refused once: confetti, light bursts, odometer counters, logo
+stings. Reaching for it to make a clip livelier would repeat the mistake
+the zoom punches made.
+
+**Where it might.** Things that are structure rather than content and that
+we currently hand-build: a pointer or arrow, a transition wipe, a
+progress/reveal on a figure that is already sourced. Worth a look only
+against a specific need, with George picking the file.
+
 ### The pane dip is REMOVED, and the obvious argument for it is wrong
 
 Asked to re-solve the dip's depth against the new chassis, the measurement

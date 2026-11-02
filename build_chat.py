@@ -36,10 +36,40 @@ from engine import twitch_chat                                  # noqa: E402
 import build_overlays                                           # noqa: E402
 
 VOD = "2905408276"
+FRAMES_S = 2812 / 60
 REGION_START = 5978.8        # clip 8's in_point in the VOD, from ranked.json
 REGION_END = 6045.89
 CHAT = ROOT / "jobs/fns-2905408276/chat_clip08.json"
 OUT = ROOT / "vendor/remotion-clip08/public/chat.json"
+FADES = ROOT / "vendor/remotion-clip08/public/chat_fades.json"
+
+# How present the chat stays while each graphic is up.
+#
+# George: "when the pictures of jingg and jonah come up the chat should fade
+# out - so the chat can come in and out you know?"
+#
+# Taken literally and applied to every card, the chat would be absent for 39
+# of the clip's 47 seconds — the graphics cover almost all of it, so a blanket
+# rule makes the chat a flicker rather than a presence. So it is graded by
+# what the graphic IS:
+#
+#   0.00  the three cards carrying photographs or a whole document. A face
+#         on screen takes the eye completely and nothing should compete.
+#   0.32  the drawn exhibits and figure cards: the chat survives as
+#         movement behind them, which is what keeps the pane alive. 0.15
+#         was tried first and is invisible — with ten cards covering 76%
+#         of the clip the chat then exists for 0.35 of 47 seconds.
+#   0.70  the side chip, 1.8s and anchored off the frame edge. It displaces
+#         nothing.
+#
+# It also blurs as it dims (in Chat.tsx). Dimming alone leaves it legible,
+# and legible text behind a graphic is still competing for the eye.
+LEVEL = {
+    "rm_Tweet": 0.0, "rm_StoryPrx": 0.0, "rm_StorySen": 0.0,
+    "rm_ExKru": 0.32, "rm_ExNrg": 0.32, "rm_Grid": 0.32,
+    "rm_StatCard": 0.32, "rm_Pair": 0.32, "rm_Ratio": 0.32,
+    "rm_ChipAmer": 0.70,
+}
 
 # The words the clip is actually about, for the relevance read.
 TOPIC = re.compile(
@@ -88,6 +118,17 @@ def main():
                 if TOPIC.search("".join(f["text"] for f in m["frags"]))]
 
     OUT.write_text(json.dumps(kept, indent=1))
+
+    # the schedule, read off resolve_lean's own EXHIBITS so the two cannot
+    # drift apart the way a hand-typed copy would
+    import resolve_lean
+    fades = [{"from": at, "to": round(at + dur, 2),
+              "level": LEVEL.get(name, 0.18)}
+             for name, at, dur in resolve_lean.EXHIBITS]
+    FADES.write_text(json.dumps(fades, indent=1))
+    covered = sum(f["to"] - f["from"] for f in fades if f["level"] < 0.3)
+    print(f"  {len(fades)} fade windows; the chat is displaced or dimmed for "
+          f"{covered:.1f}s of {FRAMES_S:.1f}s ({100 * covered / FRAMES_S:.0f}%)")
     vis = [m for m in kept if m["t"] >= 0]
     span = vis[-1]["t"] - vis[0]["t"] if vis else 0
     print(f"  {len(kept)} mapped onto the cut ({pre} of them pre-roll, already "

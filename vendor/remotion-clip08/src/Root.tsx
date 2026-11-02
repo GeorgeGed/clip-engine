@@ -9,6 +9,7 @@ import {TweetCard} from './Tweet';
 import {ChatScroll} from './Chat';
 import chat from '../public/chat.json';
 import badgeMap from '../public/badgemap.json';
+import chatFades from '../public/chat_fades.json';
 import {Stage, Dir, Kind, EXIT} from './motion';
 
 const V = {fps: 60, width: 1080, height: 1920} as const;
@@ -70,11 +71,12 @@ const XBait     = exits(ClickbaitLine, {dir: 'up', kind: 'plain', travel: 0,
 
 export const Root: React.FC = () => (
   <>
-    {/* The streamer's own chat, replayed under the facecam. A TEST, not
-        part of the delivered cut — it replaces the lower pane rather than
-        sitting over it, so it is rendered opaque and composited on its own. */}
+    {/* The streamer's own chat, replayed OVER what he is looking at. It is
+        an alpha overlay on V3 like any other, and it steps out of the way
+        when a graphic lands — see chat_fades.json. */}
     <Composition id="Chat" component={ChatScroll} durationInFrames={2812} {...V}
-      defaultProps={{messages: chat as any, badgeMap: badgeMap as any}} />
+      defaultProps={{messages: chat as any, badgeMap: badgeMap as any,
+        fades: chatFades as any}} />
 
     <Composition id="ChipAmer" component={XChipLeft} durationInFrames={110} {...V}
       defaultProps={{figure: '34/40', label: 'AMERICAS SLOTS FILLED', side: 'left',

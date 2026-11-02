@@ -1,6 +1,6 @@
 """Assemble clip 08 on the Resolve timeline.
 
-    V1 content   V2 facecam (colour arc)   V3 (empty)
+    V1 content   V2 facecam (colour arc)   V3 chat
     V4 graphics  V6 captions               A2 sound
 
 George: "I like the fact that we're kind of having pop-ups like every other
@@ -40,6 +40,17 @@ DIPS = ()
 # Apple emoji, sitting just under the facecam. It runs over the opening
 # stretch where a scroller decides, then leaves.
 BAIT = ("rm_Bait", 0.80, 17.00)
+
+# The streamer's own chat, replayed OVER the board he is reading from.
+# George: "make it so it APPEARS over what he's looking at on stream ...
+# when the pictures of jingg and jonah come up the chat should fade out -
+# so the chat can come in and out you know?"
+#
+# It goes on V3, BELOW the graphics on V4, so a card lands on top of it
+# rather than beside it. The stepping out of the way is baked into the clip
+# itself from `chat_fades.json`, because opacity in Resolve is one static
+# value per clip and this needs ten of them.
+CHAT = ("rm_Chat", 0.0, None)        # None: the whole picture length
 
 # (clip, start seconds, duration seconds)
 #
@@ -239,7 +250,7 @@ def main():
         last = at
     print("sfx:", bed(cues, total / FPS, out=OUT / "sfx.wav"))
 
-    names = ["cap_kin.mov", "sfx.wav", f"{BAIT[0]}.mov"] + \
+    names = ["cap_kin.mov", "sfx.wav", f"{BAIT[0]}.mov", f"{CHAT[0]}.mov"] + \
             [f"{n}.mov" for n, _a, _d in EXHIBITS]
     r.GetMediaStorage().AddItemListToMediaPool([str(OUT / n) for n in names])
     pool = {c.GetName(): c for c in mp.GetRootFolder().GetClipList()}
@@ -282,6 +293,7 @@ def main():
 
     for n, at, dur in EXHIBITS:
         add(f"{n}.mov", at, dur, 4)
+    add(f"{CHAT[0]}.mov", CHAT[1], total / FPS, 3)
     add(f"{BAIT[0]}.mov", BAIT[1], BAIT[2], 5)
     add("cap_kin.mov", 0.0, total / FPS, 6)
     add("sfx.wav", 0.0, total / FPS, 2, media=2)
