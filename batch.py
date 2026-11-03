@@ -296,7 +296,11 @@ def cmd_build(job, args):
                                "clip_file_in_point_s": clip.in_point},
                     "rights": {"permission": chan.get("permission"),
                                "note": chan.get("permission_note")},
-                    "chat_overlay": bool((d / f"chat_{clip.index:02d}.json").exists()),
+                    # whether the overlay was BUILT, not whether chat was
+                    # fetched — the topicality gate refuses it on half the
+                    # clips, and a sidecar that claims one that is not there
+                    # is a false statement in a deliverable
+                    "chat_overlay": (d / f"overlays_{clip.index:02d}/rm_Chat.mov").exists(),
                     "qc": [{"check": f.check, "ok": f.ok, "detail": f.detail}
                            for f in rep.findings],
                 }, indent=1))

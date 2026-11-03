@@ -13,7 +13,7 @@
   "permission": "explicit",
   "note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release."
  },
- "chat_overlay": true,
+ "chat_overlay": false,
  "qc": [
   {
    "check": "duration",
