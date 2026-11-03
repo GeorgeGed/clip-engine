@@ -60,6 +60,11 @@ class Channel:
     # against a real white in the streamer's own room; see AGENTS.md.
     arc: list | None = None
     vod_id: str | None = None
+    # "Never ship a source without a rights basis" is a [checked] gate in
+    # this project and the batch path had no field for it. One of
+    # explicit | affiliate | client_owned, plus who granted it and when.
+    permission: str | None = None
+    permission_note: str = ""
 
     @property
     def cam_wh(self) -> tuple[int, int]:

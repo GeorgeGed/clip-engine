@@ -1,0 +1,763 @@
+[
+ {
+  "n": 1,
+  "src_s": 101.3,
+  "muted": 0.426,
+  "cut_s": 53.0,
+  "shots": 18,
+  "cuts_min": 19.2,
+  "virality": 0.63,
+  "strength": 0.5,
+  "subject": "Speaker reveals he is coaching a team in the open qualifier and streaming it",
+  "verdict": "reject",
+  "why": [
+   "43% muted",
+   "19 cuts/min"
+  ]
+ },
+ {
+  "n": 2,
+  "src_s": 44.0,
+  "muted": 0.434,
+  "cut_s": 24.2,
+  "shots": 13,
+  "cuts_min": 29.7,
+  "virality": 0.588,
+  "strength": 0.35,
+  "subject": "Her one-sided friendship with Pedro, which she admits is basically parasocial",
+  "verdict": "reject",
+  "why": [
+   "43% muted",
+   "30 cuts/min"
+  ]
+ },
+ {
+  "n": 3,
+  "src_s": 20.1,
+  "muted": 0.037,
+  "cut_s": 18.7,
+  "shots": 4,
+  "cuts_min": 9.6,
+  "virality": 0.571,
+  "strength": 0.3,
+  "subject": "Whether Cryo and Austin leave when their contracts end",
+  "verdict": "reject",
+  "why": [
+   "only 19s left"
+  ]
+ },
+ {
+  "n": 4,
+  "src_s": 50.2,
+  "muted": 0.132,
+  "cut_s": 40.9,
+  "shots": 10,
+  "cuts_min": 13.2,
+  "virality": 0.565,
+  "strength": 0.3,
+  "subject": "Why he only watches Worlds finals through K drill's play-by-play co-stream",
+  "verdict": "build",
+  "why": []
+ },
+ {
+  "n": 5,
+  "src_s": 56.2,
+  "muted": 0.322,
+  "cut_s": 36.5,
+  "shots": 8,
+  "cuts_min": 11.5,
+  "virality": 0.547,
+  "strength": 0.55,
+  "subject": "Cane's era as the trendsetter that NA streamers imitate",
+  "verdict": "reject",
+  "why": [
+   "32% muted"
+  ]
+ },
+ {
+  "n": 6,
+  "src_s": 47.1,
+  "muted": 0.053,
+  "cut_s": 43.2,
+  "shots": 6,
+  "cuts_min": 7.0,
+  "virality": 0.543,
+  "strength": 0.62,
+  "subject": "Open qualifiers in the new circuit will be plagued by tech issues, but still beat franchising",
+  "verdict": "build",
+  "why": []
+ },
+ {
+  "n": 7,
+  "src_s": 67.3,
+  "muted": 0.444,
+  "cut_s": 36.2,
+  "shots": 13,
+  "cuts_min": 19.9,
+  "virality": 0.541,
+  "strength": 0.6,
+  "subject": "Free agent market and a guarantee that Sam won't join a team this year",
+  "verdict": "reject",
+  "why": [
+   "44% muted",
+   "20 cuts/min"
+  ]
+ },
+ {
+  "n": 8,
+  "src_s": 67.1,
+  "muted": 0.208,
+  "cut_s": 51.1,
+  "shots": 13,
+  "cuts_min": 14.1,
+  "virality": 0.537,
+  "strength": 0.6,
+  "subject": "Reaction to a team missing the partnership cycle and what it means for player job security",
+  "verdict": "build",
+  "why": []
+ },
+ {
+  "n": 9,
+  "src_s": 36.3,
+  "muted": 0.345,
+  "cut_s": 23.3,
+  "shots": 5,
+  "cuts_min": 10.3,
+  "virality": 0.534,
+  "strength": 0.6,
+  "subject": "Joke outrage at the idea of LOUD signing Lev or neon, with a Man City comparison",
+  "verdict": "reject",
+  "why": [
+   "35% muted"
+  ]
+ },
+ {
+  "n": 10,
+  "src_s": 61.8,
+  "muted": 0.409,
+  "cut_s": 34.7,
+  "shots": 15,
+  "cuts_min": 24.2,
+  "virality": 0.528,
+  "strength": 0.55,
+  "subject": "Dazzlers as a coach for crew",
+  "verdict": "reject",
+  "why": [
+   "41% muted",
+   "24 cuts/min"
+  ]
+ },
+ {
+  "n": 11,
+  "src_s": 59.0,
+  "muted": 0.318,
+  "cut_s": 39.4,
+  "shots": 9,
+  "cuts_min": 12.2,
+  "virality": 0.526,
+  "strength": 0.6,
+  "subject": "Streamer's all-streamer team: a win would embarrass the game, and he expects them to lose",
+  "verdict": "reject",
+  "why": [
+   "32% muted"
+  ]
+ },
+ {
+  "n": 12,
+  "src_s": 87.7,
+  "muted": 0.18,
+  "cut_s": 69.5,
+  "shots": 16,
+  "cuts_min": 13.0,
+  "virality": 0.525,
+  "strength": 0.7,
+  "subject": "Rant telling complaining players they have it easy and should sacrifice pay for the freedom to pick their own roster",
+  "verdict": "build",
+  "why": []
+ },
+ {
+  "n": 13,
+  "src_s": 67.7,
+  "muted": 0.587,
+  "cut_s": 26.9,
+  "shots": 11,
+  "cuts_min": 22.3,
+  "virality": 0.52,
+  "strength": 0.55,
+  "subject": "Teamless KRX players as free-agent options, and credit for the dictator in the event win",
+  "verdict": "reject",
+  "why": [
+   "59% muted",
+   "22 cuts/min"
+  ]
+ },
+ {
+  "n": 14,
+  "src_s": 72.4,
+  "muted": 0.299,
+  "cut_s": 48.5,
+  "shots": 12,
+  "cuts_min": 13.6,
+  "virality": 0.504,
+  "strength": 0.5,
+  "subject": "Why orgs pulling back investment won't hurt top players much",
+  "verdict": "reject",
+  "why": [
+   "30% muted"
+  ]
+ },
+ {
+  "n": 15,
+  "src_s": 33.2,
+  "muted": 0.124,
+  "cut_s": 28.2,
+  "shots": 7,
+  "cuts_min": 12.8,
+  "virality": 0.502,
+  "strength": 0.6,
+  "subject": "Open-qualifier system is clearly better than franchise for players",
+  "verdict": "build",
+  "why": []
+ },
+ {
+  "n": 16,
+  "src_s": 46.2,
+  "muted": 0.126,
+  "cut_s": 40.2,
+  "shots": 8,
+  "cuts_min": 10.5,
+  "virality": 0.497,
+  "strength": 0.5,
+  "subject": "Successful teams often hide internal problems, with Vitality as a speculative example",
+  "verdict": "build",
+  "why": []
+ },
+ {
+  "n": 17,
+  "src_s": 56.1,
+  "muted": 0.572,
+  "cut_s": 22.7,
+  "shots": 13,
+  "cuts_min": 31.8,
+  "virality": 0.495,
+  "strength": 0.5,
+  "subject": "Valin as an IGL move to MIBR, and a possible player swap",
+  "verdict": "reject",
+  "why": [
+   "57% muted",
+   "32 cuts/min"
+  ]
+ },
+ {
+  "n": 18,
+  "src_s": 79.5,
+  "muted": 0.303,
+  "cut_s": 53.0,
+  "shots": 20,
+  "cuts_min": 21.5,
+  "virality": 0.489,
+  "strength": 0.55,
+  "subject": "Team-by-team rundown of how the new rosters look",
+  "verdict": "reject",
+  "why": [
+   "30% muted",
+   "21 cuts/min"
+  ]
+ },
+ {
+  "n": 19,
+  "src_s": 60.2,
+  "muted": 0.415,
+  "cut_s": 34.7,
+  "shots": 11,
+  "cuts_min": 17.3,
+  "virality": 0.489,
+  "strength": 0.5,
+  "subject": "Speaker wants a cap on a rich org like LOUD stacking top free agents like neon",
+  "verdict": "reject",
+  "why": [
+   "42% muted",
+   "17 cuts/min"
+  ]
+ },
+ {
+  "n": 20,
+  "src_s": 76.7,
+  "muted": 0.56,
+  "cut_s": 31.4,
+  "shots": 13,
+  "cuts_min": 22.9,
+  "virality": 0.488,
+  "strength": 0.55,
+  "subject": "Where the big teamless players (Second, Knights, Demon1, Oxy) land, and how stacked the Americas are",
+  "verdict": "reject",
+  "why": [
+   "56% muted",
+   "23 cuts/min"
+  ]
+ },
+ {
+  "n": 21,
+  "src_s": 72.2,
+  "muted": 0.508,
+  "cut_s": 34.7,
+  "shots": 11,
+  "cuts_min": 17.3,
+  "virality": 0.487,
+  "strength": 0.55,
+  "subject": "Roster speculation: where Second goes from MIBR and whether Oxy, Second and Redox fit together",
+  "verdict": "reject",
+  "why": [
+   "51% muted",
+   "17 cuts/min"
+  ]
+ },
+ {
+  "n": 22,
+  "src_s": 162.4,
+  "muted": 0.356,
+  "cut_s": 101.0,
+  "shots": 29,
+  "cuts_min": 16.6,
+  "virality": 0.481,
+  "strength": 0.72,
+  "subject": "Defending the open qualifier system and arguing that players spoiled by franchise pay are the ones complaining",
+  "verdict": "reject",
+  "why": [
+   "36% muted",
+   "17 cuts/min"
+  ]
+ },
+ {
+  "n": 23,
+  "src_s": 111.1,
+  "muted": 0.126,
+  "cut_s": 94.7,
+  "shots": 14,
+  "cuts_min": 8.2,
+  "virality": 0.479,
+  "strength": 0.6,
+  "subject": "Players who missed out on the league can just grind open qualifiers and orgs will pick them up",
+  "verdict": "build",
+  "why": []
+ },
+ {
+  "n": 24,
+  "src_s": 113.6,
+  "muted": 0.322,
+  "cut_s": 72.8,
+  "shots": 29,
+  "cuts_min": 23.1,
+  "virality": 0.475,
+  "strength": 0.62,
+  "subject": "Open qualifiers are overblown as a controversy, though the turnaround time is a fair complaint",
+  "verdict": "reject",
+  "why": [
+   "32% muted",
+   "23 cuts/min"
+  ]
+ },
+ {
+  "n": 25,
+  "src_s": 103.6,
+  "muted": 0.322,
+  "cut_s": 68.1,
+  "shots": 17,
+  "cuts_min": 14.1,
+  "virality": 0.474,
+  "strength": 0.6,
+  "subject": "Rant against players complaining about unpaid months in the open circuit",
+  "verdict": "reject",
+  "why": [
+   "32% muted"
+  ]
+ },
+ {
+  "n": 26,
+  "src_s": 36.8,
+  "muted": 0.321,
+  "cut_s": 24.0,
+  "shots": 7,
+  "cuts_min": 15.0,
+  "virality": 0.467,
+  "strength": 0.45,
+  "subject": "MIBR's roster falling apart after a year of near-misses",
+  "verdict": "reject",
+  "why": [
+   "32% muted",
+   "15 cuts/min"
+  ]
+ },
+ {
+  "n": 27,
+  "src_s": 124.7,
+  "muted": 0.307,
+  "cut_s": 83.3,
+  "shots": 20,
+  "cuts_min": 13.7,
+  "virality": 0.464,
+  "strength": 0.6,
+  "subject": "Defending the open-qualifier circuit format with his own come-up stories",
+  "verdict": "reject",
+  "why": [
+   "31% muted"
+  ]
+ },
+ {
+  "n": 28,
+  "src_s": 54.3,
+  "muted": 0.252,
+  "cut_s": 38.2,
+  "shots": 15,
+  "cuts_min": 22.0,
+  "virality": 0.462,
+  "strength": 0.45,
+  "subject": "Streamer's read on the new Valorant agent: too much support util to be a solo duelist",
+  "verdict": "reject",
+  "why": [
+   "25% muted",
+   "22 cuts/min"
+  ]
+ },
+ {
+  "n": 29,
+  "src_s": 84.5,
+  "muted": 0.32,
+  "cut_s": 54.1,
+  "shots": 16,
+  "cuts_min": 16.6,
+  "virality": 0.461,
+  "strength": 0.5,
+  "subject": "Streamer announces he'll livestream while coaching, with chat off and a delay",
+  "verdict": "reject",
+  "why": [
+   "32% muted",
+   "17 cuts/min"
+  ]
+ },
+ {
+  "n": 30,
+  "src_s": 57.6,
+  "muted": 0.107,
+  "cut_s": 49.8,
+  "shots": 12,
+  "cuts_min": 13.2,
+  "virality": 0.459,
+  "strength": 0.45,
+  "subject": "Why building your own roster through open qualifiers beats joining a partner team",
+  "verdict": "build",
+  "why": []
+ },
+ {
+  "n": 31,
+  "src_s": 69.5,
+  "muted": 0.5,
+  "cut_s": 34.2,
+  "shots": 11,
+  "cuts_min": 17.5,
+  "virality": 0.456,
+  "strength": 0.45,
+  "subject": "What his stream team would do in the open qualifier, and the pressure of the lineup",
+  "verdict": "reject",
+  "why": [
+   "50% muted",
+   "18 cuts/min"
+  ]
+ },
+ {
+  "n": 32,
+  "src_s": 60.4,
+  "muted": 0.278,
+  "cut_s": 42.8,
+  "shots": 6,
+  "cuts_min": 7.0,
+  "virality": 0.454,
+  "strength": 0.45,
+  "subject": "Whether released franchise players like Valin get hurt by the new system",
+  "verdict": "reject",
+  "why": [
+   "28% muted"
+  ]
+ },
+ {
+  "n": 33,
+  "src_s": 168.0,
+  "muted": 0.393,
+  "cut_s": 96.6,
+  "shots": 28,
+  "cuts_min": 16.8,
+  "virality": 0.453,
+  "strength": 0.55,
+  "subject": "Who missed out on Valorant partnership and whether being non-partnered is actually better",
+  "verdict": "reject",
+  "why": [
+   "39% muted",
+   "17 cuts/min"
+  ]
+ },
+ {
+  "n": 34,
+  "src_s": 112.7,
+  "muted": 0.326,
+  "cut_s": 72.5,
+  "shots": 25,
+  "cuts_min": 19.9,
+  "virality": 0.452,
+  "strength": 0.55,
+  "subject": "Is the open qualifier turnaround too short for roster building after Champs?",
+  "verdict": "reject",
+  "why": [
+   "33% muted",
+   "20 cuts/min"
+  ]
+ },
+ {
+  "n": 35,
+  "src_s": 44.5,
+  "muted": 0.547,
+  "cut_s": 19.6,
+  "shots": 7,
+  "cuts_min": 18.4,
+  "virality": 0.448,
+  "strength": 0.4,
+  "subject": "Streamer shoots down the idea of reuniting old Optic",
+  "verdict": "reject",
+  "why": [
+   "55% muted",
+   "18 cuts/min",
+   "only 20s left"
+  ]
+ },
+ {
+  "n": 36,
+  "src_s": 36.3,
+  "muted": 0.219,
+  "cut_s": 27.4,
+  "shots": 11,
+  "cuts_min": 21.9,
+  "virality": 0.447,
+  "strength": 0.4,
+  "subject": "Whether Virus gets signed again",
+  "verdict": "reject",
+  "why": [
+   "22 cuts/min"
+  ]
+ },
+ {
+  "n": 37,
+  "src_s": 31.3,
+  "muted": 0.617,
+  "cut_s": 11.9,
+  "shots": 6,
+  "cuts_min": 25.2,
+  "virality": 0.446,
+  "strength": 0.45,
+  "subject": "Teasing his own team's roster and announcement timing",
+  "verdict": "reject",
+  "why": [
+   "62% muted",
+   "25 cuts/min",
+   "only 12s left"
+  ]
+ },
+ {
+  "n": 38,
+  "src_s": 144.2,
+  "muted": 0.493,
+  "cut_s": 67.8,
+  "shots": 24,
+  "cuts_min": 20.4,
+  "virality": 0.442,
+  "strength": 0.5,
+  "subject": "Sentinels' rumored rebuilt roster as a super team, compared to Real Madrid",
+  "verdict": "reject",
+  "why": [
+   "49% muted",
+   "20 cuts/min"
+  ]
+ },
+ {
+  "n": 39,
+  "src_s": 51.1,
+  "muted": 0.506,
+  "cut_s": 24.3,
+  "shots": 9,
+  "cuts_min": 19.7,
+  "virality": 0.441,
+  "strength": 0.4,
+  "subject": "SR missing out on Riot partnership",
+  "verdict": "reject",
+  "why": [
+   "51% muted",
+   "20 cuts/min"
+  ]
+ },
+ {
+  "n": 40,
+  "src_s": 153.3,
+  "muted": 0.399,
+  "cut_s": 89.3,
+  "shots": 23,
+  "cuts_min": 14.8,
+  "virality": 0.435,
+  "strength": 0.45,
+  "subject": "Val explains why he is coaching for fun and won't coach full-time",
+  "verdict": "reject",
+  "why": [
+   "40% muted"
+  ]
+ },
+ {
+  "n": 41,
+  "src_s": 24.9,
+  "muted": 0.374,
+  "cut_s": 14.7,
+  "shots": 6,
+  "cuts_min": 20.4,
+  "virality": 0.434,
+  "strength": 0.4,
+  "subject": "Would he sponsor a qualifier team? Only as a loan with interest",
+  "verdict": "reject",
+  "why": [
+   "37% muted",
+   "20 cuts/min",
+   "only 15s left"
+  ]
+ },
+ {
+  "n": 42,
+  "src_s": 50.0,
+  "muted": 0.205,
+  "cut_s": 37.8,
+  "shots": 10,
+  "cuts_min": 14.3,
+  "virality": 0.429,
+  "strength": 0.4,
+  "subject": "Defending the open qualifier circuit format and the need for a solid rule book",
+  "verdict": "build",
+  "why": []
+ },
+ {
+  "n": 43,
+  "src_s": 28.9,
+  "muted": 0.1,
+  "cut_s": 25.0,
+  "shots": 5,
+  "cuts_min": 9.6,
+  "virality": 0.428,
+  "strength": 0.35,
+  "subject": "Prediction that Kiko might leave NRG to return to EMEA",
+  "verdict": "build",
+  "why": []
+ },
+ {
+  "n": 44,
+  "src_s": 34.1,
+  "muted": 0.281,
+  "cut_s": 23.9,
+  "shots": 6,
+  "cuts_min": 12.6,
+  "virality": 0.428,
+  "strength": 0.35,
+  "subject": "The open qualifier as a pipeline for rookies",
+  "verdict": "reject",
+  "why": [
+   "28% muted"
+  ]
+ },
+ {
+  "n": 45,
+  "src_s": 22.1,
+  "muted": 0.51,
+  "cut_s": 9.8,
+  "shots": 3,
+  "cuts_min": 12.3,
+  "virality": 0.427,
+  "strength": 0.35,
+  "subject": "Oxy's reported move to Sun",
+  "verdict": "reject",
+  "why": [
+   "51% muted",
+   "only 10s left"
+  ]
+ },
+ {
+  "n": 46,
+  "src_s": 34.7,
+  "muted": 0.222,
+  "cut_s": 26.1,
+  "shots": 10,
+  "cuts_min": 20.7,
+  "virality": 0.422,
+  "strength": 0.35,
+  "subject": "Whether Zix could become an assistant coach",
+  "verdict": "reject",
+  "why": [
+   "21 cuts/min"
+  ]
+ },
+ {
+  "n": 47,
+  "src_s": 114.9,
+  "muted": 0.277,
+  "cut_s": 78.9,
+  "shots": 22,
+  "cuts_min": 16.0,
+  "virality": 0.411,
+  "strength": 0.5,
+  "subject": "Passport worries about the open circuit are overblown; qualifying teams will get sponsors and can sort it out",
+  "verdict": "reject",
+  "why": [
+   "28% muted",
+   "16 cuts/min"
+  ]
+ },
+ {
+  "n": 48,
+  "src_s": 33.9,
+  "muted": 0.548,
+  "cut_s": 15.1,
+  "shots": 7,
+  "cuts_min": 23.9,
+  "virality": 0.376,
+  "strength": 0.3,
+  "subject": "Streamer unsure whether his new team will really try to win",
+  "verdict": "reject",
+  "why": [
+   "55% muted",
+   "24 cuts/min",
+   "only 15s left"
+  ]
+ },
+ {
+  "n": 49,
+  "src_s": 136.2,
+  "muted": 0.475,
+  "cut_s": 67.8,
+  "shots": 26,
+  "cuts_min": 22.1,
+  "virality": 0.375,
+  "strength": 0.35,
+  "subject": "Streamer is coaching in the open qualifiers, hiding which team, and will miss most of Worlds Swiss stage",
+  "verdict": "reject",
+  "why": [
+   "47% muted",
+   "22 cuts/min"
+  ]
+ },
+ {
+  "n": 50,
+  "src_s": 111.3,
+  "muted": 0.194,
+  "cut_s": 86.4,
+  "shots": 23,
+  "cuts_min": 15.3,
+  "virality": 0.373,
+  "strength": 0.55,
+  "subject": "Tier two players shouldn't wait for org backing; just be good and win open qualifiers",
+  "verdict": "reject",
+  "why": [
+   "15 cuts/min"
+  ]
+ }
+]

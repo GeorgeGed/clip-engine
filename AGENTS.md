@@ -1093,6 +1093,129 @@ region of the VOD frame, already a 3x upscale to fill 1080×806; cropping to
 1.16:1 would mean taking 304×262 and blowing it up 3.55x. The seam stays at
 0.42 and the chat card goes below the captions instead.
 
+## THE PRODUCTION LINE: `batch.py`, and what the yield actually is
+
+George: *"the main thing is essentially making these en masse, build the
+full pipeline for developing this."*
+
+    batch.py <job> screen   # which clips can be cut at all
+    batch.py <job> prep     # words, chat, facecam — everything before Resolve
+    batch.py <job> specs    # topic dedup, then one spec per clip
+    batch.py <job> build    # serial, gated on the artifact, resumable
+    batch.py <job> report   # the manifest
+
+Four things shape it, and none of them is throughput:
+
+**1. THE YIELD IS 10 OF 50, AND THE SCREEN IS THE POINT.** Measured across
+every clip of this VOD: forty are rejected, almost all for DMCA muting at
+20-55%. Ranking by virality picks clips the pipeline cannot cut, so nothing
+downstream runs until `screen` has had its say.
+
+**2. FIVE OF THE TEN SURVIVORS ARE THE SAME TOPIC** — clips 06, 15, 23, 30
+and 42 all argue open qualifiers against franchising. Shipping them is
+shipping one idea five times, which is worse for a channel than shipping
+two clips. `specs` groups by topic and keeps the strongest of each group.
+
+**3. RESOLVE IS ONE GUI APP, SO BUILDS ARE SERIAL.** Its API is served on
+the GUI thread and Remotion's `public/` is shared, so two clips cannot
+render at once. Everything cheap — transcription, chat, facecam — runs in
+`prep` ahead of time, and each build is independent so a failure costs one
+clip, not the run.
+
+**4. EVERY CLIP IS GATED ON THE ARTIFACT**, by `engine/deliver_qc`, and a
+clip that fails goes in the manifest with the reason instead of the
+delivery folder. The channel also has to carry a `permission` or the build
+refuses to start.
+
+**The gate caught itself being useless, which is the reason to test a
+gate.** Its first version reported `PASS ... black_top 0 frames` — because
+`metadata=print` writes at INFO level and `-v error` silences it, so the
+regex matched nothing and a check that measured NOTHING read as a pass. It
+also read duration from the wrong key and reported `9e7 cards/s` as a
+warning rather than noticing it had been handed nothing. Both now raise.
+
+### THE ONE-NARRATIVE RULE APPLIES TO EVERY CHANNEL, NOT JUST THE AUDIO
+
+**The worst thing found this round, and it was in a clip already
+delivered.** An adversarial pass on clip 6's editorial decision reported
+that the editor "checked the TRANSCRIPT and never checked the LOWER PANE".
+
+Measured on the delivered file: of the 52 chat messages visible in the cut,
+**4% are about open qualifiers and 29% are about an unrelated
+Sentinels/Oxy roster transfer**. In the first 19 seconds it is **0 on
+subject against 11 on the other story** — a viewer reads *"who is SEN
+kicking?"* and *"oxy is out the jail"* while he rants about qualifier tech
+problems. The content pane behind the chat is a Reddit thread headlined
+"Sentinels Set to Add OXY", the same other story.
+
+So the audio was the only channel telling the clip's narrative, and the
+in-point work that made the audio one narrative had no effect on the other
+two. A clip now carries three narrative channels — what he SAYS, what is on
+his SCREEN, and what CHAT is saying — and the rule has only ever been
+enforced on the first.
+
+**AND THIS FILE ALREADY KNEW, AGAIN.** It records "a chat overlay is not a
+treatment you apply to a clip, it is a property of the window", measured on
+clip 8 at 24% on-topic. Nothing gated on it, so clip 6 shipped at 4%. Same
+shape as the hallucinated captions: **a note is not a gate.** That is now
+twice in two rounds, and the lesson is to write the check, not the
+paragraph.
+
+`chat_reaction.chat_is_safe()` derives keywords from the clip's own subject
+and claim, so it cannot drift from what the clip is about. The floor is 15%,
+set between the two measured points — clip 8 at 21-24% shipped and was
+accepted repeatedly, clip 6 at 9% is wrong. Across the ten buildable clips:
+
+| chat OK | no chat |
+|---|---|
+| 30 (41%), 42 (24%), 08 (21%), 04 (16%), 23 (16%) | 15 (14%), 12 (13%), 06 (9%), 43 (8%), 16 (6%) |
+
+**Half the clips cannot carry the chat overlay.** That is a real constraint
+on the format, not a bug: the overlay only works where the room is talking
+about the thing he is talking about.
+
+Still unchecked: the LOWER PANE's own narrative. Clip 6's Reddit headline
+is legible behind the chat for the whole clip. Nothing measures what the
+content pane says, and on a clip whose source is a browser that is a third
+channel that can contradict the other two.
+
+### OpenMontage (AGPL-3.0) — read it, do not copy from it
+
+George sent `calesthio/OpenMontage`, 75k stars, a 2209-file agentic video
+system. **Licence read from the LICENSE file, not the GitHub field: it is
+AGPL-3.0**, and that is the first thing about it.
+
+* **Using it to MAKE videos is fine.** Copyleft attaches to the software,
+  not to a rendered mp4 — the same way a compiler's licence does not reach
+  its output.
+* **Copying code from it into this repo is not.** AGPL would reach this
+  pipeline, and on an agency tool that is a decision about the whole
+  business, not a dependency choice. So this is read for TECHNIQUE —
+  measurements and ideas are not copyrightable — and nothing is pasted.
+* **Running it as a service clients touch triggers the network clause**,
+  which is the specific thing AGPL adds over GPL and the specific shape an
+  "agency as a service" would take.
+
+What is worth taking, all of it independent of its code:
+
+* **`clip-factory` is our exact problem** — "takes long-form content and
+  produces multiple short clips, N independent deliverables from a single
+  source", with quality gates on "clip selection, batch consistency, and
+  hook placement". Its structure (serial stages, quality gate after each,
+  bounded send-backs) is what `batch.py` arrived at independently.
+* **A BATCH NEEDS A MIX OF CLIP TYPES, not just distinct topics.** Its idea
+  director names five families — hook, insight, story, proof, opinion — and
+  says "a good batch mixes clip types instead of extracting the same energy
+  repeatedly". Our topic dedup catches five clips arguing one subject; it
+  would NOT catch ten clips that are all `opinion`, which is roughly what
+  this VOD is. Worth adding to `specs`.
+* **Its yield guidance matches ours.** "60+ min: 8-15 strong clips if the
+  source quality supports it" against our 103-minute VOD yielding 10
+  buildable. A useful outside check that the yield is not pathological.
+* **"Each clip must make sense alone. No 'as I was saying' openings."** —
+  our rule 3, independently arrived at, which is mild corroboration that
+  the rule is real and not a local habit.
+
 ## AN IN-POINT ON A WHISPER WORD BOUNDARY LANDS INSIDE THE PREVIOUS WORD
 
 George, on clip 6: *"it needs to start a tiny bit later because we hear a

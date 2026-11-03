@@ -478,6 +478,29 @@ def stage_chat(clip, ch, st):
             acc += k.length
         return None
 
+    # IS THE CHAT EVEN ABOUT THIS CLIP? The one-narrative rule applies to
+    # every channel, not just the audio — clip 6 shipped with chat that was
+    # 4% on its subject and 29% about an unrelated roster transfer, putting
+    # a second story on screen for the whole runtime while the audio was
+    # clean. `chat_mode: "force"` in the spec overrides this deliberately.
+    meta = st["meta"]
+    subject = f"{meta.get('subject','')} {meta.get('claim','')}"
+    inside = [m for m in raw if t0 <= m["offset"] < t1]
+    safe, why, topic = cr.chat_is_safe(inside, subject)
+    log(f"  topicality: {why} ({topic['n']} messages in the window)")
+    if not safe and clip.chat_mode != "force":
+        log("  NO CHAT OVERLAY on this clip — it would carry a second narrative")
+        st["chat_windows"] = []
+        (PUBLIC / "chat_windows.json").write_text("[]")
+        (PUBLIC / "chat.json").write_text("[]")
+        (PUBLIC / "clip.json").write_text(json.dumps({
+            "durationInFrames": st["total"],
+            "baitFrames": min(st["total"], round(BAIT_SECONDS * ch.fps)),
+            "hook": clip.hook or "", "emoji": clip.emoji}))
+        if clip.hook:
+            _render_comp("Bait", st["overlays"], ch.fps)
+        (st["overlays"] / "rm_Chat.mov").unlink(missing_ok=True)
+        return
     mode, wins, info = cr.windows(raw, t0, t1, remap=remap, mode=clip.chat_mode,
                                   out_dur=st['out_dur'])
     log(f"  resting {info['resting_rate']:.0f}/min, clip {info['clip_rate']:.0f}/min "
@@ -758,8 +781,25 @@ def stage_render(clip, ch, st):
                     "-preset", "medium", "-pix_fmt", "yuv420p", "-c:a", "copy",
                     "-movflags", "+faststart", str(out)], check=True)
     eq.unlink(missing_ok=True); mid.unlink(missing_ok=True)
-    log("  " + qc.check(out).report())
     st["out"] = out
+    # THE DELIVERY GATE, on the artifact. `qc.check` judges a render
+    # generically; this judges a clip the way we build them, and every check
+    # in it exists because something got past and reached George.
+    from engine import deliver_qc
+    from engine.resolve_captions import cards as _cards
+    from engine.tighten import remap_card as _remap
+    absent = qc.dead_audio(clip.source(ROOT), min_run=0.1)["runs"]
+    cs, _dropped = _drop_hallucinated(_cards(st.get("words") or []), absent) \
+        if st.get("words") else ([], [])
+    placed = []
+    for c in cs:
+        r = _remap(c.start, c.end, st["keeps"])
+        if r:
+            placed.append({"start": r[0], "end": r[1], "text": c.text})
+    rep = deliver_qc.check(out, cards=placed or None, absent=[] if placed else None,
+                           seam=ch.seam)
+    log(rep.text())
+    st["qc"] = rep
 
 
 def main():

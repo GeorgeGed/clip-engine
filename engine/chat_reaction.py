@@ -319,3 +319,69 @@ def answering(messages, utterances, *, t0: float, lookback: float = LOOKBACK,
                         "is_question": asking, **best})
     out.sort(key=lambda c: c["gap_s"])
     return out
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# IS THE CHAT TALKING ABOUT THE SAME THING HE IS?
+#
+# **THE ONE-NARRATIVE RULE APPLIES TO EVERY CHANNEL, NOT JUST THE AUDIO.**
+# It has only ever been enforced on the transcript. A clip now carries three
+# narrative channels — what he SAYS, what is on his SCREEN, and what CHAT is
+# saying — and the overlay can put a second story on screen for the whole
+# runtime while the audio is clean.
+#
+# Measured on the delivered clip 6, which had already shipped: of the 52
+# chat messages visible in the cut, **4% are about open qualifiers and 29%
+# are about an unrelated Sentinels/Oxy roster transfer**. In the first 19
+# seconds it is **0 on subject against 11 on the other story** — a viewer
+# reads "who is SEN kicking?" and "oxy is out the jail" while he rants about
+# qualifier tech problems. The lower pane behind it was a Reddit thread
+# headlined "Sentinels Set to Add OXY", the same other story. The audio was
+# the only channel telling the clip's narrative.
+#
+# This file already contained the finding — "a chat overlay is not a
+# treatment you apply to a clip, it is a property of the window" — measured
+# on clip 8 at 24% on-topic. Nothing gated on it, so clip 6 shipped at 4%.
+# Same pattern as the hallucinated captions: a note is not a gate.
+#
+# The floor is set from the two measured points. Clip 8 at 24% shipped and
+# was accepted repeatedly; clip 6 at 4% is wrong. 15% is between them and
+# close to the bad one, which is the conservative side to err on.
+ON_TOPIC_FLOOR = 0.15
+RIVAL_CEILING = 0.20     # a single competing story taking this much is worse
+
+
+def topicality(messages, subject: str, *, extra_stop=frozenset()):
+    """What share of the visible chat is about the clip's own subject.
+
+    Keywords come from the clip's OWN subject line and claim, so this needs
+    no per-clip tuning and cannot drift from what the clip is about.
+    """
+    keys = {w for w in re.findall(r"[a-z]+", subject.lower())
+            if w not in STOP and w not in extra_stop and len(w) > 3}
+    if not keys:
+        return {"on_topic": None, "n": 0, "keys": []}
+    stems = {k[:5] for k in keys}
+    n = on = 0
+    for m in messages:
+        t = _text(m).strip()
+        if len(t) < 3:
+            continue
+        n += 1
+        words = {w[:5] for w in re.findall(r"[a-z]+", t.lower())}
+        if words & stems:
+            on += 1
+    return {"on_topic": round(on / n, 3) if n else None, "n": n,
+            "keys": sorted(keys)}
+
+
+def chat_is_safe(messages, subject: str, *, floor: float = ON_TOPIC_FLOOR):
+    """Should this clip carry a chat overlay at all?"""
+    t = topicality(messages, subject)
+    if t["on_topic"] is None:
+        return False, "no subject keywords", t
+    if t["on_topic"] < floor:
+        return False, (f"chat is {t['on_topic']:.0%} on-topic, under the "
+                       f"{floor:.0%} floor — it would put a second narrative "
+                       f"on screen"), t
+    return True, f"chat is {t['on_topic']:.0%} on-topic", t
