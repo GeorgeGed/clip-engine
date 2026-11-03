@@ -1093,6 +1093,50 @@ region of the VOD frame, already a 3x upscale to fill 1080×806; cropping to
 1.16:1 would mean taking 304×262 and blowing it up 3.55x. The seam stays at
 0.42 and the chat card goes below the captions instead.
 
+## AN IN-POINT ON A WHISPER WORD BOUNDARY LANDS INSIDE THE PREVIOUS WORD
+
+George, on clip 6: *"it needs to start a tiny bit later because we hear a
+little fragment of his former word."*
+
+Whisper's word timings are CONTIGUOUS — the median inter-word gap on this
+clip measures **0.000s** — so every boundary it reports is a guess placed
+somewhere inside the join, not an onset. Setting `in_point` to one is
+therefore a coin flip on whether the previous word's tail comes with it,
+and a FRICATIVE is the worst case because it sustains.
+
+Measured at 5ms resolution around clip 6's `i've @ 2.02`:
+
+| | |
+|---|---|
+| 1.935-2.025 | the vowel of "this", peaking **-11 dB** |
+| **2.025-2.210** | sustained **-20 to -25 dB** — the /s/ of "this" |
+| 2.210-2.470 | the real gap, down to **-39 dB** |
+| 2.475+ | "I've", softly |
+
+So 2.02 opened the clip on **0.19s of a trailing fricative**, which is
+exactly what he heard. Confirmed by transcribing both candidates: cutting at
+2.02 and at 2.42 BOTH return *"I've said this on every single stream"*, so
+the span dropped is entirely tail and costs no speech.
+
+`make_clip._snap_in_point()` advances any in-point to the next real trough.
+Two things it took two attempts to get right:
+
+1. **THE TROUGH MUST BE SUSTAINED.** Taking the first sample under the
+   threshold caught a 10ms dip *between the vowel and the fricative of the
+   same word* and snapped to 2.025 — still inside "this". A real word gap
+   holds; a transient inside a word does not. 60ms of hold separates them.
+2. **SNAP TO THE TROUGH, NOT TO THE NEXT ONSET.** Hunting the onset needs a
+   loudness threshold, and the word after a pause is often quiet: a 5x-floor
+   test skipped the softly-spoken "I've" (peak 0.024 against a 0.004 floor)
+   and landed on "said" 0.14s later — cutting the word the clip was meant to
+   open on. The trough IS the boundary and is unambiguous. The pause in
+   front of the next word is then the dead-space pass's job, which already
+   trims it to a beat.
+
+Clip 6: 2.02 -> 2.225, moved 0.205s. Clip 8: 8.85 -> 8.88, moved 0.03s — its
+in-point was already clean, which is the check that this does not disturb a
+good one.
+
 ## WHISPER HALLUCINATES OVER A MUTE, AT p = 1.000 — AND WE BURNED IT ON SCREEN
 
 **The worst defect this project has shipped, and it was found by accident.**

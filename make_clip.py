@@ -113,6 +113,76 @@ def _shot_index(lengths, min_shot=MIN_SHOT):
             acc = 0.0
     return out
 
+# AN IN-POINT ON A WHISPER WORD BOUNDARY LANDS INSIDE THE PREVIOUS WORD.
+#
+# George, on clip 6: *"it needs to start a tiny bit later because we hear a
+# little fragment of his former word."*
+#
+# Whisper's word timings are CONTIGUOUS — this file already measures the
+# median inter-word gap at 0.000s — so every boundary it reports is a guess
+# placed somewhere inside the join, not an onset. Clip 6's in-point was set
+# to `i've @ 2.02`; measured at 5ms resolution the envelope shows the vowel
+# of the PREVIOUS word peaking -11 dB at 1.95, then **2.03-2.21 sustained at
+# -20 to -25 dB** — the /s/ of "this" — and only then a real trough to -39.
+# So 2.02 opened the clip on 0.19s of a trailing fricative.
+#
+# Confirmed by transcribing both candidates: cutting at 2.02 and at 2.42
+# BOTH return "I've said this on every single stream", so the 0.4s dropped
+# is entirely the previous word's tail and costs no speech.
+#
+# The fix is general, because the cause is: advance to the next TROUGH, then
+# to the onset after it, and leave a short pre-roll. Natural pre-roll on this
+# material measures 0.24-0.63s (median 0.42); this only has to clear the
+# consonant, so it takes the low end.
+SNAP_WINDOW = 0.9        # how far forward to look for the onset
+SNAP_PREROLL = 0.06      # breath left in front of the first word
+
+
+def _snap_in_point(src, in_point, window=SNAP_WINDOW, preroll=SNAP_PREROLL):
+    """Move `in_point` forward off a word tail onto the next real onset."""
+    import numpy as np
+    t0 = max(0.0, in_point - 0.05)
+    raw = subprocess.run(
+        ["ffmpeg", "-v", "error", "-ss", f"{t0:.3f}", "-t", f"{window:.3f}",
+         "-i", str(src), "-ac", "1", "-ar", "48000", "-f", "f32le", "-"],
+        capture_output=True).stdout
+    a = np.frombuffer(raw, np.float32)
+    if a.size < 4800:
+        return in_point, None
+    sr, w = 48000, 240                      # 5ms
+    env = np.array([float(np.sqrt(np.mean(a[i:i + w] ** 2)))
+                    for i in range(0, a.size - w, w)])
+    times = t0 + np.arange(env.size) * (w / sr)
+    floor = float(np.percentile(env, 15))
+    # THE TROUGH HAS TO BE SUSTAINED. Taking the first point under the
+    # threshold caught a 10ms dip BETWEEN the vowel and the fricative of the
+    # same word — clip 6 snapped to 2.025, still inside "this". A real word
+    # gap holds; a transient inside a word does not.
+    thr = max(floor * 2.0, 1e-6)
+    hold = 12                               # 60ms
+    tr = None
+    for i in range(env.size - hold):
+        if float(env[i:i + hold].max()) <= thr:
+            tr = i
+            break
+    if tr is None:
+        return in_point, None
+    # SNAP TO THE TROUGH, NOT TO THE ONSET. Hunting the next onset needs a
+    # loudness threshold, and the word after a pause is often quiet — on
+    # clip 6 a 5x-floor test skipped a softly-spoken "I've" (peaking 0.024
+    # against a 0.004 floor) and landed on "said" 0.14s later, cutting the
+    # word the clip was meant to open on. The trough is the word BOUNDARY
+    # and it is unambiguous; the pause in front of the next word is then
+    # the dead-space pass's job, which already trims it to a BEAT.
+    loud = max(floor * 5.0, 1e-5)
+    onset = next((i for i in range(tr, env.size - 6)
+                  if env[i] >= loud and float(env[i:i + 6].mean()) >= loud), None)
+    snapped = float(times[tr]) + 0.01
+    return round(snapped, 3), {
+        "trough": round(float(times[tr]), 3),
+        "next_loud_onset": None if onset is None else round(float(times[onset]), 3),
+        "moved": round(snapped - in_point, 3)}
+
 def _clamp_in_point(kp, in_point, min_first=0.40):
     """Clamp the keeps to `in_point` without leaving a sliver first shot.
 
@@ -270,12 +340,16 @@ def stage_cut(clip, ch, st):
     # against the speaker's own level.
     absent = qc.dead_audio(src, min_run=0.3)["runs"]
     quiet = qc.quiet_runs(src, min_run=MIN_DEAD)["runs"]
-    dead = sorted([r for r in absent + quiet if r[0] >= clip.in_point])
+    ip, snap = _snap_in_point(src, clip.in_point)
+    dead = sorted([r for r in absent + quiet if r[0] >= ip])
     spans = removals(dead, src_dur, min_remove=MIN_DEAD, beat=BEAT)
-    kp = _clamp_in_point(keeps(spans, src_dur), clip.in_point)
+    kp = _clamp_in_point(keeps(spans, src_dur), ip)
     out_dur = sum(k.length for k in kp)
     log(f"  {src.name}")
-    log(f"  in-point {clip.in_point}s | {len(spans)} dead removals "
+    if snap and abs(snap["moved"]) > 0.005:
+        log(f"  in-point {clip.in_point} -> {ip} (snapped off a word tail "
+            f"to the trough at {snap['trough']})")
+    log(f"  in-point {ip}s | {len(spans)} dead removals "
         f"({sum(s.length for s in spans):.1f}s)")
     log(f"  {src_dur:.1f}s -> {out_dur:.1f}s in {len(kp)} shots, "
         f"{(len(kp)-1)/(out_dur/60):.1f} cuts/min")
@@ -733,9 +807,10 @@ def _plan_only(clip, ch, st):
     src_dur = int(probe) / ch.fps
     absent = qc.dead_audio(src, min_run=0.3)["runs"]
     quiet = qc.quiet_runs(src, min_run=MIN_DEAD)["runs"]
-    dead = sorted([r for r in absent + quiet if r[0] >= clip.in_point])
+    ip, _snap = _snap_in_point(src, clip.in_point)
+    dead = sorted([r for r in absent + quiet if r[0] >= ip])
     spans = removals(dead, src_dur, min_remove=MIN_DEAD, beat=BEAT)
-    kp = _clamp_in_point(keeps(spans, src_dur), clip.in_point)
+    kp = _clamp_in_point(keeps(spans, src_dur), ip)
     st["keeps"] = kp
     st["out_dur"] = sum(k.length for k in kp)
     st["total"] = round(st["out_dur"] * ch.fps)
