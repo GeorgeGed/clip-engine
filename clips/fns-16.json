@@ -1,0 +1,46 @@
+{
+ "channel": {
+  "name": "fns",
+  "cam": [
+   1456,
+   818,
+   1920,
+   1080
+  ],
+  "seam": 0.42,
+  "chrome": 92,
+  "fps": 60,
+  "grade": {
+   "NodeIndex": "1",
+   "Slope": "1.06 1.06 1.07",
+   "Offset": "-0.012 -0.012 -0.010",
+   "Power": "1.06 1.06 1.06",
+   "Saturation": "1.18"
+  },
+  "arc": null,
+  "vod_id": "2905408276",
+  "permission": "explicit",
+  "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release."
+ },
+ "clip": {
+  "job": "fns-2905408276",
+  "index": 16,
+  "channel": "fns",
+  "in_point": 3.72,
+  "region": [
+   1906.3,
+   1952.51
+  ],
+  "hook": "FNS: WINNING TEAMS HAVE ISSUES TOO",
+  "cam": [
+   1450,
+   344,
+   1920,
+   608
+  ],
+  "emoji": "\ud83d\ude33",
+  "cards": [],
+  "chat_mode": null,
+  "notes": "As delivered it is two things. The first 3.7s is a chat question and a shrug \u2014 \"do you think loud will split up i have no idea what's gonna happen with the teams\" \u2014 and Loud never returns; the clip's only named team is Vitality. Then \"here's the other thing you guys have to understand about teams th"
+ }
+}

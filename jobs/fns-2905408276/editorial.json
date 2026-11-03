@@ -1,0 +1,92 @@
+{
+ "43": {
+  "verdict": "drop",
+  "in_point": 0,
+  "hook": "FNS ON THE ONE NRG PLAYER WHO MIGHT LEAVE",
+  "topic": "kiko leaving nrg prediction",
+  "why": "DROP \u2014 it passes rules 1, 2 and 3 and fails on substance and rule 4.\n\nIt is one narrative and it does explain itself: the prompt is already in the clip at 0.00 (\"What changes could you see NRG making?\"), NRG and Kiko are both named, and the reason is given inside the clip (\"Simply because he's an EM",
+  "one_narrative": true,
+  "explains_itself": true
+ },
+ "4": {
+  "verdict": "drop",
+  "in_point": 0,
+  "hook": "FNS: I LIKE PEOPLE WHO EXPLAIN THINGS",
+  "topic": "watching league worlds costream",
+  "why": "It is genuinely one narrative \u2014 no pivot, titleable in one line \u2014 and it is still a drop, on rule 3 and rule 2, and no in-point fixes either.\n\nRULE 3. The clip's whole subject is one named person and it names him wrong. The transcript says \"um kdrill is the only one that i watched for league of lege",
+  "one_narrative": true,
+  "explains_itself": false
+ },
+ "8": {
+  "verdict": "ship",
+  "in_point": 8.85,
+  "hook": "FNS ON VALORANT'S JOB SECURITY PROBLEM",
+  "topic": "player job security",
+  "why": "Ship, trimmed from the front. The subject line carries the defect in its own wording \u2014 \"Reaction to a team missing the partnership cycle AND what it means for player job security\" \u2014 and the news half is unusable regardless. Measured on the clip file rather than the mute map: 4.44s of the first 9.09s",
+  "one_narrative": true,
+  "explains_itself": true
+ },
+ "42": {
+  "verdict": "drop",
+  "in_point": 0,
+  "hook": "FNS: THE ONLY CIRCUIT THAT MAKES SENSE",
+  "topic": "open qualifiers vs franchising",
+  "why": "Drop on rule 3. The clip never names its own subject. Searched the full 50s transcript: \"qualifier\" 0 times, \"franchis\" 0, \"partner\" 0, \"riot\" 0, \"league\" 0. \"open\" appears once, with the noun cut off \u2014 \"it's the only way you have to have open\" \u2014 and \"circuit\" twice, both unidentified: \"this is the ",
+  "one_narrative": true,
+  "explains_itself": false
+ },
+ "6": {
+  "verdict": "drop",
+  "in_point": 2.02,
+  "hook": "FNS: OPEN QUALIFIERS WILL BE A DISASTER",
+  "topic": "open qualifiers vs franchising",
+  "why": "REFUTED: The editor checked the TRANSCRIPT and never checked the LOWER PANE. The in-point excludes the transfer story from the audio; the build puts it back on screen for the whole clip.\n\nMEASURED, not inferred. `clips/fns-06.json` has `chat_mode: null`, so `chat_reaction.classify` auto-picks and returns `co",
+  "one_narrative": true,
+  "explains_itself": true
+ },
+ "30": {
+  "verdict": "ship",
+  "in_point": 0,
+  "hook": "FNS: BUILD YOUR OWN TEAM, DECIDE YOUR FATE",
+  "topic": "open qualifiers vs franchising",
+  "why": "ONE NARRATIVE: every line serves \"don't take the partner-team seat, make your own lineup and qualify in\". It opens on the choice \u2014 \"they don't have to join a partnered team if they don't want to if they have a higher chance they feel of like winning with a lineup they can make out of scratch\" (4.5) ",
+  "one_narrative": true,
+  "explains_itself": true
+ },
+ "15": {
+  "verdict": "ship",
+  "in_point": 0,
+  "hook": "FNS ON WHY THE NEW SYSTEM BEATS FRANCHISE",
+  "topic": "open qualifiers vs franchising",
+  "why": "One narrative start to finish, no pivot: puzzlement, claim, mechanism, payoff. \"I can't see why any player would be complaining about this\" (0.00) -> \"Why am I seeing so much pessimism on my timeline about this system?\" (10.11) -> \"This is a clearly better system than Franchise. It's not close.\" (16",
+  "one_narrative": true,
+  "explains_itself": true
+ },
+ "16": {
+  "verdict": "ship",
+  "in_point": 3.72,
+  "hook": "FNS: WINNING TEAMS HAVE ISSUES TOO",
+  "topic": "winning teams hidden problems",
+  "why": "As delivered it is two things. The first 3.7s is a chat question and a shrug \u2014 \"do you think loud will split up i have no idea what's gonna happen with the teams\" \u2014 and Loud never returns; the clip's only named team is Vitality. Then \"here's the other thing you guys have to understand about teams th",
+  "one_narrative": true,
+  "explains_itself": true
+ },
+ "12": {
+  "verdict": "ship",
+  "in_point": 6.7,
+  "hook": "FNS: STOP COMPLAINING ABOUT UNPAID MONTHS",
+  "topic": "open qualifiers unpaid months",
+  "why": "One argument start to finish: the complaint, the generational put-down, the rebuttal, the trade. He quotes the view he is answering inside the clip \u2014 \"i don't want to hear no complaints about oh i'm not going to get paid for a couple months this is disgusting the turnaround time's too fast\" \u2014 so rul",
+  "one_narrative": true,
+  "explains_itself": true
+ },
+ "23": {
+  "verdict": "ship",
+  "in_point": 2.58,
+  "hook": "FNS: ONE RESULT AND ORGS FIGHT FOR YOU",
+  "topic": "open qualifiers vs franchising",
+  "why": "ONE NARRATIVE. He concedes the premise \u2014 \"i'm not trying to say sr shouldn't be in it fly quest shouldn't be in it there's just not enough slots i guess and it sucks that they didn't make it in\" \u2014 turns it on \"but i don't think that instantly means that they are now gonna just give up on val they ha",
+  "one_narrative": true,
+  "explains_itself": true
+ }
+}

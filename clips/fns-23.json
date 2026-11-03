@@ -1,0 +1,46 @@
+{
+ "channel": {
+  "name": "fns",
+  "cam": [
+   1456,
+   818,
+   1920,
+   1080
+  ],
+  "seam": 0.42,
+  "chrome": 92,
+  "fps": 60,
+  "grade": {
+   "NodeIndex": "1",
+   "Slope": "1.06 1.06 1.07",
+   "Offset": "-0.012 -0.012 -0.010",
+   "Power": "1.06 1.06 1.06",
+   "Saturation": "1.18"
+  },
+  "arc": null,
+  "vod_id": "2905408276",
+  "permission": "explicit",
+  "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release."
+ },
+ "clip": {
+  "job": "fns-2905408276",
+  "index": 23,
+  "channel": "fns",
+  "in_point": 2.58,
+  "region": [
+   929.5,
+   1040.6
+  ],
+  "hook": "FNS: ONE RESULT AND ORGS FIGHT FOR YOU",
+  "cam": [
+   1436,
+   344,
+   1920,
+   616
+  ],
+  "emoji": "\ud83d\ude33",
+  "cards": [],
+  "chat_mode": null,
+  "notes": "ONE NARRATIVE. He concedes the premise \u2014 \"i'm not trying to say sr shouldn't be in it fly quest shouldn't be in it there's just not enough slots i guess and it sucks that they didn't make it in\" \u2014 turns it on \"but i don't think that instantly means that they are now gonna just give up on val they ha"
+ }
+}

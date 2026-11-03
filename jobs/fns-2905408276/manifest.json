@@ -1,0 +1,59 @@
+{
+ "fns-12": {
+  "built": true,
+  "qc_ok": true,
+  "seconds": 207,
+  "render": "renders/fns-2905408276-12.mp4",
+  "findings": [
+   {
+    "check": "duration",
+    "ok": true,
+    "detail": "59.37s (want 15-90)"
+   },
+   {
+    "check": "loudness",
+    "ok": true,
+    "detail": "-14.10 LUFS (target -14.0)"
+   },
+   {
+    "check": "true_peak",
+    "ok": true,
+    "detail": "-0.70 dBTP"
+   },
+   {
+    "check": "black_top",
+    "ok": true,
+    "detail": "3562 frames, YMAX min 241"
+   },
+   {
+    "check": "black_bottom",
+    "ok": true,
+    "detail": "3562 frames, YMAX min 236"
+   },
+   {
+    "check": "dead_space",
+    "ok": true,
+    "detail": "1.15s quiet (1.9%, max 8%)"
+   },
+   {
+    "check": "absent_audio",
+    "ok": true,
+    "detail": "0.00s in 0 runs"
+   },
+   {
+    "check": "caption_cadence",
+    "ok": true,
+    "detail": "2.27 cards/s (135 cards)"
+   },
+   {
+    "check": "hallucinated_captions",
+    "ok": true,
+    "detail": "none"
+   }
+  ],
+  "subject": "One argument start to finish: the complaint, the generational put-down, the rebuttal, the trade. He quotes the view he is answering inside the clip \u2014 \"i don't want to hear no complaints about oh i'm not going to get paid for a couple months this is disgusting the turnaround time's too fast\" \u2014 so rul",
+  "permission": "explicit",
+  "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release.",
+  "delivered": "deliver/fns-12-one-argument-start-to-finish-the-complaint-the-gener.mp4"
+ }
+}

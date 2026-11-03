@@ -1093,6 +1093,77 @@ region of the VOD frame, already a 3x upscale to fill 1080×806; cropping to
 1.16:1 would mean taking 304×262 and blowing it up 3.55x. The seam stays at
 0.42 and the chat card goes below the captions instead.
 
+## The thirteen tools George sent — licence first, then against a REAL gap
+
+Every licence read from the repo's own LICENSE file, because this file has
+recorded three traps where the GitHub field or the marketing page was wrong.
+
+| tool | licence | verdict |
+|---|---|---|
+| **rembg** | MIT | **ADOPT** — the person matte |
+| **Real-ESRGAN** | BSD-3 | **ADOPT** — the soft facecam |
+| **librosa** | ISC | **ADOPT** — onset detection |
+| **PySceneDetect** | BSD-3 | **ADOPT** — content-change cuts |
+| **HyperFrames** | Apache-2.0 | **CORRECTION — it is not unavailable** |
+| auto-editor | Unlicense | read it; do NOT adopt its policy |
+| demucs | MIT, **ARCHIVED** | no current need |
+| RIFE | MIT | no current need |
+| vid.stab | LGPL-2.1+ | not needed — a webcam does not shake |
+| color-matcher | **GPL-3.0** | care: copyleft |
+| OpenMontage | **AGPL-3.0** | read, never copy |
+| FFmpeg | LGPL-2.1+ | in use |
+| yt-dlp | Unlicense | in use |
+
+**THREE OF THEM LAND ON GAPS THIS FILE HAS ALREADY WRITTEN DOWN**, which is
+the only reason to take them:
+
+* **`rembg` (MIT) -> the person matte.** "Type behind the speaker from a
+  person matte" has sat in *Still open* as "the one genuinely strong untried
+  technique" across many versions, unbuilt because it needed a matte. The
+  recorded risk stands and is now testable rather than theoretical: the
+  facecam is a 464px-wide region upscaled 3x, so the matte comes off soft
+  pixels, and there is little headroom above his head.
+* **`Real-ESRGAN` (BSD-3) -> that same softness.** This file says of the
+  facecam: *"The facecam is a 3x upscale of a 464px-wide region, so it is
+  soft. That is what the source gives; a bigger facecam on stream would be
+  the only fix."* **That conclusion is now wrong** — a super-resolution pass
+  on a 464x262 crop before it reaches Resolve is exactly the other fix, and
+  it would improve every clip from this channel. Worth a measured A/B on one
+  shot before it goes near the house build.
+* **`librosa` (ISC) -> onset detection, which was hand-rolled TODAY.**
+  `_snap_in_point` is a 5ms RMS envelope, a sustained-trough search and an
+  onset test, written from scratch and debugged through two wrong versions
+  (a transient inside a word; a too-loud onset threshold). `librosa.onset`
+  is the maintained version of exactly that. Not urgent — ours is measured
+  and works — but the next audio-timing problem should start there.
+
+**HYPERFRAMES: THE RECORDED FINDING IS WRONG AND SHOULD BE STRUCK.** This
+file says *"HyperFrames is unavailable: `npx hyperframes usage --json`
+returns `unsupported_auth` — it needs George's account."* That tested the
+HOSTED USAGE endpoint, not the renderer. The repo is **Apache-2.0, 78k
+stars, pushed today**, and its own README says *"Render locally or in
+Docker. The renderer seeks each frame in headless Chrome and encodes the
+result with FFmpeg"* — which is the same architecture as our Remotion route
+and has **no seat gate**, unlike Remotion's headcount licence. Its skills
+are already installed in this session. **Same mistake as the Twitch chat
+note: a dead client is not a dead capability.** Whether to move off Remotion
+is a real question now, not a blocked one.
+
+**The two copyleft ones, stated precisely because the distinction decides
+them.** `color-matcher` is GPL-3.0 and `OpenMontage` is AGPL-3.0. Copyleft
+attaches to the SOFTWARE, not to a rendered mp4, so running either locally
+to produce clips is fine and always was. What they reach is this repo if
+their code is imported, and for AGPL also any service clients interact with
+over a network — which is the exact shape "agency as a service" would take.
+So: run them, read them, never paste from them.
+
+**`auto-editor` is the one to read and not adopt.** It cuts silence
+automatically, which is the headline feature this file has refused twice:
+on a DMCA-muted VOD *dead air is not dead, it is speech you cannot hear*,
+and 35.8% of this VOD's audio is absent. Its silence DETECTION is worth
+reading against ours; its default POLICY would splice across unheard speech
+on almost every clip in this job.
+
 ## THE PRODUCTION LINE: `batch.py`, and what the yield actually is
 
 George: *"the main thing is essentially making these en masse, build the
@@ -3130,10 +3201,11 @@ Four things worth keeping:
    browser found for rendering frames". System Chrome works:
    `--browser-executable="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"`.
    A 2822-frame 1080x1920 render then takes a few minutes at concurrency 4.
-2. **HyperFrames is unavailable**: `npx hyperframes usage --json` returns
-   `{"status":"unknown","reason":"unsupported_auth"}` — it needs George's
-   account. Plain HTML through headless Chrome does the same job for static
-   furniture.
+2. ~~**HyperFrames is unavailable**~~ **WRONG — STRUCK.** That tested the
+   hosted USAGE endpoint, not the renderer. HyperFrames is Apache-2.0 and
+   renders locally in headless Chrome + FFmpeg, with no seat gate. See
+   "The thirteen tools George sent". Plain HTML through headless Chrome
+   still does the job for static furniture.
 3. **Chrome screenshots the whole PAGE, not an element.** Four elements in
    one file gave four identical PNGs. One element per HTML file, then crop
    to the alpha bounding box.

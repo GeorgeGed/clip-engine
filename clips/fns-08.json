@@ -18,7 +18,9 @@
    "Saturation": "1.18"
   },
   "arc": null,
-  "vod_id": "2905408276"
+  "vod_id": "2905408276",
+  "permission": "explicit",
+  "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release."
  },
  "clip": {
   "job": "fns-2905408276",
@@ -30,26 +32,15 @@
    6045.89
   ],
   "hook": "FNS ON VALORANT'S JOB SECURITY PROBLEM",
-  "emoji": "\ud83d\ude33",
-  "cards": [
-   {
-    "id": "StoryPrx",
-    "at": 37.6,
-    "dur": 4.25
-   },
-   {
-    "id": "StorySen",
-    "at": 42.1,
-    "dur": 4.0
-   }
-  ],
-  "chat_mode": "continuous",
-  "notes": "the reference build, v51. cam is the hand-measured rect; the detector independently lands within 6px of it.",
   "cam": [
-   1456,
-   818,
+   1450,
+   816,
    1920,
    1080
-  ]
+  ],
+  "emoji": "\ud83d\ude33",
+  "cards": [],
+  "chat_mode": null,
+  "notes": "Ship, trimmed from the front. The subject line carries the defect in its own wording \u2014 \"Reaction to a team missing the partnership cycle AND what it means for player job security\" \u2014 and the news half is unusable regardless. Measured on the clip file rather than the mute map: 4.44s of the first 9.09s"
  }
 }

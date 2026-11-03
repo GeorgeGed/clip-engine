@@ -158,11 +158,25 @@ def cmd_specs(job, args):
 
     # TOPIC DEDUP. Five of this VOD's ten survivors argue the same thing;
     # shipping all five is shipping one idea five times.
+    # Use the EDITORIAL topic where there is one. The ranked `subject` lines
+    # are written per clip and word the same argument differently every
+    # time, so overlapping them found nothing — 10 clips in, 10 out — while
+    # the editorial pass had already labelled three of them
+    # "open qualifiers vs franchising" in as many words.
     groups, kept, held = [], [], []
     for r in sorted(rows, key=lambda r: -(r["strength"] or 0)):
-        t = _topic(r["subject"])
-        hit = next((g for g in groups
-                    if len(t & g["topic"]) >= max(2, min(len(t), len(g["topic"])) // 2)), None)
+        if ed.get(str(r["n"]), {}).get("verdict") == "drop":
+            continue
+        t = _topic(ed.get(str(r["n"]), {}).get("topic") or r["subject"])
+        # Two shared words is NOT the same topic. "open qualifiers unpaid
+        # months" and "open qualifiers vs franchising" are different
+        # arguments that happen to name the same thing, and an
+        # intersection>=2 rule merged them and took the batch from 10 clips
+        # to 3. Jaccard over the whole label is the test: identical labels
+        # score 1.0, a shared noun scores 0.4.
+        def _sim(a, b):
+            return len(a & b) / max(len(a | b), 1)
+        hit = next((g for g in groups if _sim(t, g["topic"]) >= 0.5), None)
         if hit:
             hit["also"].append(r)
             held.append((r, hit["lead"]))
