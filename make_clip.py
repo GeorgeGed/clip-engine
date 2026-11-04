@@ -338,7 +338,17 @@ def _lead_in(src, in_point, want=LEAD_IN, quiet_db=LEAD_QUIET_DB):
     while i >= 0 and db[i] <= quiet_db:
         i -= 1
     got = (len(db) - 1 - i) * (w / sr)
-    return round(in_point - got, 3), round(got, 3)
+    # IS THE LEAD-IN PRESENT AUDIO OR A MUTE? The test above only has an
+    # UPPER bound, so digital zero — which is under any quiet threshold —
+    # passes it. On clip 12 all 0.255s of the lead-in measures -180.0 dBFS
+    # against clip 6's accepted -38.3, and `deliver_qc`'s absent-audio check
+    # CANNOT SEE IT: the chat's `paper` cue fires at 0.020s and fills the
+    # hole, so the delivered file reports 0 absent runs. A cue masking the
+    # thing a gate exists to find is the gate being blinded, which is worse
+    # than the hole. It is reported here, on the CUT, where no bed exists.
+    taken = db[i + 1:] if i + 1 < len(db) else db[:0]
+    absent = bool(taken.size) and float(taken.max()) <= -90.0
+    return round(in_point - got, 3), round(got, 3), absent
 
 
 def _snap_back(src, in_point, window=SNAP_BACK, pad=0.06):
@@ -378,7 +388,34 @@ def _snap_back(src, in_point, window=SNAP_BACK, pad=0.06):
     return None
 
 
-def _snap_out_point(words, out_point, absent, tol=0.30):
+def _in_trough(src, t, win=0.04, margin=12.0):
+    """Is `t` in an acoustic trough rather than inside audible speech?
+
+    **WHISPER'S WORD BOUNDARY AND THE AUDIO DISAGREE, and the audio wins.**
+    George asked for the clip to end on "salary"; the cut that does is 86.30,
+    which measures **-36.4 dB against a speech baseline of -19** — a 17 dB
+    dip, unmistakably a boundary. Whisper calls 86.30 the middle of "all"
+    (86.15-86.41), so `_snap_out_point` would push the cut forward to 86.41
+    and put "all" back in. Its word timings here are contiguous guesses; a
+    trough is not a guess.
+    """
+    import array, math
+    def rms_db(t0, t1):
+        raw = subprocess.run(
+            ["ffmpeg", "-v", "error", "-ss", f"{t0:.3f}", "-to", f"{t1:.3f}",
+             "-i", str(src), "-ac", "1", "-ar", "16000", "-f", "s16le", "-"],
+            capture_output=True).stdout
+        a = array.array("h"); a.frombytes(raw)
+        if not a:
+            return -99.0
+        r = math.sqrt(sum((v / 32768.0) ** 2 for v in a) / len(a))
+        return 20 * math.log10(r) if r > 0 else -99.0
+    here = rms_db(t - win / 2, t + win / 2)
+    around = rms_db(max(0.0, t - 1.5), t)
+    return here < around - margin
+
+
+def _snap_out_point(words, out_point, absent, tol=0.30, src=None):
     """Move `out_point` off the middle of a word onto that word's END.
 
     **This is the defect George named as `the end "tragic" is cut off`, and it
@@ -402,6 +439,11 @@ def _snap_out_point(words, out_point, absent, tol=0.30):
                    if w["start"] < out_point < w["end"] - 1e-6), None)
     if inside is None:
         return out_point, None
+    if src is not None and _in_trough(src, out_point):
+        return out_point, {"moved": 0.0,
+                           "skipped": f"whisper puts this inside "
+                                      f"{inside['text']!r}, but the audio there "
+                                      f"is a trough — the audio wins"}
     end = float(inside["end"])
     if end - out_point > tol:
         return out_point, {"moved": 0.0,
@@ -636,7 +678,10 @@ def stage_cut(clip, ch, st):
         log(f"  in-point skipped {k['was']!r} — {k['zero']:.0%} of its span is "
             f"digital zero, so the caption gate drops it; opening on {k['now']!r}")
     if pl.get("lead"):
-        log(f"  lead-in {pl['lead']:.3f}s of quiet before the first word")
+        kind = ("ABSENT AUDIO, not room tone — there is none on this source; "
+                "the chat cue covers it and the delivery gate cannot see it"
+                if pl.get("lead_absent") else "room tone")
+        log(f"  lead-in {pl['lead']:.3f}s before the first word ({kind})")
     elif pl.get("lead") == 0.0:
         log(f"  NO LEAD-IN AVAILABLE — the clip opens on the word's attack")
     if snap and abs(snap["moved"]) > 0.005:
@@ -1065,10 +1110,16 @@ def stage_punch(clip, ch, st):
     if not moments:
         log("     none — no loud moment sits on one of the clip's own "
             "thesis words, so it gets no punches and no booms")
-    # The anchors ARE the phrase starts now: each moment is already one of
-    # them, so `split` finds it exactly and the punch opens on the card
-    # rather than being pulled back to an utterance boundary behind it.
-    pieces = rp.split(segs, moments, shot_of=sidx, phrase_starts=anchors)
+    # THE MOMENTS ARE THEIR OWN PHRASE STARTS. Passing the raw card list here
+    # undid the attack refinement and silently lost a punch: once a moment is
+    # moved off its card onto the stressed syllable it is no longer IN that
+    # list, so `open_at` snapped it back to the PREVIOUS card — clip 12's
+    # middle boom was pulled from 12.78 to 9.35 and merged away, delivering
+    # two booms where the plan printed three. Passing the moments themselves
+    # makes `open_at` return `t - 0.05`, which is the small pre-roll the zoom
+    # wants and still inside the boom's own 15 ms attack.
+    pieces = rp.split(segs, moments, shot_of=sidx,
+                      phrase_starts=[t for t, _d in moments])
     tl.DeleteClips(v2)
     canvas = Frame(1080, 1920, 1920, 1080)
     rects = framings(nshots, _cam(clip, ch, st))
@@ -1087,7 +1138,17 @@ def stage_punch(clip, ch, st):
         apply(it, plan(canvas, rect, (0, 0, 1080, seam_y)))
         if ch.grade:
             it.SetCDL(ch.grade)
-    st["punch_starts"] = [round(o0, 3) for o0, _d, _s, _i, p in pieces if p]
+    # THE BOOM GOES ON THE MOMENT, NOT ON THE PIECE. They were the same
+    # value until a punch was allowed to open early to find room; now a
+    # piece can start up to PUNCH_BACKOFF before the word, and a cue there
+    # would be exactly the "too late"/"too early" complaint in reverse.
+    _starts = []
+    for o0, d, _s, _i, p in pieces:
+        if not p:
+            continue
+        near = [t for t, _x in moments if o0 - 0.02 <= t <= o0 + d]
+        _starts.append(round(min(near) if near else o0, 3))
+    st["punch_starts"] = _starts
     (st["overlays"] / "punches.json").write_text(json.dumps(
         {"punches": [t for t, _d in moments], "zoom": round(1/(1-rp.PUNCH_INSET), 3),
          "applied": [round(o0, 2) for o0, _d, _s, _i, p in pieces if p]}, indent=1))
@@ -1272,8 +1333,8 @@ def _plan_only(clip, ch, st):
     ip0, skipped = _open_on_captionable(words, clip.in_point,
                                         qc.dead_audio(src, min_run=0.1)["runs"])
     ip, snap = _snap_in_point(src, ip0)
-    ip, lead = _lead_in(src, ip)
-    op, osnap = _snap_out_point(words, clip.out_point, absent)
+    ip, lead, lead_absent = _lead_in(src, ip)
+    op, osnap = _snap_out_point(words, clip.out_point, absent, src=src)
     dead = sorted([r for r in absent + quiet if r[0] >= ip])
     spans = removals(dead, src_dur, min_remove=MIN_DEAD, beat=BEAT)
     kp = _clamp_out_point(_clamp_in_point(keeps(spans, src_dur), ip), op)
@@ -1283,7 +1344,7 @@ def _plan_only(clip, ch, st):
     st["base_wav"].parent.mkdir(parents=True, exist_ok=True)
     return {"src": src, "src_dur": src_dur, "in_point": ip, "out_point": op,
             "snap": snap, "out_snap": osnap, "spans": spans, "words": words,
-            "skipped": skipped, "lead": lead}
+            "skipped": skipped, "lead": lead, "lead_absent": lead_absent}
 
 
 if __name__ == "__main__":

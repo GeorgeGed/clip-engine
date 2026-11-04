@@ -1491,6 +1491,114 @@ the clip's metadata**, and then that fact gets reasoned from.
 Clip 8 is still on the old bespoke scripts and has NOT had the gate
 applied; its eight cards are still in the shipped file.
 
+## TIGHTENING: the card was the right phrase and the wrong instant
+
+George: *"second boom was slightly too late same with the third one -
+tighten, also ends when he says tragic for some reason when it should be
+'salary' - tighten."*
+
+Read the two rounds together: last time he said **"random"** (selection) AND
+**"too late"** (timing); this time only "slightly too late". **The selection
+is settled and only the anchor was still wrong**, which is what decided the
+fork below.
+
+### A card begins on whichever word whisper grouped first
+
+Anchoring to the emphasised card put the moment in the right PHRASE and still
+fired late inside it. Measured on clip 12, **12 of the 16 emphasised cards sit
+LATE of their own speech run's onset, median +59 ms**; the two he flagged were
+the card "THE FREEDOM" at **+220 ms** — the boom landed on *"the"*, not on the
+stressed *"have"* — and a card whose stressed syllable (*"that's IT"*) was
+240 ms earlier.
+
+So the anchor is refined once more: the loudest 40 ms in
+`[t − STRESS_BACK, t + 0.10]`, then its ATTACK, walking back to 6 dB under
+that syllable's own peak. **`STRESS_BACK = 0.22` is bracketed on both sides**:
+
+| | |
+|---|---|
+| 0.30 | drags clip 6's second punch 305 ms back onto *"which"*, mid-previous-phrase |
+| 0.18 | leaves clip 12's second boom at +15 ms — does not answer the note |
+| **0.22** | clip 12 → *"hear" / "it" / "have"* (−180 / −240 / −185 ms); clip 6's "ping issues cheaters" punch moves −35 ms |
+
+Delivered: **3.36 / 12.78 / 28.55**, measuring 3.7x / 3.9x / 3.6x the low-band
+baseline, on *"don't want to **HEAR** no complaints"*, *"that's **IT**"* and
+*"you **HAVE** the freedom"*.
+
+### Two bugs the refinement exposed, both of the "plan ≠ build" family
+
+1. **THE MOMENTS ARE THEIR OWN PHRASE STARTS.** `split`'s `open_at` snaps to
+   the latest entry in `phrase_starts` at or before the moment. Once a moment
+   moves off its card onto the stressed syllable it is no longer IN that list,
+   so it snapped back to the PREVIOUS card — clip 12's middle boom went from
+   12.78 to 9.35 and merged away. Pass the moments themselves.
+2. **A MOMENT NEAR THE END OF ITS SEGMENT VANISHED SILENTLY.** 12.78 sits
+   0.18 s before a picture cut, so the window was 0.23 s, fell under the 0.5 s
+   minimum, and was skipped — **the plan printed three punches and the build
+   delivered two, and the sfx bed followed the build.** A plan that prints what
+   it cannot build is the same defect as a gate that measures nothing. The
+   punch now opens earlier to fit (bounded by its segment and by
+   `PUNCH_BACKOFF = 0.45`), and **the boom stays on the MOMENT, not on the
+   piece** — a zoom already in when the word lands is the normal shape.
+
+### Ending on "salary": whisper's boundary and the audio disagree
+
+He wanted the clip to end on *"salary"*, not *"tragic"*. Transcribing
+candidates with the tail padded:
+
+| cut at | returns |
+|---|---|
+| 86.15 | *"...a couple months of **salad**."* — the word is clipped |
+| 86.22 | *"...of **salary**."* — the earliest clean cut |
+| **86.34** | *"...of **salary**."* — and it is the acoustic trough |
+
+86.34 measures **−36 dB against a −19 dB speech baseline**, a 17 dB dip.
+Whisper calls it the middle of *"all"* (86.15–86.41), so `_snap_out_point`
+pushed the cut forward to 86.41 and put *"all"* back in. **`_in_trough()`
+now lets the audio win**: whisper's word timings here are contiguous guesses,
+and a trough is not a guess. 45.90s → **45.10s**.
+
+### THE LEAD-IN WAS DIGITAL ZERO AND A SOUND EFFECT HID IT FROM THE GATE
+
+Found by the adversarial pass, and it reproduces exactly. `_lead_in` had only
+an UPPER bound, so a Twitch mute — under any quiet threshold — sailed through
+it: all **0.255 s** of clip 12's lead-in measures **−180.0 dBFS, 100% digital
+zero**, against clip 6's accepted lead-in at **−38.3 dBFS, 1% zero**.
+
+**And `deliver_qc` cannot see it.** The chat's `paper` cue fires at 0.020 s
+inside that silence, so `qc.dead_audio` on the delivered file reports **0 runs**.
+A cue filled the hole the gate exists to find — the gate blinded, which is
+worse than the hole. It is now measured on the CUT, where no bed exists, and
+the build log names it.
+
+**The behaviour is kept deliberately.** Scanning the source there is no room
+tone to take — one 5 ms sample in twelve seconds — so the choice is 255 ms of
+silence under the chat cue, or opening on the word's attack at full level,
+which is the defect this lead-in was added to fix. The cue covers it and the
+clip opens soft. What was wrong was that nothing said so.
+
+### The adversarial pass rewrote the selector, and it was not taken
+
+Its settle agents edited `resolve_punch.py` directly and replaced the whole
+selector with a RISE metric snapped to caption-card starts. It is well
+evidenced — on rise, clip 6's "CHEATERS" is the **#2 moment in the clip at
++4.66 dB**, where the emphasised-card rule scores it at the 57.7th percentile
+— and **it is probably the better metric.** It was reverted anyway, for a
+reason that is about the review loop and not about the measurement:
+
+* its picks on clip 12 (6.92 "the", 13.72 "it", 24.49 "going", 30.99 "there",
+  42.03 "i") land on function words and **move the second boom LATER**, which
+  is the opposite of the note;
+* it drops the semantic filter entirely, so a boom no longer has to sit on one
+  of the clip's own thesis words;
+* George has just accepted this selection. Swapping the metric underneath a
+  note that only asks for tightening would re-open a question he has closed.
+
+**Worth revisiting when the selection is next in question**, with the rise
+distribution it measured (clip 6 p50 −0.05 / p99 +3.94 / max +5.91; clip 12
+p50 +0.04 / p99 +4.16 / max +6.44) — it is in `$TMPDIR/wf_resolve_punch.py`
+for that round, and the reasoning is above.
+
 ## "IT'S RANDOM" WAS LITERALLY TRUE, AND THE CAUSE WAS A SMOOTHING WINDOW
 
 George, on clip 12: *"start of the video is still a bit wrong - try again -

@@ -71,6 +71,8 @@ PUNCH_LEAD = 0.12         # in just before the peak, when there is no phrase
 PHRASE_GAP = 0.25         # an inter-word gap at or over this starts a phrase
 PHRASE_BACK = 2.20        # how far back a peak may be snapped
 MIN_PIECE = 0.40          # a sliver shorter than this reads as a glitch
+MIN_WINDOW = 0.50         # shorter than this is a flick, not a punch
+PUNCH_BACKOFF = 0.45      # how early a punch may open to find room
 MIN_SEP = 5.0             # two punches closer than this are one moment
 # THE FLOOR IS A FRACTION OF THE CLIP'S OWN RANGE, not an absolute dB.
 #
@@ -150,6 +152,33 @@ MAX_PUNCHES = 5           # the cap
 # pause-then-hit score ranks it 31st of 138. This rule HITS it.
 ANCHOR_BACK = 1.10        # how far behind the onset a card may sit
 ANCHOR_FWD = 0.30         # and how far ahead
+# AND THE CARD'S START IS NOT THE ATTACK EITHER.
+#
+# George, one round later: *"second boom was slightly too late same with the
+# third one - tighten."* The card anchored the moment to the right PHRASE and
+# it still fired late inside it, because a card begins on whichever word
+# whisper grouped first — often a function word — and that start is a
+# contiguous guess placed inside the join, not an onset. Measured on clip 12,
+# **12 of the 16 emphasised cards sit LATE of their own speech run's onset,
+# median +59 ms**; the two he flagged were the card "THE FREEDOM" at +220 ms,
+# where the boom landed on "the" rather than on the stressed "have", and a
+# card whose stressed syllable ("that's IT") was 240 ms earlier.
+#
+# So the anchor is refined once more: take the loudest 40 ms in
+# [t - STRESS_BACK, t + 0.10] — the stressed syllable — and then its ATTACK,
+# walking back to 6 dB under that syllable's own peak. That is where a
+# listener puts the beat.
+#
+# STRESS_BACK IS BRACKETED ON BOTH SIDES BY MEASUREMENT, which is why it is
+# 0.22 and not a round number:
+#   0.30 drags clip 6's second punch 305 ms back onto "which", a function
+#        word in the middle of the PREVIOUS phrase;
+#   0.18 leaves clip 12's second boom where it was (+15 ms), i.e. it does
+#        not answer the note at all;
+#   0.22 moves clip 12 onto "hear" / "it" / "have" (-180 / -240 / -185 ms)
+#        and leaves clip 6's "ping issues cheaters" punch alone at -35 ms.
+STRESS_BACK = 0.22
+STRESS_DROP = 6.0         # dB under the syllable's peak that counts as its attack
 # A SMALL GUARD, NOT A STRUCTURAL ONE. This was 9.0, set to clear clip 8's
 # 8.97s opening shot — but that attribution was wrong: swept across 9.0 /
 # 4.0 / 2.5 / 1.0 clip 8 returns the IDENTICAL plan every time, because its
@@ -168,6 +197,20 @@ MAX_PER_SHOT = 1          # a shot that goes in-out-in-out is chopped, not punch
 # `_base.mov` is the tightened cut with PCM audio, no graphics and no sfx
 # bed, and it does not change between versions.
 SRC = "renders/styles/_base.mov"
+
+
+def _attack(env_db, hop, t, back=STRESS_BACK, fwd=0.10, drop=STRESS_DROP):
+    """The attack of the stressed syllable nearest `t`. See STRESS_BACK."""
+    lo = max(0, int((t - back) / hop))
+    hi = min(len(env_db) - 1, int((t + fwd) / hop))
+    if hi <= lo:
+        return t
+    j = lo + int(max(range(hi - lo + 1), key=lambda k: env_db[lo + k]))
+    peak = env_db[j]
+    k = j
+    while k > 0 and env_db[k] > peak - drop and (j - k) * hop < 0.14:
+        k -= 1
+    return round((k + 1) * hop, 3)
 
 
 def _onset(rms, times, i, base, d, max_back=1.20):
@@ -210,6 +253,10 @@ def bold_moments(path=SRC, *, min_db=MIN_DB, min_sep=MIN_SEP,
             rms.append(20 * np.log10(v)); times.append(i / sr)
     rms, times = np.array(rms), np.array(times)
     base = float(np.percentile(rms, 40))
+    fh, fw = int(0.005 * sr), int(0.040 * sr)      # for the attack refinement
+    fine = 20 * np.log10(np.maximum(np.array(
+        [float(np.sqrt(np.mean(a[i:i + fw] ** 2)))
+         for i in range(0, max(1, len(a) - fw), fh)]), 1e-9))
     # relative to THIS speaker in THIS clip — see the DB_FRAC note above
     floor = max(min_db, db_frac * (float(rms.max()) - base))
     cand = []
@@ -229,7 +276,8 @@ def bold_moments(path=SRC, *, min_db=MIN_DB, min_sep=MIN_SEP,
                     if on - ANCHOR_BACK <= a <= on + ANCHOR_FWD]
             if not near:
                 continue
-            t = round(min(near, key=lambda a: abs(a - on)), 2)
+            t = min(near, key=lambda c: abs(c - on))
+            t = round(_attack(fine, 0.005, t), 2)   # ...onto its stressed syllable
             if t < skip_head:
                 continue
         cand.append((t, round(float(d), 1)))
@@ -303,7 +351,21 @@ def split(segments, punches, shot_of=None, phrase_starts=None):
         for t, _db in inside[:max(0, room)]:
             a = max(o0, open_at(t))
             b = min(o1, a + PUNCH_HOLD)
-            if b - a >= 0.5:
+            # A MOMENT NEAR THE END OF ITS SEGMENT HAS NO ROOM, AND USED TO
+            # VANISH WITHOUT SAYING SO. Clip 12's middle moment sits at 12.78
+            # with its segment ending at 12.96, so the window was 0.23s, fell
+            # under the 0.5s minimum and was skipped — the plan printed three
+            # punches and the build delivered two, and the sfx bed followed
+            # the build, so George got two booms where the log said three.
+            # A plan that prints what it cannot build is the same defect as a
+            # gate that measures nothing. So the punch OPENS EARLIER to fit,
+            # bounded by its segment and by PUNCH_BACKOFF from the moment,
+            # and the boom stays on the moment rather than on the piece — a
+            # zoom already in when the word lands is the normal shape anyway.
+            if b - a < MIN_WINDOW:
+                a = max(o0, min(a, o1 - MIN_WINDOW), t - PUNCH_BACKOFF)
+                b = min(o1, a + PUNCH_HOLD)
+            if b - a >= MIN_WINDOW:
                 marks.append((a, b))
                 used[shot] = used.get(shot, 0) + 1
         marks.sort()
