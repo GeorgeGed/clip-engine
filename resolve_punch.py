@@ -93,8 +93,63 @@ MIN_SEP = 5.0             # two punches closer than this are one moment
 #   clip 6  range 4.55 dB -> floor 3.19 -> 33.90 +4.6, 26.40 +4.1, 12.00 +4.0,
 #                                          39.80 +4.0, 18.60 +3.5
 MIN_DB = 2.5              # the absolute minimum, for a clip with no dynamic
-DB_FRAC = 0.70            # of the clip's own peak-over-baseline range
+# 0.70 WAS DOING THE ANCHOR FILTER'S JOB, BADLY, AND STACKING WITH IT.
+# With `anchors` in play the dB floor is no longer what stops a moment being
+# arbitrary — the emphasised card is. Keeping both at full strength is two
+# gates on one decision, and on clip 12 it left exactly ONE punch: the floor
+# at 0.70 x 4.28 = 3.00 dB admitted only three candidate peaks and the anchor
+# filter then dropped two of them.
+#
+# Swept with anchors on, the plan is IDENTICAL at 0.55, 0.45, 0.35 and 0.25
+# on both clips — a plateau, where the old absolute threshold was a knife
+# edge that a fraction of a dB flipped. 0.55 is the top of that plateau, so
+# it is the most conservative value that still behaves, and the exact number
+# does not matter, which is the point.
+#
+#   clip 12  -> 3.54 (+2.7), 13.02 (+4.3), 28.73 (+2.7)
+#   clip 6   -> 9.30 (+3.5) = "CHEATERS", 26.64 (+4.4), 34.80 (+3.7)
+DB_FRAC = 0.55            # of the clip's own peak-over-baseline range
 MAX_PUNCHES = 5           # the cap
+# ANCHOR A MOMENT TO WHAT THE CLIP ITSELF CALLS ITS POINT.
+#
+# George, on clip 12: *"the boom effect was too late the first time and the
+# second one was also a bit too late - it's random, but we need to add some
+# kind of logic to it."* Both halves of that are measurable, and they have
+# the SAME cause.
+#
+# "TOO LATE" IS THE 0.30s WINDOW. An RMS window is a smoother, so its maximum
+# sits after the stressed syllable that caused it — measured against the word
+# the moment is named for: clip 6's peak is **695 ms** after "CHEATERS", clip
+# 12's three were 280 / 1170 / 695 ms after their own anchors. On clip 6 the
+# phrase snap rescued this, because whisper gave it an utterance boundary to
+# snap to. On clip 12 it did not: two of the three punches landed at exactly
+# `peak - PUNCH_LEAD`, i.e. the snap found nothing, because whisper's VAD had
+# merged the utterances (this file already records the median inter-word gap
+# on this VOD as 0.000s). So the snap is sound and it was starved of targets.
+#
+# "RANDOM" IS THE SAME STARVATION. Measured on clip 12, the three delivered
+# moments changed the level by **+1.5, +0.3 and -0.2 dB** against the two
+# seconds before them — the last one is QUIETER than what preceded it. In a
+# clip whose entire range is 3.9 dB the loudest windows are near-ties, and
+# ranking near-ties is indistinguishable from choosing at random.
+#
+# WHAT WORKS IS THE EMPHASISED CAPTION CARD. Those come from
+# `emphasis_keys(claim, consequence)` — the clip's own thesis, written by the
+# model that selected it — and this file already records that they "marked
+# the right ones". They are also VISIBLE: the card is drawn in accent colour
+# at that instant, which satisfies the standing rule that a sound must mark
+# something the viewer can see, not a vocal peak.
+#
+# So a candidate peak is walked back to its onset, and must find an
+# emphasised card in [onset - ANCHOR_BACK, onset + ANCHOR_FWD]. If it finds
+# none it marks nothing and is DROPPED — a clip with no qualifying moment
+# gets no punches, which is the honest answer for a flat read.
+#
+# Checked against the regression that killed two simpler rules: per-word rise
+# ranks clip 6's "cheaters" 6th among content words (+2.02) and a
+# pause-then-hit score ranks it 31st of 138. This rule HITS it.
+ANCHOR_BACK = 1.10        # how far behind the onset a card may sit
+ANCHOR_FWD = 0.30         # and how far ahead
 # A SMALL GUARD, NOT A STRUCTURAL ONE. This was 9.0, set to clear clip 8's
 # 8.97s opening shot — but that attribution was wrong: swept across 9.0 /
 # 4.0 / 2.5 / 1.0 clip 8 returns the IDENTICAL plan every time, because its
@@ -115,8 +170,22 @@ MAX_PER_SHOT = 1          # a shot that goes in-out-in-out is chopped, not punch
 SRC = "renders/styles/_base.mov"
 
 
+def _onset(rms, times, i, base, d, max_back=1.20):
+    """Walk back from a 0.30s-window maximum to where the rise began.
+
+    The window is a smoother; its peak is not the attack. Halfway between the
+    baseline and the peak is the crossing that corresponds to the syllable.
+    """
+    tgt = base + d * 0.5
+    j = i
+    while j > 0 and rms[j] > tgt and times[i] - times[j] < max_back:
+        j -= 1
+    return float(times[j])
+
+
 def bold_moments(path=SRC, *, min_db=MIN_DB, min_sep=MIN_SEP,
-                 skip_head=SKIP_HEAD, limit=MAX_PUNCHES, db_frac=DB_FRAC):
+                 skip_head=SKIP_HEAD, limit=MAX_PUNCHES, db_frac=DB_FRAC,
+                 anchors=None):
     """The `limit` loudest local RMS maxima at least `min_db` over baseline.
 
     RANKED, NOT THRESHOLDED, and that is a stability fix rather than a taste
@@ -150,7 +219,20 @@ def bold_moments(path=SRC, *, min_db=MIN_DB, min_sep=MIN_SEP,
             continue
         if rms[i] < max(rms[i - 2:i + 3]):
             continue
-        cand.append((round(float(times[i]), 2), round(float(d), 1)))
+        t = round(float(times[i]), 2)
+        if anchors:
+            # ANCHOR OR DROP. See the ANCHOR_BACK note: the window's maximum
+            # is not the moment, and a moment with no emphasised card beside
+            # it is not one of the clip's points.
+            on = _onset(rms, times, i, base, d)
+            near = [a for a in anchors
+                    if on - ANCHOR_BACK <= a <= on + ANCHOR_FWD]
+            if not near:
+                continue
+            t = round(min(near, key=lambda a: abs(a - on)), 2)
+            if t < skip_head:
+                continue
+        cand.append((t, round(float(d), 1)))
     # loudest first, each one suppressing everything within min_sep of it
     out = []
     for t, d in sorted(cand, key=lambda c: (-c[1], c[0])):

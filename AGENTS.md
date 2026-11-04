@@ -1491,6 +1491,179 @@ the clip's metadata**, and then that fact gets reasoned from.
 Clip 8 is still on the old bespoke scripts and has NOT had the gate
 applied; its eight cards are still in the shipped file.
 
+## "IT'S RANDOM" WAS LITERALLY TRUE, AND THE CAUSE WAS A SMOOTHING WINDOW
+
+George, on clip 12: *"start of the video is still a bit wrong - try again -
+also the boom effect was too late the first time and the second one was also
+a bit too late - it's random, but we need to add some kind of logic to it -
+also ends midway though tragic."*
+
+Three notes, and the second one had two halves with ONE cause.
+
+### The booms were on time to the frame and still late
+
+First measurement, because the obvious hypothesis was wrong: cross-correlating
+the boom template against the delivered low band put the three hits at
+14.267 / 20.263 / 33.617 against planned cuts at 14.28 / 20.28 / 33.63 —
+**13 to 17 ms EARLY, inside one frame.** The cue is not mislaid.
+
+What is late is the MOMENT. Per-word levels around each one:
+
+| boom | the emphatic word | boom fired | late by |
+|---|---|---|---|
+| 14.28 | "**want**" 13.45, +5.5 dB | 14.28 | **0.83s** |
+| 20.28 | "**just**" 18.63, +3.7 dB | 20.28 | **1.65s** |
+| 33.63 | "**are**" 31.56, +7.1 dB | 33.63 | **2.07s** |
+
+**A 0.30s RMS window is a smoother, so its maximum sits after the syllable
+that caused it.** On clip 6 the phrase snap hid this, because whisper gave it
+an utterance boundary to snap to. On clip 12 it did not: two of the three
+punches landed at exactly `peak - PUNCH_LEAD`, which is the signature of the
+snap finding nothing — whisper's VAD had merged the utterances, and this file
+already records the median inter-word gap on this VOD as 0.000s. **The snap
+was sound and it was starved of targets.**
+
+And "random" is the same starvation. Measured against the two seconds before
+them, the three moments changed the level by **+1.5, +0.3 and −0.2 dB** — the
+last one is QUIETER than what preceded it. In a clip whose whole range is
+3.9 dB, ranking the loudest windows is ranking near-ties.
+
+### Two simpler rules were tried first and the regression killed both
+
+The test that matters is clip 6, where George named the moment himself: *"ping
+issues, cheaters there should be zooms because it's when he's loud."*
+
+| rule | where it puts clip 6's "cheaters" |
+|---|---|
+| per-WORD rise over the preceding 1.2s | **6th among content words** (+2.02), outside the top 10 overall |
+| pause-before × rise ("setup then hit") | **31st of 138** — and on clip 12 its top pick is a 10.3s Twitch mute |
+| **emphasised caption card + rise** | **4th of 21**, and it is picked |
+
+Both of the first two are plausible and both are wrong, and the reason is the
+same: **whisper's word timings here are contiguous, so per-word acoustics and
+inter-word gaps are both built on guesses placed inside joins.** Nearly every
+"gap before a word" on this clip measures 0.000s.
+
+### The anchor is the emphasised caption card
+
+Those come from `emphasis_keys(claim, consequence)` — the clip's own thesis,
+written by the model that selected it — and this file already records that
+they "marked the right ones" on clip 8. They are also the only candidate that
+satisfies the standing rule **no sound without a VISIBLE event**: the card is
+drawn in accent colour at that instant, so the boom marks something on screen
+rather than a vocal peak.
+
+So `bold_moments(..., anchors=…)`: a candidate peak is walked back to its
+onset (the first crossing of halfway between baseline and peak), and must find
+an emphasised card in `[onset − 1.10, onset + 0.30]`. **No card, no punch and
+no boom** — a clip with no loud moment on one of its own thesis words gets
+none, which is the honest answer for a flat read.
+
+**`DB_FRAC` came down 0.70 → 0.55, because it was doing the anchor's job and
+stacking with it.** At 0.70 clip 12 got exactly ONE punch: the floor admitted
+three candidate peaks and the anchor filter dropped two. Swept with anchors on,
+the plan is IDENTICAL at 0.55, 0.45, 0.35 and 0.25 on both clips — **a plateau
+where the old threshold was a knife edge.** 0.55 is the top of it, and the
+point is that the exact number no longer matters.
+
+| | picks |
+|---|---|
+| clip 12 | 3.54 (+2.7), 13.02 (+4.3), 28.73 (+2.7) |
+| clip 6 | **9.30 = "CHEATERS"**, 26.64, 34.80 |
+
+Verified in the delivered file: 3.6x / 3.9x / 4.1x the low-band baseline, on
+*"I don't want to hear **no complaints**"*, *"I **just** don't want to hear
+it"* and *"you **have the** freedom to choose your own teammates"* — the
+claim, the claim again, and the consequence.
+
+### The opening: no pre-roll exists on this material, and the first word had no caption
+
+Measured across the clips George has ACCEPTED:
+
+| clip | lead-in | frame 0 |
+|---|---|---|
+| 06 | 270 ms | −47.6 dBFS |
+| 08 | 100–200 ms | −41.5 dBFS |
+| **12** | **0 ms** | **−11.9 dBFS** (its own peak is −10.4) |
+
+**Pre-roll cannot be FOUND here.** Scanning source 20–32s, every word is
+preceded either by the previous word still sounding — he talks continuously —
+or by digital zero. **Exactly one word in twelve seconds has real room tone in
+front of it.**
+
+And the first word was not one to open on anyway: `in_point 23.225` sat on
+"you", whose span is **55.4% digital zero**, so `_drop_hallucinated` had
+already refused its caption. The viewer heard a word the caption track would
+not show, and the captions started on the next one. **The audio and the
+captions disagreed at frame 0.** `_open_on_captionable()` applies the same
+test to the in-point: a word we will not quote is not a word to open on. On
+clip 6 the opening word "i've" is 0.0% silent, so the rule is a no-op there
+and the earlier backward snap stands.
+
+`_lead_in()` then backs into whatever quiet precedes the new first word, up to
+0.24s, crossing only audio under −34 dB so it cannot pull in the previous
+word's tail. Clip 12 opens on **"guys have it good now, man"** with 255 ms of
+lead-in; clip 6 moves 20 ms.
+
+**Whisper will tell you the word is still there, and it is lying.** The
+delivered clip transcribes as "You guys have it good now, man" — but the
+source between the in-point and "guys" is digital zero at −180 dBFS, so there
+is no "you" in the file. It is a language-model completion. Same lesson as the
+hallucination gate: **the audio is the check, not the model.**
+
+### "Ends midway though tragic" was THREE defects in a row
+
+1. **The source window itself was short.** The clip file ran 87.70s and
+   "tragic" ends at 87.71 — the word's release was the last frames of the
+   file, so any frame lost anywhere ate it. **The VOD is still up**, so the
+   region was re-fetched and 2.3s of tail spliced on. `--force-keyframes-at-cuts`
+   put a whole-region re-fetch **1.078s out**, which would have invalidated
+   every word timestamp, chat offset and punch — so the tail was taken from a
+   separately verified fetch and concatenated, then checked: **offset +0.0 ms,
+   corr 1.000** in an early and a late window. *Verify an alignment on
+   ENVELOPES, not raw samples* — the raw-waveform correlation read 0.027 and
+   was useless, while the 1 kHz envelope read 0.406 against a 0.016 median.
+2. **The out-point was not frame-aligned.** 87.71 made the last keep 0.390s =
+   23.4 frames, so the picture held 23 and the word needed 24. 87.72 makes it
+   exactly 0.400s = 24 frames, and `"Thank you to the tier one man"` starts at
+   87.72 so none of it is included.
+3. **`-frames:v` BOUNDS THE AUDIO.** It stops ffmpeg reading once the video
+   stream ends, so the audio is cut to the picture however long the release
+   is. Measured: the Resolve render ended the word cleanly at **−53 dB** and
+   the delivery step handed it over at **−14 dB**, 67 ms short. The note that
+   put `-frames:v` there was about `-t` cutting at a KEYFRAME, which is true
+   of `-c:v copy` and not of a step that re-encodes. Now `-t` with three
+   frames of slack; `black_top`/`black_bottom` would catch it if that cost
+   anything, and they report none.
+
+**AND A TRAP IN VERIFYING IT:** whisper drops a trailing word when the file
+ends on one. The delivered tail transcribed as *"...of salary all day."* with
+no "tragic" until the clip was padded with 0.6s of silence, at which point it
+returns *"a couple months of salary all day. Tragic."* **Pad before
+transcribing a tail.**
+
+### Replacing a source file under Resolve delivers a silent clip
+
+The extended source was first written to the SAME path. Resolve had that path
+in its media pool from the previous build, did not re-conform it, and rendered
+**the sfx bed alone** — 44.09s of absent audio in a 45.8s clip, every speech
+frame gone, and the loudness gate caught it at −12.76 LUFS. Giving the file a
+new name fixed it. Same family as the media-pool-by-name collision already
+recorded here: **Resolve's pool caches by path as well as by name, so a
+changed file needs a changed path.**
+
+### What clip 12 measures now
+
+| | |
+|---|---|
+| Duration | **45.90s** |
+| Opening | 255 ms of lead-in, then "guys have it good now, man" |
+| Ending | "...salary all day. **Tragic.**", decaying to −58.6 dB |
+| Booms | 3, each on an emphasised card, **3.6–4.1x** the low-band baseline |
+| Chat | 29 of 29 frames |
+| Captions | 104 cards, 2.27/s, 0 hallucinated |
+| Audio | −14.06 LUFS, −1.19 dBTP, 0.00s dead space, 0.00s absent |
+
 ## THE BOOM WAS IN THE BED AND NOT IN THE FILE, TWICE OVER
 
 George: *"no keep the twitch chat why did you remove it? it was good, also

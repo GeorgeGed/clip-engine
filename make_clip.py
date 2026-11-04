@@ -188,6 +188,35 @@ SNAP_MAX = 0.35
 # trough is 0.075s behind. 0.20s is the ceiling: enough to recover a word's
 # onset, not enough to pull in the previous word.
 SNAP_BACK = 0.20
+# THE CLIP MUST NOT OPEN AT FULL LEVEL ON FRAME 0, AND IT MUST NOT OPEN ON A
+# WORD THE CAPTION GATE REFUSES. Two rules, one measurement each, both from
+# George's second note on this opening: "start of the video is still a bit
+# wrong - try again".
+#
+# 1. FRAME 0. Measured across the clips he has ACCEPTED: clip 6 opens with
+#    270ms of lead-in at -47.6 dBFS on frame 0, clip 8 with 100-200ms at
+#    -41.5. Clip 12 opened with **0ms of lead-in at -11.9 dBFS** — its own
+#    peak is -10.4, so it began at full speech level on the first frame.
+#    That is the defect, and it is not subtle.
+#
+#    Pre-roll cannot be FOUND on this material. Scanning source 20-32s, every
+#    word is preceded either by the previous word still sounding (he talks
+#    continuously — whisper's median inter-word gap here is 0.000s) or by
+#    digital zero (a Twitch mute). Exactly ONE word in twelve seconds has real
+#    room tone in front of it. So the in-point backs into whatever quiet is
+#    there, and a mute's tail is acceptable as lead-in where room tone is not
+#    available: a quarter-second of silence at the head of a clip is how every
+#    accepted clip starts, whatever its dBFS.
+#
+# 2. THE FIRST WORD. `in_point 23.225` opened on "you", whose span is **55.4%
+#    digital zero** — so `_drop_hallucinated` had already refused its caption.
+#    The viewer heard a word the caption track would not show, and the
+#    captions then started on the NEXT word. The audio and the captions
+#    disagreed at frame 0. A word we will not quote is not a word to open on.
+#    Checked against clip 6: its opening word "i've" is 0.0% silent, so the
+#    rule is a no-op there and the earlier fix stands.
+LEAD_IN = 0.24           # what frame 0 gets, measured off clip 6's 270ms
+LEAD_QUIET_DB = -34.0    # what counts as quiet enough to back into
 
 
 def _snap_in_point(src, in_point, window=SNAP_WINDOW, preroll=SNAP_PREROLL):
@@ -255,6 +284,62 @@ def _snap_in_point(src, in_point, window=SNAP_WINDOW, preroll=SNAP_PREROLL):
         "trough": round(float(times[tr]), 3),
         "next_loud_onset": None if onset is None else round(float(times[onset]), 3),
         "moved": round(snapped - in_point, 3)}
+
+def _open_on_captionable(words, in_point, absent, limit=2.0):
+    """Move `in_point` off a word whose caption the hallucination gate drops.
+
+    Same test as `_drop_hallucinated`, applied to the in-point instead of to a
+    card: more than `HALLUCINATION_SHARE` of the word's own span is digital
+    zero. Returns the new in-point and the word it moved to, or (in_point, None).
+    """
+    cur = next((w for w in words
+                if w["start"] <= in_point < w["end"] - 1e-6), None)
+    if cur is None:
+        return in_point, None
+    def zshare(w):
+        span = max(1e-6, w["end"] - w["start"])
+        z = sum(max(0.0, min(w["end"], b) - max(w["start"], a)) for a, b in absent)
+        return z / span
+    if zshare(cur) <= HALLUCINATION_SHARE:
+        return in_point, None
+    nxt = next((w for w in words
+                if w["start"] >= cur["end"] - 1e-6
+                and zshare(w) <= HALLUCINATION_SHARE), None)
+    if nxt is None or nxt["start"] - in_point > limit:
+        return in_point, None
+    return float(nxt["start"]), {"was": cur["text"], "zero": round(zshare(cur), 3),
+                                 "now": nxt["text"]}
+
+
+def _lead_in(src, in_point, want=LEAD_IN, quiet_db=LEAD_QUIET_DB):
+    """Back the in-point into whatever quiet precedes it, up to `want`.
+
+    Only ever crosses audio under `quiet_db`, so it cannot pull in the tail of
+    the previous word — which is the defect `_snap_in_point` exists to remove,
+    and this must not reintroduce it. Returns the new in-point and how much
+    lead-in it found; 0.0 means there was none to take.
+    """
+    import numpy as np
+    t0 = max(0.0, in_point - want - 0.02)
+    raw = subprocess.run(
+        ["ffmpeg", "-v", "error", "-ss", f"{t0:.3f}",
+         "-t", f"{in_point - t0:.3f}", "-i", str(src),
+         "-ac", "1", "-ar", "48000", "-f", "f32le", "-"],
+        capture_output=True).stdout
+    a = np.frombuffer(raw, np.float32)
+    sr, w = 48000, 240                      # 5ms
+    if a.size < w * 2:
+        return in_point, 0.0
+    env = np.array([float(np.sqrt(np.mean(a[i:i + w] ** 2)))
+                    for i in range(0, a.size - w, w)])
+    db = 20 * np.log10(np.maximum(env, 1e-9))
+    # walk back from the in-point while it stays quiet
+    i = len(db) - 1
+    while i >= 0 and db[i] <= quiet_db:
+        i -= 1
+    got = (len(db) - 1 - i) * (w / sr)
+    return round(in_point - got, 3), round(got, 3)
+
 
 def _snap_back(src, in_point, window=SNAP_BACK, pad=0.06):
     """The onset of the word `in_point` is sitting inside, or None.
@@ -420,6 +505,33 @@ def _drop_hallucinated(cs, absent, min_share=HALLUCINATION_SHARE):
         (dropped if mute / span > min_share else kept).append((c, mute / span))
     return [c for c, _ in kept], dropped
 
+def _emphasis_anchors(clip, ch, st):
+    """The emphasised caption cards' start times, in OUTPUT time.
+
+    These are the clip's own thesis words — `emphasis_keys(claim,
+    consequence)` from the model that selected the clip — and they are drawn
+    in accent colour, so a punch or a cue landing on one marks something the
+    viewer SEES. `resolve_punch` uses them both to FILTER candidate moments
+    (a peak with no card beside it marks nothing) and to ANCHOR the ones that
+    survive. See the ANCHOR_BACK note there for the measurements.
+    """
+    from engine.resolve_captions import cards, emphasis_keys, mark_emphasis
+    words = [w for u in json.loads(clip.words(ROOT).read_text())["utterances"]
+             for w in u["words"]]
+    cs = cards(words)
+    meta = st["meta"]
+    mark_emphasis(cs, emphasis_keys(meta.get("claim", ""),
+                                    meta.get("consequence", "")))
+    out = []
+    for c in cs:
+        if not c.emphasis:
+            continue
+        rm = remap_card(c.start, c.end, st["keeps"])
+        if rm:
+            out.append(round(rm[0], 3))
+    return sorted(set(out))
+
+
 def _phrase_starts(clip, ch, st):
     """Phrase starts in OUTPUT time, for snapping a punch off its RMS peak.
 
@@ -519,6 +631,14 @@ def stage_cut(clip, ch, st):
     snap, osnap, spans = pl["snap"], pl["out_snap"], pl["spans"]
     kp, out_dur = st["keeps"], st["out_dur"]
     log(f"  {src.name}")
+    if pl.get("skipped"):
+        k = pl["skipped"]
+        log(f"  in-point skipped {k['was']!r} — {k['zero']:.0%} of its span is "
+            f"digital zero, so the caption gate drops it; opening on {k['now']!r}")
+    if pl.get("lead"):
+        log(f"  lead-in {pl['lead']:.3f}s of quiet before the first word")
+    elif pl.get("lead") == 0.0:
+        log(f"  NO LEAD-IN AVAILABLE — the clip opens on the word's attack")
     if snap and abs(snap["moved"]) > 0.005:
         why = snap.get("backward") or (
             f"snapped off a word tail to the trough at {snap['trough']}")
@@ -936,12 +1056,19 @@ def stage_punch(clip, ch, st):
     sidx = _shot_index([d for _o, d, _s in segs])
     nshots = sidx[-1] + 1 if sidx else 1
     # Measure the CLEAN CUT, never the last delivery — see AGENTS.md.
-    base, moments = rp.bold_moments(_cut_audio(clip, ch, st))
-    log(f"  baseline {base:.1f} dBFS; {len(moments)} bold moments:")
+    anchors = _emphasis_anchors(clip, ch, st)
+    base, moments = rp.bold_moments(_cut_audio(clip, ch, st), anchors=anchors)
+    log(f"  baseline {base:.1f} dBFS; {len(anchors)} emphasised cards to "
+        f"anchor to; {len(moments)} bold moments:")
     for t, d in moments:
         log(f"     {t:6.2f}s  +{d} dB")
-    pieces = rp.split(segs, moments, shot_of=sidx,
-                      phrase_starts=_phrase_starts(clip, ch, st))
+    if not moments:
+        log("     none — no loud moment sits on one of the clip's own "
+            "thesis words, so it gets no punches and no booms")
+    # The anchors ARE the phrase starts now: each moment is already one of
+    # them, so `split` finds it exactly and the punch opens on the card
+    # rather than being pulled back to an utterance boundary behind it.
+    pieces = rp.split(segs, moments, shot_of=sidx, phrase_starts=anchors)
     tl.DeleteClips(v2)
     canvas = Frame(1080, 1920, 1920, 1080)
     rects = framings(nshots, _cam(clip, ch, st))
@@ -1014,8 +1141,18 @@ def stage_render(clip, ch, st):
     log(f"  voice chain: sub-85 {m['rumble_dbfs']} dBFS vs body "
         f"{m['body_dbfs']} ({m['margin_db']:+.1f} dB) -> "
         f"high-pass {'ON' if m['highpass'] else 'OFF'}")
+    # PAD THE AUDIO TRIM, OR THE LAST WORD'S RELEASE IS CUT OFF.
+    # `-t` here exists to drop overlay frames that outran V1 and render
+    # black — a PICTURE concern, which `-frames:v` on the delivery already
+    # handles. Applying it to the audio as well is what George heard as
+    # "ends midway though tragic": the last keep is 0.390s, which is 23.4
+    # frames, so the picture holds 23 (0.3833s) while the word's release
+    # needs the full 0.390. Measured, the Resolve render's audio ran to
+    # 45.888s and ended on the decay at -53 dB — complete — and this trim
+    # cut it to 45.833s, ending it at -21 dB, mid-word. Three frames of pad
+    # costs nothing: the muxer stops at the last video frame anyway.
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(raw),
-                    "-t", f"{st['total']/ch.fps:.4f}", "-af", EQ,
+                    "-t", f"{(st['total'] + 3)/ch.fps:.4f}", "-af", EQ,
                     "-c:v", "libx264", "-crf", "17", "-preset", "medium",
                     "-pix_fmt", "yuv420p", "-c:a", "pcm_s16le", str(eq)], check=True)
     # Loudness is finished HERE, not in Resolve: NormalizeAudioLevel applies
@@ -1030,9 +1167,20 @@ def stage_render(clip, ch, st):
     _finish_audio(eq, {"audio": {"target_lufs": -14.0, "true_peak_dbtp": -1.5},
                        "render": {"audio_codec": "aac"}}, mid)
     out = ROOT / f"renders/{tag}.mp4"
-    # -t with -c:v copy cuts at a keyframe, so trim the PICTURE with -frames:v
+    # `-frames:v` BOUNDS THE AUDIO TOO, and that is the other half of
+    # "ends midway though tragic". It stops ffmpeg reading once the video
+    # stream is done, so the audio is cut to the picture however long the
+    # release is — measured, the Resolve render ended the word cleanly at
+    # -53 dB and this step delivered it at -14 dB, 67 ms short.
+    #
+    # The note that put `-frames:v` here was about `-t` cutting at a
+    # KEYFRAME, which is true of `-c:v copy` and not of this step: it
+    # re-encodes, so `-t` is frame-accurate. The picture is already bounded
+    # by the render marks and by the EQ step, so three frames of slack here
+    # costs nothing and `black_top`/`black_bottom` would catch it if it did.
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(mid),
-                    "-frames:v", str(st["total"]), "-c:v", "libx264", "-crf", "18",
+                    "-t", f"{(st['total'] + 3)/ch.fps:.4f}",
+                    "-c:v", "libx264", "-crf", "18",
                     "-preset", "medium", "-pix_fmt", "yuv420p", "-c:a", "copy",
                     "-movflags", "+faststart", str(out)], check=True)
     eq.unlink(missing_ok=True); mid.unlink(missing_ok=True)
@@ -1116,9 +1264,15 @@ def _plan_only(clip, ch, st):
     # against the speaker's own level.
     absent = qc.dead_audio(src, min_run=0.3)["runs"]
     quiet = qc.quiet_runs(src, min_run=MIN_DEAD)["runs"]
-    ip, snap = _snap_in_point(src, clip.in_point)
     words = [w for u in json.loads(clip.words(ROOT).read_text())["utterances"]
              for w in u["words"]]
+    # ORDER MATTERS. Skip the uncaptionable word FIRST, then snap onto the new
+    # word's onset, then take the lead-in — snapping before skipping would
+    # refine a point we are about to abandon.
+    ip0, skipped = _open_on_captionable(words, clip.in_point,
+                                        qc.dead_audio(src, min_run=0.1)["runs"])
+    ip, snap = _snap_in_point(src, ip0)
+    ip, lead = _lead_in(src, ip)
     op, osnap = _snap_out_point(words, clip.out_point, absent)
     dead = sorted([r for r in absent + quiet if r[0] >= ip])
     spans = removals(dead, src_dur, min_remove=MIN_DEAD, beat=BEAT)
@@ -1128,7 +1282,8 @@ def _plan_only(clip, ch, st):
     st["total"] = round(st["out_dur"] * ch.fps)
     st["base_wav"].parent.mkdir(parents=True, exist_ok=True)
     return {"src": src, "src_dur": src_dur, "in_point": ip, "out_point": op,
-            "snap": snap, "out_snap": osnap, "spans": spans, "words": words}
+            "snap": snap, "out_snap": osnap, "spans": spans, "words": words,
+            "skipped": skipped, "lead": lead}
 
 
 if __name__ == "__main__":
