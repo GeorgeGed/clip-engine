@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clip Factory</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<header>
+  <h1>Clip&nbsp;Factory</h1>
+  <p class="sub">Paste a Twitch VOD. It screens, picks and builds — through Resolve, on this machine.</p>
+</header>
+
+<main>
+  <section class="panel" id="new">
+    <h2>New VOD</h2>
+    <form id="job-form">
+      <label>VOD URL
+        <input name="url" type="url" required
+               placeholder="https://www.twitch.tv/videos/2905408276">
+      </label>
+      <div class="row">
+        <label>Channel
+          <input name="channel" required placeholder="fns" pattern="[A-Za-z0-9_-]+">
+        </label>
+        <label>Rights basis
+          <select name="rights" required>
+            <option value="">choose one…</option>
+            <option value="explicit">explicit — written permission</option>
+            <option value="affiliate">affiliate</option>
+            <option value="client_owned">client owned</option>
+          </select>
+        </label>
+      </div>
+      <label>Note <span class="hint">optional — what the permission covers</span>
+        <input name="note" placeholder="Operator's own permission, carried from the quote desk">
+      </label>
+      <p class="note">Every source carries a rights basis. The build refuses to
+         start without one, so this is asked rather than defaulted.</p>
+      <button type="submit">Start</button>
+      <span id="form-msg" class="msg"></span>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Jobs <span id="queue-note" class="hint"></span></h2>
+    <ul id="jobs" class="jobs"><li class="empty">Nothing yet.</li></ul>
+  </section>
+
+  <section class="panel" id="detail" hidden>
+    <div class="detail-head">
+      <h2 id="d-name">—</h2>
+      <div class="detail-actions">
+        <button id="d-cancel" class="ghost">Cancel</button>
+        <button id="d-close" class="ghost">Close</button>
+      </div>
+    </div>
+    <p id="d-meta" class="hint"></p>
+
+    <ol id="d-stages" class="stages"></ol>
+
+    <div class="split">
+      <div>
+        <h3>Screen <span class="hint" id="d-yield"></span></h3>
+        <p class="note">The yield is the point. Most candidates cannot be cut
+           at all — mostly DMCA muting — so this is a table with a reason, not
+           a spinner.</p>
+        <div class="tablewrap"><table id="d-screen">
+          <thead><tr><th>#</th><th>Verdict</th><th>Subject</th><th>Why</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+      <div>
+        <h3>Log</h3>
+        <select id="d-stage-pick"></select>
+        <pre id="d-log">—</pre>
+      </div>
+    </div>
+
+    <h3>Clips <span class="hint" id="d-clipcount"></span></h3>
+    <div id="d-clips" class="clips"><p class="empty">No clips built yet.</p></div>
+  </section>
+</main>
+
+<script src="/app.js"></script>
+</body>
+</html>

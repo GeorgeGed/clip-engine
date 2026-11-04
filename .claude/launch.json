@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "clip-factory",
+      "runtimeExecutable": ".venv/bin/python",
+      "runtimeArgs": ["web/server.py"],
+      "port": 8808
+    }
+  ]
+}

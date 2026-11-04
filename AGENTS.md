@@ -4574,3 +4574,59 @@ clip, and a server that connects is not a working render.
 
 See `STYLE-BASELINE.md` for the full reference measurements and
 `docs/RESOLVE-BUILD.md` for how to build this in Resolve.
+
+## TWO BOOMS, AND THE PIPELINE AS A WEBSITE
+
+### The third boom was a count problem, not a pick problem
+
+George rejected the THIRD boom twice, on two different moments — *"you HAVE
+the freedom to choose your own teammates"*, then *"you don't get paid FOR a
+couple months"* — the second time as *"third boom is pointless - remove from
+logic and video"*. Two rejections of two different picks is not selection,
+it is **count**: a 45s clip carries two of these and the third pads whatever
+it lands on. `MAX_PUNCHES = 2`, recorded as what it is — an editorial
+constant from repeated review, not a measurement — and a CAP, so a clip with
+one qualifying moment still gets one.
+
+### Clip 8 rebuilt on the pipeline, and it lost its zooms
+
+The flagship clip was still on the old bespoke scripts, and AGENTS.md
+recorded that **its eight hallucinated caption cards were still shipping**.
+Rebuilt through `make_clip`: 45.00s, −14.04 LUFS, nine of nine gates, and
+**the eight cards are dropped**.
+
+**But it came back with 0 bold moments**, so no zooms and no booms at all,
+where it used to carry three punches. Eight emphasised cards to anchor to
+and not one qualifying peak beside them. That is the "zero is an allowed
+answer" path doing what it was built to do, and on this clip it is probably
+too strict — the claim-only anchor filter plus the `DB_FRAC` floor compound.
+**Stated rather than shipped quietly: clip 8 is currently a flat cut.**
+
+### `web/` — the factory as a local site
+
+`web/server.py`, stdlib `http.server`, no framework (the venv has no pip).
+It drives the real commands — `run.py ingest/analyse/rank`, then
+`batch.py screen/prep/specs/build/report` — as subprocesses with each
+stage's output tee'd to `jobs/<job>/web/<stage>.log`. Nothing about the
+editing is reimplemented, so the site follows the pipeline for free.
+
+Three things it refuses to hide:
+
+* **One job at a time.** A single worker thread. Resolve's API is on its GUI
+  thread and `public/` is shared, so the queue is the constraint stated
+  honestly rather than a UI limit.
+* **The screen is the product.** 10 of 50 buildable on this VOD, and the
+  table shows a verdict and a reason per clip. A spinner that emitted three
+  clips from fifty would be lying about the yield.
+* **Rights are a required field**, not a default, because the build refuses
+  to start without one.
+
+Verified against the real job: 50 screened / 10 buildable rendered in the
+table, three clips playing from `renders/`, and the three validation paths
+(bad URL, missing rights, duplicate job) each refused with their reason.
+
+**A bug worth keeping, because it is the generic one for polled UIs.** The
+job list re-rendered every 1.5s, so a row was torn out from under a click
+and the click landed on nothing. Both lists now rebuild only when their own
+signature changes — the same fix the clips grid already needed so a playing
+`<video>` is not replaced mid-frame.

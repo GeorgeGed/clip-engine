@@ -111,7 +111,19 @@ MIN_DB = 2.5              # the absolute minimum, for a clip with no dynamic
 #   clip 12  -> 3.54 (+2.7), 13.02 (+4.3), 28.73 (+2.7)
 #   clip 6   -> 9.30 (+3.5) = "CHEATERS", 26.64 (+4.4), 34.80 (+3.7)
 DB_FRAC = 0.55            # of the clip's own peak-over-baseline range
-MAX_PUNCHES = 5           # the cap
+# TWO. George has now rejected the THIRD boom twice, on two different
+# moments — "you HAVE the freedom to choose your own teammates" and then
+# "you don't get paid FOR a couple months" — and the second time with
+# *"third boom is pointless - remove from logic and video"*. Two rejections
+# of two different picks is not a selection problem, it is a COUNT problem:
+# a 45s clip carries two of these and the third is padding whatever it
+# lands on.
+#
+# Recorded as what it is — an editorial constant from repeated review, not a
+# measurement — and it is a CAP, so a clip with only one qualifying moment
+# still gets one. Worth revisiting for a clip much longer than this one,
+# where one boom every ~22s would allow a third.
+MAX_PUNCHES = 2           # the cap; see the note above
 # ANCHOR A MOMENT TO WHAT THE CLIP ITSELF CALLS ITS POINT.
 #
 # George, on clip 12: *"the boom effect was too late the first time and the
