@@ -393,3 +393,40 @@ def shutter(dur=0.16, seed=37):
 
 
 PALETTE["shutter"] = shutter
+
+
+def vine_boom():
+    """The Vine Boom, from the file George supplied. NOT synthesised.
+
+    This file has refused synthesised cues' critics four times and recorded
+    "a licensed SFX library" as an outstanding blocker. This is the first
+    real sample in the palette, and it is in the palette rather than
+    special-cased so `cue_gain` can solve its level like any other cue.
+
+    MEASURED, because it does not behave like anything else here:
+
+    | | duration | crest | centroid | energy <200 Hz |
+    |---|---|---|---|---|
+    | shutter | 82ms | 22.0 dB | 11460 Hz | — |
+    | paper | 260ms | 16.9 dB | 2007 Hz | — |
+    | **vine_boom** | **1185ms** | **7.7 dB** | 880 Hz | **50%** |
+
+    **The crest is the thing to notice: 7.7 dB, the lowest in the palette
+    by 4 dB.** This file's own rule is that a CLICK is set by peak, because
+    a click is almost all peak and no RMS. The Vine Boom is the exact
+    opposite — dense, low and sustained — so setting it by peak alongside
+    the shutter would put its RMS far above everything else, which is the
+    same mistake in mirror image. It is set by RMS.
+
+    RIGHTS: a meme sound of uncertain provenance. George chose it and
+    supplied the file; it is not a licensed library and should not be
+    treated as one.
+    """
+    import soundfile as sf
+    y, sr = sf.read(ASSETS / "vine_boom.wav", dtype="float32")
+    if y.ndim > 1:
+        y = y.mean(axis=1)
+    return y
+
+
+PALETTE["vine_boom"] = vine_boom

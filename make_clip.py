@@ -58,7 +58,7 @@ from engine.cuts import framings, content_framings               # noqa: E402
 from engine.tighten import removals, keeps, remap_card, joins    # noqa: E402
 from engine import captions_video, twitch_chat                   # noqa: E402
 from engine import chat_reaction as cr                           # noqa: E402
-from engine.sfx import Cue, bed, cue_gain_peak                   # noqa: E402
+from engine.sfx import Cue, bed, cue_gain, cue_gain_peak                   # noqa: E402
 
 VENDOR = ROOT / "vendor/remotion-clip08"
 PUBLIC = VENDOR / "public"
@@ -77,7 +77,21 @@ BEAT = 0.08              # what is LEFT of each one; 0 makes words collide
 CAPTION_ACCENT = (92, 128, 255, 255)      # theme.tsx C.blueLight
 MASTER_GAIN = 6.2        # what loudnorm adds; cues are solved through it
 BAIT_SECONDS = 17.0      # the hook holds the stretch where a scroller decides
-STAGES = ("cut", "captions", "chat", "assemble", "punch", "render")
+# THE BOOM, SET BY RMS AND THEN CHECKED AGAINST THE OTHER CUES' PEAKS.
+# -26 dBFS RMS put its peak at -18.3 in the master — QUIETER in peak than
+# every cue the project has ever accepted (shutter -10.4, thunk -14.3) and
+# 17.5 dB under the speech, where this file records 13 dB as "low". A
+# sub-heavy hit also needs more level than a mid one to read as equally
+# loud, since half its energy sits below 200 Hz. -21.0 puts the peak near
+# -12.8: above the thunk, below the shutter, and under the speech.
+BOOM_RMS = -21.0
+# PUNCH RUNS BEFORE ASSEMBLE. George: *"ensure we are adding sound effects
+# for funny moments throughout the video ... has to go on a zoom for
+# dramatic effect."* A cue on a zoom needs the zoom's time, and the punch
+# plan is only known once that stage has run. The two touch different
+# tracks — punch rebuilds V2, assemble clears V3+ and A2 — so the order is
+# free to change.
+STAGES = ("cut", "captions", "chat", "punch", "assemble", "render")
 
 
 def log(*a):
@@ -136,6 +150,17 @@ def _shot_index(lengths, min_shot=MIN_SHOT):
 # consonant, so it takes the low end.
 SNAP_WINDOW = 0.9        # how far forward to look for the onset
 SNAP_PREROLL = 0.06      # breath left in front of the first word
+# HOW FAR A SNAP MAY MOVE. The snap only ever moves FORWARD, so when the
+# requested in-point is already a correct word START it marches past that
+# word to the trough on its far side. Clip 12 asked for "you guys have it
+# good now" at 23.30 and got 23.835 — "you" ends at 23.82, so the snap ate
+# the word the line opens on.
+#
+# The distance separates the two cases, because a word TAIL is short and a
+# whole word is not: clip 6's trailing fricative put the trough 0.195s away,
+# clip 12's next-word trough was 0.525s away. Beyond this, the requested
+# point is taken to be deliberate and is left alone.
+SNAP_MAX = 0.35
 
 
 def _snap_in_point(src, in_point, window=SNAP_WINDOW, preroll=SNAP_PREROLL):
@@ -178,10 +203,31 @@ def _snap_in_point(src, in_point, window=SNAP_WINDOW, preroll=SNAP_PREROLL):
     onset = next((i for i in range(tr, env.size - 6)
                   if env[i] >= loud and float(env[i:i + 6].mean()) >= loud), None)
     snapped = float(times[tr]) + 0.01
+    if snapped - in_point > SNAP_MAX:
+        return in_point, {"trough": round(float(times[tr]), 3),
+                          "moved": 0.0,
+                          "skipped": f"nearest trough is "
+                                     f"{snapped - in_point:.3f}s away, over the "
+                                     f"{SNAP_MAX}s limit — treated as a real "
+                                     f"word start"}
     return round(snapped, 3), {
         "trough": round(float(times[tr]), 3),
         "next_loud_onset": None if onset is None else round(float(times[onset]), 3),
         "moved": round(snapped - in_point, 3)}
+
+def _clamp_out_point(kp, out_point, min_last=0.40):
+    """Truncate the keeps at `out_point`, without leaving a sliver last shot."""
+    if out_point is None:
+        return kp
+    kp = [k for k in kp if k.start < out_point]
+    if not kp:
+        return kp
+    kp[-1].end = min(kp[-1].end, out_point)
+    if len(kp) > 1 and kp[-1].length < min_last:
+        kp[-2].end = kp[-1].end
+        del kp[-1]
+    return kp
+
 
 def _clamp_in_point(kp, in_point, min_first=0.40):
     """Clamp the keeps to `in_point` without leaving a sliver first shot.
@@ -343,7 +389,8 @@ def stage_cut(clip, ch, st):
     ip, snap = _snap_in_point(src, clip.in_point)
     dead = sorted([r for r in absent + quiet if r[0] >= ip])
     spans = removals(dead, src_dur, min_remove=MIN_DEAD, beat=BEAT)
-    kp = _clamp_in_point(keeps(spans, src_dur), ip)
+    kp = _clamp_out_point(_clamp_in_point(keeps(spans, src_dur), ip),
+                          clip.out_point)
     out_dur = sum(k.length for k in kp)
     log(f"  {src.name}")
     if snap and abs(snap["moved"]) > 0.005:
@@ -629,6 +676,24 @@ def stage_assemble(clip, ch, st):
     shut = cue_gain_peak("shutter", -9.5, MASTER_GAIN)
     for c in clip.cards:
         cues.append(Cue(c["at"] + 0.04, "shutter", shut, f"{c['id']} lands"))
+
+    # THE BOOM GOES ON THE ZOOM. By RMS, not peak — its crest is 7.7 dB
+    # against the shutter's 22.0, so matching peaks would put it far louder
+    # in the ear. -26 dBFS RMS sits it above the ticks (-40) and below the
+    # speech, and it is verified in the BED after mixing, never from the
+    # generator.
+    boom = cue_gain("vine_boom", BOOM_RMS, MASTER_GAIN)
+    # Read them off disk when the punch stage did not run in THIS
+    # invocation. Exactly the failure the chat windows had: a stage's
+    # output living only in memory means a partial run silently drops it,
+    # and `cues: 0` is not loud enough to notice.
+    starts = st.get("punch_starts")
+    if starts is None:
+        pj = st["overlays"] / "punches.json"
+        starts = json.loads(pj.read_text()).get("applied", []) if pj.exists() else []
+    for t in starts:
+        cues.append(Cue(round(t, 3), "vine_boom", boom,
+                        f"the facecam punches in at {t:.2f}s"))
     log(f"  sfx: {bed(cues, total / fps, out=st['overlays'] / 'sfx.wav')}")
 
     names = ["cap_kin.mov", "sfx.wav", "rm_Chat.mov"]
@@ -638,7 +703,31 @@ def stage_assemble(clip, ch, st):
     have = [n for n in names if (st["overlays"] / n).exists()]
     r.GetMediaStorage().AddItemListToMediaPool(
         [str(st["overlays"] / n) for n in have])
-    pool = {c.GetName(): c for c in mp.GetRootFolder().GetClipList()}
+    # MATCH THE POOL BY FILE PATH, NEVER BY NAME.
+    #
+    # Every clip writes its overlays as `rm_Chat.mov`, `cap_kin.mov`,
+    # `sfx.wav` into its OWN directory, and they all land in one shared
+    # Resolve media pool. Keyed by name, `{c.GetName(): c}` keeps whichever
+    # was added last — so a clip that builds no chat of its own silently
+    # picks up the PREVIOUS clip's.
+    #
+    # That is exactly what shipped: clip 12's chat overlay was refused by the
+    # topicality gate and never rendered, and the delivered file carried
+    # CLIP 6's chat — real viewers' messages from a different part of the
+    # stream, on the wrong lines, ending at 38.3s because that is how long
+    # clip 6 is. George saw it as "the chat kind of dies at the end".
+    # The pool held FIVE `rm_Chat.mov` entries at the time, and seven
+    # `cap_kin.mov`.
+    want = {str((st["overlays"] / n).resolve()): n for n in have}
+    pool = {}
+    for c in mp.GetRootFolder().GetClipList():
+        fp = c.GetClipProperty("File Path")
+        if fp and str(Path(fp).resolve()) in want:
+            pool[want[str(Path(fp).resolve())]] = c
+    missing = [n for n in have if n not in pool]
+    if missing:
+        raise RuntimeError(f"not in the media pool by path: {missing}")
+    log(f"  overlays resolved by path: {sorted(pool)}")
 
     def frames_of(name):
         out = subprocess.run(
@@ -721,6 +810,7 @@ def stage_punch(clip, ch, st):
         apply(it, plan(canvas, rect, (0, 0, 1080, seam_y)))
         if ch.grade:
             it.SetCDL(ch.grade)
+    st["punch_starts"] = [round(o0, 3) for o0, _d, _s, _i, p in pieces if p]
     (st["overlays"] / "punches.json").write_text(json.dumps(
         {"punches": [t for t, _d in moments], "zoom": round(1/(1-rp.PUNCH_INSET), 3),
          "applied": [round(o0, 2) for o0, _d, _s, _i, p in pieces if p]}, indent=1))
@@ -828,7 +918,7 @@ def main():
     for s in STAGES:
         if s not in want:
             if s == "cut" and any(x in want for x in
-                                  ("captions", "chat", "assemble", "punch")):
+                                  ("captions", "chat", "punch", "assemble")):
                 log("[cut] (re-planning, not rebuilding — needed downstream)")
                 _plan_only(clip, ch, st)
             continue
@@ -850,7 +940,8 @@ def _plan_only(clip, ch, st):
     ip, _snap = _snap_in_point(src, clip.in_point)
     dead = sorted([r for r in absent + quiet if r[0] >= ip])
     spans = removals(dead, src_dur, min_remove=MIN_DEAD, beat=BEAT)
-    kp = _clamp_in_point(keeps(spans, src_dur), ip)
+    kp = _clamp_out_point(_clamp_in_point(keeps(spans, src_dur), ip),
+                          clip.out_point)
     st["keeps"] = kp
     st["out_dur"] = sum(k.length for k in kp)
     st["total"] = round(st["out_dur"] * ch.fps)

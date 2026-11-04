@@ -1164,6 +1164,119 @@ and 35.8% of this VOD's audio is absent. Its silence DETECTION is worth
 reading against ours; its default POLICY would splice across unheard speech
 on almost every clip in this job.
 
+## ONE CLIP SHIPPED WITH ANOTHER CLIP'S CHAT ON IT
+
+George, on clip 12: *"the chat kind of dies at the end for some reason."*
+
+Clip 12 has **no chat overlay** — the topicality gate measured its chat at
+13% on-topic and refused it, and `overlays_12/` contains no `rm_Chat.mov`.
+The delivered file carried a chat box anyway, for 0-38.25s, and then it
+stopped.
+
+**It was CLIP 6's chat.** `overlays_06/rm_Chat.mov` is 2298 frames = 38.3s,
+which is exactly where it died.
+
+`stage_assemble` built its lookup as `{c.GetName(): c for c in
+mp.GetRootFolder().GetClipList()}` — **keyed by FILE NAME**. Every clip
+writes `rm_Chat.mov`, `cap_kin.mov` and `sfx.wav` into its own directory and
+they all land in one shared Resolve media pool, so at the time of the build
+the pool held **five `rm_Chat.mov` entries and seven `cap_kin.mov`**, and
+the dict kept whichever was added last. Clip 12 added no chat of its own, so
+the lookup silently handed it clip 6's.
+
+What shipped was real viewers' messages from a different part of the
+stream, timed to lines they were not written about. Nothing failed, nothing
+warned, and every gate passed — the delivery QC checks black frames,
+loudness, captions and dead space, and none of those notice that the
+overlay belongs to another clip.
+
+**Match the pool by RESOLVED FILE PATH, never by name.** `GetClipProperty
+("File Path")` on each item, compared against the paths actually added.
+Missing now raises rather than falling through.
+
+The captions were right ONLY BY LUCK: clip 12 did render its own
+`cap_kin.mov`, so it was added last and won the same collision.
+
+**This is the third defect in two rounds that a single clip could never
+have exposed**, after the MarkIn offset and the stale `_cut.wav`. Building
+one clip well says nothing about building the second.
+
+## George's three notes on clip 12
+
+### "A bit too long ... make it compact" — the lever is CONTENT, not pauses
+
+Dead space was already at 1.9%; there was nothing left to tighten. The clip
+ran 59.4s with its claim arriving at **15.7s**, behind a long anecdote about
+taking five modes of transport to a LAN. `in_point` moves to **23.30**,
+which is the word "you" in *"you guys have it good now man"* — the setup —
+so the claim lands at once. **59.4s -> 46.8s.**
+
+`Clip.out_point` is added for the same job at the other end. It is used
+less, because the payoff is normally last (clip 12's is the final line), but
+without it the only lever on length was the front.
+
+### THE SNAP MOVED PAST A CORRECT IN-POINT, and the distance is the tell
+
+`_snap_in_point` only ever moves FORWARD, so when the requested point is
+already a real word START it marches past that word to the trough on its
+far side. Asked for 23.30 it returned **23.835** — "you" ends at 23.82, so
+it ate the word the line opens on.
+
+A word TAIL is short and a whole word is not:
+
+| | requested | nearest trough | distance | right answer |
+|---|---|---|---|---|
+| clip 6 | 2.02, inside the /s/ of "this" | 2.215 | **0.195s** | snap |
+| clip 12 | 23.30, the start of "you" | 23.825 | **0.525s** | leave it |
+
+`SNAP_MAX = 0.35`. Beyond it the requested point is treated as deliberate.
+Clip 8 (0.03s) and clip 6 (0.205s) are unaffected.
+
+### THE VINE BOOM, and why it is set by RMS
+
+George supplied the file and asked for it *"on a zoom for dramatic effect"*.
+**This is the first real sample in the palette** — every other cue is
+synthesised, and "a licensed SFX library" has been an open blocker here for
+many versions. Rights: a meme sound of uncertain provenance, chosen by him,
+and not a licensed library.
+
+Measured, because it behaves like nothing else in the palette:
+
+| | duration | crest | centroid | energy <200 Hz |
+|---|---|---|---|---|
+| shutter | 82ms | 22.0 dB | 11460 Hz | — |
+| paper | 260ms | 16.9 dB | 2007 Hz | — |
+| **vine_boom** | **1185ms** | **7.7 dB** | 880 Hz | **50%** |
+
+**The crest decides the method.** This file's rule is that a CLICK is set by
+PEAK, because a click is almost all peak and no RMS — that is why
+`cue_gain_peak` exists. The Vine Boom is the exact mirror: dense, low and
+sustained at a 7.7 dB crest, the lowest in the palette by 4 dB. Setting it
+by peak beside the shutter would put its RMS far above everything else.
+
+So it is set by RMS — and then **checked against the other cues' peaks**,
+which is what caught the first value. -26 dBFS RMS put its peak at **-18.3
+in the master**: quieter in peak than every cue this project has accepted
+(shutter -10.4, thunk -14.3) and 17.5 dB under the speech, where 13 dB is
+the recorded figure for "low". A sub-heavy hit also needs more level than a
+mid one to read as equally loud. **-21.0 RMS lands the peak at -13.3**:
+above the thunk, below the shutter, under the speech.
+
+**PUNCH NOW RUNS BEFORE ASSEMBLE.** A cue on a zoom needs the zoom's time,
+and the punch plan only exists once that stage has run. The two touch
+different tracks — punch rebuilds V2, assemble clears V3+ and A2 — so the
+order was free. Verified on the delivered file: the facecam pane's
+frame-to-frame delta at each boom is 37-51 against a median of 0.25, so all
+three land on a real cut.
+
+**And the same partial-run bug appeared a second time.** `punch_starts`
+lived only in memory, so `--only assemble,render` produced `cues: 0` and
+three silent booms. It reads `punches.json` off disk when the stage did not
+run, exactly as the chat windows now do. Worth generalising: **any value one
+stage computes and another consumes has to survive on disk**, because a
+partial run is the normal way this pipeline is driven and `cues: 0` is not
+loud enough to notice.
+
 ## THE PRODUCTION LINE: `batch.py`, and what the yield actually is
 
 George: *"the main thing is essentially making these en masse, build the

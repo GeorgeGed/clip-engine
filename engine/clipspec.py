@@ -81,6 +81,10 @@ class Clip:
     # narrative rule lives here: a pivot is a boundary, so this trims the
     # previous topic off the front.
     in_point: float = 0.0
+    # where the narrative ENDS inside the cut file. None keeps the whole
+    # thing. The payoff is normally last, so trimming the front is the usual
+    # lever — but "make it compact" needs both ends available.
+    out_point: float | None = None
     # the clip's span in VOD time, for pulling its chat
     region: tuple[float, float] | None = None
     hook: str | None = None       # the clickbait line; written, not derived
