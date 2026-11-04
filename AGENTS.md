@@ -4630,3 +4630,45 @@ job list re-rendered every 1.5s, so a row was torn out from under a click
 and the click landed on nothing. Both lists now rebuild only when their own
 signature changes — the same fix the clips grid already needed so a playing
 `<video>` is not replaced mid-frame.
+
+### `specs` OVERWROTE FOUR ROUNDS OF REVIEW, SILENTLY
+
+Re-running `batch.py <job> specs` regenerates every spec from
+`editorial.json` — and **the spec file is where the review lives.** On clip
+12 it put `in_point` back to 6.7 from 23.3, dropped `out_point` 86.80 to
+None and `chat_mode` "continuous" to None, and replaced the notes recording
+why each of those was chosen. Four rounds of George's notes, gone, from a
+stage whose only job is to pick WHICH clips to make.
+
+It was caught because the clip was rebuilt immediately after and the
+in-point looked wrong. Nothing would have reported it otherwise: `specs`
+prints `wrote 4` either way.
+
+**`specs` proposes a starting spec; the review owns it from then on.** An
+existing spec is left alone and logged as such, with `--force` for when the
+editorial pass really should win. Verified: re-running leaves clip 12 at
+23.3 / 86.80 / continuous.
+
+Generalising, because this is the third time a routine stage has eaten
+hand-tuned state: a stage that DERIVES a file must not overwrite one a human
+has since edited. `_cut.wav` was the cached version of this, the shared
+`punches.json` path was the cross-clip version, and this is the one that
+reached the spec itself.
+
+### The batch, and where it stands
+
+`specs` keeps **4 of the 10 buildable** after topic dedup — 12, 08, 15, 16 —
+with 23 and 30 held behind 15 as the same argument. Clip 04 has no spec for
+that reason, not because its build failed.
+
+| clip | | |
+|---|---|---|
+| **12** | 45.30s, 2 booms, chat 100% | shipped |
+| **08** | 45.00s, **8 hallucinated cards dropped**, **0 zooms** | needs a look |
+| **16** | 34.48s, 2 booms at 8.28 / 25.39, 4 cards dropped, **no chat** (6% on-topic, the gate refused) | shipped |
+| 15 | unbuilt | |
+
+**Clip 16 getting two booms is evidence against loosening the floor.** Clip
+8's zero is specific to clip 8 — 8 anchors and no qualifying peak beside one
+— rather than the threshold being wrong everywhere, so the fix is probably
+clip 8's anchors and not `DB_FRAC`.

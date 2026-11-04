@@ -190,6 +190,7 @@ def cmd_specs(job, args):
                 f"{[x['n'] for x in g['also']]}  ({g['lead']['subject'][:52]})")
 
     (ROOT / "clips").mkdir(exist_ok=True)
+    force = bool(getattr(args, "force", False))
     written = []
     for r in kept:
         n = r["n"]
@@ -200,6 +201,22 @@ def cmd_specs(job, args):
             continue
         cam = (cams.get(str(n)) or {}).get("rect")
         spec = ROOT / f"clips/{chan['name']}-{n:02d}.json"
+        # NEVER OVERWRITE A SPEC THAT EXISTS. **Every round of George's review
+        # lands in these files** — the in-point he moved, the out-point he
+        # chose, `chat_mode`, the pinned facecam rect, the notes recording
+        # WHY. Re-running `specs` regenerated clip 12 from `editorial.json`
+        # and put its in_point back to 6.7 from 23.3, dropped out_point
+        # 86.80 to None and `chat_mode` "continuous" to None: four rounds of
+        # his notes gone, silently, from a stage whose job is only to pick
+        # which clips to make.
+        #
+        # `specs` proposes a starting spec; the review owns it afterwards.
+        # `--force` is there for when the editorial pass really should win.
+        if spec.exists() and not force:
+            log(f"   {n:02d} -> {spec.name} EXISTS, left alone "
+                f"(--force to regenerate from editorial.json)")
+            written.append(spec)
+            continue
         save(spec, Clip(job=job, index=n, channel=chan["name"],
                         in_point=float(e.get("in_point", 0.0)),
                         region=(m["in_point"], m["out_point"]),
