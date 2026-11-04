@@ -1491,6 +1491,171 @@ the clip's metadata**, and then that fact gets reasoned from.
 Clip 8 is still on the old bespoke scripts and has NOT had the gate
 applied; its eight cards are still in the shipped file.
 
+## THE BOOM WAS IN THE BED AND NOT IN THE FILE, TWICE OVER
+
+George: *"no keep the twitch chat why did you remove it? it was good, also
+remove the "uhh" - also the end "tragic" is cut off, also there's no booms?"*
+
+Four notes, four separate defects, and **every one of them was a guard or a
+constant that was correct once and had stopped being correct.** The build log
+said `cues: 3` on a clip with no booms in it, which is the whole argument for
+measuring the artifact: *a cue count is a claim about the plan.*
+
+### 1. No audio track, and then a high-pass that ate what was left
+
+The first cause was that `make_clip` only ever called `tl.AddTrack("video")`,
+so the bed was appended to an A2 that did not exist and vanished silently.
+**No clip this pipeline ever built had a sound effect in it.**
+
+With the track added, the booms were still not audible, and the second cause
+is an own-goal:
+
+| | |
+|---|---|
+| Vine Boom energy **under 85 Hz** | **52.8%** |
+| What `HOUSE_EQ` costs it | **7.09 dB RMS** (−7.67 → −14.76), only 1.83 dB peak |
+| Clip 12's own sub-85 content | **−35.1 dBFS against a 200–4000 Hz body of −23.4** |
+
+`highpass=f=85` was set because ONE clip's master measured rumble at −5.1 dB
+against the speech body, and it then applied to every clip — and to the bed,
+because Resolve mixes A2 into the master before `_finish_audio` sees it. On
+clip 12 there is no rumble to remove (12 dB down is already masked) and the
+filter was removing nothing except the one cue whose entire point is low end.
+It does not quieten the boom, it **hollows it out**: 7 dB of RMS for 1.8 dB of
+peak.
+
+`render_ffmpeg.house_eq(src)` measures instead, with the floor at −10 dB, and
+the decision prints in the build log. **Measure it on the SPEECH, not the
+master** — `raw` already has the bed in it, and a Vine Boom reads as rumble, so
+measuring there keeps the high-pass on *because* the boom is there and then
+cuts the boom.
+
+Measured in the delivered file, 40–120 Hz against its own baseline:
+
+| | before | after |
+|---|---|---|
+| boom 1 | 1.2x — **absent** | **3.8x** |
+| boom 2 | — | **3.6x** |
+| boom 3 | 2.6x | **4.2x** |
+
+### 2. A boom is an EVENT cue, so it sits at the shutter's level
+
+`BOOM_RMS = -21.0` was chosen on arithmetic as "near −12.8" and **measured
+−14.57** — the thunk's level. Wrong tier: a thunk means "a fact arrived" and
+rides under the speech, while this is a punchline on the clip's loudest
+moment, which is where the shutter sits (−10.4, "a photo card lands"). This
+file's own rule is that a sound accompanying motion sits below one marking an
+event. **−16.8 measures −10.47 dBFS peak.** Both numbers are measured in the
+master, because the prediction was out by 1.8 dB — again.
+
+**ASK FOR −1.5 dBTP TO DELIVER −1.0.** Raising the boom took true peak to
+−0.41 and `deliver_qc` rejected the render, correctly. loudnorm hits its
+target on the PCM it limits, but the delivery is AAC and AAC decode
+overshoots — the same −1.0 request had measured −0.64 and −0.77 on earlier
+versions of this clip. The overshoot belongs to the codec, so the request
+carries the headroom instead of the cue being backed off to hide it. Now
+−1.11 dBTP.
+
+### 3. THE SLIVER GUARD WAS WRONG AT BOTH ENDS, AND IT RESTORED DEAD AIR
+
+The same `min_first/min_last = 0.40` guard sat in `_clamp_in_point` and
+`_clamp_out_point`. It was written when every keep got its own framing, so a
+0.1s keep was a six-frame flash and merging it into its neighbour was the
+lesser evil. **Since `_shot_index` decoupled shots from keeps it is pure
+damage, because merging two keeps does not shorten anything — it puts the
+removal between them BACK.**
+
+| end | what it did |
+|---|---|
+| in-point | swallowed a 1.0s removal, delivering a clipped "you" then **1.0s of −77 dB silence** at the top — George's "uhh" |
+| out-point | the last keep held the one-word button "Tragic." and ran **0.38s**, 0.02s under the limit, so the 0.59s removal came back as **0.75s of quiet with 0.35s of digital zero in it, immediately before the payoff word** |
+
+Both gone. `dead_space` 1.6% → **0.0%**, `absent_audio` 0.35s → **0.00s**.
+
+A keep is not a shot. That is the second time this round the same sentence
+settled a bug, at opposite ends of the same clip.
+
+### 4. An in-point can land INSIDE a word, and then the only fix is backwards
+
+`_snap_in_point` had two cases: the point sits on a word TAIL (a trough is
+close — snap forward, which is clip 6's fricative) or it is a real word START
+(no trough close — leave it). Clip 12 was neither.
+
+`in_point 23.30` landed **inside the word "you"**, audible 23.228–23.52 and
+then decaying into a 0.73s Twitch mute. The forward snap refused, correctly —
+the next trough was 0.535s away, past `SNAP_MAX`. So the clip opened on the
+*second half of a word*, which is what an "uhh" is.
+
+**THE REFUSAL IS THE SIGNAL.** When the forward trough is beyond `SNAP_MAX`
+and the audio is CONTINUOUS across the requested point, the point is mid-word
+and the only safe direction is back to that word's own onset. The test for
+"continuous" is that the 60ms before the point is within 10 dB of the 60ms
+after; at a genuine word start the before is 20+ dB down and nothing moves.
+`SNAP_BACK = 0.20` — enough to recover an onset, not enough to pull in the
+previous word.
+
+Clip 12: 23.30 → **23.225** (−0.075s). Clip 6 still returns **+0.205s**, and a
+real word start still does not move. Worth noting for accuracy: the forward
+path can already return a value up to 0.05s EARLIER than its input, because
+its analysis window starts at `in_point − 0.05` — so "it only ever moves
+FORWARD" was never quite true, by up to 50ms into silence.
+
+### 5. "tragic" was real, and whisper reported it 0.8 seconds early
+
+`out_point 86.50` sat inside the word "day" (86.410–86.590), so the clip
+stopped mid-word. But the interesting part is why the fix was not mechanical.
+
+Measured at 20ms on the source: audible speech stops at **86.80**, then
+**digital zero 87.00–87.34**, then a fresh onset at 87.36 running to the end
+of the window. Whisper places "tragic" at **86.59–87.43** — stretched 0.8s
+backwards across the silence, because its word timings are contiguous and the
+gap has to be filled by something. Transcribing the spans separately settles
+it: 86.30–86.82 is `"all day."` and 87.34–end is `"tragic"`.
+
+So the button is real, it is audible, and it is 0.9s later than the transcript
+says. `out_point 87.70` (the source end) recovers it; the 0.34s mute between
+is then ordinary dead space and the cut leaves a beat.
+
+`_snap_out_point()` now moves an out-point off the middle of a word onto that
+word's END, forward, on the tie-break this file already records — over-
+including by one word is recoverable, losing the payoff is not. **Be honest
+about what it would have done here: 86.50 → 86.59, finishing "day" and still
+dropping "tragic".** The guard stops a mid-word cut; it cannot know a one-word
+button was the point. That took George's ear, which is what rules 1–3 have
+always said.
+
+It also reports when the word it lands on straddles a mute, because that is
+the case where the snap cannot help.
+
+### 6. Two planners, one of which was already stale
+
+`_plan_only` was a second copy of `stage_cut`'s planning block, and within
+this one round they diverged: the out-point snap went into `stage_cut` only,
+so `--only render` planned a different cut than the full build had rendered.
+`stage_cut` now calls `_plan_only`. Same shape as the punch plan being
+measured from the overwritten delivery, and as `_cut.wav` being cached —
+**two numbers that are supposed to be the same number, derived twice.**
+
+### What clip 12 measures
+
+| | |
+|---|---|
+| Duration | **45.95s** |
+| Opening | `"You guys have it good now man"` from 0.00s, whole word |
+| Ending | `"...salary all day. Tragic."`, the word completes |
+| Booms | 3, on the zooms, **3.6–4.2x** the low-band baseline |
+| Chat | Twitch's own black, chatters' own colours, **29 of 29 frames** |
+| Captions | 105 cards, 2.29/s, **0 hallucinated** |
+| Audio | −14.07 LUFS, −1.11 dBTP, **0.00s dead space, 0.00s absent** |
+
+**One thing to say to George rather than bury.** The chat he liked was clip
+6's, composited onto clip 12 by the media-pool bug. This is clip 12's OWN
+chat, and it measures **13% on-topic against the 15% floor** — `chat_is_safe`
+refuses it and it is on because he asked for it. An explicit `chat_mode` in a
+spec is now the override: the floor is a default for clips nobody has watched,
+and once he has watched one his call settles it. The measurement stays in the
+log as a caveat rather than a veto.
+
 ## A SHOT IS NOT A KEEP — which is how to cut ALL the dead space
 
 George, for the third time: *"remember i said cut ALL dead space too"*, on a

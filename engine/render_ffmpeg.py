@@ -432,3 +432,52 @@ HOUSE_EQ = ("highpass=f=85,"
       "equalizer=f=280:t=q:w=1.0:g=-2.5,"
       "equalizer=f=3000:t=q:w=1.1:g=4,"
       "equalizer=f=9500:t=q:w=1.0:g=-7")
+
+# THE HIGH-PASS IS A MEASUREMENT, NOT A HOUSE CONSTANT — and leaving it one
+# cost the Vine Boom half its body.
+#
+# `highpass=f=85` was set because ONE clip's master measured rumble at -5.1 dB
+# against the speech body. It then applied to every clip, and to the sfx bed,
+# which Resolve renders into the master on A2.
+#
+# Measured on the Vine Boom: 52.8% of its magnitude sits UNDER 85 Hz, so the
+# full chain costs it **7.09 dB RMS** (-7.67 -> -14.76 dBFS) while costing its
+# peak only 1.83 dB — i.e. it hollows the sound out rather than quietening it.
+# Meanwhile clip 12's own base measures sub-85 at **-36.95 dBFS against a
+# 200-4000 Hz body of -24.50**, which is 12.45 dB down and already masked.
+#
+# So on this clip the filter removed nothing audible and took 7 dB off the one
+# cue whose whole point is low end. The floor is -10 dB: rumble within 10 dB
+# of the speech body gets filtered, anything further down is inaudible and the
+# filter costs more than it buys. Raising the boom to compensate would have
+# been the stacked compensation this project keeps deleting.
+RUMBLE_FLOOR_DB = -10.0
+
+
+def _band_rms_db(src: str | Path, af: str) -> float:
+    """RMS of one band of `src`, in dBFS."""
+    import array, math, subprocess
+    raw = subprocess.run(
+        ["ffmpeg", "-v", "error", "-i", str(src), "-af", af,
+         "-ac", "1", "-ar", "48000", "-f", "s16le", "-"],
+        capture_output=True).stdout
+    a = array.array("h"); a.frombytes(raw)
+    if not a:
+        return -999.0
+    r = math.sqrt(sum((v / 32768.0) ** 2 for v in a) / len(a))
+    return 20 * math.log10(r) if r > 0 else -999.0
+
+
+def house_eq(src: str | Path) -> tuple[str, dict]:
+    """The voice chain for THIS source, with the high-pass only if earned.
+
+    Returns the filter string and what was measured, so the decision lands in
+    the build log rather than in a constant nobody re-checks.
+    """
+    rumble = _band_rms_db(src, "lowpass=f=85")
+    body = _band_rms_db(src, "highpass=f=200,lowpass=f=4000")
+    margin = rumble - body
+    keep = margin > RUMBLE_FLOOR_DB
+    chain = HOUSE_EQ if keep else HOUSE_EQ.split(",", 1)[1]
+    return chain, {"rumble_dbfs": round(rumble, 2), "body_dbfs": round(body, 2),
+                   "margin_db": round(margin, 2), "highpass": keep}

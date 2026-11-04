@@ -77,14 +77,23 @@ BEAT = 0.08              # what is LEFT of each one; 0 makes words collide
 CAPTION_ACCENT = (92, 128, 255, 255)      # theme.tsx C.blueLight
 MASTER_GAIN = 6.2        # what loudnorm adds; cues are solved through it
 BAIT_SECONDS = 17.0      # the hook holds the stretch where a scroller decides
-# THE BOOM, SET BY RMS AND THEN CHECKED AGAINST THE OTHER CUES' PEAKS.
-# -26 dBFS RMS put its peak at -18.3 in the master — QUIETER in peak than
-# every cue the project has ever accepted (shutter -10.4, thunk -14.3) and
-# 17.5 dB under the speech, where this file records 13 dB as "low". A
-# sub-heavy hit also needs more level than a mid one to read as equally
-# loud, since half its energy sits below 200 Hz. -21.0 puts the peak near
-# -12.8: above the thunk, below the shutter, and under the speech.
-BOOM_RMS = -21.0
+# THE BOOM IS AN EVENT CUE, SO IT SITS AT THE SHUTTER'S LEVEL, NOT THE
+# THUNK'S — and both numbers here are measured in the master, because the
+# prediction was wrong by 1.8 dB.
+#
+# -26 dBFS RMS put its peak at -18.3 in the master, quieter than every cue
+# this project has accepted. -21.0 was then chosen on the arithmetic as
+# "near -12.8" and MEASURED at -14.57 — the thunk's level. That is the wrong
+# tier: a thunk means "a fact arrived" and rides under the speech, while
+# this is a punchline on the clip's loudest moment, which is where the
+# shutter (-10.4, "a photo card lands") sits. This file's own rule is that a
+# sound accompanying motion sits BELOW one marking an event; the boom marks
+# one. -16.8 measures **-10.47 dBFS peak** in the master.
+#
+# RMS, not peak: `cue_gain_peak` exists for clicks, and the boom has the
+# LOWEST crest in the palette (7.7 dB) — it is the most sustained sound
+# there, so its RMS is what carries.
+BOOM_RMS = -16.8
 # PUNCH RUNS BEFORE ASSEMBLE. George: *"ensure we are adding sound effects
 # for funny moments throughout the video ... has to go on a zoom for
 # dramatic effect."* A cue on a zoom needs the zoom's time, and the punch
@@ -161,6 +170,24 @@ SNAP_PREROLL = 0.06      # breath left in front of the first word
 # clip 12's next-word trough was 0.525s away. Beyond this, the requested
 # point is taken to be deliberate and is left alone.
 SNAP_MAX = 0.35
+# HOW FAR IT MAY WALK BACK, which is the THIRD case and the one that produced
+# George's "remove the uhh".
+#
+# The snap above has two cases: the in-point sits on a word TAIL (a trough is
+# close, snap forward) or it is a real word START (no trough close, leave it).
+# Clip 12 was neither. `in_point 23.30` landed **inside the word "you"**,
+# which is audible 23.228-23.52 and then decays into a 0.73s Twitch mute. So
+# the forward snap refused — correctly, the next trough was 0.535s away — and
+# the clip opened on the second half of a word. A half-word with its onset
+# missing is not a word; it is the "uhh".
+#
+# The refusal IS the signal. When the forward trough is beyond SNAP_MAX and
+# the audio is CONTINUOUS across the requested point, we are mid-word, and
+# the only safe direction is backward to that word's own onset. Measured at
+# 23.20-23.23 the level sits -43 to -49 dB against the word's -15, so the
+# trough is 0.075s behind. 0.20s is the ceiling: enough to recover a word's
+# onset, not enough to pull in the previous word.
+SNAP_BACK = 0.20
 
 
 def _snap_in_point(src, in_point, window=SNAP_WINDOW, preroll=SNAP_PREROLL):
@@ -204,6 +231,20 @@ def _snap_in_point(src, in_point, window=SNAP_WINDOW, preroll=SNAP_PREROLL):
                   if env[i] >= loud and float(env[i:i + 6].mean()) >= loud), None)
     snapped = float(times[tr]) + 0.01
     if snapped - in_point > SNAP_MAX:
+        # MID-WORD: WALK BACK TO THE ONSET. See SNAP_BACK. The test for
+        # "mid-word" is that the audio does not stop at the requested point —
+        # the 60ms before it is within 10 dB of the 60ms after, i.e. one
+        # continuous sound the point is sitting inside. At a genuine word
+        # start the before is 20+ dB down and nothing moves.
+        back = _snap_back(src, in_point, window=SNAP_BACK)
+        if back is not None:
+            return round(back, 3), {
+                "trough": round(float(times[tr]), 3),
+                "moved": round(back - in_point, 3),
+                "backward": f"the requested point was INSIDE a word (audio "
+                            f"continuous across it, next trough "
+                            f"{snapped - in_point:.3f}s away) — walked back to "
+                            f"the word's own onset"}
         return in_point, {"trough": round(float(times[tr]), 3),
                           "moved": 0.0,
                           "skipped": f"nearest trough is "
@@ -215,17 +256,106 @@ def _snap_in_point(src, in_point, window=SNAP_WINDOW, preroll=SNAP_PREROLL):
         "next_loud_onset": None if onset is None else round(float(times[onset]), 3),
         "moved": round(snapped - in_point, 3)}
 
-def _clamp_out_point(kp, out_point, min_last=0.40):
-    """Truncate the keeps at `out_point`, without leaving a sliver last shot."""
+def _snap_back(src, in_point, window=SNAP_BACK, pad=0.06):
+    """The onset of the word `in_point` is sitting inside, or None.
+
+    Returns None unless the audio is CONTINUOUS across `in_point` — which is
+    what says the point is mid-word rather than at a word start — and a
+    sustained trough exists within `window` behind it.
+    """
+    import numpy as np
+    t0 = max(0.0, in_point - window - pad)
+    raw = subprocess.run(
+        ["ffmpeg", "-v", "error", "-ss", f"{t0:.3f}",
+         "-t", f"{in_point + pad - t0:.3f}", "-i", str(src),
+         "-ac", "1", "-ar", "48000", "-f", "f32le", "-"],
+        capture_output=True).stdout
+    a = np.frombuffer(raw, np.float32)
+    sr, w = 48000, 240                      # 5ms
+    if a.size < w * 8:
+        return None
+    env = np.array([float(np.sqrt(np.mean(a[i:i + w] ** 2)))
+                    for i in range(0, a.size - w, w)])
+    times = t0 + np.arange(env.size) * (w / sr)
+    at = int(np.argmin(np.abs(times - in_point)))
+    db = lambda v: 20 * np.log10(max(v, 1e-9))
+    before = db(float(np.sqrt(np.mean(env[max(0, at - 12):at] ** 2))))
+    after = db(float(np.sqrt(np.mean(env[at:at + 12] ** 2))))
+    if before < after - 10.0:               # the audio DOES stop here
+        return None
+    floor = float(np.percentile(env, 15))
+    thr = max(floor * 2.0, 1e-6)
+    # the last sustained trough before the point
+    for i in range(at - 4, 2, -1):
+        if float(env[max(0, i - 4):i].max()) <= thr:
+            cand = float(times[i]) - 0.005
+            return cand if in_point - cand <= window else None
+    return None
+
+
+def _snap_out_point(words, out_point, absent, tol=0.30):
+    """Move `out_point` off the middle of a word onto that word's END.
+
+    **This is the defect George named as `the end "tragic" is cut off`, and it
+    was a hand-typed number, not a pipeline bug.** `out_point 86.50` sat inside
+    the word "day" (86.410-86.590), so the clip stopped mid-word; the line is
+    "...sacrifice a couple months of salary all day. Tragic."
+
+    AGENTS.md already records the policy for the tie — over-including by one
+    word is recoverable, losing the payoff is not — so the snap goes FORWARD to
+    the containing word's end. It also reports the next word, because that is
+    how a human notices a button like "Tragic." has been left outside the clip:
+    nothing mechanical can tell that it was the point.
+
+    `absent` lets it say when the word it landed on straddles a mute, which is
+    the case where the snap cannot help and the out-point belongs back at the
+    last audible sample instead.
+    """
+    if out_point is None or not words:
+        return out_point, None
+    inside = next((w for w in words
+                   if w["start"] < out_point < w["end"] - 1e-6), None)
+    if inside is None:
+        return out_point, None
+    end = float(inside["end"])
+    if end - out_point > tol:
+        return out_point, {"moved": 0.0,
+                           "skipped": f"inside {inside['text']!r} but its end is "
+                                      f"{end - out_point:.2f}s away, over {tol}s"}
+    nxt = next((w for w in words if w["start"] >= end - 1e-6), None)
+    zero = sum(max(0.0, min(end, b) - max(float(inside["start"]), a))
+               for a, b in absent)
+    return end, {"word": inside["text"], "moved": round(end - out_point, 3),
+                 "next": nxt["text"] if nxt else None,
+                 "straddles_mute": round(zero, 2) if zero > 0.05 else None}
+
+
+def _clamp_out_point(kp, out_point):
+    """Truncate the keeps at `out_point`.
+
+    **THE SWALLOW IS GONE HERE TOO, AND IT WAS WORSE AT THIS END.** The same
+    `min_last=0.40` sliver guard that `_clamp_in_point` lost earlier this round
+    was still merging a short FINAL keep into the one before it — which does
+    not shorten anything, it RESTORES the removal between them.
+
+    Measured on clip 12: the last keep ran 87.32-87.70, which is 0.38s, holding
+    the one-word button "Tragic." At 0.02s under the limit the guard merged it,
+    so the keeps became one span 84.67-87.70 and the 0.59s removal came back —
+    delivering **0.75s of quiet with 0.35s of digital zero in it** immediately
+    before the payoff word. The clip's last sound before its punchline was a
+    dropout, and the gate flagged it as absent audio.
+
+    The guard was correct when every keep got its own framing. Since
+    `_shot_index` groups keeps until MIN_SHOT accumulates, a 0.38s final keep
+    is just the tail of the last shot and costs nothing. A keep is not a shot —
+    which is the same finding twice in one round, at both ends of the clip.
+    """
     if out_point is None:
         return kp
     kp = [k for k in kp if k.start < out_point]
     if not kp:
         return kp
     kp[-1].end = min(kp[-1].end, out_point)
-    if len(kp) > 1 and kp[-1].length < min_last:
-        kp[-2].end = kp[-1].end
-        del kp[-1]
     return kp
 
 
@@ -243,9 +373,18 @@ def _clamp_in_point(kp, in_point, min_first=0.40):
     if not kp:
         return kp
     kp[0].start = max(kp[0].start, in_point)
-    if len(kp) > 1 and kp[0].length < min_first:
-        kp[0].end = kp[1].end          # swallow the removal between them
-        del kp[1]
+    # THE SWALLOW IS GONE. It was written when every keep got its own
+    # framing, so a 0.1s first keep was a six-frame flash and merging it
+    # forward was the lesser evil. Since shots were decoupled from keeps a
+    # short first keep is simply the opening fragment of shot 0 and costs
+    # nothing — while the merge KEEPS THE PAUSE, and on clip 12 that put a
+    # clipped "you", then **1.0 second of digital silence at -77 dB**, then
+    # "guys have it good now man" at the very top of the clip. That dead
+    # second is what George heard as an "uhh".
+    #
+    # A guard that was correct under one architecture became a defect under
+    # the next, which is the same shape as the chat cycle that outlived the
+    # cards it was dodging.
     return kp
 
 # WHISPER HALLUCINATES OVER A MUTE, AND IT DOES IT AT p = 1.000.
@@ -375,35 +514,28 @@ def _cam(clip, ch, st):
 def stage_cut(clip, ch, st):
     src = clip.source(ROOT)
     fps = ch.fps
-    probe = subprocess.run(
-        ["ffprobe", "-v", "error", "-count_frames", "-select_streams", "v:0",
-         "-show_entries", "stream=nb_read_frames", "-of", "csv=p=0", str(src)],
-        capture_output=True, text=True).stdout.strip()
-    src_dur = int(probe) / fps
-    # Dead air is BOTH kinds: digital zero (the Twitch mutes) and ordinary
-    # room tone. A fixed dBFS floor means something different on every clip
-    # because raw VOD audio runs ~7 dB under target, so `quiet_runs` measures
-    # against the speaker's own level.
-    absent = qc.dead_audio(src, min_run=0.3)["runs"]
-    quiet = qc.quiet_runs(src, min_run=MIN_DEAD)["runs"]
-    ip, snap = _snap_in_point(src, clip.in_point)
-    dead = sorted([r for r in absent + quiet if r[0] >= ip])
-    spans = removals(dead, src_dur, min_remove=MIN_DEAD, beat=BEAT)
-    kp = _clamp_out_point(_clamp_in_point(keeps(spans, src_dur), ip),
-                          clip.out_point)
-    out_dur = sum(k.length for k in kp)
+    pl = _plan_only(clip, ch, st)
+    src_dur, ip, op = pl["src_dur"], pl["in_point"], pl["out_point"]
+    snap, osnap, spans = pl["snap"], pl["out_snap"], pl["spans"]
+    kp, out_dur = st["keeps"], st["out_dur"]
     log(f"  {src.name}")
     if snap and abs(snap["moved"]) > 0.005:
-        log(f"  in-point {clip.in_point} -> {ip} (snapped off a word tail "
-            f"to the trough at {snap['trough']})")
+        why = snap.get("backward") or (
+            f"snapped off a word tail to the trough at {snap['trough']}")
+        log(f"  in-point {clip.in_point} -> {ip} ({why})")
+    if osnap:
+        if osnap.get("moved"):
+            log(f"  out-point {clip.out_point} -> {op} (was inside "
+                f"{osnap['word']!r}; finished the word)")
+            if osnap.get("straddles_mute"):
+                log(f"    CAREFUL: that word straddles "
+                    f"{osnap['straddles_mute']}s of absent audio")
+        else:
+            log(f"  out-point left at {clip.out_point}: {osnap['skipped']}")
     log(f"  in-point {ip}s | {len(spans)} dead removals "
         f"({sum(s.length for s in spans):.1f}s)")
     log(f"  {src_dur:.1f}s -> {out_dur:.1f}s in {len(kp)} shots, "
         f"{(len(kp)-1)/(out_dur/60):.1f} cuts/min")
-    st["keeps"] = kp
-    st["out_dur"] = out_dur
-    st["total"] = round(out_dur * fps)
-
     r = connect(); r.OpenPage("edit")
     proj = r.GetProjectManager().GetCurrentProject()
     mp = proj.GetMediaPool()
@@ -418,6 +550,15 @@ def stage_cut(clip, ch, st):
     tl = mp.CreateEmptyTimeline(name)
     while tl.GetTrackCount("video") < 6:
         tl.AddTrack("video")
+    # AND AN AUDIO TRACK FOR THE SFX BED — the absence of which meant NO
+    # CLIP BUILT BY THIS PIPELINE HAS EVER HAD A SOUND EFFECT. `add()` puts
+    # the bed on audio track 2; only video tracks were ever created, so the
+    # append went to a track that does not exist and was dropped in silence.
+    # `AppendToTimeline` still returned it, so the log read "appended 3 of 3"
+    # and the sfx stage still reported its cue count — both describing a bed
+    # that was written to disk and never placed. George: "there's no booms?"
+    while tl.GetTrackCount("audio") < 2:
+        tl.AddTrack("audio")
     proj.SetCurrentTimeline(tl)
     # recordFrame is ABSOLUTE: a timeline starts at 01:00:00:00 = 216000 at
     # 60fps, so recordFrame=0 puts the clip an hour before the start and
@@ -535,7 +676,12 @@ def stage_chat(clip, ch, st):
     inside = [m for m in raw if t0 <= m["offset"] < t1]
     safe, why, topic = cr.chat_is_safe(inside, subject)
     log(f"  topicality: {why} ({topic['n']} messages in the window)")
-    if not safe and clip.chat_mode != "force":
+    # AN EXPLICIT `chat_mode` IN THE SPEC IS THE OVERRIDE. The topicality
+    # floor is a default for clips nobody has looked at; once George has
+    # watched one and said "keep the twitch chat, it was good", his call
+    # settles it and the measurement goes in the log as a caveat rather
+    # than a veto.
+    if not safe and not clip.chat_mode:
         log("  NO CHAT OVERLAY on this clip — it would carry a second narrative")
         st["chat_windows"] = []
         (PUBLIC / "chat_windows.json").write_text("[]")
@@ -548,7 +694,11 @@ def stage_chat(clip, ch, st):
             _render_comp("Bait", st["overlays"], ch.fps)
         (st["overlays"] / "rm_Chat.mov").unlink(missing_ok=True)
         return
-    mode, wins, info = cr.windows(raw, t0, t1, remap=remap, mode=clip.chat_mode,
+    # "force" means OVERRIDE THE GATE, not "a mode called force". Passing it
+    # through would miss both branches of `windows()` and return an empty
+    # window list — the chat would be switched on and then not appear.
+    mode_req = None if clip.chat_mode == "force" else clip.chat_mode
+    mode, wins, info = cr.windows(raw, t0, t1, remap=remap, mode=mode_req,
                                   out_dur=st['out_dur'])
     log(f"  resting {info['resting_rate']:.0f}/min, clip {info['clip_rate']:.0f}/min "
         f"(x{info['clip_rate']/info['resting_rate']:.2f}), hype {info['hype_share']:.2f}")
@@ -821,7 +971,7 @@ def stage_punch(clip, ch, st):
 
 # ------------------------------------------------------------- render ----
 def stage_render(clip, ch, st):
-    from engine.render_ffmpeg import _finish_audio, HOUSE_EQ as EQ
+    from engine.render_ffmpeg import _finish_audio, house_eq
     r = connect()
     proj = r.GetProjectManager().GetCurrentProject()
     for j in (proj.GetRenderJobList() or []):
@@ -856,13 +1006,28 @@ def stage_render(clip, ch, st):
         time.sleep(1)
     log(f"  resolve render {time.time()-t0:.0f}s")
     eq, mid = ROOT / "renders/_eq.mov", ROOT / "renders/_mid.mp4"
+    # MEASURE THE RUMBLE ON THE SPEECH, NOT ON THE MASTER. `raw` already has
+    # the sfx bed mixed in on A2, and a Vine Boom reads as rumble — measuring
+    # there would keep the high-pass on BECAUSE the boom is there, and then cut
+    # the boom. `base_wav` is the cut speech with no bed and no loudnorm.
+    EQ, m = house_eq(_cut_audio(clip, ch, st))
+    log(f"  voice chain: sub-85 {m['rumble_dbfs']} dBFS vs body "
+        f"{m['body_dbfs']} ({m['margin_db']:+.1f} dB) -> "
+        f"high-pass {'ON' if m['highpass'] else 'OFF'}")
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(raw),
                     "-t", f"{st['total']/ch.fps:.4f}", "-af", EQ,
                     "-c:v", "libx264", "-crf", "17", "-preset", "medium",
                     "-pix_fmt", "yuv420p", "-c:a", "pcm_s16le", str(eq)], check=True)
     # Loudness is finished HERE, not in Resolve: NormalizeAudioLevel applies
     # gain without true-peak limiting, so the lift to -14 would clip.
-    _finish_audio(eq, {"audio": {"target_lufs": -14.0, "true_peak_dbtp": -1.0},
+    # ASK FOR -1.5 TO DELIVER -1.0. The ceiling is hard (-1.0 dBTP), and
+    # loudnorm hits its target on the PCM it limits — but the delivery is AAC,
+    # and AAC decode overshoots: a -1.0 request has measured -0.64 and -0.77
+    # on this clip, and once the boom went to the event tier it measured
+    # -0.41 and the gate rejected the render. The overshoot is the codec's,
+    # not the mix's, so the request carries the headroom rather than the cue
+    # being backed off to hide it.
+    _finish_audio(eq, {"audio": {"target_lufs": -14.0, "true_peak_dbtp": -1.5},
                        "render": {"audio_codec": "aac"}}, mid)
     out = ROOT / f"renders/{tag}.mp4"
     # -t with -c:v copy cuts at a keyframe, so trim the PICTURE with -frames:v
@@ -918,7 +1083,8 @@ def main():
     for s in STAGES:
         if s not in want:
             if s == "cut" and any(x in want for x in
-                                  ("captions", "chat", "punch", "assemble")):
+                                  ("captions", "chat", "punch", "assemble",
+                                   "render")):
                 log("[cut] (re-planning, not rebuilding — needed downstream)")
                 _plan_only(clip, ch, st)
             continue
@@ -928,24 +1094,41 @@ def main():
 
 
 def _plan_only(clip, ch, st):
-    """The cut's PLAN without touching Resolve, for partial runs."""
+    """The cut's PLAN without touching Resolve.
+
+    **ONE IMPLEMENTATION, called by both paths.** This was a second copy of
+    `stage_cut`'s planning block, and within one round they diverged: the
+    out-point word-end snap went into `stage_cut` only, so a `--only render`
+    run planned a different cut than the full build had just rendered. That is
+    the same shape as the punch plan being measured from the overwritten
+    delivery, and as `_cut.wav` being cached — two numbers that are supposed to
+    be the same number, derived twice.
+    """
     src = clip.source(ROOT)
     probe = subprocess.run(
         ["ffprobe", "-v", "error", "-count_frames", "-select_streams", "v:0",
          "-show_entries", "stream=nb_read_frames", "-of", "csv=p=0", str(src)],
         capture_output=True, text=True).stdout.strip()
     src_dur = int(probe) / ch.fps
+    # Dead air is BOTH kinds: digital zero (the Twitch mutes) and ordinary
+    # room tone. A fixed dBFS floor means something different on every clip
+    # because raw VOD audio runs ~7 dB under target, so `quiet_runs` measures
+    # against the speaker's own level.
     absent = qc.dead_audio(src, min_run=0.3)["runs"]
     quiet = qc.quiet_runs(src, min_run=MIN_DEAD)["runs"]
-    ip, _snap = _snap_in_point(src, clip.in_point)
+    ip, snap = _snap_in_point(src, clip.in_point)
+    words = [w for u in json.loads(clip.words(ROOT).read_text())["utterances"]
+             for w in u["words"]]
+    op, osnap = _snap_out_point(words, clip.out_point, absent)
     dead = sorted([r for r in absent + quiet if r[0] >= ip])
     spans = removals(dead, src_dur, min_remove=MIN_DEAD, beat=BEAT)
-    kp = _clamp_out_point(_clamp_in_point(keeps(spans, src_dur), ip),
-                          clip.out_point)
+    kp = _clamp_out_point(_clamp_in_point(keeps(spans, src_dur), ip), op)
     st["keeps"] = kp
     st["out_dur"] = sum(k.length for k in kp)
     st["total"] = round(st["out_dur"] * ch.fps)
     st["base_wav"].parent.mkdir(parents=True, exist_ok=True)
+    return {"src": src, "src_dur": src_dur, "in_point": ip, "out_point": op,
+            "snap": snap, "out_snap": osnap, "spans": spans, "words": words}
 
 
 if __name__ == "__main__":
