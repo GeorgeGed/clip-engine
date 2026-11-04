@@ -272,8 +272,15 @@ def bold_moments(path=SRC, *, min_db=MIN_DB, min_sep=MIN_SEP,
             # is not the moment, and a moment with no emphasised card beside
             # it is not one of the clip's points.
             on = _onset(rms, times, i, base, d)
+            # THE WINDOW SPANS ONSET TO PEAK, not onset +- a margin. A card
+            # may sit anywhere inside the rise it belongs to, and measuring
+            # the margin only from the ONSET threw away cards sitting near
+            # the PEAK: clip 12's opening moment has its card at 2.865, which
+            # is 0.065s after its own peak at 2.80 and so obviously correct,
+            # but 0.665s ahead of the walked-back onset at 2.20 — outside
+            # ANCHOR_FWD, and the moment George had accepted vanished.
             near = [a for a in anchors
-                    if on - ANCHOR_BACK <= a <= on + ANCHOR_FWD]
+                    if on - ANCHOR_BACK <= a <= float(times[i]) + ANCHOR_FWD]
             if not near:
                 continue
             t = min(near, key=lambda c: abs(c - on))

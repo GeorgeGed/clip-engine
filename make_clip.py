@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import dataclasses
 import subprocess
 import sys
 import time
@@ -58,7 +59,7 @@ from engine.cuts import framings, content_framings               # noqa: E402
 from engine.tighten import removals, keeps, remap_card, joins    # noqa: E402
 from engine import captions_video, twitch_chat                   # noqa: E402
 from engine import chat_reaction as cr                           # noqa: E402
-from engine.sfx import Cue, bed, cue_gain, cue_gain_peak                   # noqa: E402
+from engine.sfx import Cue, bed, cue_gain, cue_gain_peak, perceptual_lead                   # noqa: E402
 
 VENDOR = ROOT / "vendor/remotion-clip08"
 PUBLIC = VENDOR / "public"
@@ -216,6 +217,8 @@ SNAP_BACK = 0.20
 #    Checked against clip 6: its opening word "i've" is 0.0% silent, so the
 #    rule is a no-op there and the earlier fix stands.
 LEAD_IN = 0.24           # what frame 0 gets, measured off clip 6's 270ms
+LEAD_IN_ABSENT = 0.10    # ...but a mute's tail is silence, not room tone
+CUE_SILENT_HEAD = 0.25   # a cue at or before this marks the clip, not an event
 LEAD_QUIET_DB = -34.0    # what counts as quiet enough to back into
 
 
@@ -348,6 +351,12 @@ def _lead_in(src, in_point, want=LEAD_IN, quiet_db=LEAD_QUIET_DB):
     # than the hole. It is reported here, on the CUT, where no bed exists.
     taken = db[i + 1:] if i + 1 < len(db) else db[:0]
     absent = bool(taken.size) and float(taken.max()) <= -90.0
+    # A MUTE'S TAIL BUYS LESS THAN ROOM TONE DOES. Room tone is the sound of
+    # the room and reads as the clip breathing before he speaks; digital zero
+    # reads as nothing happening. Clip 6 opens on 270 ms of real tone at
+    # -38.3 dBFS; clip 12 has none to take, so it gets a shorter beat.
+    if absent:
+        got = min(got, LEAD_IN_ABSENT)
     return round(in_point - got, 3), round(got, 3), absent
 
 
@@ -562,11 +571,37 @@ def _emphasis_anchors(clip, ch, st):
              for w in u["words"]]
     cs = cards(words)
     meta = st["meta"]
-    mark_emphasis(cs, emphasis_keys(meta.get("claim", ""),
-                                    meta.get("consequence", "")))
+    # THE CLAIM, NOT THE CONSEQUENCE. George: *"last boom is pretty
+    # irrelevant - remember there should be logic to it."* The third boom sat
+    # on "you HAVE the freedom to choose your own teammates" — a calm
+    # explanatory line — while the two he kept sat on "I don't want to HEAR
+    # no complaints" and "that's IT".
+    #
+    # Neither metric separates them: measured at their own peaks the three
+    # score +2.72 / +1.28 / +2.74 dB over baseline and +0.87 / +5.00 / +1.79
+    # dB of rise, so level ranks the irrelevant one FIRST and rise ranks it
+    # second. What separates them is where the word comes from. `claim` and
+    # `consequence` are separate fields and the cards merge them; the two
+    # booms that work are claim words and the one he rejected is a
+    # consequence word.
+    #
+    # A boom punctuates what he is ASSERTING, not the resolution he offers.
+    # Captions still emphasise both — that is the style he signed off — and
+    # only the cue anchors narrow. Editorial rather than universal: on a clip
+    # whose payoff IS its consequence this would need revisiting.
+    # MARK WITH BOTH, ANCHOR ON THE CLAIM. Marking with the claim alone also
+    # changes WHICH cards are emphasised (16 -> 12 on clip 12), which moves
+    # every anchor and cost a boom George had accepted. The caption styling
+    # must not move: it is emphasised from claim AND consequence, which is
+    # what he signed off. Only the subset usable as a CUE ANCHOR narrows.
+    both = emphasis_keys(meta.get("claim", ""), meta.get("consequence", ""))
+    mark_emphasis(cs, both)
+    claim_keys = emphasis_keys(meta.get("claim", ""), "")
     out = []
     for c in cs:
         if not c.emphasis:
+            continue
+        if not any(k in c.text.upper() for k in claim_keys):
             continue
         rm = remap_card(c.start, c.end, st["keeps"])
         if rm:
@@ -985,9 +1020,26 @@ def stage_assemble(clip, ch, st):
         # silently shipping no cue (which is what the first run did)
         wins = json.loads((PUBLIC / "chat_windows.json").read_text())
     for w in (wins or []):
-        cues.append(Cue(w["from"] + 0.02, "paper",
-                        cue_gain_peak("paper", -13.0, MASTER_GAIN),
-                        "the chat box settles in"))
+        # NO CUE ON A WINDOW THAT STARTS WITH THE CLIP. George, twice on this
+        # opening and the second time precisely: *"should remove the 'uhh'."*
+        # There is no "uhh" in the speech — the source between the in-point
+        # and "guys" is digital zero. **The "uhh" IS this cue.** Measured on
+        # the delivered file, the first 0.24s is exactly the paper envelope,
+        # -27.1 dB decaying to -56.2, and no speech starts until 0.26s: a
+        # soft low noise burst with a 120 Hz thud in it, alone at the top of
+        # a clip, reads as a voice clearing its throat.
+        #
+        # It also marks nothing. The standing rule is no sound without a
+        # VISIBLE event, and at frame 0 every element arrives at once — the
+        # chat is not "settling in", the clip is starting. A cue for that is
+        # a cue for nothing.
+        if w["from"] > CUE_SILENT_HEAD:
+            cues.append(Cue(w["from"] + 0.02, "paper",
+                            cue_gain_peak("paper", -13.0, MASTER_GAIN),
+                            "the chat box settles in"))
+        else:
+            log(f"  no entrance cue: the chat is up from {w['from']:.2f}s, "
+                f"so it marks the clip starting rather than the box arriving")
     shut = cue_gain_peak("shutter", -9.5, MASTER_GAIN)
     for c in clip.cards:
         cues.append(Cue(c["at"] + 0.04, "shutter", shut, f"{c['id']} lands"))
@@ -1009,6 +1061,17 @@ def stage_assemble(clip, ch, st):
     for t in starts:
         cues.append(Cue(round(t, 3), "vine_boom", boom,
                         f"the facecam punches in at {t:.2f}s"))
+    # FIRE EACH CUE EARLY BY ITS OWN PERCEPTUAL LEAD. See
+    # `sfx.perceptual_lead`: a cue is heard where its ENERGY arrives, not
+    # where its file starts, and the Vine Boom reaches 10% of its energy at
+    # 108 ms. Clicks measure 0.4-5.6 ms and are unaffected, so this is one
+    # rule rather than a table.
+    cues = [dataclasses.replace(
+                c, at=round(max(0.0, c.at - perceptual_lead(c.name)), 3))
+            for c in cues]
+    log(f"  cue leads: " + ", ".join(
+        f"{n} {perceptual_lead(n)*1000:.0f}ms"
+        for n in sorted({c.name for c in cues})))
     log(f"  sfx: {bed(cues, total / fps, out=st['overlays'] / 'sfx.wav')}")
 
     names = ["cap_kin.mov", "sfx.wav", "rm_Chat.mov"]

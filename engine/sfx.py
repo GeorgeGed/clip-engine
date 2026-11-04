@@ -430,3 +430,33 @@ def vine_boom():
 
 
 PALETTE["vine_boom"] = vine_boom
+
+
+# A CUE IS NOT HEARD WHERE ITS FILE STARTS.
+#
+# George, third note on the same booms: *"the booms are still very slightly
+# late, fix add to the logic."* They were already landing within a frame of
+# their anchor, so the remaining lateness is in the SOUND, not the schedule.
+#
+# Measured on `assets/sfx/vine_boom.wav`: it reaches 10% of its total energy
+# at **108 ms**, 25% at 281 ms, 50% at 510 ms, and its broadband 20 ms
+# envelope peaks at **600 ms**. It is a heavily back-loaded sub hit, so
+# placing the FILE on the word puts the thing a listener hears as the hit
+# about a tenth of a second behind it. That is exactly "very slightly late",
+# and it is a property of the cue rather than of the clip.
+#
+# The lead is the 10%-energy point, which generalises across the palette
+# without a table: a click like `shutter` reaches 10% almost immediately and
+# gets a lead of ~0, while a sustained hit gets a real one. An earlier pass
+# concluded no lead was warranted by measuring the ONSET (-6 dB in 15 ms) —
+# true, and the onset is not where a back-loaded sound is heard.
+def perceptual_lead(name: str, frac: float = 0.10) -> float:
+    """Seconds by which `name` must be fired EARLY to be heard on the beat."""
+    import numpy as np
+    y = PALETTE[name]()
+    y = y[0] if isinstance(y, tuple) else y
+    e = np.asarray(y, dtype=float) ** 2
+    tot = float(e.sum())
+    if tot <= 0:
+        return 0.0
+    return float(np.argmax(np.cumsum(e) / tot >= frac)) / SR

@@ -1491,6 +1491,105 @@ the clip's metadata**, and then that fact gets reasoned from.
 Clip 8 is still on the old bespoke scripts and has NOT had the gate
 applied; its eight cards are still in the shipped file.
 
+## THE "UHH" WAS A SOUND EFFECT, AND A CUE IS NOT HEARD WHERE ITS FILE STARTS
+
+George: *"should remove the 'uhh' and the booms are still very slightly late,
+fix add to the logic, last boom is pretty irrelevant - remember there should
+be logic to it - also video ends a bit too early now - fix."*
+
+### The "uhh" is the chat's own entrance cue
+
+There is no "uhh" in the speech — the source between the in-point and "guys"
+is digital zero. Measured on the delivered file, **the first 0.24 s is exactly
+the `paper` envelope**, −27.1 dB decaying to −56.2 over 260 ms, and no speech
+starts until 0.26 s. A soft low noise burst with a 120 Hz thud in it, alone at
+the top of a clip, reads as a voice clearing its throat.
+
+It also marks nothing. The standing rule is **no sound without a VISIBLE
+event**, and at frame 0 every element arrives at once — the chat is not
+settling in, the clip is starting. `CUE_SILENT_HEAD = 0.25`: a window opening
+at or before that gets no entrance cue. The clip now opens on 0.06 s of
+silence and then speech.
+
+`LEAD_IN_ABSENT = 0.10` goes with it. Room tone reads as the clip breathing
+before he speaks; a mute's tail reads as nothing happening, so it buys less —
+0.24 s of it was a quarter-second of dead start once the cue was gone.
+
+### A CUE IS NOT HEARD WHERE ITS FILE STARTS
+
+"Still very slightly late" after the anchor was already on the stressed
+syllable's attack, so the remaining lateness is in the SOUND. Measured on
+`vine_boom.wav`:
+
+| | |
+|---|---|
+| 10% of total energy by | **107.8 ms** |
+| 25% / 50% | 280.9 / 510.1 ms |
+| broadband 20 ms envelope peak | **600 ms** |
+
+It is a heavily back-loaded sub hit, so putting the FILE on the word puts the
+thing a listener hears about a tenth of a second behind it. `sfx.perceptual_lead`
+is the 10%-energy point and every cue is now fired early by its own:
+
+| vine_boom | paper | shutter | thunk | tock |
+|---|---|---|---|---|
+| **107.8 ms** | 5.6 | 0.4 | 1.2 | 0.7 |
+
+One rule, no table — a click reaches 10% immediately and is unaffected. **An
+earlier pass concluded no lead was warranted by measuring the ONSET** (−6 dB
+in 15 ms, which is true) — and the onset is not where a back-loaded sound is
+heard.
+
+### "Last boom is pretty irrelevant": no acoustic metric separates it
+
+The third boom sat on *"you HAVE the freedom to choose your own teammates"* —
+a calm explanatory line — against *"I don't want to HEAR no complaints"* and
+*"that's IT"*. Measured at their own peaks:
+
+| moment | level over baseline | rise |
+|---|---|---|
+| 3.36 "HEAR" | +2.72 | +0.87 |
+| 12.78 "IT" | +1.28 | **+5.00** |
+| 28.55 "HAVE the freedom" | **+2.74** | +1.79 |
+
+**Level ranks the rejected one FIRST and rise ranks it second.** Capping at
+two keeps it under either metric. What separates them is not how it sounds but
+where the word comes from: `claim` and `consequence` are separate fields, the
+two he kept are claim words and the one he rejected is a consequence word. A
+boom punctuates what he is ASSERTING, not the resolution he offers.
+
+**Mark with both, anchor on the claim.** Marking the cards with the claim
+alone also changes WHICH cards are emphasised (16 → 12) and moved every
+anchor, costing a boom he had accepted. The caption styling must not move —
+that is what he signed off — so only the anchor subset narrows.
+
+**And the anchor window spans onset→peak, not onset ± a margin.** A card may
+sit anywhere inside the rise it belongs to. Clip 12's opening card is at 2.865,
+0.065 s AFTER its own peak at 2.80 and so obviously right, but 0.665 s ahead
+of the walked-back onset at 2.20 — outside `ANCHOR_FWD`, and that moment
+vanished until the window was measured to the peak instead.
+
+### The ending
+
+86.34 ended on *"salary"* and read short. Transcribed with the tail padded,
+86.50 gives *"...of salary."*, **86.70 and 86.80 both give *"...of salary all
+day."*** — the complete sentence. 86.80 sits where "day" has decayed to −65 dB,
+before the 87.00 mute and well before "tragic" at 87.36. 45.10 → **45.30s**.
+
+Whisper calls 86.80 the middle of *"tragic"* (it times that word 0.8 s early,
+across the mute); `_in_trough` lets the audio win, as it did at 86.34.
+
+### Where this is still soft, stated plainly
+
+The attack search can land on a neighbouring syllable rather than the card's
+own word — delivered, the three booms sit on *"here"*, *"it"* and *"for"*,
+and only the middle one is the word anyone would name. The energy peak inside
+a 0.22 s window is not the same thing as the stressed word, and tightening the
+window to keep it on the card (0.12 s) just moves it onto a different function
+word. On a sub-bass hit under continuous speech the beat matters more than the
+syllable, so this ships — but **if he flags the words again, the fix is a
+stress model, not another constant.**
+
 ## TIGHTENING: the card was the right phrase and the wrong instant
 
 George: *"second boom was slightly too late same with the third one -
