@@ -4665,7 +4665,7 @@ that reason, not because its build failed.
 |---|---|---|
 | **12** | 45.30s, 2 booms, chat 100% | shipped |
 | **08** | 45.00s, **8 hallucinated cards dropped**, **0 zooms** | needs a look |
-| **16** | 34.48s, 2 booms at 8.28 / 25.39, 4 cards dropped, **no chat** (6% on-topic, the gate refused) | shipped |
+| **16** | 30.96s, 2 booms at 4.84 / 21.92, 4 cards dropped, chat ON by override (6% on-topic), auto `StoryVitality` card | shipped |
 | 15 | unbuilt | |
 
 **Clip 16 getting two booms is evidence against loosening the floor.** Clip
@@ -4835,3 +4835,127 @@ Mercedes-Benz Arena — the Jinggg/JonahP treatment, found rather than typed.
 returns **zero** results where `per_page=8` returns eight. That looks exactly
 like "no photos of this team" and is a paging quirk, so `story.find` pages at
 8 and the reason is in the code.
+
+## THE BOOM WAS LATE BECAUSE THE BED PLAYED A DIFFERENT SOUND
+
+George, on clip 16: *"first boom is still too late and also the vitality pop
+up needs to take up more of the screen like i mentioned for the jingg/jonahp
+story - but the logic is good."*
+
+**His notes on boom 1 across three deliveries went late -> early -> late, and
+that oscillation was the diagnosis.** Each round moved the anchor by tens of
+milliseconds. None of them could reach the defect, because the defect was
+**270ms and it was not in the anchor at all.**
+
+### Two definitions of one sound
+
+`bed()` rendered every cue by reading `assets/sfx/<name>.wav` off disk, while
+`cue_gain`, `cue_gain_peak` and `perceptual_lead` all measured
+`PALETTE[name]()`. For the nine synthesised cues those agree, because
+`build()` writes those files FROM the palette — **so the split was invisible
+until a cue existed that was not synthesised.**
+
+`vine_boom` is that cue. The palette entry trims George's 1.185s file to
+0.55s; the file on disk is his original. So:
+
+| | |
+|---|---|
+| lead solved on | the trimmed waveform — centroid **237ms** |
+| lead applied to | the untrimmed file — centroid **508ms** |
+| error | **+271ms, every time, in every clip** |
+
+Measured in the delivered clip 16: the cue fired at **4.608** and the
+35-120 Hz energy peaked at **5.04**, against the word at 4.845. Measured in
+the bed itself, both booms run **1.180s**, not 0.55.
+
+**A gain error rode along with it.** `build()` writes `y * 0.9`, so every
+synthesised cue in the bed was also 0.9 dB under the level `cue_gain` had
+solved. Uniform, so nothing ever showed it.
+
+`bed()` now renders from `PALETTE`. One definition, which is the one the
+gain and the lead are already solved against.
+
+### `build()` would have eaten George's file
+
+`vine_boom()` READS `assets/sfx/vine_boom.wav`. `build()` writes every
+palette entry to `<name>.wav` — so the next `sfx.build()` would have written
+its own 0.55s trim over his source, and the run after that would have
+trimmed the trim. It had never fired because `build()` was written when the
+palette was entirely synthesised. `SAMPLED = ("vine_boom",)` is excluded.
+
+### The check, because this is the fifth time
+
+`tests/test_sfx.py`. It places one cue in a silent bed and compares the slice
+**sample for sample** against the palette waveform — no threshold, because
+`riser` ramps out of silence and `shutter` is two clacks with a gap, so both
+read short at any sensible floor and a real 0.63s discrepancy could hide
+behind the same tolerance. Verified against the old `bed()`: 14 failures,
+and the detail line names it — *"vine_boom sounds 0.634s past its palette
+length"*.
+
+This file has now recorded the same shape five times — `_cut.wav` cached,
+`punches.json` on a shared path, the punch plan measured from the
+overwritten delivery, `specs` overwriting a reviewed spec, and this. Every
+time the lesson written down was *a note is not a gate*. **Any value one
+stage computes and another consumes has to come from ONE place, and the test
+that proves it has to fail against the old code before it is worth
+anything.**
+
+### The Vitality card was not small — the people in it were
+
+Measured off its own alpha at >250: body **y 1005-1647, 1040px wide, 48.9%
+of the lower pane**, and already 47px past the 1600 platform-UI line.
+
+What is small is a one-photo card's subject, for a reason that does not
+apply to the hand-built pair:
+
+* the Jinggg/JonahP cards put **two near-square crops side by side**, so each
+  face was ~499px wide;
+* a single 1.5:1 team shot in a 1008x430 box is a **2.34:1 letterbox** that
+  throws away 36% of the frame and leaves each player 221px tall.
+
+**AND A TALLER BOX DOES NOT FIX IT.** Under `objectFit: cover` at a fixed
+card width the scale is set by WIDTH, so raising `photoHeight` shows more of
+the photo and leaves every person exactly the same size on screen. Only
+cropping in enlarges them. That is why `photoZoom` exists and is not
+decoration.
+
+Measured on the photo (1024x683): the five players occupy source **y 365-590
+of 683** — the lower middle — so the inherited `objectPosition: center 22%`
+centred the crop on the crowd and the hanging light rig and **cut their feet
+off**.
+
+| | was | now |
+|---|---|---|
+| `STORY_TOP` | 1029 | **1008** |
+| `STORY_PHOTO_H` | 430 | **560** |
+| focus | `22%` (written for portraits) | **`62%`** |
+| zoom | — | tried at 1.15, **reverted to 1** |
+
+Going past the 1600 line is a precedent George has already set twice — this
+file records the Jinggg card ending near y 1740 as *"a deliberate trade for
+the size he asked for twice"*, and that band is a CAPTION gate in
+`gates.py`, not a graphics one. Measured on the render, the body now runs
+**y 984-1756, 773px tall, 59.8% of the lower pane** against 643px and 48.9%.
+
+### THE ZOOM CUT THE FIFTH PLAYER IN HALF, and the cap is 1.002x
+
+The zoom shipped at 1.15 and the render shows a player sliced down the
+middle by the card edge. **`transform: scale()` crops SYMMETRICALLY about
+the element centre, and on a found press photo the subject routinely runs to
+the frame edge.**
+
+Measured by masking bright, near-neutral pixels — the white kit — against
+the stage screen's saturated orange, which an L-channel threshold cannot
+separate at all (it returned one blob spanning the whole width, because
+stage fire is as bright as a jersey): the five figures span **x 209-1023 of
+1024**. The furthest edge sits **511px from a 512px centre**, so a symmetric
+zoom caps at **1.002x**. Not "1.15 was a bit much" — there is no headroom.
+
+So **the card gets its size from `top` and `photoHeight` only**, and the
+subject stays the size it was. Be straight about that: the pop-up is 20%
+more of the pane and the players are not bigger. **Enlarging the subject on
+an arbitrary photo needs subject detection, not a constant** — the crop
+would have to re-centre on the subject, and nothing here knows where it is.
+`rembg` is already in the adopt column for the person matte and is the tool
+that would answer this too.

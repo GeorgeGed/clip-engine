@@ -176,7 +176,8 @@ export const Root: React.FC = () => (
         durationInFrames={s.frames} {...V}
         defaultProps={{tilt: s.tilt, headline: s.headline,
           photos: [{src: staticFile(s.photo)}],
-          top: s.top, photoHeight: s.photoHeight, exitH: 600}} />
+          top: s.top, photoHeight: s.photoHeight,
+          photoFocus: s.photoFocus, photoZoom: s.photoZoom, exitH: 600}} />
     ))}
 
     <Composition id="Bait" component={XBait}

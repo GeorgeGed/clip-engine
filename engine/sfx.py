@@ -215,12 +215,22 @@ PALETTE = {"ding": ding, "sparkle": sparkle, "impact": impact,
            "boom": boom, "whoosh": whoosh, "riser": riser, "pop": pop, "tock": tock, "thunk": thunk}
 
 
+# A cue whose waveform comes from a FILE George supplied rather than from
+# code. `build()` must never write one: `vine_boom()` reads
+# `assets/sfx/vine_boom.wav`, so writing its own trimmed output back to that
+# path would overwrite the source with a 0.55s copy of itself and lose the
+# original on the second run.
+SAMPLED = ("vine_boom",)
+
+
 def build(out: Path = ASSETS) -> dict:
     """Render the palette to disk with a manifest carrying the rights basis."""
     import soundfile as sf
     out.mkdir(parents=True, exist_ok=True)
     man = {}
     for name, fn in PALETTE.items():
+        if name in SAMPLED:
+            continue
         y = fn()
         sf.write(out / f"{name}.wav", y * 0.9, SR, subtype="PCM_16")
         peak = float(np.max(np.abs(y)))
@@ -269,15 +279,39 @@ class Cue:
             raise ValueError(f"{self.name} at {self.at}s has no motivation")
 
 
-def bed(cues, duration, *, out: Path, assets: Path = ASSETS):
-    """Render the cue list to a single audio bed the length of the clip."""
+def bed(cues, duration, *, out: Path):
+    """Render the cue list to a single audio bed the length of the clip.
+
+    **IT RENDERS FROM `PALETTE`, NOT FROM THE .wav ON DISK, AND THAT WAS A
+    REAL BUG WORTH 270 MILLISECONDS.** This read `assets/<name>.wav` while
+    `cue_gain` and `perceptual_lead` both measured `PALETTE[name]()` — two
+    definitions of one sound. For the nine synthesised cues they agree,
+    because `build()` writes those files FROM the palette. For `vine_boom`
+    they did not: the palette entry trims George's 1.185s file to 0.55s and
+    the file on disk is the untrimmed original, so the bed played a sound
+    0.63s longer than the one every measurement was taken from.
+
+    The cost was exactly the note George kept sending. The lead was solved
+    as the trimmed waveform's energy centroid, 237ms, and applied to a
+    waveform whose centroid is 508ms — so the boom's mass landed about
+    270ms LATE however the anchor was nudged, and four rounds of moving the
+    anchor by tens of milliseconds could never reach it. Measured in the
+    delivered clip 16: cue fired at 4.608, low-band energy peaked at 5.04,
+    against the word at 4.845.
+
+    Same family as `_cut.wav` being cached, `punches.json` on a shared
+    path, and the punch plan measured from the overwritten delivery. **Any
+    value one stage computes and another consumes has to come from ONE
+    place** — here the palette, because that is what the gain and the lead
+    are already solved against.
+    """
     import soundfile as sf
     n = int(duration * SR) + SR
     track = np.zeros(n, dtype=np.float32)
     for c in cues:
-        y, sr = sf.read(assets / f"{c.name}.wav", dtype="float32")
-        if y.ndim > 1:
-            y = y.mean(axis=1)
+        y = PALETTE[c.name]()
+        y = y[0] if isinstance(y, tuple) else y
+        y = np.asarray(y, dtype=np.float32)
         start = c.at - (len(y) / SR if c.align == "end" else 0.0)
         i = max(0, int(start * SR))
         seg = y[: n - i] * c.gain

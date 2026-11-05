@@ -44,7 +44,19 @@ export const NewsStory: React.FC<{
   photos: {src: string}[];
   top: number; tilt: number;
   photoHeight?: number;
-}> = ({headline, photos, top, tilt, photoHeight = 400}) => {
+  // A SINGLE WIDE PHOTO IS NOT TWO PORTRAITS, and the defaults were written
+  // for two. With `objectFit: cover` at a fixed card width the scale is set
+  // by WIDTH, so making the box taller shows more of the photo and does NOT
+  // make the people in it any bigger — only cropping in does that. Measured
+  // on the Vitality team shot (1024x683): the five players occupy source
+  // y 365-590, so `22%` centred the crop on the crowd and the light rig and
+  // cut their feet off, and at 430px tall they stood 221px high inside a
+  // 2.34:1 letterbox. These two let a team card place and enlarge its
+  // subject without a second component.
+  photoFocus?: string;
+  photoZoom?: number;
+}> = ({headline, photos, top, tilt, photoHeight = 400,
+       photoFocus = '22%', photoZoom = 1}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const st = useStagger();
@@ -95,8 +107,8 @@ export const NewsStory: React.FC<{
                     it existed only to seat the name. */}
                 <Img src={p.src} style={{
                   width: '100%', height: '100%', objectFit: 'cover',
-                  objectPosition: 'center 22%', display: 'block',
-                  transform: `scale(${(1 + 0.014 * hold).toFixed(4)})`,
+                  objectPosition: `center ${photoFocus}`, display: 'block',
+                  transform: `scale(${(photoZoom + 0.014 * hold).toFixed(4)})`,
                 }} />
               </div>
             );

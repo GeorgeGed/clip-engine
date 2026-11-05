@@ -841,9 +841,50 @@ def stage_captions(clip, ch, st):
 # the captions own everything above it, and the two hand-built story cards
 # that shipped ran 255 and 240 frames with 2.15s and 2.42s of settled hold.
 STORY_FRAMES = 240
-STORY_TOP = 1029
-STORY_PHOTO_H = 430
 STORY_TILT = -3.4
+
+# GEORGE, ON THE VITALITY CARD: *"the vitality pop up needs to take up more
+# of the screen like i mentioned for the jingg/jonahp story."*
+#
+# It was not small — measured off its own alpha at >250 the body ran
+# y 1005-1647, 1040px wide, 48.9% of the lower pane, and already 47px past
+# the 1600 platform-UI line. What was small was the PEOPLE in it, for a
+# reason specific to a one-photo card: the hand-built Jinggg/JonahP cards
+# put TWO near-square crops side by side, so each face was ~499px wide,
+# while a single 1.5:1 team shot in a 1008x430 box is a 2.34:1 letterbox
+# that threw away 36% of the frame and left each player 221px tall.
+#
+# Three things move, and only the first is a number George named:
+#
+# * **TALLER, past the safe line, which is a precedent he has already set
+#   twice.** AGENTS.md records the Jinggg card ending near y 1740 inside
+#   the bottom 320px exclusion as "a deliberate trade for the size he asked
+#   for twice" — that band is a CAPTION gate in `gates.py`, not a graphics
+#   one. This lands at the same place rather than inventing a new limit.
+# * **FOCUS, because `22%` was written for portraits.** Measured on the
+#   photo, the five players occupy source y 365-590 of 683 — the lower
+#   middle — so centring the crop near the top kept the crowd and the light
+#   rig and cut their feet off.
+# * **ZOOM — TRIED AT 1.15, AND IT CUT THE FIFTH PLAYER IN HALF.** Under
+#   `objectFit: cover` at a fixed card width the scale is set by WIDTH, so a
+#   taller box shows more photo and leaves every player the same size on
+#   screen; only cropping in enlarges them. But `transform: scale()` crops
+#   SYMMETRICALLY about the element centre, and on a found press photo the
+#   subject routinely runs to the frame edge. Measured by masking bright,
+#   near-neutral pixels (the white kit) against the stage's saturated
+#   orange: the five figures span **x 209-1023 of 1024**, so the furthest
+#   edge sits 511px from a 512px centre and **a symmetric zoom caps at
+#   1.002x before it bisects someone.** Not "1.15 is a bit much" — there is
+#   no headroom at all, and shipped at 1.15 it rendered a player sliced down
+#   the middle by the card edge.
+#   The prop stays, because it is right for a photo whose subject is
+#   centred, and the default is 1. **Enlarging the subject on an arbitrary
+#   photo needs subject detection, not a constant** — the crop would have to
+#   re-centre on the subject, and nothing here knows where that is.
+STORY_TOP = 1008
+STORY_PHOTO_H = 560
+STORY_FOCUS = "62%"
+STORY_ZOOM = 1.0
 
 
 def _story_cards(clip, ch, st):
@@ -899,6 +940,7 @@ def _story_cards(clip, ch, st):
         entries.append({"id": cid, "headline": s.headline, "photo": s.photo.name,
                         "tilt": STORY_TILT, "top": STORY_TOP,
                         "photoHeight": STORY_PHOTO_H, "frames": STORY_FRAMES,
+                        "photoFocus": STORY_FOCUS, "photoZoom": STORY_ZOOM,
                         # `at` is not read by Remotion; it is here so a
                         # partial run can recover the schedule off disk —
                         # the same reason `punches.json` carries its own.
