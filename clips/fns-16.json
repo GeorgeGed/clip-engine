@@ -26,21 +26,21 @@
   "job": "fns-2905408276",
   "index": 16,
   "channel": "fns",
-  "in_point": 3.72,
+  "in_point": 7.58,
   "region": [
    1906.3,
    1952.51
   ],
   "hook": "FNS: WINNING TEAMS HAVE ISSUES TOO",
   "cam": [
-   1450,
-   344,
+   1532,
+   390,
    1920,
    608
   ],
   "emoji": "\ud83d\ude33",
   "cards": [],
-  "chat_mode": null,
-  "notes": "As delivered it is two things. The first 3.7s is a chat question and a shrug \u2014 \"do you think loud will split up i have no idea what's gonna happen with the teams\" \u2014 and Loud never returns; the clip's only named team is Vitality. Then \"here's the other thing you guys have to understand about teams th"
+  "chat_mode": "continuous",
+  "notes": "Successful teams hide internal problems. in_point 7.58, not 3.72: the clip was opening on \"here's the other thing you guys have to understand about teams that are succeeding and\" \u2014 a continuation marker referring to something the viewer never heard, which is rule 3 and the \"as I was saying\" opening. 7.58 starts on the contrast itself, \"obviously for teams that are FAILING you're gonna assume there are problems / for teams that SUCCEED they had prior issues as well\", which is the claim and is self-contained. Chat forced on at George's instruction despite 6% topicality. cam top pulled 344 -> 390: his own \"17,082\" viewer-count overlay sits at the top-left INSIDE the facecam, and the pane cropped it to a stray \"82\" in the corner. Detection agrees with the original rect at 74x, so the rect was right and the number is really in his cam; the only way out is vertical, since cropping left enough to clear it would cut his face."
  }
 }

@@ -4672,3 +4672,76 @@ that reason, not because its build failed.
 8's zero is specific to clip 8 — 8 anchors and no qualifying peak beside one
 — rather than the threshold being wrong everywhere, so the fix is probably
 clip 8's anchors and not `DB_FRAC`.
+
+## THE BOOM IS A DRONE, NOT A TRANSIENT — which is why four fixes failed
+
+George, on clip 16: *"started too early - also where's the chat? and the boom
+is too late - change the logic and send again."*
+
+**Fourth "too late" in a row, and the previous three fixes were all correct
+and all aimed at the wrong thing.** The anchor moved to the emphasised card,
+then to the stressed syllable, then to that syllable's attack, and finally
+the cue was given a 108 ms lead. Every one of those aligns an ONSET.
+
+**Mapping the whole file settles it. `vine_boom.wav` has no onset.**
+
+| | |
+|---|---|
+| 0 ms | −11.2 dB |
+| 40 ms → 800 ms | between **−4 and −8**, never leaving that band |
+| total range across 1.185 s | **7 dB** |
+| energy centroid | **508 ms** |
+
+It is a flat drone. Aligning a drone's start to a word puts its entire mass
+after the word, and that is measurable in the delivered file: **the cue fired
+at 8.23 and the low-band energy peaked at 8.74 — +510 ms** — with the second
+boom reproducing it at **+520 ms**. The cue was on the frame to within one
+frame every time; the SOUND arrived half a second behind it.
+
+Two changes, and the first is the one that matters:
+
+1. **TRIM IT TO PUNCTUATION.** A word is 0.2–0.3 s; a 1.185 s cue is a bed,
+   not a beat, and the untrimmed tail smears over the second of speech that
+   follows. `BOOM_LEN = 0.55` keeps the rise and the body — the recognisable
+   part — with `BOOM_FADE = 0.14` out. Centroid falls 508 → **237 ms**.
+2. **`perceptual_lead` IS THE ENERGY CENTROID**, not the 10% cumulative
+   point. The 10% point is right for a sound whose energy sits behind a
+   clear attack and wrong for one that does not. The centroid degrades
+   correctly across the palette with no table:
+
+   | tick | tock | thunk | shutter | paper | newsding | boom |
+   |---|---|---|---|---|---|---|
+   | 1.5 ms | 7.6 | 10.2 | 21.6 | 31.7 | 101.7 | **237** |
+
+   Nothing but the boom moves by more than a frame and a half.
+
+**Measured on the rebuilt file: the low-band peak now lands +20 ms and
++30 ms from the moment**, against +510 and +520. That is the whole note.
+
+### "Started too early" was an "as I was saying" opening
+
+Clip 16 opened at 3.72 on *"here's the other thing you guys have to
+understand about teams that are succeeding and"* — a continuation marker
+pointing at something the viewer never heard. That is rule 3 and it is the
+one line OpenMontage's clip-factory names explicitly ("no 'as I was saying'
+openings").
+
+`in_point 7.58` opens on the contrast instead — *"obviously for teams that
+are FAILING you're gonna assume there are problems ... for teams that
+SUCCEED they had prior issues as well"* — which is the claim, carries its own
+setup, and drops 3.9 s of throat-clearing. **34.48 → 30.96s.**
+
+### The chat, and a half-number in the corner
+
+Chat forced on (`chat_mode: "continuous"`), 21 of 21 sampled frames. It
+measures **6% on-topic**, the lowest of the ten buildable, so the gate
+refused it and the explicit mode overrides — the same arrangement as clip 12,
+and the caveat stays in the log.
+
+And one thing worth the extra build: a stray **"82"** sat clipped in the
+top-left of the facecam. It is the tail of his own **"17,082" viewer counter**,
+burned into the cam region on his stream. `facecam.detect` returns the spec's
+rect at **74x confidence**, so the rect was right and the number is genuinely
+inside his cam — cropping left far enough to clear it would cut his face, so
+the only axis is vertical. Cam top 344 → **390**, which costs some headroom
+and reads as an ordinary tight framing rather than as a bug.

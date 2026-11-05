@@ -395,6 +395,12 @@ def shutter(dur=0.16, seed=37):
 PALETTE["shutter"] = shutter
 
 
+# A WORD IS 0.2-0.3s, SO A 1.185s CUE IS A BED AND NOT A BEAT. See
+# `vine_boom` for the envelope that forced this.
+BOOM_LEN = 0.55           # the rise and the body, which is the recognisable part
+BOOM_FADE = 0.14          # out without a click
+
+
 def vine_boom():
     """The Vine Boom, from the file George supplied. NOT synthesised.
 
@@ -421,11 +427,38 @@ def vine_boom():
     RIGHTS: a meme sound of uncertain provenance. George chose it and
     supplied the file; it is not a licensed library and should not be
     treated as one.
+
+    **AND IT IS NOT A TRANSIENT — IT IS A 1.185s DRONE, WHICH IS WHY FOUR
+    ROUNDS OF TIMING FIXES ALL FAILED.** Mapping its whole 20ms envelope:
+    -11.2 dB at 0ms, up to about -5 by 40ms, and then it stays between -4
+    and -8 all the way to 800ms before decaying. **Seven dB of range across
+    the entire file.** There is no attack to align anything to.
+
+    That is the common thread under George's four notes. Aligning a flat
+    drone's ONSET to a word puts its whole mass after the word: measured in
+    the delivered clip 16, the cue fired at 8.23 and its low-band energy
+    peaked at **8.74 — 510ms later**, and the second boom reproduced it at
+    +520ms. The cue was on the frame and the SOUND arrived half a second
+    behind.
+
+    So the file is trimmed to its punctuation. A word is 0.2-0.3s; a cue
+    that outlasts it four times over is a bed, not a beat, and the untrimmed
+    tail smears across the second of speech that follows. `BOOM_LEN` keeps
+    the rise and the body — the part that is recognisably the sound — and
+    `BOOM_FADE` takes it out without a click. The energy centroid comes back
+    from 508ms to roughly a quarter of that, which is what makes
+    `perceptual_lead` usable on it at all.
     """
+    import numpy as np
     import soundfile as sf
     y, sr = sf.read(ASSETS / "vine_boom.wav", dtype="float32")
     if y.ndim > 1:
         y = y.mean(axis=1)
+    n = min(len(y), int(BOOM_LEN * SR))
+    y = np.asarray(y[:n], dtype=float).copy()
+    f = min(int(BOOM_FADE * SR), n)
+    if f > 1:
+        y[-f:] *= np.linspace(1.0, 0.0, f) ** 1.5
     return y
 
 
@@ -450,8 +483,27 @@ PALETTE["vine_boom"] = vine_boom
 # gets a lead of ~0, while a sustained hit gets a real one. An earlier pass
 # concluded no lead was warranted by measuring the ONSET (-6 dB in 15 ms) —
 # true, and the onset is not where a back-loaded sound is heard.
-def perceptual_lead(name: str, frac: float = 0.10) -> float:
-    """Seconds by which `name` must be fired EARLY to be heard on the beat."""
+def perceptual_lead(name: str) -> float:
+    """Seconds by which `name` must be fired EARLY to be heard on the beat.
+
+    **THE ENERGY CENTROID, not a low cumulative percentile.** The first
+    version used the 10% point, which is right for a sound whose energy sits
+    behind a clear attack and wrong for one that does not: on the Vine Boom
+    it returned 108ms while the sound's mass sits at 508ms, and the delivered
+    clip measured its low-band peak **+510ms after the cue** — George's
+    fourth "too late" in a row.
+
+    The centroid is where the sound's weight actually is, so it degrades
+    correctly across the palette instead of needing a table:
+
+    | tick | thunk | tock | shutter | paper | newsding |
+    |---|---|---|---|---|---|
+    | 1.5ms | 10.2 | 7.6 | 21.6 | 31.7 | 101.7 |
+
+    A click's weight is at its start and it barely moves; a sustained cue
+    gets a real lead. Nothing in the palette except the boom shifts by more
+    than a frame and a half.
+    """
     import numpy as np
     y = PALETTE[name]()
     y = y[0] if isinstance(y, tuple) else y
@@ -459,4 +511,4 @@ def perceptual_lead(name: str, frac: float = 0.10) -> float:
     tot = float(e.sum())
     if tot <= 0:
         return 0.0
-    return float(np.argmax(np.cumsum(e) / tot >= frac)) / SR
+    return float((np.arange(len(e)) / SR * e).sum() / tot)
