@@ -4745,3 +4745,93 @@ rect at **74x confidence**, so the rect was right and the number is genuinely
 inside his cam — cropping left far enough to clear it would cut his face, so
 the only axis is vertical. Cam top 344 → **390**, which costs some headroom
 and reads as an ordinary tight framing rather than as a bug.
+
+## A PHOTO CARD THE PIPELINE FINDS ITSELF, and two corrections
+
+George, on clip 16: *"again boom too early - also seems to be weirdly zoomed
+in - second boom is fine, surely we should be showing an image of vitality at
+champions similar to the jingg/jonahp story of the previous video? include
+that in the logic."*
+
+### The zoom was mine, and the counter cannot also be fixed
+
+Last round the facecam top was pulled 344 → 390 to hide a stray **"82"** in
+the corner — the tail of his own "17,082" viewer counter, burned into the cam
+region. **The pane zoom is `806 / rect_height`**, so every crop that clears
+the counter raises it: 264px → 3.05x, 218px → **3.70x**. That is what he saw.
+
+The counter sits at the TOP-LEFT INSIDE the cam, x 1505-1615, y 348-382. It
+cannot be cropped out horizontally — the pane keeps the centre and his face
+starts at x 1680, so clearing it sideways cuts his face — and vertically it
+costs exactly the zoom he just rejected. **The two cannot both be had.** Cam
+reverted to (1450, 344, 1920, 608), 3.05x, and the counter stays: it is his
+own overlay, and he flagged the zoom, not the number.
+
+### "Again too early" was one correction too many
+
+Boom 2, which he called fine, sits at the start of a loud run (*"end up
+making runs"*, +6.3 dB). Boom 1 sat on **"had"** — an auxiliary verb that
+happens to be the loudest thing in its phrase at −19.3 dB — while the
+emphasised card sat 85 ms later on *"prior"*.
+
+**The attack refinement was compensating for the wrong cue lead.** It was
+added when `perceptual_lead` returned 108 ms on a sound whose weight is at
+508, and it dragged the moment earlier to make up the difference. With the
+lead corrected to the centroid, the compensation became an over-correction.
+The attack may now refine FORWARD off a late whisper boundary and **may never
+precede the card**. Two corrections for one symptom, again.
+
+**Be straight about the size: this moves boom 1 by 85 ms**, onto the card word
+rather than before it. If it still reads early the next levers are the lead
+itself (237 ms) or anchoring on the following card, *"issues"*, +0.46 s — not
+a third correction stacked on these.
+
+### `engine/story.py` — the card finds its own photo
+
+Clip 16's consequence is *"For all you know Vitality was a dead fucking team
+that just happened to make a run"*, and the viewer has no idea what run.
+`StoryPrx` and `StorySen` were typed into `Root.tsx` by hand, which is why
+there were exactly two and why a third clip got none.
+
+**What makes this safe to automate**, given the standing rule that cards are
+editorial and a name on screen needs an independent check:
+
+1. **The org must be in the clip's own `claim`/`consequence` AND spoken in its
+   transcript.** Both. A `SPOKEN` map handles what a speaker actually says
+   ("vitality" → Team Vitality), and an org not on the known list is never
+   looked up — which stops a whisper mis-hearing becoming a photo card of the
+   wrong team.
+2. **THE HEADLINE IS BUILT FROM RIOT'S OWN CAPTION.** Their photo desk writes
+   a full one on every frame: *"Team Vitality walk onstage for the opening
+   ceremony during VALORANT Champions Shanghai Grand Finals at Mercedes-Benz
+   Arena on October 18, 2026"*. Event, venue and date from a primary source —
+   **a stronger basis than the VLR roster items this file records failing an
+   independent check four times out of eight**, and the reason this one can be
+   automatic where those could not.
+3. **A result is asserted only when a caption says it.** Several of the same
+   set read *"after their loss during ... Grand Finals"*, which is how the
+   card can say "reached the grand final and lost" rather than just "at".
+4. Licence, account and page URL are written per photo to
+   `jobs/<job>/photos/stories_NN.json`. Riot's VCT photos are All Rights
+   Reserved, used on George's operator permission.
+
+**ONSTAGE BEATS BACKSTAGE, and ranking missed it first.** Scoring "the caption
+names the subject first" chose a posed team-and-staff group against a bare
+corridor wall — identifiably Vitality, showing no event at all, on a card
+whose whole job is to answer *what run?*. The stage shot has the arena in it.
+`venue` now outranks everything but a performer shot.
+
+**Generated, not registered.** `Root.tsx` maps `public/stories.json` to
+Compositions, so a new card needs no edit to that file and
+`render_remotion.py --all` picks it up. The entries carry their own `at` for
+the same reason `punches.json` does — a partial run must be able to recover
+the schedule off disk.
+
+Delivered on clip 16: **StoryVitality at 23.58s**, 4.0s, white paper tilted
+−3.4° with the Source Serif headline and all five players on stage at the
+Mercedes-Benz Arena — the Jinggg/JonahP treatment, found rather than typed.
+
+**A quirk of the Flickr client worth keeping:** `search(..., per_page=20)`
+returns **zero** results where `per_page=8` returns eight. That looks exactly
+like "no photos of this team" and is a paging quirk, so `story.find` pages at
+8 and the reason is in the code.

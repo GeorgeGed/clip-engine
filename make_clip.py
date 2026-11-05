@@ -40,6 +40,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
+import shutil
 import dataclasses
 import subprocess
 import sys
@@ -827,12 +829,120 @@ def stage_captions(clip, ch, st):
                              "words": c.words, "emph": c.emphasis}
                             for c in out],
                            dst, dur=st["out_dur"], accent=CAPTION_ACCENT)
+    st["story_cards"] = _story_cards(clip, ch, st)
     log(f"  {len(cs)} cards -> {len(out)} after the cut "
         f"({sum(1 for c in out if c.emphasis)} emphasised), "
         f"{len(out)/max(st['out_dur'],1):.2f}/s -> {dst.name}")
 
 
 # --------------------------------------------------------------- chat ----
+# HOW LONG A STORY CARD HOLDS, and where it sits. Both measured earlier in
+# this file: the usable band for a lower-pane graphic is y 980-1600 because
+# the captions own everything above it, and the two hand-built story cards
+# that shipped ran 255 and 240 frames with 2.15s and 2.42s of settled hold.
+STORY_FRAMES = 240
+STORY_TOP = 1029
+STORY_PHOTO_H = 430
+STORY_TILT = -3.4
+
+
+def _story_cards(clip, ch, st):
+    """Licensed photo cards for the orgs this clip NAMES. See engine/story.
+
+    Returns card dicts for `stage_assemble`, writes the photos and
+    `stories.json` into Remotion's `public/`, and records every photo's
+    licence and page URL in the job's manifest. Returns [] on any miss —
+    no key, no photo, no org named — because a clip with no card is the
+    normal case and must not be an error.
+    """
+    from engine import story
+    meta = st["meta"]
+    words = [w["text"] for w in st.get("words", [])] or \
+        [w["text"] for u in json.loads(clip.words(ROOT).read_text())["utterances"]
+         for w in u["words"]]
+    text = f"{meta.get('claim','')} {meta.get('consequence','')}"
+    orgs = story.named_in(text, words)
+    if not orgs:
+        log("  no org named in BOTH the claim and the transcript — no story card")
+        (VENDOR / "public/stories.json").write_text("[]")
+        return []
+    rm = _remap_fn(st["keeps"])
+    cards, entries, record = [], [], []
+    for org in orgs[:2]:
+        s = story.find(org, cache=ROOT / f"jobs/{clip.job}/_flickr",
+                       dest_dir=ROOT / f"jobs/{clip.job}/photos")
+        if s is None:
+            log(f"  {org}: no licensed photo found — no card")
+            continue
+        # WHERE IT GOES: the line the viewer hears the name on, not a slot.
+        at = None
+        for w in (st.get("words") or
+                  [w for u in json.loads(clip.words(ROOT).read_text())["utterances"]
+                   for w in u["words"]]):
+            spoken = w["text"].lower().strip(".,!?'\"")
+            if spoken in story.SPOKEN and story.SPOKEN[spoken] == org:
+                at = rm(w["start"])
+                if at is not None:
+                    break
+        if at is None:
+            log(f"  {org}: named but not locatable in the cut — no card")
+            continue
+        # "Story" + the distinctive word of the org, so the composition id
+        # reads in the Remotion list and in the Resolve media pool.
+        word = [w for w in re.split(r"[^A-Za-z0-9]", org) if w][-1]
+        cid = f"Story{word[:12].capitalize()}"
+        dest = VENDOR / "public" / s.photo.name
+        if not dest.exists() or dest.stat().st_size != s.photo.stat().st_size:
+            shutil.copyfile(s.photo, dest)
+        cards.append({"id": cid, "at": round(at, 2),
+                      "dur": STORY_FRAMES / ch.fps})
+        entries.append({"id": cid, "headline": s.headline, "photo": s.photo.name,
+                        "tilt": STORY_TILT, "top": STORY_TOP,
+                        "photoHeight": STORY_PHOTO_H, "frames": STORY_FRAMES,
+                        # `at` is not read by Remotion; it is here so a
+                        # partial run can recover the schedule off disk —
+                        # the same reason `punches.json` carries its own.
+                        "at": round(at, 2)})
+        record.append(s.record())
+        log(f"  story card {cid} at {at:.2f}s — {s.headline!r}")
+        log(f"     photo {s.photo.name} · {s.account} · {s.licence}")
+    (VENDOR / "public/stories.json").write_text(json.dumps(entries, indent=1))
+    if record:
+        (ROOT / f"jobs/{clip.job}/photos/stories_{clip.index:02d}.json"
+         ).write_text(json.dumps(record, indent=1))
+    return cards
+
+
+def _all_cards(clip, st):
+    """The spec's cards plus the ones `_story_cards` found. The spec still
+    wins: an `id` named by hand is not overwritten by a generated one."""
+    found = st.get("story_cards")
+    if found is None:
+        # Partial run: `stage_captions` did not execute, so recover the
+        # schedule from disk rather than silently dropping every card.
+        sj = VENDOR / "public/stories.json"
+        try:
+            found = [{"id": e["id"], "at": e["at"],
+                      "dur": e.get("frames", STORY_FRAMES) / 60.0}
+                     for e in json.loads(sj.read_text()) if "at" in e]
+        except (OSError, json.JSONDecodeError, KeyError):
+            found = []
+    by_id = {c["id"]: c for c in found}
+    by_id.update({c["id"]: c for c in clip.cards})
+    return sorted(by_id.values(), key=lambda c: c["at"])
+
+
+def _remap_fn(keeps):
+    def rm(t):
+        acc = 0.0
+        for k in keeps:
+            if k.start <= t < k.end:
+                return acc + (t - k.start)
+            acc += k.length
+        return None
+    return rm
+
+
 def stage_chat(clip, ch, st):
     """Fetch, CLASSIFY, and place. The one stage that makes a decision."""
     if not (ch.vod_id and clip.region):
@@ -892,6 +1002,8 @@ def stage_chat(clip, ch, st):
             "hook": clip.hook or "", "emoji": clip.emoji}))
         if clip.hook:
             _render_comp("Bait", st["overlays"], ch.fps)
+        for c in st.get("story_cards", []):
+            _render_comp(c["id"], st["overlays"], ch.fps)
         (st["overlays"] / "rm_Chat.mov").unlink(missing_ok=True)
         return
     # "force" means OVERRIDE THE GATE, not "a mode called force". Passing it
@@ -954,7 +1066,8 @@ def stage_chat(clip, ch, st):
         "durationInFrames": st["total"],
         "baitFrames": min(st["total"], round(BAIT_SECONDS * ch.fps)),
         "hook": clip.hook or "", "emoji": clip.emoji}))
-    comps = ["Chat"] + (["Bait"] if clip.hook else [])
+    comps = ["Chat"] + (["Bait"] if clip.hook else []) \
+        + [c["id"] for c in st.get("story_cards", [])]
     for comp in comps:
         _render_comp(comp, st["overlays"], ch.fps)
 
@@ -1041,7 +1154,7 @@ def stage_assemble(clip, ch, st):
             log(f"  no entrance cue: the chat is up from {w['from']:.2f}s, "
                 f"so it marks the clip starting rather than the box arriving")
     shut = cue_gain_peak("shutter", -9.5, MASTER_GAIN)
-    for c in clip.cards:
+    for c in _all_cards(clip, st):
         cues.append(Cue(c["at"] + 0.04, "shutter", shut, f"{c['id']} lands"))
 
     # THE BOOM GOES ON THE ZOOM. By RMS, not peak — its crest is 7.7 dB
@@ -1077,7 +1190,7 @@ def stage_assemble(clip, ch, st):
     names = ["cap_kin.mov", "sfx.wav", "rm_Chat.mov"]
     if clip.hook:
         names.append("rm_Bait.mov")
-    names += [f"rm_{c['id']}.mov" for c in clip.cards]
+    names += [f"rm_{c['id']}.mov" for c in _all_cards(clip, st)]
     have = [n for n in names if (st["overlays"] / n).exists()]
     r.GetMediaStorage().AddItemListToMediaPool(
         [str(st["overlays"] / n) for n in have])
@@ -1132,8 +1245,9 @@ def stage_assemble(clip, ch, st):
 
     # V1 content | V2 facecam | V3 chat | V4 cards | V5 titles | V6 captions
     add("rm_Chat.mov", 0.0, total / fps, 3)
-    for c in clip.cards:
-        add(f"rm_{c['id']}.mov", c["at"], c["dur"], 4)
+    for c in _all_cards(clip, st):
+        add(f"rm_{c['id']}.mov", c["at"],
+            c.get("dur", STORY_FRAMES / fps), 4)
     if clip.hook:
         add("rm_Bait.mov", 0.8, min(BAIT_SECONDS, total / fps - 0.8), 5)
     add("cap_kin.mov", 0.0, total / fps, 6)

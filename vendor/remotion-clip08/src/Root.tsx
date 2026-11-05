@@ -15,6 +15,7 @@ import chatWindows from '../public/chat_windows.json';
 // line, which is exactly the kind of constant that has to become
 // data before a second clip can be built.
 import clip from '../public/clip.json';
+import stories from '../public/stories.json';
 import {Stage, Dir, Kind, EXIT} from './motion';
 
 const V = {fps: 60, width: 1080, height: 1920} as const;
@@ -158,6 +159,25 @@ export const Root: React.FC = () => (
         photos: [{src: staticFile('p_jonahp.jpg')},
                  {src: staticFile('p_jerrwin.jpg')}],
         top: 1029, photoHeight: 430, exitH: 600}} />
+
+    {/* STORY CARDS ARE GENERATED, NOT HAND-REGISTERED.
+        George: "surely we should be showing an image of vitality at
+        champions similar to the jingg/jonahp story of the previous video?
+        include that in the logic." StoryPrx and StorySen above are typed
+        out by hand, which is why there were two of them and why a third
+        clip got none. `engine/story.py` finds a licensed Riot photo of a
+        team the clip NAMES and writes `stories.json`; every entry here
+        becomes a Composition, so `render_remotion.py --all` picks it up
+        with no edit to this file. The headline comes from Riot's own photo
+        caption — see that module for why that is a strong enough source to
+        automate, where a single-outlet roster item was not. */}
+    {(stories as any[]).map((s) => (
+      <Composition key={s.id} id={s.id} component={XStory}
+        durationInFrames={s.frames} {...V}
+        defaultProps={{tilt: s.tilt, headline: s.headline,
+          photos: [{src: staticFile(s.photo)}],
+          top: s.top, photoHeight: s.photoHeight, exitH: 600}} />
+    ))}
 
     <Composition id="Bait" component={XBait}
       durationInFrames={clip.baitFrames} {...V}

@@ -295,8 +295,24 @@ def bold_moments(path=SRC, *, min_db=MIN_DB, min_sep=MIN_SEP,
                     if on - ANCHOR_BACK <= a <= float(times[i]) + ANCHOR_FWD]
             if not near:
                 continue
-            t = min(near, key=lambda c: abs(c - on))
-            t = round(_attack(fine, 0.005, t), 2)   # ...onto its stressed syllable
+            card = min(near, key=lambda c: abs(c - on))
+            # NEVER WALK BACK OFF THE CARD. The attack refinement was added
+            # when the cue's LEAD was wrong (108 ms on a sound whose weight
+            # sits at 508), and it was compensating for that by dragging the
+            # moment earlier. With `perceptual_lead` corrected to the energy
+            # centroid the compensation became an over-correction, and it
+            # lands on whatever syllable is loudest rather than on the card's
+            # own word: clip 16's first boom went to **"had"** — an auxiliary
+            # verb that happens to be the loudest thing in its phrase at
+            # -19.3 dB — while the card sat 85 ms later on "prior", and
+            # George called it early. Its second boom was already at a card
+            # start ("end up making runs") and he called that one fine.
+            #
+            # So the attack may still refine FORWARD off a late whisper
+            # boundary, and may never precede the card. Two corrections for
+            # one symptom, which is the stacked compensation this file keeps
+            # deleting.
+            t = round(max(card, _attack(fine, 0.005, card)), 2)
             if t < skip_head:
                 continue
         cand.append((t, round(float(d), 1)))
