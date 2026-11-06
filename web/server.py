@@ -62,6 +62,8 @@ from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+import views
+
 ROOT = Path(__file__).resolve().parent.parent
 WEB = ROOT / "web"
 JOBS = ROOT / "jobs"
@@ -624,6 +626,10 @@ class Handler(BaseHTTPRequestHandler):
         self._send(200, path.read_bytes(), ctype, head)
 
     # -- routes
+    def _job(self, job_id: int):
+        with db() as c:
+            return c.execute("SELECT * FROM job WHERE id=?", (job_id,)).fetchone()
+
     def do_GET(self):                                   # noqa: N802
         u = urllib.parse.urlparse(self.path)
         q = urllib.parse.parse_qs(u.query)
@@ -631,7 +637,7 @@ class Handler(BaseHTTPRequestHandler):
 
         if p in ("/", "/index.html"):
             return self._file(WEB / "static" / "index.html")
-        if p in ("/app.js", "/app.css"):
+        if re.fullmatch(r"/[A-Za-z0-9._-]+\.(js|css|svg|png|ico|woff2?)", p):
             return self._file(WEB / "static" / p.lstrip("/"))
 
         if p == "/api/doctor":
@@ -684,6 +690,40 @@ class Handler(BaseHTTPRequestHandler):
             lp = log_path(row["name"], stage)
             text = lp.read_text()[-20000:] if lp.exists() else ""
             return self._json({"stage": stage, "text": text})
+
+        m = re.fullmatch(r"/api/jobs/(\d+)/candidates", p)
+        if m:
+            row = self._job(int(m.group(1)))
+            if not row:
+                return self._json({"error": "no such job"}, 404)
+            cands = views.candidates(row["name"])
+            views.warm(row["name"], [c["n"] for c in cands])
+            return self._json(cands)
+
+        m = re.fullmatch(r"/api/jobs/(\d+)/detail/(\d+)", p)
+        if m:
+            row = self._job(int(m.group(1)))
+            if not row:
+                return self._json({"error": "no such job"}, 404)
+            return self._json(views.clip_detail(row["name"], int(m.group(2))))
+
+        m = re.fullmatch(r"/api/jobs/(\d+)/thumb/(\d+)", p)
+        if m:
+            row = self._job(int(m.group(1)))
+            f = views.candidate_thumb(row["name"], int(m.group(2))) if row else None
+            if not f:
+                return self._json({"error": "no frame"}, 404)
+            return self._file(f)
+
+        m = re.fullmatch(r"/api/jobs/(\d+)/frame/(\d+)", p)
+        if m:
+            row = self._job(int(m.group(1)))
+            at = float((q.get("t") or ["1"])[0] or 1)
+            w = int((q.get("w") or ["250"])[0] or 250)
+            f = views.clip_frame(row["name"], int(m.group(2)), at, w) if row else None
+            if not f:
+                return self._json({"error": "no frame"}, 404)
+            return self._file(f)
 
         m = re.fullmatch(r"/api/jobs/(\d+)/clip/(\d+)", p)
         if m:
@@ -783,6 +823,8 @@ class Handler(BaseHTTPRequestHandler):
             res, err = write_spec(row["name"], int(m.group(2)),
                                   body.get("spec", {}) or {},
                                   str(body.get("note", "")))
+            if not err:
+                views.invalidate(row["name"], int(m.group(2)))
             return self._json({"error": err} if err else res, 400 if err else 200)
 
         m = re.fullmatch(r"/api/jobs/(\d+)/build/(\d+)", p)

@@ -1,0 +1,43 @@
+{
+ "channel": {
+  "name": "fns",
+  "cam": [
+   1456,
+   818,
+   1920,
+   1080
+  ],
+  "seam": 0.42,
+  "chrome": 92,
+  "fps": 60,
+  "grade": {
+   "NodeIndex": "1",
+   "Slope": "1.06 1.06 1.07",
+   "Offset": "-0.012 -0.012 -0.010",
+   "Power": "1.06 1.06 1.06",
+   "Saturation": "1.18"
+  },
+  "arc": null,
+  "vod_id": "2905408276",
+  "permission": "explicit",
+  "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release."
+ },
+ "clip": {
+  "job": "fns-2905408276",
+  "index": 5,
+  "channel": "fns",
+  "in_point": 0.0,
+  "out_point": 34.5,
+  "region": [
+   5668.5,
+   5724.68
+  ],
+  "hook": null,
+  "cam": null,
+  "emoji": "\ud83d\ude33",
+  "cards": [],
+  "chat_mode": null,
+  "booms": null,
+  "notes": "Cane's era as the trendsetter that NA streamers imitate  Cut to 0-34s by the screen: the whole region is 56s and fails the gate, this window is 25% muted at 13 cuts/min. The window makes it BUILDABLE; whether it is one narrative and explains itself is still an editorial call."
+ }
+}

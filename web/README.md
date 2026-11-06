@@ -1,47 +1,64 @@
-# Clip Factory — the pipeline as a website
+# The site
 
-    ./.venv/bin/python web/server.py      # http://127.0.0.1:8808
+    ./start.sh              http://127.0.0.1:8808
+    ./start.sh --public     the same site on a public https URL
 
-Paste a Twitch VOD, give it a rights basis, and it drives the existing
-pipeline end to end:
+`start.sh` runs two things: the site and the render agent. Ctrl-C stops both.
 
-    run.py   ingest / analyse / rank
-    batch.py screen / prep / specs / build / report
+## Why the site and the renderer are the same machine
 
-## Why it is local, and why one job at a time
+Resolve serves its scripting API on its own GUI thread, on this Mac, and
+Remotion's `public/` is shared. Nothing can render anywhere else. **So
+hosting a front end apart from the renderer buys nothing** — it would be a
+page that says "worker offline" whenever this machine is asleep, which is
+exactly when the product cannot work anyway.
 
-`build` drives DaVinci Resolve through a scripting API served on Resolve's
-own GUI thread: one Resolve, one project, one timeline. Remotion's `public/`
-is shared the same way. A single worker thread consumes the queue, which is
-the honest model of that constraint rather than a limit imposed by the UI.
+A tunnel is therefore the whole of hosting, not a shortcut past it:
 
-## What it does NOT hide
+    brew install cloudflared     # once
+    ./start.sh --public
 
-**The screen is the product.** Measured across this VOD's 50 candidate
-windows, 10 are buildable — the rest are rejected mostly for DMCA muting at
-20-55%. The site shows that as a table with a verdict and a reason per clip,
-because a progress bar that emitted three clips out of fifty would be lying
-about the yield.
+That prints a `https://….trycloudflare.com` URL. No account, no deploy, no
+environment variables. The URL changes each run; a named tunnel on a domain
+you own is the same tool with one config file, when it is worth it.
 
-**Rights are a required field.** `permission` is on every source and the
-build refuses to start without one, so the form asks rather than defaults.
+When the pipeline does grow a cloud control plane, `worker/agent.py` already
+speaks to one — see `worker/README.md`. The site here keeps working either
+way, because both read the same `jobs/` directory.
 
-## Layout
+## The three screens
 
-    web/server.py          stdlib http.server — no framework, nothing to install
-    web/static/index.html  one page
-    web/static/app.js      polling, 1.5s
-    web/static/app.css
-    web/factory.db         SQLite job + stage state (gitignored)
-    jobs/<job>/web/*.log   one log per stage, tee'd from the subprocess
+**New project** — paste a Twitch VOD or the path of one already on this Mac
+(`engine.ingest.fetch` adopts a local file instead of downloading it). A
+Twitch link fills in its own channel, duration and title from Helix. A
+rights basis is required; the build refuses to start without one.
 
-Every stage is the same command a person would type. Nothing about the
-editing is reimplemented here, so the site follows the pipeline for free.
+**Clips** — every scored candidate, defaulting to the ones that can be cut.
+Each card carries the score, the state (Rendered / Ready to cut / Refused)
+and, when the screen had to cut into the region to make it buildable, the
+window it chose. Refused clips are one chip away with their reason, because
+a high score on a clip you cannot use is a tease.
 
-## Not done yet
+**Editor** — the rendered clip plays, the transcript sits beside it with the
+claim's own emphasis marked, and clicking a word jumps the video there. The
+five fields review actually changes — in, out, booms, chat, hook — write
+back to the spec, which `batch.py specs` will not overwrite.
 
-- No per-clip build picker: `build` currently builds everything `specs`
-  kept. The screen table is read-only.
-- No auth. It binds 127.0.0.1 and assumes the operator is at the machine.
-- `cancel` terminates the running subprocess; Resolve may need a look after
-  a cancelled `build`.
+## What is derived and cached
+
+`web/views.py` makes the thumbnails, the per-clip transcript in cut time and
+the candidate list, caching all of it under `jobs/<job>/ui/`. Nothing there
+decides anything: the scores come from `ranked.json`, the verdicts from
+`screened.json`, the words from the transcript the pipeline already wrote.
+If a number on the page disagrees with the pipeline, this layer is wrong.
+
+Thumbnails are warmed on a daemon thread the first time a project is opened.
+Fifty frames is fifty ffmpeg calls, and generating them inside the requests
+left the grid blank while they queued.
+
+## One job at a time
+
+A single worker thread, and the same rule in `worker/agent.py`. Resolve
+cannot be driven concurrently and two VODs transcribing at once would fight
+over the GPU. The queue is the constraint stated honestly rather than a
+limit imposed by the interface.

@@ -1,0 +1,134 @@
+<header class="bar"><div class="wrap">
+  <div class="mark"><i></i>Clip&nbsp;Factory</div>
+  <nav>
+    <button type="button" data-go="new">New project</button>
+    <button type="button" data-go="results" aria-current="true">Clips</button>
+    <button type="button" data-go="editor">Editor</button>
+  </nav>
+  <div class="sp"></div>
+  <select id="projpick" class="pill" aria-label="Project"></select>
+  <span class="pill" id="agent" title="The render agent"></span>
+  <button class="icb" id="theme" type="button">Theme</button>
+</div></header>
+
+<main>
+<section class="view wrap" id="v-new" hidden>
+  <div class="newgrid">
+    <div>
+      <p class="eyebrow">New project</p>
+      <h1 style="margin:9px 0 8px">Drop a stream. Get clips.</h1>
+      <p style="color:var(--ink-2);max-width:58ch;margin-bottom:20px">A Twitch VOD,
+        or a file already on this machine. It transcribes once, scores every
+        candidate moment, and cuts the ones it can actually cut.</p>
+
+      <div class="srcbox">
+        <div class="in">
+          <input id="src" type="text" aria-label="Source video"
+                 placeholder="https://www.twitch.tv/videos/… or /path/to/vod.mp4">
+          <button type="button" id="upload">On this Mac?</button>
+        </div>
+        <div class="found" id="found" hidden></div>
+        <div class="sets">
+          <div class="set">
+            <div class="lab">Channel</div>
+            <input id="chan" type="text" placeholder="fills itself from a Twitch link">
+          </div>
+          <div class="set">
+            <div class="lab">Rights basis</div>
+            <select id="rights">
+              <option value="explicit">explicit — written permission</option>
+              <option value="affiliate">affiliate</option>
+              <option value="client_owned">client owned</option>
+            </select>
+            <p class="sub">Required. The build refuses to start without one, and a
+              viewer's chat message is their words on screen.</p>
+          </div>
+          <div class="set">
+            <div class="lab">Note <span style="text-transform:none;letter-spacing:0">optional</span></div>
+            <input id="note" type="text" placeholder="what the permission covers">
+          </div>
+        </div>
+        <div class="runbar">
+          <button class="btn" id="go" type="button">Get clips</button>
+          <span class="sub" id="gohint" style="margin:0"></span>
+        </div>
+      </div>
+    </div>
+    <div class="side">
+      <h2>Where it is</h2>
+      <div class="steps" id="steps"></div>
+    </div>
+  </div>
+</section>
+
+<section class="view wrap" id="v-results">
+  <div class="rhead">
+    <div>
+      <p class="eyebrow" id="rstate">Project</p>
+      <h1 id="rtitle" style="margin-top:7px">—</h1>
+    </div>
+    <div class="sp"></div>
+    <div class="tally" id="tally"></div>
+  </div>
+  <div class="steps" id="steps2" style="margin-bottom:18px"></div>
+  <div class="toolbar">
+    <div class="segs" data-seg="filter" id="filters"></div>
+    <div class="gap"></div>
+    <a class="chip" id="dlall" href="#" hidden>Download all</a>
+    <div class="segs" data-seg="sort" id="sorts">
+      <button class="seg" type="button" aria-pressed="true">Score</button>
+      <button class="seg" type="button" aria-pressed="false">In order</button>
+    </div>
+  </div>
+  <div class="cards" id="cards"></div>
+</section>
+
+<section class="view wrap" id="v-editor" hidden>
+  <div class="rhead" style="margin-bottom:14px">
+    <div><p class="eyebrow">Editing</p><h1 id="etitle" style="margin-top:7px">—</h1></div>
+    <div class="sp"></div>
+    <button class="btn quiet sm" id="back" type="button">← All clips</button>
+  </div>
+  <div class="ed">
+    <div class="stage">
+      <div class="canvas" id="canvas">
+        <video id="evid" controls playsinline preload="metadata"></video>
+        <div class="seam"></div>
+        <div class="safe"><i class="t"></i><i class="b"></i></div>
+      </div>
+      <div class="tl" id="tl"></div>
+      <div class="strip" id="strip"></div>
+      <div class="stagemeta" id="emeta"></div>
+      <button class="icb" id="guides" type="button" aria-pressed="true">Hide guides</button>
+    </div>
+    <div class="panel">
+      <div class="tabs" id="tabs">
+        <button type="button" aria-selected="true">Transcript</button>
+        <button type="button" aria-selected="false">The cut</button>
+        <button type="button" aria-selected="false">Sound</button>
+      </div>
+      <div class="pane" id="p0">
+        <p class="sub" style="margin:0">The cut, word by word. Click a word to jump
+          the video there; the clip's own emphasis is marked.</p>
+        <div class="tx" id="tx"></div>
+        <dl class="kv" id="txkv"></dl>
+      </div>
+      <div class="pane" id="p1" hidden></div>
+      <div class="pane" id="p2" hidden></div>
+      <div class="exp">
+        <button class="btn sm" id="rebuild" type="button">Save &amp; rebuild</button>
+        <a class="btn quiet sm" id="dl1" href="#">Download</a>
+        <div class="gap"></div>
+        <span class="msg" id="emsg"></span>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<div class="toast" id="toast" hidden></div>
+<footer class="foot"><div class="wrap">
+  <span id="foot-yield"></span>
+  <span class="sp" style="flex:1"></span>
+  <span id="foot-agent"></span>
+</div></footer>
