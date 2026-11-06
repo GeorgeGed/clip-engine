@@ -1,0 +1,105 @@
+<header class="top"><div class="wrap">
+  <div class="mark"><i></i>Clip&nbsp;Factory</div>
+  <div class="sp"></div>
+  <div class="jobchip" id="jobchip"></div>
+  <button class="ghost" id="theme" type="button">Theme</button>
+</div></header>
+
+<section class="band"><div class="wrap">
+  <div class="hero">
+    <div>
+      <p class="eyebrow">Twitch VOD in, vertical clips out</p>
+      <h1 style="margin-top:10px">Most of a stream is not a clip. The useful part is knowing which.</h1>
+      <p class="lede" style="margin-top:14px">Paste a VOD. It transcribes once, scores every
+        candidate window, and then <b>refuses the ones it cannot cut</b> — DMCA-muted audio,
+        a cut rate that strobes, nothing left after tightening. What survives is built
+        through DaVinci Resolve and gated on the rendered file, not on the plan.</p>
+      <div class="rail" id="rail" style="margin-top:26px"></div>
+    </div>
+
+    <div class="drop">
+      <div class="pad">
+        <label for="vod">Source</label>
+        <input id="vod" type="text" value="https://www.twitch.tv/videos/2905408276">
+        <div class="resolved" id="resolved"></div>
+        <div class="row2">
+          <div>
+            <label for="chan">Channel</label>
+            <input id="chan" type="text" value="gofns">
+          </div>
+          <div>
+            <label for="rights">Rights basis</label>
+            <select id="rights">
+              <option value="explicit">explicit — written permission</option>
+              <option value="affiliate">affiliate</option>
+              <option value="client_owned">client owned</option>
+            </select>
+          </div>
+        </div>
+        <div class="go">
+          <button class="btn" id="run" type="button">Run the pipeline</button>
+          <span class="hint" id="runhint">Replays this VOD's real run.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<section class="band alt"><div class="wrap">
+  <p class="eyebrow">The screen</p>
+  <h2 style="margin-top:8px">Four clips out of fifty candidates</h2>
+  <p class="lede" style="margin-top:10px">The yield is the product. A tool that returned
+    three clips from fifty without saying what it discarded would be hiding the only
+    judgement that matters.</p>
+  <div class="funnel" id="funnel"></div>
+
+  <div class="filters" id="filters">
+    <button class="chip" data-f="all" aria-pressed="true" type="button">All 50</button>
+    <button class="chip" data-f="build" aria-pressed="false" type="button">Buildable</button>
+    <button class="chip" data-f="reject" aria-pressed="false" type="button">Refused</button>
+  </div>
+  <div class="tw"><table>
+    <thead><tr>
+      <th>#</th><th>Candidate</th><th style="text-align:right">Muted</th>
+      <th style="text-align:right">Cuts/min</th><th>Verdict</th><th>Reason</th>
+    </tr></thead>
+    <tbody id="rows"></tbody>
+  </table></div>
+</div></section>
+
+<section class="band"><div class="wrap">
+  <p class="eyebrow">Delivery</p>
+  <h2 style="margin-top:8px">Each clip is its spec, not its render</h2>
+  <p class="lede" style="margin-top:10px">Five fields are the ones review actually changes.
+    Everything else — captions, framing, sound, palette — is house style and lives in code,
+    identical on every clip for every channel.</p>
+  <div class="grid" id="clips"></div>
+</div></section>
+
+<section class="band alt"><div class="wrap">
+  <div class="two">
+    <div>
+      <p class="eyebrow">What the engine decides</p>
+      <dl class="spec" id="facts"></dl>
+      <p class="note" style="margin-top:18px"><b>One job at a time.</b> Resolve serves its
+        scripting API on its own GUI thread, and Remotion's asset directory is shared, so
+        two VODs cannot render at once. The queue is the constraint stated honestly rather
+        than a limit imposed by the interface.</p>
+    </div>
+    <div>
+      <p class="eyebrow">The rule that shapes the cut</p>
+      <blockquote class="quote" style="margin:14px 0 0">A clip is about one thing,
+        titleable in one line. When the speaker pivots to another subject, that pivot is a
+        boundary — not something to clip across.
+        <cite>If describing it needs the words “and then he talks about”, it is two clips.</cite>
+      </blockquote>
+    </div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <span>Prototype interface.</span>
+  <span>Every number on this page is from one real run: VOD 2905408276, 1h43m03s.</span>
+  <span class="sp" style="flex:1"></span>
+  <span>Riot/VCT stills used on the operator's own permission.</span>
+</div></footer>

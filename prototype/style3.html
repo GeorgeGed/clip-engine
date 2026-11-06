@@ -1,0 +1,80 @@
+<style>
+/* ---- the screen table -------------------------------------------------- */
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin:18px 0 12px}
+.chip{background:none;border:1px solid var(--line);color:var(--ink-2);font:inherit;
+      font-size:12.5px;padding:6px 13px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);
+                           border-color:var(--ink)}
+.tw{border:1px solid var(--line);max-height:430px;overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line);
+      vertical-align:top}
+th{position:sticky;top:0;background:var(--band);font-size:10.5px;font-weight:650;
+   letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);z-index:1}
+tbody tr:last-child td{border-bottom:0}
+td.n{font-variant-numeric:tabular-nums;color:var(--ink-3);width:40px}
+td.subj{min-width:0}
+td.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.why{color:var(--ink-2);font-size:12px}
+.v{font-size:11px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;
+   white-space:nowrap}
+.v.build{color:var(--good)}
+.v.reject{color:var(--ink-3)}
+tr.build td.subj{font-weight:550}
+/* the severity stripe: muted share, as a key not a number */
+.key{display:inline-block;width:3px;height:11px;background:var(--blue);
+     margin-right:7px;vertical-align:-1px}
+tr.reject .key{background:var(--line)}
+
+/* ---- clips ------------------------------------------------------------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(236px,1fr));
+      gap:20px;margin-top:20px}
+.card{border:1px solid var(--line);background:var(--paper);display:flex;
+      flex-direction:column;min-width:0}
+.card .shot{position:relative;background:var(--band);aspect-ratio:9/16;
+            overflow:hidden}
+.card .shot img{width:100%;height:100%;object-fit:cover;display:block}
+.card .dur{position:absolute;right:0;bottom:0;background:var(--blue);color:#fff;
+           font-size:11px;font-weight:650;padding:3px 7px;
+           font-variant-numeric:tabular-nums}
+.card .body{padding:13px;display:flex;flex-direction:column;gap:9px;flex:1}
+.card .hook{font-family:var(--ed);font-size:15px;line-height:1.28;font-weight:600}
+.meta{display:flex;gap:8px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-3);
+      font-variant-numeric:tabular-nums}
+.qc{font-size:11px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--good)}
+.qc::before{content:"";display:inline-block;width:6px;height:6px;
+            background:var(--good);margin-right:6px;vertical-align:1px}
+.fields{border-top:1px solid var(--line);margin-top:auto;padding-top:10px;
+        display:grid;gap:6px}
+.f{display:grid;grid-template-columns:54px 1fr;gap:8px;align-items:center;
+   font-size:12px}
+.f span{color:var(--ink-3);text-align:right}
+.f input{font:inherit;font-size:12px;padding:4px 7px;border:1px solid var(--line);
+         background:var(--paper);color:var(--ink);width:100%;min-width:0;
+         font-variant-numeric:tabular-nums}
+.f input:focus{outline:2px solid var(--blue);outline-offset:-2px}
+.cardbar{display:flex;gap:7px;align-items:center;padding-top:3px}
+.cardbar .msg{font-size:11px;color:var(--blue)}
+.mini{background:none;border:1px solid var(--line);color:var(--ink-2);font:inherit;
+      font-size:11.5px;padding:5px 10px;cursor:pointer}
+.mini:hover{color:var(--ink);border-color:var(--ink-3)}
+.mini.solid{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* ---- closing ----------------------------------------------------------- */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,4vw,48px)}
+@media(max-width:760px){.two{grid-template-columns:1fr}}
+.note{font-size:13px;color:var(--ink-2);max-width:60ch}
+.note b{color:var(--ink);font-weight:600}
+dl.spec{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;font-size:13px;
+        margin:14px 0 0}
+dl.spec dt{color:var(--ink-3)}
+dl.spec dd{margin:0;font-variant-numeric:tabular-nums}
+.quote{font-family:var(--ed);font-size:clamp(17px,2.4vw,21px);line-height:1.38;
+       border-left:3px solid var(--blue);padding-left:16px;max-width:54ch}
+.quote cite{display:block;font-family:var(--ui);font-size:12px;font-style:normal;
+            color:var(--ink-3);margin-top:9px}
+footer{border-top:1px solid var(--line)}
+footer .wrap{padding-block:22px;display:flex;gap:14px;flex-wrap:wrap;
+             font-size:12px;color:var(--ink-3)}
+</style>

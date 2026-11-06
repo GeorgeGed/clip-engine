@@ -1,0 +1,55 @@
+<title>Clip Factory</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+/* Layout: a single column of full-width bands; the work reads top to bottom
+   in the order the pipeline runs it. Tokens are the clip engine's own
+   (vendor/remotion-clip08/src/theme.tsx) so the site and the clips agree. */
+:root{
+  --blue:#2E5CFF;          /* Polymarket. Sampled off the mark: 96.1% of it */
+  --blue-lift:#5C80FF;     /* the same hue lifted; the house rule for dark */
+  --ink:#0B0B0C;
+  --ink-2:rgba(11,11,12,.62);
+  --ink-3:rgba(11,11,12,.40);
+  --paper:#FFFFFF;
+  --band:#F2F3F7;          /* a neutral biased toward the blue, not grey */
+  --line:rgba(11,11,12,.14);
+  --good:#117A4B;
+  --stop:#9A1B1B;
+  --ui:Inter,"Helvetica Neue",system-ui,sans-serif;
+  --ed:"Source Serif 4",Charter,Georgia,serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --blue:#5C80FF; --blue-lift:#5C80FF;
+  --ink:#F5F6F8; --ink-2:rgba(245,246,248,.62); --ink-3:rgba(245,246,248,.38);
+  --paper:#0B0B0C; --band:#131417; --line:rgba(245,246,248,.16);
+  --good:#4BD08B; --stop:#FF6B6B; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --blue:#5C80FF; --blue-lift:#5C80FF;
+  --ink:#F5F6F8; --ink-2:rgba(245,246,248,.62); --ink-3:rgba(245,246,248,.38);
+  --paper:#0B0B0C; --band:#131417; --line:rgba(245,246,248,.16);
+  --good:#4BD08B; --stop:#FF6B6B; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--ui);
+     font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+/* RADIUS = 0 everywhere. The clips' own geometry. */
+button,input,select,.card,.chip{border-radius:0}
+.wrap{max-width:1140px;margin:0 auto;
+      padding-left:max(16px,env(safe-area-inset-left,0px));
+      padding-right:max(16px,env(safe-area-inset-right,0px))}
+.band{background:var(--paper)}
+.band.alt{background:var(--band)}
+.band>.wrap{padding-block:clamp(28px,5vw,56px)}
+h1,h2,h3{margin:0;text-wrap:balance;letter-spacing:-.022em}
+h1{font-size:clamp(26px,4.4vw,38px);font-weight:800}
+h2{font-size:clamp(20px,2.6vw,25px);font-weight:700}
+h3{font-size:16px;font-weight:650}
+p{margin:0}
+.eyebrow{font-size:11px;font-weight:650;letter-spacing:.14em;text-transform:uppercase;
+         color:var(--ink-3)}
+.lede{color:var(--ink-2);max-width:62ch}
+.num{font-variant-numeric:tabular-nums}
+</style>
