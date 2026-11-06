@@ -217,15 +217,33 @@ def cmd_specs(job, args):
                 f"(--force to regenerate from editorial.json)")
             written.append(spec)
             continue
+        # A WINDOW FROM THE SCREEN BEATS THE EDITORIAL PASS'S IN-POINT.
+        # `screen_clips.best_window` only returns one when the whole region
+        # FAILED the gate, and it is the span that makes the clip buildable
+        # at all — so it is not a suggestion to weigh against a default of
+        # 0.0, it is the reason this clip is in the list.
+        win = r.get("window")
+        in_pt = float(e.get("in_point", 0.0))
+        out_pt = None
+        note = e.get("why") or m["subject"]
+        if win:
+            in_pt, out_pt = float(win["in"]), float(win["out"])
+            note = (f"{note}  Cut to {in_pt:.0f}-{out_pt:.0f}s by the screen: "
+                    f"the whole region is {r['src_s']:.0f}s and fails the gate, "
+                    f"this window is {win['muted']:.0%} muted at "
+                    f"{win['cuts_min']:.0f} cuts/min. The window makes it "
+                    f"BUILDABLE; whether it is one narrative and explains "
+                    f"itself is still an editorial call.")
         save(spec, Clip(job=job, index=n, channel=chan["name"],
-                        in_point=float(e.get("in_point", 0.0)),
+                        in_point=in_pt, out_point=out_pt,
                         region=(m["in_point"], m["out_point"]),
                         hook=e.get("hook"), cards=[],
                         cam=tuple(cam) if cam else None,
-                        notes=e.get("why") or m["subject"]), _channel_obj(job))
+                        notes=note), _channel_obj(job))
         written.append(spec)
-        log(f"   {n:02d} -> {spec.name}  in_point {e.get('in_point', 0.0)}"
-            f"  hook {e.get('hook')!r}")
+        log(f"   {n:02d} -> {spec.name}  in_point {in_pt}"
+            + (f" out_point {out_pt}  (screen window)" if win else "")
+            + f"  hook {e.get('hook')!r}")
     log(f"[specs] wrote {len(written)}")
     return written
 

@@ -1,0 +1,11 @@
+{
+ "worker": "Mac-mini.local",
+ "at": 1793981706.1992261,
+ "resolve": true,
+ "notes": [
+  "Ready."
+ ],
+ "host": "Mac-mini.local",
+ "platform": "macOS-27.0-arm64-arm-64bit",
+ "python": "3.12.13"
+}

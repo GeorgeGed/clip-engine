@@ -5233,3 +5233,112 @@ One look at the transcript answered it.
 
 21 tests in `tests/test_nucleus.py`, including the W sweep and the
 `as well as` bigram.
+
+## THE REGION IS NOT THE CLIP — 21 of the 40 refusals were wrong
+
+George: *"are we sure those clips were refused? because they were good."* He
+named one: clip 01, *"speaker reveals he is coaching a team in the open
+qualifier"*, scored 63 and refused at 43% muted.
+
+**He is right, and it is the same class of mistake this file keeps
+recording: a measurement taken on the wrong object.** `screen_one` measured
+the whole candidate REGION. A clip is a cut — an in-point and an out-point
+inside that region — and this project's history is nothing but that. Clip
+8's in-point moved to 8.85s and *"also dropped 4.2s of mute that sat in
+those 9s"*; clip 12's to 23.30; clip 16's to 7.58. **Moving the in-point is
+HOW mutes get dropped, and the screen refused the clip before anyone was
+allowed to do it.**
+
+Scanned every refusal for the longest contiguous window that passes the
+same gate on its own:
+
+| | |
+|---|---|
+| refused clips containing a buildable window | **21 of 40** |
+| buildable overall | **10 -> 31 of 50** |
+| clip 01, whole region | 43% muted, 19.2 cuts/min — refused |
+| clip 01, seconds **72-101** | **18% muted, 14.7 cuts/min, 24.6s after tightening** |
+
+**18% is cleaner than clip 08 at 21%, which shipped and was accepted, and
+identical to clip 12.** There is no reading on which that clip was
+unbuildable.
+
+**Be straight about the quality spread, because "rescued" is not "good".**
+Of the 21, four are comfortably clean — 33 at 14%, 25 at 17%, 01 and 47 at
+18% — and seventeen sit at 23-25%, right on the limit. They clear the same
+bar the ten survivors cleared, so they are no worse than what already
+ships; they are not better either. And the window only decides whether a
+clip is CUTTABLE. Whether it is one narrative and explains itself is still
+the editorial pass's call, which is why `specs` writes the reasoning into
+the spec notes rather than presenting the window as an editorial decision.
+
+`screen_clips.best_window()` runs only when the whole region FAILS — a
+region that already passes keeps all of itself, since searching a passing
+region could only return something shorter. The window flows into
+`Clip.in_point`/`out_point` through `specs`, with a note saying the screen
+chose it and why.
+
+## THE RENDER AGENT: the one piece that has to be on this Mac
+
+George: *"I want to build this to a website. So what should we use, like
+Lovable or something?"* — and then: *"build the worker."*
+
+The architecture is forced, not chosen. Everything except rendering can be
+hosted anywhere; rendering cannot, because Resolve serves its scripting API
+on its own GUI thread on one machine and Remotion's `public/` is shared.
+This file already says that is not a deployment choice to revisit by renting
+a bigger box. So:
+
+    browser -> web app + database + storage -> queue -> AGENT on a Mac -> clips back
+
+`web/server.py` already queued jobs and ran stages, but only from its own
+HTTP POST, on this machine, while someone had it open. `worker/agent.py` is
+the same loop with the job source pulled out behind a seam.
+
+**Two backends, and the local one is not a toy.** `LocalBackend` reads
+`web/factory.db`, the SQLite the site already uses, so the agent runs and is
+watchable today with no account anywhere. `HttpBackend` speaks six calls to
+a control plane over HTTPS with a bearer token. `worker/schema.sql` is the
+Postgres side, so the website can be built against a schema rather than a
+guess.
+
+**Uploads go straight to storage, never through the control plane.** A clip
+is ~20 MB and a serverless function is the wrong place to put 20 MB; both
+Supabase Storage and S3/R2 hand out a signed PUT for exactly this.
+
+### What it refuses to get wrong
+
+* **One job at a time.** The local claim is one conditional `UPDATE`; the
+  Postgres one is `for update skip locked`. Verified by racing two agents at
+  one queued job: one claimed it, the other reported "nothing queued" and
+  exited.
+* **Resolve is checked before the hour, not during it.** `build` is last and
+  the only stage that needs it, so an agent claiming with Resolve closed
+  would transcribe and screen for the best part of an hour before failing.
+  Capabilities go up with the claim and the check runs again immediately
+  before the build stage.
+* **It resumes.** Finished stages stay finished and the next claim asks only
+  for what is left; `batch.py build` already skips a clip that is built and
+  passed.
+* **A LEASE, not a thread flag.** A worker that dies mid-job must not strand
+  it, and a flag in memory cannot survive a crash, a power cut, or a Mac
+  going to sleep. All three happen, so `schema.sql` carries `lease_until`
+  and the claim reclaims anything past its lease.
+
+### Two bugs the end-to-end run found, which reading could not
+
+* **The delivery index is the SECOND field.** `batch.py` writes
+  `<channel>-<index>-<slug>.mp4` and the slug has hyphens of its own, so
+  `stem.split("-")[-1]` parsed the last word of the slug and every clip was
+  silently skipped — "0 clip(s) published" on a job with a clip in
+  `deliver/`.
+* **THE SIDECAR WAS BEING LEFT BEHIND.** `batch.py` writes `<name>.json`
+  beside every delivery, and its own comment says why: *"fns-2905408276-06.mp4
+  tells whoever posts it nothing, and they also need the title, the source
+  timestamps and the rights basis in one place — that is the difference
+  between a render and something you can actually publish."* Uploading the
+  mp4 alone threw that away at the last step.
+
+Also fixed: `--once` polled forever when it found nothing, which is what the
+loser of a two-agent race looks like and what makes it useless in cron. It
+now means what it says — at most one job, then exit.

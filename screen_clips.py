@@ -51,6 +51,67 @@ from engine.tighten import removals, keeps                       # noqa: E402
 MAX_MUTED = 0.25
 MAX_CUTS_MIN = 15.0
 MIN_SECONDS = 20.0
+# THE REGION IS NOT THE CLIP, AND MEASURING IT AS IF IT WERE THREW AWAY 21
+# BUILDABLE CLIPS.
+#
+# George: *"are we sure those clips were refused? because they were good."*
+# He named clip 01 — "speaker reveals he is coaching a team in the open
+# qualifier" — which scored 63 and was refused at 43% muted.
+#
+# He is right, and the defect is that this file measured the whole candidate
+# REGION. A clip is a cut: an in-point and an out-point inside that region.
+# This project's own history is nothing but that — clip 8's in-point moved to
+# 8.85s and "also dropped 4.2s of mute that sat in those 9s", clip 12's to
+# 23.30, clip 16's to 7.58. Moving the in-point is HOW mutes get dropped, and
+# the screen refused the clip before anyone was allowed to do it.
+#
+# Measured across the 40 refusals: **21 contain a contiguous window that
+# passes this same gate on its own.** Clip 01's seconds 72-101 are **18%
+# muted at 14.7 cuts/min** — cleaner than clip 08 (21%), which shipped and
+# was accepted, and identical to clip 12 (18%).
+#
+# Be straight about the quality spread: of the 21, four are comfortably clean
+# (01 at 18%, 25 at 17%, 33 at 14%, 47 at 18%) and seventeen sit at 23-25%,
+# right on the limit. The gate is the same one the ten survivors passed, so
+# they are no worse than what already ships — but "buildable" is not "good".
+# Whether a window is ONE NARRATIVE and explains itself is still the
+# editorial pass's call, and that has not changed.
+WINDOW_STEP = 0.5          # the scan resolution, in seconds
+MIN_WINDOW = 25.0          # shorter than this is not worth a search
+
+
+def best_window(absent, quiet, dur):
+    """The longest contiguous window that would pass the gate on its own.
+
+    Returns `(a, b, muted, cut_s, cuts_min)` or None. Only ever called when
+    the whole region FAILS, so a region that already passes keeps all of
+    itself — searching a passing region could only return something shorter.
+    """
+    def muted_in(a, b):
+        t = sum(max(0.0, min(b, y) - max(a, x)) for x, y in absent)
+        return t / (b - a) if b > a else 1.0
+
+    best = None
+    a = 0.0
+    while a + MIN_WINDOW <= dur:
+        w = MIN_WINDOW
+        while a + w <= dur and muted_in(a, a + w) <= MAX_MUTED:
+            w += WINDOW_STEP
+        w -= WINDOW_STEP
+        if w >= MIN_WINDOW:
+            b = a + w
+            sub = [(max(x, a) - a, min(y, b) - a)
+                   for x, y in sorted(absent + quiet) if y > a and x < b]
+            kp = keeps(removals(sub, b - a, min_remove=0.35, beat=0.12), b - a)
+            out = sum(k.length for k in kp)
+            cpm = (len(kp) - 1) / (out / 60) if out else 1e9
+            if out >= MIN_SECONDS and cpm <= MAX_CUTS_MIN:
+                cand = (round(a, 1), round(b, 1), round(muted_in(a, b), 3),
+                        round(out, 1), round(cpm, 1))
+                if best is None or cand[3] > best[3]:
+                    best = cand
+        a += WINDOW_STEP
+    return best
 
 
 def duration(p):
@@ -79,11 +140,23 @@ def screen_one(job, n, meta, *, want_chat=False, want_cam=False):
         why.append(f"{cpm:.0f} cuts/min")
     if out < MIN_SECONDS:
         why.append(f"only {out:.0f}s left")
+    window = None
+    if why:
+        # The region fails. Does a WINDOW inside it pass? See the note above.
+        w = best_window(absent, quiet, dur)
+        if w:
+            a, b, wm, wout, wcpm = w
+            window = {"in": a, "out": b, "muted": wm,
+                      "cut_s": wout, "cuts_min": wcpm}
+            why = [f"region {' / '.join(why)} — cut to {a:.0f}-{b:.0f}s "
+                   f"({wm:.0%} muted, {wcpm:.0f} cuts/min)"]
+            muted, out, cpm = wm, wout, wcpm
     row = {"n": n, "src_s": round(dur, 1), "muted": round(muted, 3),
            "cut_s": round(out, 1), "shots": len(kp), "cuts_min": round(cpm, 1),
            "virality": round(meta.get("virality", 0), 3),
            "strength": meta.get("strength"), "subject": meta.get("subject", ""),
-           "verdict": "build" if not why else "reject", "why": why}
+           "verdict": "build" if (not why or window) else "reject",
+           "window": window, "why": why}
     if want_cam:
         f = facecam.detect(src)
         row["cam"] = f.rect if f else None

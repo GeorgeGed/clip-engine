@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A LaunchAgent, not a LaunchDaemon: the build stage drives Resolve, which
+     is a GUI app, so the agent has to run inside a logged-in user session.
+     A daemon would start before login and never find Resolve. -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.clipfactory.agent</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>__ROOT__/.venv/bin/python</string>
+    <string>__ROOT__/worker/agent.py</string>
+  </array>
+  <key>WorkingDirectory</key><string>__ROOT__</string>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>__ROOT__/jobs/agent.log</string>
+  <key>StandardErrorPath</key><string>__ROOT__/jobs/agent.log</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <!-- Leave these out to use the local SQLite queue. -->
+    <!-- <key>CLIP_WORKER_URL</key><string>https://your-app/api/worker</string> -->
+    <!-- <key>CLIP_WORKER_TOKEN</key><string></string> -->
+  </dict>
+</dict>
+</plist>
