@@ -42,6 +42,44 @@ const took = (st) => (st.started && st.ended)
 const stateClass = (s) => s.startsWith('failed') || s.startsWith('error')
   ? 'failed' : s;
 
+// A PASTED VOD KNOWS ITS OWN CHANNEL. Asking for it again is asking the
+// operator to retype something the URL already contains, and getting it
+// wrong renames the job directory.
+let lookedUp = '';
+async function lookupVod() {
+  const el0 = $('#job-form [name=url]');
+  const url = el0.value.trim();
+  const out = $('#vod-about');
+  if (!/\/videos?\/\d+/.test(url) || url === lookedUp) return;
+  lookedUp = url;
+  out.className = 'note'; out.textContent = 'looking up…';
+  try {
+    const d = await api(`/api/lookup?url=${encodeURIComponent(url)}`);
+    const ch = $('#job-form [name=channel]');
+    if (d.channel && !ch.value.trim()) ch.value = d.channel;
+    out.className = 'note ok-note';
+    out.textContent = `${d.channel} · ${d.duration} · ${d.title}`;
+  } catch (e) {
+    out.className = 'note';
+    out.textContent = `could not look that up (${e.message}) — fill the channel in yourself`;
+  }
+}
+$('#job-form [name=url]').addEventListener('change', lookupVod);
+$('#job-form [name=url]').addEventListener('paste', () => setTimeout(lookupVod, 50));
+
+// Resolve is needed by exactly one stage, and it is the last one. Saying so
+// on the form is cheaper than finding out an hour in.
+async function showDoctor() {
+  const el0 = $('#doctor');
+  try {
+    const d = await api('/api/doctor');
+    el0.className = `doctor ${d.ok ? 'ok' : 'bad'}`;
+    el0.textContent = d.ok
+      ? `Resolve ready${d.studio ? ' (Studio)' : ''} — the build stage can run`
+      : `Resolve not reachable — everything up to Specs will still run. ${(d.notes || []).join(' ')}`;
+  } catch { el0.textContent = ''; }
+}
+
 // ------------------------------------------------------------- new job ---
 $('#job-form').addEventListener('submit', async (ev) => {
   ev.preventDefault();
@@ -135,7 +173,15 @@ function renderDetail(j) {
     const t = took(s);
     if (t) bits.push(t);
     if (s.code) bits.push(`exit ${s.code}`);
+    if (s.state === 'running' && j.progress && j.progress.total) {
+      bits.push(`${j.progress.done}/${j.progress.total}`);
+    }
     li.append(el('div', 's', bits.join(' · ')));
+    if (s.state === 'running' && j.progress && j.progress.line) {
+      // what it is actually doing. A spinner cannot tell "transcribing"
+      // from "wedged", and Resolve does wedge.
+      li.append(el('div', 'now', j.progress.line));
+    }
     li.addEventListener('click', () => {
       logStage = s.key; pinnedLog = true;
       $('#d-stage-pick').value = s.key;
@@ -201,6 +247,9 @@ function renderDetail(j) {
     : j.clips.map((c) => ({ index: c.index, unspecced: true }));
   $('#d-clipcount').textContent = specs.length
     ? `${j.clips.length} built of ${specs.length} specced` : '';
+  const dl = $('#d-dlall');
+  dl.hidden = !j.clips.length;
+  dl.href = `/api/jobs/${j.id}/clips.zip`;
 
   // Rebuild only when something actually changed AND nothing here has focus.
   // The grid holds text inputs now, so a 1.5s poll that replaced it would
@@ -237,7 +286,10 @@ function clipCard(job, spec, built) {
   const m = el('div', 'meta');
   m.append(el('b', '', `#${spec.index}`));
   if (built) {
-    m.append(document.createTextNode(` · ${built.size_mb} MB · ${ago(built.modified)}`));
+    m.append(document.createTextNode(` · ${built.size_mb} MB · ${ago(built.modified)} · `));
+    const a = el('a', 'dl', 'download');
+    a.href = `/api/jobs/${job.id}/clip/${String(spec.index).padStart(2, '0')}?download=1`;
+    m.append(a);
     const qc = built.qc || {};
     if (qc.verdict || qc.status) {
       const ok = /pass/i.test(qc.verdict || qc.status);
@@ -359,4 +411,6 @@ async function refresh() {
 }
 
 refresh();
+showDoctor();
 setInterval(refresh, POLL_MS);
+setInterval(showDoctor, 15000);

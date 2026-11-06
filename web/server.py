@@ -44,6 +44,7 @@ defaulting, because a default here is how an unlicensed clip ships.
 
 from __future__ import annotations
 
+import io
 import json
 import mimetypes
 import os
@@ -52,9 +53,11 @@ import re
 import shutil
 import sqlite3
 import subprocess
+import sys
 import threading
 import time
 import urllib.parse
+import zipfile
 from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -117,6 +120,42 @@ REPORT = Stage("report", "Report",
 
 ALL_STAGES = STAGES + (BUILD, REPORT)
 STAGE_BY_KEY = {s.key: s for s in ALL_STAGES}
+
+
+# ----------------------------------------------------------- preflight ----
+# RESOLVE IS CHECKED BEFORE THE BUILD, NOT DURING IT.
+#
+# `build` is the only stage that needs Resolve, and it is last — so a VOD
+# dropped on a machine where Resolve is closed would ingest, transcribe,
+# detect, screen and spec for the best part of an hour and then fail inside
+# `make_clip` with whatever the scripting API raises. The chain is one action
+# now, which makes that the normal way to lose an hour rather than an edge
+# case.
+#
+# `doctor()` IMPORTS DaVinciResolveScript and connects, and this file already
+# records that Resolve serves its API on the GUI thread — so it is cached.
+# Polling it at the UI's 1.5s would be knocking on that thread 40 times a
+# minute for a value that changes when someone opens an app.
+_DOCTOR: dict = {"at": 0.0, "val": None}
+DOCTOR_TTL = 10.0
+
+
+def resolve_doctor(force: bool = False) -> dict:
+    now = time.time()
+    if not force and _DOCTOR["val"] is not None and now - _DOCTOR["at"] < DOCTOR_TTL:
+        return _DOCTOR["val"]
+    try:
+        sys.path.insert(0, str(ROOT))
+        from engine.resolve_driver import doctor           # noqa: PLC0415
+        d = doctor()
+        val = {"ok": d.ok(), "running": d.resolve_running,
+               "studio": d.studio, "importable": d.module_importable,
+               "notes": list(d.notes)[:4]}
+    except Exception as exc:                               # noqa: BLE001
+        val = {"ok": False, "running": False, "studio": None,
+               "importable": False, "notes": [f"{type(exc).__name__}: {exc}"]}
+    _DOCTOR.update(at=now, val=val)
+    return val
 
 
 # ------------------------------------------------------------------ db ----
@@ -216,6 +255,18 @@ def worker() -> None:
                 if RUNNING.get("cancel") == job_id:
                     failed = f"{key} (cancelled)"
                     break
+                if key == "build":
+                    doc = resolve_doctor(force=True)
+                    if not doc["ok"]:
+                        why = ("DaVinci Resolve is not reachable — open it, "
+                               "and set Preferences > System > General > "
+                               "External scripting using to Local. "
+                               + "; ".join(doc["notes"]))
+                        log_path(row["name"], key).write_text(why + "\n")
+                        set_stage(job_id, key, state="failed",
+                                  ended=time.time(), code=1)
+                        failed = f"{key} (Resolve not reachable)"
+                        break
                 code = run_stage(job_id, row["name"], row["url"],
                                  row["rights"], STAGE_BY_KEY[key], extra)
                 if code != 0:
@@ -411,6 +462,43 @@ def write_spec(name: str, index: int, patch: dict,
                                          for k, (a, b) in changed.items()}}, None
 
 
+# ------------------------------------------------------------ progress ----
+# WHAT IS HAPPENING RIGHT NOW, from the stage's own log.
+#
+# A 103-minute VOD spends the best part of an hour in `analyse` and then a
+# serial pass through Resolve, and until now the rail said "running" for all
+# of it. A spinner that cannot distinguish "transcribing" from "wedged" is
+# the thing AGENTS.md warns about in the other direction: Resolve CAN wedge,
+# at 90-105% CPU, with no output at all. The last line it printed is the
+# cheapest honest answer, and for `build` the clip count is countable.
+BUILD_MARK = re.compile(r"^=== (\S+) ===", re.M)
+BUILD_DONE = re.compile(r"^\[(\S+)\] -> ", re.M)
+
+
+def progress(name: str, stage: str) -> dict:
+    lp = log_path(name, stage)
+    if not lp.exists():
+        return {}
+    try:
+        tail = lp.read_text(errors="replace")[-8000:]
+    except OSError:
+        return {}
+    lines = [ln.rstrip() for ln in tail.splitlines() if ln.strip()]
+    out = {"line": lines[-1][:160] if lines else ""}
+    if stage == "build":
+        started = BUILD_MARK.findall(tail)
+        out["done"] = len(BUILD_DONE.findall(tail))
+        out["total"] = len(read_specs(name))
+        if started:
+            out["clip"] = started[-1]
+    return out
+
+
+# ------------------------------------------------------------- delivery ---
+def clip_path(name: str, index: int) -> Path:
+    return ROOT / "renders" / f"{name}-{index:02d}.mp4"
+
+
 def job_json(row: sqlite3.Row) -> dict:
     with db() as c:
         st = {r["key"]: dict(r) for r in c.execute(
@@ -431,6 +519,9 @@ def job_json(row: sqlite3.Row) -> dict:
         "clips": read_clips(row["name"]),
         "active": RUNNING.get("job_id") == row["id"],
         "active_stage": RUNNING.get("stage") if RUNNING.get("job_id") == row["id"] else None,
+        "progress": (progress(row["name"], RUNNING["stage"])
+                     if RUNNING.get("job_id") == row["id"] and RUNNING.get("stage")
+                     else {}),
     }
 
 
@@ -501,7 +592,7 @@ class Handler(BaseHTTPRequestHandler):
         except json.JSONDecodeError:
             return {}
 
-    def _file(self, path: Path) -> None:
+    def _file(self, path: Path, download: str | None = None) -> None:
         if not path.is_file():
             return self._json({"error": "not found"}, 404)
         ctype = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
@@ -527,7 +618,10 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(chunk)
             return
-        self._send(200, path.read_bytes(), ctype, {"Accept-Ranges": "bytes"})
+        head = {"Accept-Ranges": "bytes"}
+        if download:
+            head["Content-Disposition"] = f'attachment; filename="{download}"'
+        self._send(200, path.read_bytes(), ctype, head)
 
     # -- routes
     def do_GET(self):                                   # noqa: N802
@@ -539,6 +633,31 @@ class Handler(BaseHTTPRequestHandler):
             return self._file(WEB / "static" / "index.html")
         if p in ("/app.js", "/app.css"):
             return self._file(WEB / "static" / p.lstrip("/"))
+
+        if p == "/api/doctor":
+            return self._json(resolve_doctor())
+
+        if p == "/api/lookup":
+            # A PASTED VOD KNOWS ITS OWN CHANNEL, so do not ask for it.
+            # Helix `Get Videos` returns user_login, title and duration; the
+            # credentials are the ones `engine.detect_crowd` already reads.
+            src = (q.get("url") or [""])[0]
+            m = re.search(r"/videos?/(\d+)", src)
+            if not m:
+                return self._json({"error": "not a Twitch VOD URL"}, 400)
+            try:
+                sys.path.insert(0, str(ROOT))
+                from engine.detect_crowd import Helix      # noqa: PLC0415
+                d = (Helix().get("videos", id=m.group(1))
+                     .get("data") or [{}])[0]
+            except Exception as exc:                       # noqa: BLE001
+                return self._json({"error": f"{type(exc).__name__}: {exc}"}, 502)
+            if not d:
+                return self._json({"error": "no such VOD"}, 404)
+            return self._json({"channel": d.get("user_login", ""),
+                               "title": d.get("title", ""),
+                               "duration": d.get("duration", ""),
+                               "created": d.get("created_at", "")})
 
         if p == "/api/jobs":
             with db() as c:
@@ -573,8 +692,32 @@ class Handler(BaseHTTPRequestHandler):
                                 (int(m.group(1)),)).fetchone()
             if not row:
                 return self._json({"error": "no such job"}, 404)
-            return self._file(ROOT / "renders" /
-                              f"{row['name']}-{int(m.group(2)):02d}.mp4")
+            fp = clip_path(row["name"], int(m.group(2)))
+            if q.get("download"):
+                return self._file(fp, download=f"{fp.stem}.mp4")
+            return self._file(fp)
+
+        m = re.fullmatch(r"/api/jobs/(\d+)/clips\.zip", p)
+        if m:
+            with db() as c:
+                row = c.execute("SELECT * FROM job WHERE id=?",
+                                (int(m.group(1)),)).fetchone()
+            if not row:
+                return self._json({"error": "no such job"}, 404)
+            files = [clip_path(row["name"], c["index"])
+                     for c in read_clips(row["name"])]
+            files = [f for f in files if f.exists()]
+            if not files:
+                return self._json({"error": "no clips built yet"}, 404)
+            buf = io.BytesIO()
+            with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as z:
+                # STORED, not DEFLATED: these are already H.264, so deflate
+                # buys nothing and costs the whole file through a CPU.
+                for f in files:
+                    z.write(f, f.name)
+            return self._send(200, buf.getvalue(), "application/zip",
+                              extra={"Content-Disposition":
+                                     f'attachment; filename="{row["name"]}-clips.zip"'})
 
         return self._json({"error": "not found"}, 404)
 
@@ -614,7 +757,7 @@ class Handler(BaseHTTPRequestHandler):
                     409)
             for s in ALL_STAGES:
                 set_stage(job_id, s.key)
-            WORK.put((job_id, [s.key for s in STAGES], ()))
+            # THE WHOLE CHAIN. The promise is 'drop a VOD, get\n            # clips'; stopping at `specs` delivered specs.\n            WORK.put((job_id, [s.key for s in ALL_STAGES], ()))
             return self._json({"id": job_id, "name": name}, 201)
 
         m = re.fullmatch(r"/api/jobs/(\d+)/run", p)

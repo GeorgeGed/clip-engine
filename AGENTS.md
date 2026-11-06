@@ -5094,3 +5094,58 @@ standing in the way was the server's `url.startswith("http")` check. The
 form now takes a Twitch URL *or* a path, and a local file's job name comes
 from its own stem, less the channel prefix so it does not read
 `fns-fnsstreamnov5`.
+
+## DROP A VOD, GET CLIPS — the site stopped three stages short of its own promise
+
+George: *"back to building this out to be a whole website where we can drop a
+twitch vod and this will generate clips for us."*
+
+**The Start button queued `STAGES`, which is ingest -> analyse -> rank ->
+screen -> prep -> specs. `build` and `report` were in `ALL_STAGES` and were
+never reached.** So dropping a VOD produced *specs*, and the thing the page
+is named after had to be started by hand. It now queues the whole chain.
+
+### Resolve is checked BEFORE the hour, not during it
+
+`build` is the only stage that needs Resolve and it is last. With the chain
+as one action, a VOD dropped while Resolve is closed would ingest,
+transcribe, detect, screen and spec for the best part of an hour and then
+fail inside `make_clip` with whatever the scripting API raises. The worker
+now runs `resolve_driver.doctor()` immediately before the build stage and
+fails it with a readable note; the form shows the same thing live, so the
+answer is on screen before Start is pressed.
+
+**It is cached for 10s, and that is not an optimisation.** `doctor()` imports
+`DaVinciResolveScript` and connects, and this file already records that
+Resolve serves its API on the GUI thread and can wedge at 90-105% CPU.
+Polling it at the UI's 1.5s would be knocking on that thread 40 times a
+minute for a value that changes when somebody opens an app.
+
+### A pasted VOD already knows its own channel
+
+Helix `Get Videos` returns `user_login`, the title and the duration, and
+`engine/detect_crowd.Helix` has carried the credentials all along. Paste
+`twitch.tv/videos/2905408276` and the form fills in `gofns`, `1h43m3s` and
+the stream title. Asking for the channel separately was asking the operator
+to retype something the URL contains — and getting it wrong renames the job
+directory, which is what every path in the pipeline is keyed on.
+
+### "Running" for an hour is not progress, and Resolve can wedge
+
+The rail said `running` through a 103-minute transcription and a serial pass
+through Resolve, which is exactly the state this file warns is
+indistinguishable from a wedge — *"two probes hung with no output at all, and
+`ps` showed Resolve at 90-105% CPU"*. `progress()` reads the tail of the
+running stage's own log: the last line it printed, and for `build` the clip
+it is on and how many of the specs are done. Derived from the log the stage
+already writes, so it cannot drift from what is happening.
+
+### Getting the clips out
+
+Per clip, `?download=1` sets a `Content-Disposition`; per job,
+`/api/jobs/:id/clips.zip`. **STORED, not DEFLATED** — these are already
+H.264, so deflate buys nothing and costs the whole 83 MB through a CPU.
+
+Verified against the real job: doctor reports Studio ready, the lookup
+returns `gofns`, a bad URL is refused, and the zip comes back 83,424,916
+bytes holding all four delivered clips.

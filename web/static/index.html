@@ -9,7 +9,7 @@
 <body>
 <header>
   <h1>Clip&nbsp;Factory</h1>
-  <p class="sub">Paste a Twitch VOD. It screens, picks and builds — through Resolve, on this machine.</p>
+  <p class="sub">Drop in a Twitch VOD. It screens, picks, builds and delivers — through Resolve, on this machine.</p>
 </header>
 
 <main>
@@ -20,6 +20,7 @@
         <input name="url" required
                placeholder="https://www.twitch.tv/videos/2905408276">
       </label>
+      <p id="vod-about" class="note"></p>
       <div class="row">
         <label>Channel
           <input name="channel" required placeholder="fns" pattern="[A-Za-z0-9_-]+">
@@ -38,6 +39,7 @@
       </label>
       <p class="note">Every source carries a rights basis. The build refuses to
          start without one, so this is asked rather than defaulted.</p>
+      <p id="doctor" class="doctor"></p>
       <button type="submit">Start</button>
       <span id="form-msg" class="msg"></span>
     </form>
@@ -78,7 +80,8 @@
       </div>
     </div>
 
-    <h3>Clips <span class="hint" id="d-clipcount"></span></h3>
+    <h3>Clips <span class="hint" id="d-clipcount"></span>
+        <a id="d-dlall" class="dl" href="#" hidden>download all</a></h3>
     <p class="note">Each clip is its spec, not its render. These five fields
        are the ones every round of review has actually changed; the rest is
        house style and lives in code. Saving edits the spec, which
