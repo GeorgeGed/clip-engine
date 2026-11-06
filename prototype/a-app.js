@@ -141,7 +141,10 @@ function card(c) {
     }
     b.append(el('div', 'at num', 'at ' + mmss(c.at)),
              el('div', 'st', st === 'cuttable'
-               ? 'Cuttable — not reframed yet' : 'Not cut'));
+               ? (c.window
+                   ? `Cut to ${Math.round(c.window.in)}–${Math.round(c.window.out)}s`
+                   : 'Cuttable — not reframed yet')
+               : 'Not cut'));
     top.append(b, el('div', 'dur num', Math.round(c.secs) + 's'));
   }
   const sc = el('div', 'score');
@@ -159,6 +162,7 @@ function card(c) {
   tags.append(el('span', 'tag ' + meta.tag, meta.label));
   if (c.genre) tags.append(el('span', 'tag', c.genre));
   if (c.muted != null) tags.append(el('span', 'tag', Math.round(c.muted * 100) + '% muted'));
+  if (c.window) tags.append(el('span', 'tag', 'windowed'));
   body.append(tags);
   d.append(top, body);
 
