@@ -123,7 +123,56 @@ DB_FRAC = 0.55            # of the clip's own peak-over-baseline range
 # measurement — and it is a CAP, so a clip with only one qualifying moment
 # still gets one. Worth revisiting for a clip much longer than this one,
 # where one boom every ~22s would allow a third.
-MAX_PUNCHES = 2           # the cap; see the note above
+MAX_PUNCHES = 2           # the ceiling; see the note above and `boom_budget`
+
+# ONE BOOM PER ~22 SECONDS, because the count is the only lever that has ever
+# survived review.
+#
+# George has now rejected a boom on two clips, and both times the word was
+# *"pointless"* — about the boom EXISTING, not about where it sat:
+#
+#   clip 12, 45.2s, 3 booms -> "third boom is pointless"          -> 2
+#   clip 16, 30.8s, 2 booms -> "first boom is basically pointless" -> 1
+#
+# AND NO ACOUSTIC METRIC SEPARATES WHAT HE KEEPS FROM WHAT HE DROPS. Measured
+# against his six verdicts (clip 16 4.84 no / 21.92 yes, clip 12 2.87 yes /
+# 12.87 yes / 27.25 no, clip 6 9.30 yes, which he named himself):
+#
+#   level over baseline  clip 16's REJECTED moment is the LOUDEST candidate
+#                        in the clip, +3.96 against the accepted +3.83
+#   rise over 1.2s       worse — clip 16's two rejected candidates have the
+#                        two HIGHEST rises in the clip, +5.82 and +6.10
+#   sustain              swept 50 parameterisations (window 0.15-0.40s, hop
+#                        0.02-0.10s, fixed thresholds 1.5-3.0 dB and adaptive
+#                        ones at 0.6-1.0x this clip's own floor, both
+#                        "containing run" and "walk out from the peak").
+#                        ZERO separate all six: clip 12's accepted 2.87 sits
+#                        at the floor under nearly every setting
+#   position in clip     accepted span 6-76%, rejected 15% and 63%
+#   clause-finality      rejected are 0 and 12 words from their utterance
+#                        end, accepted are 0, 5, 13 and 20 — and whisper's
+#                        VAD merges utterances into 20-word blocks here
+#   claim vs consequence backwards: clip 12's REJECTED "couple months" is in
+#                        BOTH fields, the accepted ones in the claim only
+#
+# A first pass reported sustain separating all six and it was an artifact of
+# one parameter choice. **That is why the sweep is in this comment and not
+# just the conclusion.**
+#
+# So the budget scales with duration and the PICK among near-ties is not
+# decidable from the audio — `Clip.booms` carries a watched human's call, the
+# same arrangement `chat_mode` has for a gate whose default was wrong once.
+#
+# BOOM_EVERY is bracketed on both sides rather than chosen: round(d/E) must
+# give 1 at 30.96s (E > 20.6) and 2 at 38.3s (E <= 25.5).
+BOOM_EVERY = 22.0
+KEEP_SNAP = 0.60       # how far a spec's boom may be from a measured candidate
+
+
+def boom_budget(duration: float, *, limit: int = MAX_PUNCHES) -> int:
+    """How many booms a clip of this length carries. At least one, at most
+    `limit` — a clip with one qualifying moment still gets it."""
+    return max(1, min(limit, round(duration / BOOM_EVERY)))
 # ANCHOR A MOMENT TO WHAT THE CLIP ITSELF CALLS ITS POINT.
 #
 # George, on clip 12: *"the boom effect was too late the first time and the
@@ -240,7 +289,7 @@ def _onset(rms, times, i, base, d, max_back=1.20):
 
 def bold_moments(path=SRC, *, min_db=MIN_DB, min_sep=MIN_SEP,
                  skip_head=SKIP_HEAD, limit=MAX_PUNCHES, db_frac=DB_FRAC,
-                 anchors=None):
+                 anchors=None, keep=None):
     """The `limit` loudest local RMS maxima at least `min_db` over baseline.
 
     RANKED, NOT THRESHOLDED, and that is a stability fix rather than a taste
@@ -316,6 +365,17 @@ def bold_moments(path=SRC, *, min_db=MIN_DB, min_sep=MIN_SEP,
             if t < skip_head:
                 continue
         cand.append((t, round(float(d), 1)))
+    if keep:
+        # A WATCHED HUMAN'S CALL, snapped to the measured candidates so the
+        # moment keeps its own attack refinement and its dB. A time with no
+        # candidate near it is taken literally and reported as such, because
+        # silently moving it would be the same defect as silently dropping it.
+        out = []
+        for want in keep:
+            near = [c for c in cand if abs(c[0] - want) <= KEEP_SNAP]
+            out.append(min(near, key=lambda c: abs(c[0] - want))
+                       if near else (round(float(want), 2), None))
+        return base, sorted(out)
     # loudest first, each one suppressing everything within min_sep of it
     out = []
     for t, d in sorted(cand, key=lambda c: (-c[1], c[0])):

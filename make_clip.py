@@ -1321,11 +1321,30 @@ def stage_punch(clip, ch, st):
     nshots = sidx[-1] + 1 if sidx else 1
     # Measure the CLEAN CUT, never the last delivery — see AGENTS.md.
     anchors = _emphasis_anchors(clip, ch, st)
-    base, moments = rp.bold_moments(_cut_audio(clip, ch, st), anchors=anchors)
-    log(f"  baseline {base:.1f} dBFS; {len(anchors)} emphasised cards to "
-        f"anchor to; {len(moments)} bold moments:")
+    # off disk when the cut stage did not run in THIS invocation — a
+    # partial run is the normal way this pipeline is driven
+    out_dur = st.get("out_dur") or sum(k.length for k in st["keeps"])
+    budget = rp.boom_budget(out_dur)
+    auto_base, auto = rp.bold_moments(_cut_audio(clip, ch, st),
+                                      anchors=anchors, limit=budget)
+    log(f"  baseline {auto_base:.1f} dBFS; {len(anchors)} emphasised cards to "
+        f"anchor to; budget {budget} "
+        f"({out_dur:.1f}s / one per {rp.BOOM_EVERY:.0f}s)")
+    base, moments = auto_base, auto
+    if clip.booms is not None:
+        # PRINT BOTH. The automatic pick and the human's are two numbers that
+        # are supposed to agree, and this file's recurring defect is two such
+        # numbers drifting with nothing saying so.
+        base, moments = rp.bold_moments(_cut_audio(clip, ch, st),
+                                        anchors=anchors, keep=clip.booms)
+        log(f"  spec overrides the pick: {[t for t, _ in moments]} "
+            f"(automatic would be {[t for t, _ in auto]})")
+        for t, d in moments:
+            if d is None:
+                log(f"     {t:6.2f}s  NOT near any measured candidate — "
+                    f"taken literally")
     for t, d in moments:
-        log(f"     {t:6.2f}s  +{d} dB")
+        log(f"     {t:6.2f}s  " + (f"+{d} dB" if d is not None else "(spec)"))
     if not moments:
         log("     none — no loud moment sits on one of the clip's own "
             "thesis words, so it gets no punches and no booms")

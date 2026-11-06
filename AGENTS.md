@@ -4959,3 +4959,127 @@ an arbitrary photo needs subject detection, not a constant** — the crop
 would have to re-centre on the subject, and nothing here knows where it is.
 `rembg` is already in the adopt column for the person matte and is the tool
 that would answer this too.
+
+## FIVE METRICS, SIX VERDICTS, NO SEPARATION — so the lever is COUNT again
+
+George, on clip 16: *"first boom is basically pointless, remove, second one
+is perfect, update logic."*
+
+**Both times he has rejected a boom the word was "pointless"** — about the
+boom EXISTING, not about where it sat:
+
+| | | |
+|---|---|---|
+| clip 12 | 45.2s, 3 booms | *"third boom is pointless"* -> 2 |
+| clip 16 | 30.8s, 2 booms | *"first boom is basically pointless"* -> 1 |
+
+### What was tested, and what it cost to find out
+
+Six labelled moments now exist — clip 16 (4.84 no, 21.92 yes), clip 12 (2.87
+yes, 12.87 yes, 27.25 no) and clip 6's 9.30, which he named himself. Five
+metrics were measured against them and **none separates**:
+
+| metric | why it fails |
+|---|---|
+| **level** over baseline | clip 16's REJECTED moment is the LOUDEST candidate in the clip, **+3.96 against the accepted +3.83** |
+| **rise** over the preceding 1.2s | worse — clip 16's two rejected candidates carry the **two highest rises in the clip**, +5.82 and +6.10. This is the metric the earlier adversarial pass called "probably the better one"; it is actively backwards here |
+| **sustain** | swept **50 parameterisations** — window 0.15-0.40s, hop 0.02-0.10s, fixed thresholds 1.5-3.0 dB and adaptive ones at 0.6-1.0x the clip's own floor, both "containing run" and "walk out from the peak". **Zero separate all six.** Clip 12's accepted 2.87 sits at the floor under nearly every setting |
+| **position** in the clip | accepted span 6-76%, rejected 15% and 63% |
+| **clause-finality** | rejected are 0 and 12 words from their utterance end, accepted 0, 5, 13 and 20 — and whisper's VAD merges utterances into 20-word blocks here, so there is no clause to be final in |
+| **claim vs consequence** | backwards: clip 12's REJECTED *"couple months"* appears in BOTH fields, the accepted ones in the claim only |
+
+**THE FIRST SUSTAIN MEASUREMENT REPORTED A CLEAN 6-OF-6 AND IT WAS AN
+ARTIFACT.** One window size, one hop, one threshold. It read 0.90s for the
+accepted moment against 0.10s for the rejected — a 9x gap that looked
+decisive — and it vanished under the sweep. That is why the sweep is
+recorded here and not just the conclusion: **a separation found at one
+parameter setting is not a finding, and six data points will fit almost
+anything.**
+
+### So: a rate, and a named override
+
+`resolve_punch.boom_budget(duration)` — one boom per **22s**, floor 1, ceiling
+`MAX_PUNCHES`. `BOOM_EVERY = 22.0` is bracketed rather than chosen: `round(d/E)`
+must give 1 at 30.96s (E > 20.6) and 2 at 38.3s (E <= 25.5).
+
+| clip | | budget | |
+|---|---|---|---|
+| 16 | 30.8s | **1** | was 2 |
+| 06 | 38.3s | 2 | unchanged |
+| 08 | 44.9s | 2 | unchanged (0 qualify) |
+| 12 | 45.2s | 2 | unchanged, same two moments he accepted |
+
+**The count is not enough on its own, and this is the honest part.** At a
+budget of 1 the dB ranking keeps clip 16's **4.84 (+3.96) over 21.92
+(+3.83)** — it would keep exactly the boom he rejected, on a 0.13 dB margin
+inside a 4 dB range, which this file already calls "ranking near-ties".
+
+Since no measurement decides it, **`Clip.booms` carries a watched human's
+call** — the same arrangement `chat_mode` has for a gate whose default was
+wrong once. Each time snaps to the nearest measured candidate (`KEEP_SNAP
+0.60`) so it keeps its own attack refinement; one with no candidate near it
+is taken literally and the build log says so. The log prints both:
+
+    budget 1 (30.8s / one per 22s)
+    spec overrides the pick: [21.92] (automatic would be [4.84])
+
+because two numbers that are supposed to agree, derived twice, is this
+file's most-repeated defect.
+
+### Clip 6 would have lost the moment George named
+
+Checked while verifying the budget. At 38.3s clip 6's budget is 2, and
+**9.30 = "CHEATERS" ranks THIRD by level** (+3.54, behind 22.57 at +3.96 and
+34.19 at +3.72) — so the automatic pick drops the one moment in this whole
+job that George pointed at himself: *"ping issues, cheaters there should be
+zooms because it's when he's loud."*
+
+Not a new regression — clip 6's delivered file is many rounds stale
+(`punches.json` holds five punches, and its bed has **no boom at all**,
+predating the `bed()` fix). But a rebuild today would drop it, so the spec
+now names `[9.30, 22.57]`. **A ranking that drops the only moment the client
+named is the argument for the override, not a reason to re-tune the rank.**
+
+## THE REVIEW LOOP IS THE PRODUCT, and it was the one thing the site could not do
+
+George: *"continue with the idea of making a full clip making design where we
+can just upload a full vod and you will generate these videos."*
+
+The site already drove the whole chain. What it could not do is the thing
+that actually consumes the time: **every note across six rounds reduced to
+editing one of five spec fields and rebuilding that one clip.**
+
+    in_point    out_point    booms    chat_mode    hook
+
+Nothing else about a clip has ever been what he changed — the rest is house
+style and lives in code, which is the split `engine/clipspec.py` already
+draws. That loop ran through chat, by hand. **The bottleneck in "upload a VOD
+and get clips" was never the rendering.**
+
+So the clips grid is now driven by the **specs, not by `renders/`**: a clip
+is its spec and the mp4 is its current render, which may be missing (shown as
+"not built yet") or stale. Each card carries the five fields, a "why" line
+appended to the spec's notes, Save, and Save & rebuild.
+
+* **`POST /api/jobs/:id/spec/:n` MERGES**, never replaces — the spec carries
+  reasoning no UI collects, and a routine write eating hand-tuned state is
+  the defect this file has recorded four times. Verified by diff: channel
+  block identical, no key lost, only the named fields changed.
+* **It validates before writing**, because a bad value costs a Resolve build:
+  a non-numeric in-point, a negative time, an out-point before the in-point,
+  a boom that is not a time and an unknown chat mode are each refused with a
+  reason and nothing is written.
+* **`POST /api/jobs/:id/build/:n`** queues `batch.py build --only N --force`
+  through the SAME single worker, so the one-at-a-time guarantee holds. The
+  `--force` matters: a rebuild after a note is exactly what the "already
+  built and passed, skipping" guard would swallow.
+* **The grid will not re-render while a field has focus.** It already
+  rebuilt only on a signature change so a playing `<video>` was not torn
+  out; with text inputs in it, a 1.5s poll would wipe what is being typed.
+  Same defect as the job list tearing a row out from under a click, one
+  layer down, and worth stating as the general rule for a polled UI: **do
+  not replace a subtree that holds focus or playback.**
+
+Verified against the real job: 8 specs read, "4 built of 8 specced", clip 07
+shown as not built, a write round-tripped and reverted with nothing lost, and
+all six validation paths refused.

@@ -33,6 +33,10 @@
   "emoji": "\ud83d\ude33",
   "cards": [],
   "chat_mode": null,
-  "notes": "Open qualifiers in the new circuit will be plagued by tech issues. in_point 2.02 drops the dangling \"in the new circuit i already said this\" so the clip opens on a complete clause and the claim lands ~3s in instead of 9.5s."
+  "notes": "Open qualifiers in the new circuit will be plagued by tech issues. in_point 2.02 drops the dangling \"in the new circuit i already said this\" so the clip opens on a complete clause and the claim lands ~3s in instead of 9.5s.  booms named rather than ranked: George said \"ping issues, cheaters there should be zooms because it's when he's loud\", and that moment (9.30) ranks THIRD by level (+3.54) behind 22.57 (+3.96) and 34.19 (+3.72). At a 2-boom budget the automatic pick drops it. 22.57 keeps the loudest; 34.19 is the one given up, and no verdict exists on either.",
+  "booms": [
+   9.3,
+   22.57
+  ]
  }
 }

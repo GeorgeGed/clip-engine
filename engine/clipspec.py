@@ -97,6 +97,21 @@ class Clip:
     cards: list = field(default_factory=list)   # EDITORIAL. see the docstring
     # filled in by the chat pass
     chat_mode: str | None = None  # 'continuous' | 'reactive' | None
+    # THE BOOMS, IN CUT SECONDS, once a human has watched the clip.
+    #
+    # None means the automatic pick: `resolve_punch.boom_budget` scales the
+    # count with duration and the loudest qualifying moments win. That is a
+    # default for clips nobody has watched. It cannot be better than that,
+    # because no acoustic metric separates the placements George keeps from
+    # the ones he calls pointless — six verdicts against five metrics and 50
+    # parameterisations, all recorded in `resolve_punch`.
+    #
+    # So this is the same arrangement `chat_mode` has: the measurement is a
+    # default, and once he has watched one his call settles it. Each time is
+    # snapped to the nearest measured candidate so it keeps its own attack
+    # refinement; one with no candidate near it is taken literally and the
+    # build log says so.
+    booms: list[float] | None = None
     notes: str = ""
 
     def source(self, root: Path) -> Path:

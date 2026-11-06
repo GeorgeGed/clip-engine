@@ -77,9 +77,11 @@ class Stage:
     blurb: str
     argv: tuple[str, ...]          # {job} and {url} and {rights} are filled in
 
-    def cmd(self, job: str, url: str, rights: str) -> list[str]:
-        return [str(VENV)] + [a.format(job=job, url=url, rights=rights)
-                              for a in self.argv]
+    def cmd(self, job: str, url: str, rights: str,
+            extra: tuple[str, ...] = ()) -> list[str]:
+        return ([str(VENV)]
+                + [a.format(job=job, url=url, rights=rights) for a in self.argv]
+                + list(extra))
 
 
 # The chain, in order. `build` is last because it is the only stage that
@@ -179,13 +181,13 @@ def log_path(job_name: str, stage: str) -> Path:
 
 
 def run_stage(job_id: int, job_name: str, url: str, rights: str,
-              stage: Stage) -> int:
+              stage: Stage, extra: tuple[str, ...] = ()) -> int:
     """One stage as a subprocess, output tee'd to its own log."""
     out = log_path(job_name, stage.key)
     set_stage(job_id, stage.key, state="running", started=time.time(),
               ended=None, code=None)
     RUNNING["stage"] = stage.key
-    cmd = stage.cmd(job_name, url, rights)
+    cmd = stage.cmd(job_name, url, rights, extra)
     with out.open("w") as fh:
         fh.write(f"$ {' '.join(cmd)}\n\n"); fh.flush()
         proc = subprocess.Popen(cmd, cwd=ROOT, stdout=fh,
@@ -200,7 +202,7 @@ def run_stage(job_id: int, job_name: str, url: str, rights: str,
 
 def worker() -> None:
     while True:
-        job_id, keys = WORK.get()
+        job_id, keys, extra = WORK.get()
         try:
             with db() as c:
                 row = c.execute("SELECT * FROM job WHERE id=?",
@@ -215,7 +217,7 @@ def worker() -> None:
                     failed = f"{key} (cancelled)"
                     break
                 code = run_stage(job_id, row["name"], row["url"],
-                                 row["rights"], STAGE_BY_KEY[key])
+                                 row["rights"], STAGE_BY_KEY[key], extra)
                 if code != 0:
                     failed = key
                     break
@@ -299,6 +301,116 @@ def read_clips(name: str) -> list[dict]:
     return out
 
 
+# ----------------------------------------------------------- the review ---
+# THE SPEC IS WHERE THE REVIEW LIVES, and until now the site could not see it.
+#
+# Every note George has sent over six rounds reduced to editing one of these
+# five fields and rebuilding that one clip: the in-point, the out-point, which
+# booms survive, whether the chat overlay is forced on, and the hook line.
+# Nothing else about a clip has ever been the thing he changed. That loop ran
+# through chat, by hand, which is the actual bottleneck in "upload a VOD and
+# get clips" — not the rendering.
+#
+# `batch.py specs` already refuses to overwrite a spec a human has edited, so
+# these writes are safe against a re-run of the stage that proposed them.
+REVIEWABLE = ("in_point", "out_point", "booms", "chat_mode", "hook")
+CHAT_MODES = ("continuous", "reactive")
+
+
+def spec_path(name: str, index: int) -> Path:
+    """`clips/<channel>-NN.json`. The channel is the job name's first part."""
+    return ROOT / "clips" / f"{name.split('-')[0]}-{index:02d}.json"
+
+
+def read_specs(name: str) -> list[dict]:
+    chan = name.split("-")[0]
+    out = []
+    for sp in sorted((ROOT / "clips").glob(f"{chan}-*.json")):
+        m = re.search(r"-(\d+)\.json$", sp.name)
+        if not m:
+            continue
+        try:
+            d = json.loads(sp.read_text())
+        except json.JSONDecodeError:
+            continue
+        c = d.get("clip", {})
+        if str(c.get("job", "")) not in ("", name):
+            continue                       # another VOD's clip, same channel
+        out.append({
+            "index": int(m.group(1)),
+            "file": sp.name,
+            **{k: c.get(k) for k in REVIEWABLE},
+            "notes": c.get("notes", ""),
+            "cards": len(c.get("cards") or []),
+        })
+    return out
+
+
+def _clean(patch: dict) -> tuple[dict, str | None]:
+    """Validate before writing. A bad value here costs a Resolve build, so it
+    is refused with a reason rather than written and discovered at render."""
+    out = {}
+    for k, v in patch.items():
+        if k not in REVIEWABLE:
+            continue
+        if v == "" or v is None:
+            # in_point has no meaningful empty state; the others clear to None
+            if k == "in_point":
+                return {}, "in_point cannot be empty"
+            out[k] = None
+            continue
+        if k in ("in_point", "out_point"):
+            try:
+                f = float(v)
+            except (TypeError, ValueError):
+                return {}, f"{k} must be a number of seconds"
+            if f < 0:
+                return {}, f"{k} cannot be negative"
+            out[k] = round(f, 3)
+        elif k == "booms":
+            if isinstance(v, str):
+                v = [x for x in re.split(r"[,\s]+", v.strip()) if x]
+            try:
+                xs = sorted(round(float(x), 2) for x in v)
+            except (TypeError, ValueError):
+                return {}, "booms must be times in seconds, comma separated"
+            if any(x < 0 for x in xs):
+                return {}, "a boom cannot sit at a negative time"
+            out[k] = xs
+        elif k == "chat_mode":
+            if v not in CHAT_MODES:
+                return {}, f"chat_mode must be one of {', '.join(CHAT_MODES)}"
+            out[k] = v
+        else:
+            out[k] = str(v)
+    if "in_point" in out and "out_point" in out and out["out_point"] is not None \
+            and out["out_point"] <= out["in_point"]:
+        return {}, "out_point must be after in_point"
+    return out, None
+
+
+def write_spec(name: str, index: int, patch: dict,
+               note: str = "") -> tuple[dict | None, str | None]:
+    """MERGE, never replace. The spec carries reasoning in `notes` that no UI
+    collects, and this file's recurring defect is a routine write eating state
+    a human put there."""
+    sp = spec_path(name, index)
+    if not sp.exists():
+        return None, f"no spec at clips/{sp.name}"
+    clean, err = _clean(patch)
+    if err:
+        return None, err
+    d = json.loads(sp.read_text())
+    c = d.setdefault("clip", {})
+    changed = {k: (c.get(k), v) for k, v in clean.items() if c.get(k) != v}
+    c.update(clean)
+    if note.strip():
+        c["notes"] = (str(c.get("notes", "")).rstrip() + " " + note.strip()).strip()
+    sp.write_text(json.dumps(d, indent=1) + "\n")
+    return {"file": sp.name, "changed": {k: {"was": a, "now": b}
+                                         for k, (a, b) in changed.items()}}, None
+
+
 def job_json(row: sqlite3.Row) -> dict:
     with db() as c:
         st = {r["key"]: dict(r) for r in c.execute(
@@ -315,6 +427,7 @@ def job_json(row: sqlite3.Row) -> dict:
             "ended": st.get(s.key, {}).get("ended"),
         } for s in ALL_STAGES],
         "screen": read_screen(row["name"]),
+        "specs": read_specs(row["name"]),
         "clips": read_clips(row["name"]),
         "active": RUNNING.get("job_id") == row["id"],
         "active_stage": RUNNING.get("stage") if RUNNING.get("job_id") == row["id"] else None,
@@ -476,7 +589,7 @@ class Handler(BaseHTTPRequestHandler):
                     409)
             for s in ALL_STAGES:
                 set_stage(job_id, s.key)
-            WORK.put((job_id, [s.key for s in STAGES]))
+            WORK.put((job_id, [s.key for s in STAGES], ()))
             return self._json({"id": job_id, "name": name}, 201)
 
         m = re.fullmatch(r"/api/jobs/(\d+)/run", p)
@@ -489,8 +602,42 @@ class Handler(BaseHTTPRequestHandler):
                 set_stage(job_id, k, state="pending", code=None,
                           started=None, ended=None)
             set_job(job_id, state="queued")
-            WORK.put((job_id, keys))
+            WORK.put((job_id, keys, ()))
             return self._json({"queued": keys})
+
+        m = re.fullmatch(r"/api/jobs/(\d+)/spec/(\d+)", p)
+        if m:
+            with db() as c:
+                row = c.execute("SELECT * FROM job WHERE id=?",
+                                (int(m.group(1)),)).fetchone()
+            if not row:
+                return self._json({"error": "no such job"}, 404)
+            res, err = write_spec(row["name"], int(m.group(2)),
+                                  body.get("spec", {}) or {},
+                                  str(body.get("note", "")))
+            return self._json({"error": err} if err else res, 400 if err else 200)
+
+        m = re.fullmatch(r"/api/jobs/(\d+)/build/(\d+)", p)
+        if m:
+            job_id, n = int(m.group(1)), int(m.group(2))
+            with db() as c:
+                row = c.execute("SELECT * FROM job WHERE id=?",
+                                (job_id,)).fetchone()
+            if not row:
+                return self._json({"error": "no such job"}, 404)
+            if not spec_path(row["name"], n).exists():
+                return self._json({"error": f"no spec for clip {n:02d}"}, 404)
+            if RUNNING.get("job_id") is not None:
+                return self._json(
+                    {"error": "a job is already running — one at a time, "
+                              "because Resolve is a single GUI app"}, 409)
+            # --force, because a rebuild after a note is exactly the case the
+            # "already built and passed, skipping" guard would swallow.
+            set_stage(job_id, "build", state="pending", code=None,
+                      started=None, ended=None)
+            set_job(job_id, state="queued")
+            WORK.put((job_id, ["build"], ("--only", str(n), "--force")))
+            return self._json({"queued": "build", "clip": n})
 
         m = re.fullmatch(r"/api/jobs/(\d+)/cancel", p)
         if m:

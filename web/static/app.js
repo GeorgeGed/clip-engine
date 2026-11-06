@@ -192,36 +192,141 @@ function renderDetail(j) {
   }
   pick.value = logStage;
 
-  // clips
+  // clips — driven by the SPECS, not by renders/. The spec IS the clip; the
+  // mp4 is its current render, which may be missing or stale.
   const wrap = $('#d-clips');
-  $('#d-clipcount').textContent = j.clips.length ? `${j.clips.length} delivered` : '';
-  const sig = j.clips.map((c) => `${c.index}:${c.modified}`).join(',');
-  if (wrap.dataset.sig !== sig) {      // only rebuild when it changed, so a
-    wrap.dataset.sig = sig;            // playing <video> is not torn out
+  const byIdx = Object.fromEntries(j.clips.map((c) => [c.index, c]));
+  const specs = j.specs.length
+    ? j.specs
+    : j.clips.map((c) => ({ index: c.index, unspecced: true }));
+  $('#d-clipcount').textContent = specs.length
+    ? `${j.clips.length} built of ${specs.length} specced` : '';
+
+  // Rebuild only when something actually changed AND nothing here has focus.
+  // The grid holds text inputs now, so a 1.5s poll that replaced it would
+  // wipe what the operator is typing — the same defect as the job list
+  // tearing a row out from under a click, one layer down.
+  const sig = specs.map((s) => [s.index, s.in_point, s.out_point,
+    JSON.stringify(s.booms), s.chat_mode, s.hook,
+    byIdx[s.index]?.modified].join(':')).join('|');
+  const typing = wrap.contains(document.activeElement);
+  if (wrap.dataset.sig !== sig && !typing) {
+    wrap.dataset.sig = sig;
     wrap.textContent = '';
-    if (!j.clips.length) {
-      wrap.append(el('p', 'empty', 'No clips built yet.'));
-    }
-    for (const c of j.clips) {
-      const d = el('div', 'clip');
-      const v = document.createElement('video');
-      v.controls = true;
-      v.preload = 'metadata';
-      v.src = `/api/jobs/${j.id}/clip/${String(c.index).padStart(2, '0')}`;
-      d.append(v);
-      const m = el('div', 'meta');
-      const b = el('b', '', `#${c.index}`);
-      m.append(b, document.createTextNode(` · ${c.size_mb} MB · ${ago(c.modified)}`));
-      const qc = c.qc || {};
-      if (qc.verdict || qc.status) {
-        const ok = /pass/i.test(qc.verdict || qc.status);
-        m.append(el('div', `qc ${ok ? 'pass' : 'fail'}`,
-          `QC ${qc.verdict || qc.status}${qc.reason ? ' — ' + qc.reason : ''}`));
-      }
-      d.append(m);
-      wrap.append(d);
+    if (!specs.length) wrap.append(el('p', 'empty', 'No clips specced yet.'));
+    for (const s of specs) {
+      wrap.append(clipCard(j, s, byIdx[s.index]));
     }
   }
+}
+
+// One clip: its render, and the five fields every round of review has
+// actually changed. Everything else about a clip is house style and lives
+// in code, by the same split `engine/clipspec.py` already draws.
+function clipCard(job, spec, built) {
+  const d = el('div', 'clip');
+  if (built) {
+    const v = document.createElement('video');
+    v.controls = true;
+    v.preload = 'metadata';
+    v.src = `/api/jobs/${job.id}/clip/${String(spec.index).padStart(2, '0')}`;
+    d.append(v);
+  } else {
+    d.append(el('div', 'noclip', 'not built yet'));
+  }
+  const m = el('div', 'meta');
+  m.append(el('b', '', `#${spec.index}`));
+  if (built) {
+    m.append(document.createTextNode(` · ${built.size_mb} MB · ${ago(built.modified)}`));
+    const qc = built.qc || {};
+    if (qc.verdict || qc.status) {
+      const ok = /pass/i.test(qc.verdict || qc.status);
+      m.append(el('div', `qc ${ok ? 'pass' : 'fail'}`,
+        `QC ${qc.verdict || qc.status}${qc.reason ? ' — ' + qc.reason : ''}`));
+    }
+  }
+  d.append(m);
+  if (spec.unspecced) return d;
+
+  const f = el('div', 'review');
+  const field = (key, label, value, ph) => {
+    const l = el('label', 'f');
+    l.append(el('span', '', label));
+    const i = document.createElement(key === 'chat_mode' ? 'select' : 'input');
+    if (key === 'chat_mode') {
+      for (const [v2, t2] of [['', 'auto (topicality gate)'],
+                              ['continuous', 'continuous'],
+                              ['reactive', 'reactive']]) {
+        const o = el('option', '', t2); o.value = v2; i.append(o);
+      }
+      i.value = value || '';
+    } else {
+      i.type = 'text';
+      i.value = value === null || value === undefined ? '' : value;
+      i.placeholder = ph || '';
+    }
+    i.dataset.key = key;
+    l.append(i);
+    f.append(l);
+    return i;
+  };
+  field('in_point', 'in', spec.in_point, 'seconds');
+  field('out_point', 'out', spec.out_point, 'end of region');
+  field('booms', 'booms', (spec.booms || []).join(', '), 'auto by duration');
+  field('chat_mode', 'chat', spec.chat_mode);
+  field('hook', 'hook', spec.hook, 'clickbait line');
+
+  const note = el('label', 'f wide');
+  note.append(el('span', '', 'why'));
+  const ni = document.createElement('input');
+  ni.type = 'text';
+  ni.placeholder = 'appended to the spec notes — what the change is for';
+  note.append(ni);
+  f.append(note);
+
+  const bar = el('div', 'rbar');
+  const save = el('button', 'ghost', 'Save');
+  const build = el('button', '', 'Save & rebuild');
+  const msg = el('span', 'msg');
+  bar.append(save, build, msg);
+  f.append(bar);
+
+  const collect = () => {
+    const out = {};
+    f.querySelectorAll('[data-key]').forEach((i) => { out[i.dataset.key] = i.value; });
+    return out;
+  };
+  const put = async (then) => {
+    msg.className = 'msg'; msg.textContent = 'saving…';
+    try {
+      const r = await api(`/api/jobs/${job.id}/spec/${spec.index}`, {
+        method: 'POST',
+        body: JSON.stringify({ spec: collect(), note: ni.value }),
+      });
+      const n = Object.keys(r.changed || {}).length;
+      msg.className = 'msg ok';
+      msg.textContent = n ? `saved ${n} change${n > 1 ? 's' : ''}` : 'no change';
+      ni.value = '';
+      if (then) await then();
+    } catch (e) {
+      msg.className = 'msg bad';
+      msg.textContent = e.message;
+    }
+  };
+  save.addEventListener('click', () => put());
+  build.addEventListener('click', () => put(async () => {
+    try {
+      await api(`/api/jobs/${job.id}/build/${spec.index}`, { method: 'POST' });
+      msg.className = 'msg ok';
+      msg.textContent = 'saved, rebuild queued';
+      refresh();
+    } catch (e) {
+      msg.className = 'msg bad';
+      msg.textContent = e.message;
+    }
+  }));
+  d.append(f);
+  return d;
 }
 
 async function loadLog() {
