@@ -33,7 +33,12 @@
    2082.69
   ],
   "hook": null,
-  "cam": null,
+  "cam": [
+   1450,
+   344,
+   1920,
+   608
+  ],
   "emoji": "\ud83d\ude33",
   "cards": [],
   "chat_mode": null,

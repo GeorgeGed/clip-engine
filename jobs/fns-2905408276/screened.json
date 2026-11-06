@@ -2,23 +2,18 @@
  {
   "n": 1,
   "src_s": 101.3,
-  "muted": 0.185,
-  "cut_s": 24.6,
+  "muted": 0.426,
+  "cut_s": 53.0,
   "shots": 18,
-  "cuts_min": 14.7,
+  "cuts_min": 19.2,
   "virality": 0.63,
   "strength": 0.5,
   "subject": "Speaker reveals he is coaching a team in the open qualifier and streaming it",
-  "verdict": "build",
-  "window": {
-   "in": 72.0,
-   "out": 101.0,
-   "muted": 0.185,
-   "cut_s": 24.6,
-   "cuts_min": 14.7
-  },
+  "verdict": "reject",
+  "window": null,
   "why": [
-   "region 43% muted / 19 cuts/min \u2014 cut to 72-101s (18% muted, 15 cuts/min)"
+   "43% muted",
+   "19 cuts/min"
   ]
  },
  {
@@ -71,23 +66,17 @@
  {
   "n": 5,
   "src_s": 56.2,
-  "muted": 0.248,
-  "cut_s": 26.9,
+  "muted": 0.322,
+  "cut_s": 36.5,
   "shots": 8,
-  "cuts_min": 13.4,
+  "cuts_min": 11.5,
   "virality": 0.547,
   "strength": 0.55,
   "subject": "Cane's era as the trendsetter that NA streamers imitate",
-  "verdict": "build",
-  "window": {
-   "in": 0.0,
-   "out": 34.5,
-   "muted": 0.248,
-   "cut_s": 26.9,
-   "cuts_min": 13.4
-  },
+  "verdict": "reject",
+  "window": null,
   "why": [
-   "region 32% muted \u2014 cut to 0-34s (25% muted, 13 cuts/min)"
+   "32% muted"
   ]
  },
  {
@@ -120,10 +109,11 @@
    "out": 53.0,
    "muted": 0.241,
    "cut_s": 31.8,
-   "cuts_min": 11.3
+   "cuts_min": 11.3,
+   "keeps": 1.0
   },
   "why": [
-   "region 44% muted / 20 cuts/min \u2014 cut to 14-53s (24% muted, 11 cuts/min)"
+   "region 44% muted / 20 cuts/min \u2014 cut to 14-53s (24% muted, 11 cuts/min, keeps 100% of the claim)"
   ]
  },
  {
@@ -189,10 +179,11 @@
    "out": 32.0,
    "muted": 0.248,
    "cut_s": 26.8,
-   "cuts_min": 13.4
+   "cuts_min": 13.4,
+   "keeps": 1.0
   },
   "why": [
-   "region 32% muted \u2014 cut to 0-32s (25% muted, 13 cuts/min)"
+   "region 32% muted \u2014 cut to 0-32s (25% muted, 13 cuts/min, keeps 100% of the claim)"
   ]
  },
  {
@@ -242,10 +233,11 @@
    "out": 72.0,
    "muted": 0.228,
    "cut_s": 38.5,
-   "cuts_min": 12.5
+   "cuts_min": 12.5,
+   "keeps": 0.5
   },
   "why": [
-   "region 30% muted \u2014 cut to 22-72s (23% muted, 12 cuts/min)"
+   "region 30% muted \u2014 cut to 22-72s (23% muted, 12 cuts/min, keeps 50% of the claim)"
   ]
  },
  {
@@ -309,10 +301,11 @@
    "out": 59.0,
    "muted": 0.245,
    "cut_s": 28.9,
-   "cuts_min": 14.5
+   "cuts_min": 14.5,
+   "keeps": 0.75
   },
   "why": [
-   "region 30% muted / 21 cuts/min \u2014 cut to 24-59s (24% muted, 14 cuts/min)"
+   "region 30% muted / 21 cuts/min \u2014 cut to 24-59s (24% muted, 14 cuts/min, keeps 75% of the claim)"
   ]
  },
  {
@@ -352,45 +345,35 @@
  {
   "n": 21,
   "src_s": 72.2,
-  "muted": 0.233,
-  "cut_s": 22.7,
+  "muted": 0.508,
+  "cut_s": 34.7,
   "shots": 11,
-  "cuts_min": 10.6,
+  "cuts_min": 17.3,
   "virality": 0.487,
   "strength": 0.55,
   "subject": "Roster speculation: where Second goes from MIBR and whether Oxy, Second and Redox fit together",
-  "verdict": "build",
-  "window": {
-   "in": 45.5,
-   "out": 72.0,
-   "muted": 0.233,
-   "cut_s": 22.7,
-   "cuts_min": 10.6
-  },
+  "verdict": "reject",
+  "window": null,
   "why": [
-   "region 51% muted / 17 cuts/min \u2014 cut to 46-72s (23% muted, 11 cuts/min)"
+   "51% muted",
+   "17 cuts/min"
   ]
  },
  {
   "n": 22,
   "src_s": 162.4,
-  "muted": 0.25,
-  "cut_s": 37.6,
+  "muted": 0.356,
+  "cut_s": 101.0,
   "shots": 29,
-  "cuts_min": 4.8,
+  "cuts_min": 16.6,
   "virality": 0.481,
   "strength": 0.72,
   "subject": "Defending the open qualifier system and arguing that players spoiled by franchise pay are the ones complaining",
-  "verdict": "build",
-  "window": {
-   "in": 96.0,
-   "out": 135.5,
-   "muted": 0.25,
-   "cut_s": 37.6,
-   "cuts_min": 4.8
-  },
+  "verdict": "reject",
+  "window": null,
   "why": [
-   "region 36% muted / 17 cuts/min \u2014 cut to 96-136s (25% muted, 5 cuts/min)"
+   "36% muted",
+   "17 cuts/min"
   ]
  },
  {
@@ -440,10 +423,11 @@
    "out": 103.5,
    "muted": 0.174,
    "cut_s": 41.3,
-   "cuts_min": 11.6
+   "cuts_min": 11.6,
+   "keeps": 0.5
   },
   "why": [
-   "region 32% muted \u2014 cut to 57-104s (17% muted, 12 cuts/min)"
+   "region 32% muted \u2014 cut to 57-104s (17% muted, 12 cuts/min, keeps 50% of the claim)"
   ]
  },
  {
@@ -479,10 +463,11 @@
    "out": 94.0,
    "muted": 0.247,
    "cut_s": 74.4,
-   "cuts_min": 12.1
+   "cuts_min": 12.1,
+   "keeps": 1.0
   },
   "why": [
-   "region 31% muted \u2014 cut to 0-94s (25% muted, 12 cuts/min)"
+   "region 31% muted \u2014 cut to 0-94s (25% muted, 12 cuts/min, keeps 100% of the claim)"
   ]
  },
  {
@@ -501,10 +486,11 @@
    "out": 29.5,
    "muted": 0.242,
    "cut_s": 23.1,
-   "cuts_min": 13.0
+   "cuts_min": 13.0,
+   "keeps": 1.0
   },
   "why": [
-   "region 25% muted / 22 cuts/min \u2014 cut to 3-30s (24% muted, 13 cuts/min)"
+   "region 25% muted / 22 cuts/min \u2014 cut to 3-30s (24% muted, 13 cuts/min, keeps 100% of the claim)"
   ]
  },
  {
@@ -523,10 +509,11 @@
    "out": 50.0,
    "muted": 0.245,
    "cut_s": 27.0,
-   "cuts_min": 6.7
+   "cuts_min": 6.7,
+   "keeps": 0.75
   },
   "why": [
-   "region 32% muted / 17 cuts/min \u2014 cut to 20-50s (24% muted, 7 cuts/min)"
+   "region 32% muted / 17 cuts/min \u2014 cut to 20-50s (24% muted, 7 cuts/min, keeps 75% of the claim)"
   ]
  },
  {
@@ -559,10 +546,11 @@
    "out": 26.0,
    "muted": 0.247,
    "cut_s": 23.2,
-   "cuts_min": 10.3
+   "cuts_min": 10.3,
+   "keeps": 0.91
   },
   "why": [
-   "region 50% muted / 18 cuts/min \u2014 cut to 0-26s (25% muted, 10 cuts/min)"
+   "region 50% muted / 18 cuts/min \u2014 cut to 0-26s (25% muted, 10 cuts/min, keeps 91% of the claim)"
   ]
  },
  {
@@ -581,32 +569,34 @@
    "out": 46.5,
    "muted": 0.247,
    "cut_s": 44.7,
-   "cuts_min": 4.0
+   "cuts_min": 4.0,
+   "keeps": 1.0
   },
   "why": [
-   "region 28% muted \u2014 cut to 0-46s (25% muted, 4 cuts/min)"
+   "region 28% muted \u2014 cut to 0-46s (25% muted, 4 cuts/min, keeps 100% of the claim)"
   ]
  },
  {
   "n": 33,
   "src_s": 168.0,
-  "muted": 0.137,
-  "cut_s": 34.3,
+  "muted": 0.24,
+  "cut_s": 20.1,
   "shots": 28,
-  "cuts_min": 10.5,
+  "cuts_min": 14.9,
   "virality": 0.453,
   "strength": 0.55,
   "subject": "Who missed out on Valorant partnership and whether being non-partnered is actually better",
   "verdict": "build",
   "window": {
-   "in": 130.0,
-   "out": 167.5,
-   "muted": 0.137,
-   "cut_s": 34.3,
-   "cuts_min": 10.5
+   "in": 82.0,
+   "out": 110.0,
+   "muted": 0.24,
+   "cut_s": 20.1,
+   "cuts_min": 14.9,
+   "keeps": 0.57
   },
   "why": [
-   "region 39% muted / 17 cuts/min \u2014 cut to 130-168s (14% muted, 10 cuts/min)"
+   "region 39% muted / 17 cuts/min \u2014 cut to 82-110s (24% muted, 15 cuts/min, keeps 57% of the claim)"
   ]
  },
  {
@@ -625,10 +615,11 @@
    "out": 91.0,
    "muted": 0.244,
    "cut_s": 48.0,
-   "cuts_min": 12.5
+   "cuts_min": 12.5,
+   "keeps": 0.7
   },
   "why": [
-   "region 33% muted / 20 cuts/min \u2014 cut to 33-91s (24% muted, 12 cuts/min)"
+   "region 33% muted / 20 cuts/min \u2014 cut to 33-91s (24% muted, 12 cuts/min, keeps 70% of the claim)"
   ]
  },
  {
@@ -699,10 +690,11 @@
    "out": 25.5,
    "muted": 0.236,
    "cut_s": 21.7,
-   "cuts_min": 11.1
+   "cuts_min": 11.1,
+   "keeps": 0.4
   },
   "why": [
-   "region 49% muted / 20 cuts/min \u2014 cut to 0-26s (24% muted, 11 cuts/min)"
+   "region 49% muted / 20 cuts/min \u2014 cut to 0-26s (24% muted, 11 cuts/min, keeps 40% of the claim)"
   ]
  },
  {
@@ -738,10 +730,11 @@
    "out": 112.5,
    "muted": 0.247,
    "cut_s": 66.4,
-   "cuts_min": 11.7
+   "cuts_min": 11.7,
+   "keeps": 1.0
   },
   "why": [
-   "region 40% muted \u2014 cut to 25-112s (25% muted, 12 cuts/min)"
+   "region 40% muted \u2014 cut to 25-112s (25% muted, 12 cuts/min, keeps 100% of the claim)"
   ]
  },
  {
@@ -806,10 +799,11 @@
    "out": 29.0,
    "muted": 0.248,
    "cut_s": 27.2,
-   "cuts_min": 6.6
+   "cuts_min": 6.6,
+   "keeps": 1.0
   },
   "why": [
-   "region 28% muted \u2014 cut to 0-29s (25% muted, 7 cuts/min)"
+   "region 28% muted \u2014 cut to 0-29s (25% muted, 7 cuts/min, keeps 100% of the claim)"
   ]
  },
  {
@@ -861,10 +855,11 @@
    "out": 114.5,
    "muted": 0.181,
    "cut_s": 49.7,
-   "cuts_min": 13.3
+   "cuts_min": 13.3,
+   "keeps": 0.9
   },
   "why": [
-   "region 28% muted / 16 cuts/min \u2014 cut to 52-114s (18% muted, 13 cuts/min)"
+   "region 28% muted / 16 cuts/min \u2014 cut to 52-114s (18% muted, 13 cuts/min, keeps 90% of the claim)"
   ]
  },
  {
@@ -918,10 +913,11 @@
    "out": 86.0,
    "muted": 0.25,
    "cut_s": 60.5,
-   "cuts_min": 14.9
+   "cuts_min": 14.9,
+   "keeps": 0.57
   },
   "why": [
-   "region 15 cuts/min \u2014 cut to 5-86s (25% muted, 15 cuts/min)"
+   "region 15 cuts/min \u2014 cut to 5-86s (25% muted, 15 cuts/min, keeps 57% of the claim)"
   ]
  }
 ]

@@ -37,6 +37,7 @@ from __future__ import annotations
 import argparse
 import glob
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -78,15 +79,86 @@ MIN_SECONDS = 20.0
 # editorial pass's call, and that has not changed.
 WINDOW_STEP = 0.5          # the scan resolution, in seconds
 MIN_WINDOW = 25.0          # shorter than this is not worth a search
+# A CLEAN WINDOW IS NOT A CLIP, and the first version of this proved it the
+# expensive way. Clip 01 — the one George named — was rescued at 72-101s,
+# built, and passed every gate: 21.0s, -13.91 LUFS, no absent audio, no
+# hallucinated captions. Then read the cut:
+#
+#   "we'll see we'll see how that goes so yeah the problem is how am i
+#    supposed to stream league of legends worlds if the qualifiers..."
+#
+# The clip's claim is *"I'm gonna be coaching in the open qualifier and
+# we're gonna be streaming it"* and **that line is not in the cut.** The
+# window found clean audio somewhere else in the region. It opens on a
+# trailing fragment, it is about a different subject, and every piece of
+# metadata keyed to the region — subject, hook, the emphasis anchors the
+# captions and the boom use — still describes the clip it is no longer.
+#
+# This is the category error this file keeps recording: an ACOUSTIC
+# measurement making an EDITORIAL decision. Measured across the 21 rescued
+# clips, by how many of the claim's own content words survive the window:
+#
+#   0%, 0%, 0%, 11%  |  40%, 43%  |  50% and up, fifteen of them
+#
+# Four lose the point outright. The gap between 11% and 40% is wide, so the
+# threshold is a plateau rather than an edge — anything in (0.11, 0.40]
+# drops exactly those four, and 0.25 is the middle of it.
+CLAIM_KEEP = 0.25
+# THE OPENINGS ARE STILL WRONG AND SNAPPING TO UTTERANCES DOES NOT FIX THEM.
+#
+# Most of the rescued cuts open mid-clause — *"were paying good money,
+# decent money for sure..."*, *"um see it as a better system but..."* —
+# which is rule 3 and the "as I was saying" opening. The obvious mechanical
+# fix is to make the candidate in-points UTTERANCE STARTS instead of a
+# half-second grid. **It was tried and it was worse on both axes: 17
+# windowed clips became 3, and the three still opened mid-sentence.**
+#
+# The reason is already in AGENTS.md: whisper's VAD merges utterances on
+# this VOD and the median inter-word gap measures 0.000s, so there are
+# barely any boundaries to snap to and the few that exist are not sentence
+# starts. The utterance list is the only phrase signal available AND it is
+# too coarse to carry this.
+#
+# So the opening stays an EDITORIAL problem, which is what this file has
+# said about rules 2 and 3 all along. The window makes a clip CUTTABLE; a
+# human or a Tier 3 pass still has to choose where it starts.
+_STOP = frozenset(
+    "about above after again against because before being below between could doing during "
+    "each from further having into itself might more most other over same should some such "
+    "than that their them then there these they this those through under until very were "
+    "what when where which while will with would your gonna really thing things".split())
 
 
-def best_window(absent, quiet, dur):
+def _keys(*texts) -> set:
+    """The clip's own content words — the same shape `emphasis_keys` uses."""
+    out = set()
+    for s in texts:
+        out |= {w for w in re.findall(r"[a-z']+", (s or "").lower())
+                if len(w) >= 5 and w not in _STOP}
+    return out
+
+
+def best_window(absent, quiet, dur, words=None, keys=None):
     """The longest contiguous window that would pass the gate on its own.
 
-    Returns `(a, b, muted, cut_s, cuts_min)` or None. Only ever called when
-    the whole region FAILS, so a region that already passes keeps all of
+    Returns `(a, b, muted, cut_s, cuts_min, keep)` or None. Only ever called
+    when the whole region FAILS, so a region that already passes keeps all of
     itself — searching a passing region could only return something shorter.
+
+    `words` and `keys` are what stop this being an audio measurement making
+    an editorial decision: a window must retain `CLAIM_KEEP` of the clip's
+    own content words or it is not this clip, however clean it sounds. With
+    no transcript the constraint cannot be applied and the window is refused
+    rather than guessed at — see the note above for what that costs.
     """
+    def kept(a, b):
+        if not keys:
+            return 0.0
+        here = {re.sub(r"[^a-z']", "", w["text"].lower()) for w in (words or [])
+                if a <= w.get("start", -1) <= b}
+        have = keys & {re.sub(r"[^a-z']", "", w["text"].lower())
+                       for w in (words or [])}
+        return len(keys & here) / len(have) if have else 0.0
     def muted_in(a, b):
         t = sum(max(0.0, min(b, y) - max(a, x)) for x, y in absent)
         return t / (b - a) if b > a else 1.0
@@ -106,10 +178,14 @@ def best_window(absent, quiet, dur):
             out = sum(k.length for k in kp)
             cpm = (len(kp) - 1) / (out / 60) if out else 1e9
             if out >= MIN_SECONDS and cpm <= MAX_CUTS_MIN:
-                cand = (round(a, 1), round(b, 1), round(muted_in(a, b), 3),
-                        round(out, 1), round(cpm, 1))
-                if best is None or cand[3] > best[3]:
-                    best = cand
+                k = kept(a, b)
+                if k >= CLAIM_KEEP:
+                    cand = (round(a, 1), round(b, 1), round(muted_in(a, b), 3),
+                            round(out, 1), round(cpm, 1), round(k, 2))
+                    # the window that keeps the most of the clip's own point,
+                    # and only then the longest
+                    if best is None or (cand[5], cand[3]) > (best[5], best[3]):
+                        best = cand
         a += WINDOW_STEP
     return best
 
@@ -143,13 +219,20 @@ def screen_one(job, n, meta, *, want_chat=False, want_cam=False):
     window = None
     if why:
         # The region fails. Does a WINDOW inside it pass? See the note above.
-        w = best_window(absent, quiet, dur)
+        wf = ROOT / f"jobs/{job}/words/{n:02d}.json"
+        tw = None
+        if wf.exists():
+            tr = json.loads(wf.read_text())
+            tw = [w for u in tr["utterances"] for w in u["words"]]
+        kk = _keys(meta.get("claim"), meta.get("subject"))
+        w = best_window(absent, quiet, dur, words=tw, keys=kk) if tw else None
         if w:
-            a, b, wm, wout, wcpm = w
-            window = {"in": a, "out": b, "muted": wm,
-                      "cut_s": wout, "cuts_min": wcpm}
+            a, b, wm, wout, wcpm, keep = w
+            window = {"in": a, "out": b, "muted": wm, "cut_s": wout,
+                      "cuts_min": wcpm, "keeps": keep}
             why = [f"region {' / '.join(why)} — cut to {a:.0f}-{b:.0f}s "
-                   f"({wm:.0%} muted, {wcpm:.0f} cuts/min)"]
+                   f"({wm:.0%} muted, {wcpm:.0f} cuts/min, keeps "
+                   f"{keep:.0%} of the claim)"]
             muted, out, cpm = wm, wout, wcpm
     row = {"n": n, "src_s": round(dur, 1), "muted": round(muted, 3),
            "cut_s": round(out, 1), "shots": len(kp), "cuts_min": round(cpm, 1),

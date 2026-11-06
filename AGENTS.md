@@ -5342,3 +5342,57 @@ Supabase Storage and S3/R2 hand out a signed PUT for exactly this.
 Also fixed: `--once` polled forever when it found nothing, which is what the
 loser of a two-agent race looks like and what makes it useless in cron. It
 now means what it says — at most one job, then exit.
+
+## A CLEAN WINDOW IS NOT A CLIP — and building one proved it
+
+The section above rescued 21 refusals by finding a contiguous window of
+clean audio inside each failing region. **That measurement was right and
+the fix built on it was wrong, and the only reason we know is that clip 01
+got built.**
+
+It passed everything: 21.0s, −13.91 LUFS, −0.73 dBTP, 0.00s absent audio,
+49 caption cards, no hallucinations, delivered. Then read the cut:
+
+> *"we'll see we'll see how that goes so yeah the problem is how am i
+> supposed to stream league of legends worlds if the qualifiers…"*
+
+**The clip's claim is *"I'm gonna be coaching in the open qualifier and
+we're gonna be streaming it"*, and that line is not in the cut.** The window
+found clean audio somewhere else in the region. It opens on a trailing
+fragment, it is about a different subject, and everything keyed to the
+region — subject, hook, the emphasis anchors the captions and the boom use
+— still describes the clip it is no longer.
+
+**An ACOUSTIC measurement was making an EDITORIAL decision**, which is the
+category error this file keeps recording. Measured across all 21, by how
+much of the claim's own content words the window keeps:
+
+    0%  0%  0%  11%   |   40%  43%   |   50% and up, fifteen of them
+
+Four lose the point outright. The gap between 11% and 40% is wide, so
+`CLAIM_KEEP = 0.25` sits in the middle of a plateau rather than on an edge
+— anything in (0.11, 0.40] drops exactly those four. The window is now
+ranked by how much of the point it keeps FIRST and length second, which
+moved clip 33 from 130–168s (43%) to 82–110s (57%).
+
+**Yield: 10 → 31 → 27.** Clip 01, 05, 21 and 22 are refused again, and clip
+01's render and delivery were deleted.
+
+### Snapping the in-point to an utterance was tried and is worse
+
+Most rescued cuts still open mid-clause — *"were paying good money, decent
+money for sure…"*, *"um see it as a better system but…"* — which is rule 3.
+The obvious mechanical fix is to take candidate in-points from the
+utterance list instead of a half-second grid. **It took 17 windowed clips
+to 3, and the three still opened mid-sentence.**
+
+The reason is already in this file: whisper's VAD merges utterances on this
+VOD and the median inter-word gap is 0.000s, so there are barely any
+boundaries to snap to and the few that exist are not sentence starts. The
+utterance list is simultaneously the only phrase signal available and too
+coarse to carry this. Reverted.
+
+**So the opening stays editorial**, which is what this file has said about
+rules 2 and 3 from the beginning. The window decides whether a clip is
+CUTTABLE. Where it starts is still a human's call, or a Tier 3 pass's —
+and the 17 rescued clips should get one before any of them ships.

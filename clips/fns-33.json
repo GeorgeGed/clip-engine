@@ -26,18 +26,23 @@
   "job": "fns-2905408276",
   "index": 33,
   "channel": "fns",
-  "in_point": 130.0,
-  "out_point": 167.5,
+  "in_point": 82.0,
+  "out_point": 110.0,
   "region": [
    1512.4,
    1680.37
   ],
   "hook": null,
-  "cam": null,
+  "cam": [
+   1450,
+   344,
+   1920,
+   608
+  ],
   "emoji": "\ud83d\ude33",
   "cards": [],
   "chat_mode": null,
   "booms": null,
-  "notes": "Who missed out on Valorant partnership and whether being non-partnered is actually better  Cut to 130-168s by the screen: the whole region is 168s and fails the gate, this window is 14% muted at 10 cuts/min. The window makes it BUILDABLE; whether it is one narrative and explains itself is still an editorial call."
+  "notes": "Who missed out on Valorant partnership and whether being non-partnered is actually better  Cut to 82-110s by the screen: the whole region is 168s and fails the gate, this window is 24% muted at 15 cuts/min. The window makes it BUILDABLE; whether it is one narrative and explains itself is still an editorial call."
  }
 }
