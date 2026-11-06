@@ -1,0 +1,78 @@
+<style>
+/* ---- shell ------------------------------------------------------------- */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;
+     background:var(--paper);border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;
+             height:env(safe-area-inset-top,0px);z-index:30;background:var(--paper)}
+.bar .wrap{display:flex;align-items:center;gap:18px;padding-block:11px}
+.mark{display:flex;align-items:center;gap:9px;font-weight:800;font-size:16px;
+      letter-spacing:-.03em;white-space:nowrap}
+.mark i{width:10px;height:16px;background:var(--blue)}
+nav{display:flex;gap:3px}
+nav button{background:none;border:0;color:var(--ink-3);font-size:13px;
+           font-weight:550;padding:6px 11px;cursor:pointer}
+nav button[aria-current="true"]{color:var(--ink);box-shadow:inset 0 -2px 0 var(--blue)}
+nav button:hover{color:var(--ink)}
+.sp{flex:1}
+.pill{font-size:11.5px;color:var(--ink-2);border:1px solid var(--line);
+      padding:4px 9px;white-space:nowrap}
+.icb{background:none;border:1px solid var(--line);color:var(--ink-2);
+     font-size:12px;padding:5px 10px;cursor:pointer}
+.icb:hover{color:var(--ink);border-color:var(--ink-3)}
+main{padding-block:clamp(22px,4vw,40px)}
+.view[hidden]{display:none!important}
+
+/* ---- buttons ----------------------------------------------------------- */
+.btn{background:var(--blue);color:#fff;border:0;font-weight:650;font-size:14px;
+     padding:11px 22px;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.4;cursor:default;filter:none}
+.btn.sm{padding:7px 14px;font-size:12.5px}
+.btn.quiet{background:none;border:1px solid var(--line);color:var(--ink-2)}
+.btn.quiet:hover{color:var(--ink);border-color:var(--ink-3);filter:none}
+
+/* ---- new project ------------------------------------------------------- */
+.newgrid{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(24px,4vw,56px);
+         align-items:start}
+@media(max-width:880px){.newgrid{grid-template-columns:1fr}}
+.srcbox{border:1px solid var(--line);background:var(--paper)}
+.srcbox .in{display:flex;border-bottom:1px solid var(--line)}
+.srcbox .in input{flex:1;min-width:0;border:0;background:none;color:var(--ink);
+                  padding:15px 16px;font-size:14.5px}
+.srcbox .in input:focus{outline:2px solid var(--blue);outline-offset:-2px}
+.srcbox .in button{border:0;border-left:1px solid var(--line);background:var(--band);
+                   color:var(--ink-2);font-size:12.5px;padding:0 16px;cursor:pointer;
+                   white-space:nowrap}
+.found{display:flex;gap:11px;align-items:center;padding:12px 16px;
+       background:var(--band);border-bottom:1px solid var(--line);font-size:13px}
+.found .kb{width:3px;align-self:stretch;background:var(--blue);flex:0 0 auto}
+.found .t{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+          color:var(--ink-2)}
+.sets{padding:16px;display:grid;gap:16px}
+.set>.lab{font-size:10.5px;font-weight:650;letter-spacing:.13em;
+          text-transform:uppercase;color:var(--ink-3);margin-bottom:7px}
+.segs{display:flex;flex-wrap:wrap;gap:5px}
+.seg{background:none;border:1px solid var(--line);color:var(--ink-2);font-size:12.5px;
+     padding:7px 13px;cursor:pointer}
+.seg[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.set input[type=text],.set select,.set textarea{width:100%;border:1px solid var(--line);
+  background:var(--paper);color:var(--ink);padding:9px 12px;font-size:13.5px}
+.set textarea{resize:vertical;min-height:62px;font-family:inherit}
+.set input:focus,.set select:focus,.set textarea:focus{outline:2px solid var(--blue);
+  outline-offset:-2px}
+.sub{font-size:11.5px;color:var(--ink-3);margin-top:6px}
+.runbar{padding:16px;border-top:1px solid var(--line);display:flex;
+        align-items:center;gap:14px;flex-wrap:wrap}
+.side h2{margin-bottom:12px}
+.steps{display:grid;gap:1px;background:var(--line);border:1px solid var(--line)}
+.step{background:var(--paper);padding:11px 14px;display:flex;gap:12px;
+      align-items:baseline}
+.step .i{font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums;
+         width:16px;flex:0 0 auto}
+.step .k{font-weight:600;font-size:13.5px}
+.step .d{font-size:12.5px;color:var(--ink-2)}
+.step.on{background:var(--band)}
+.step.on .k{color:var(--blue)}
+.step.done .i::before{content:"✓";color:var(--good)}
+.step.done .i{font-size:12px}
+</style>
