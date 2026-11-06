@@ -434,6 +434,21 @@ def job_json(row: sqlite3.Row) -> dict:
     }
 
 
+def is_local_vod(s: str) -> bool:
+    """A path on this machine, rather than a URL.
+
+    `engine.ingest.fetch` already ADOPTS an existing path instead of calling
+    yt-dlp, so a VOD that is already on disk needs no download — only this
+    check stood in the way. A multipart upload is the wrong shape here: the
+    source is a 6 GB 1080p60 file, the server is one stdlib thread, and the
+    file is already on the same disk the pipeline reads from.
+    """
+    try:
+        return bool(s) and Path(s).expanduser().is_file()
+    except OSError:
+        return False
+
+
 def job_name_for(url: str, given: str) -> str:
     """`fns-2905408276` — the channel and the VOD id, which is what the
     pipeline's own directories are already named after."""
@@ -442,6 +457,13 @@ def job_name_for(url: str, given: str) -> str:
     m = re.search(r"/videos?/(\d+)", url)
     if m:
         vid = m.group(1)
+    elif is_local_vod(url):
+        # a local file has no VOD id, so its own name is the next best thing —
+        # less the channel prefix, or the job reads `fns-fnsstreamnov5`
+        stem = re.sub(r"[^a-z0-9]+", "", Path(url).stem.lower())
+        if given and stem.startswith(given.replace("-", "")):
+            stem = stem[len(given.replace("-", "")):].lstrip("-_") or stem
+        vid = stem[:24]
     if given and vid:
         return f"{given}-{vid}"
     return given or (f"vod-{vid}" if vid else f"job-{int(time.time())}")
@@ -568,8 +590,11 @@ class Handler(BaseHTTPRequestHandler):
             rights = str(body.get("rights", "")).strip()
             channel = str(body.get("channel", "")).strip()
             note = str(body.get("note", "")).strip()
-            if not url.startswith(("http://", "https://")):
-                return self._json({"error": "a Twitch VOD URL is required"}, 400)
+            if not url.startswith(("http://", "https://")) \
+                    and not is_local_vod(url):
+                return self._json(
+                    {"error": "give a Twitch VOD URL, or the path to a VOD "
+                              "already on this machine"}, 400)
             if rights not in RIGHTS:
                 return self._json(
                     {"error": f"rights must be one of {', '.join(RIGHTS)} — "

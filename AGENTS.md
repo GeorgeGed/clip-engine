@@ -5083,3 +5083,14 @@ appended to the spec's notes, Save, and Save & rebuild.
 Verified against the real job: 8 specs read, "4 built of 8 specced", clip 07
 shown as not built, a write round-tripped and reverted with nothing lost, and
 all six validation paths refused.
+
+### A local VOD needs no upload, and `fetch` already knew
+
+*"upload a full vod"* taken literally would be a multipart POST of a 6 GB
+1080p60 file through a one-thread stdlib server, onto the same disk the
+pipeline already reads from. **`engine.ingest.fetch` ADOPTS an existing path
+instead of calling yt-dlp** — that has always been true — so the only thing
+standing in the way was the server's `url.startswith("http")` check. The
+form now takes a Twitch URL *or* a path, and a local file's job name comes
+from its own stem, less the channel prefix so it does not read
+`fns-fnsstreamnov5`.
