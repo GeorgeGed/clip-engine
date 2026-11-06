@@ -7,13 +7,18 @@
        display:flex;flex-direction:column;align-items:center;gap:14px}
 .canvas{position:relative;width:min(292px,72vw);aspect-ratio:9/16;
         background:var(--sunk);overflow:hidden;border:1px solid var(--line)}
-.canvas img{width:100%;height:100%;object-fit:cover;display:block}
+.canvas video{width:100%;height:100%;object-fit:contain;display:block;
+               background:#000}
 .seam{position:absolute;left:0;right:0;top:42%;height:1px;background:var(--blue);
-      opacity:.85}
+      opacity:.85;pointer-events:none}
 .seam::after{content:"seam 0.42";position:absolute;right:4px;top:4px;font-size:9px;
              letter-spacing:.08em;text-transform:uppercase;color:#fff;
              background:var(--blue);padding:1px 4px}
 .safe{position:absolute;inset:0;pointer-events:none}
+/* The guides sit OVER the video, so they have to be dismissable: the bottom
+   platform-UI band lands exactly where the player's own controls are. */
+.canvas.noguide .seam,.canvas.noguide .safe{display:none}
+#guides{align-self:center}
 .safe i{position:absolute;left:0;right:0;background:repeating-linear-gradient(
         45deg,transparent,transparent 5px,var(--line) 5px,var(--line) 6px)}
 .safe i.t{top:0;height:7.8%}

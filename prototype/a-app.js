@@ -67,11 +67,22 @@ function steps() {
 }
 
 /* ───────────────────────────── results ─────────────────────────────────── */
-let filter = 'all', sort = 'score';
+// USABLE IS THE DEFAULT, AND REFUSED IS ONE CLICK AWAY.
+//
+// George: "you gave it a 63 and yet it's blocked because it's 43% muted.
+// Why are you even showing that to me if we can't even use it?" He is right
+// — a high score on a clip that cannot be cut is a tease, and it was the
+// first thing in the grid. The yield still matters, so the count stays in
+// the tally and on the chip; what changes is that it no longer costs him
+// the top of the page.
+let filter = 'usable', sort = 'score';
 const FILTERS = [
-  ['all', 'Everything'], ['rendered', 'Rendered'],
-  ['cuttable', 'Ready to cut'], ['blocked', 'Blocked'],
+  ['usable', 'Usable'], ['rendered', 'Rendered'],
+  ['cuttable', 'Ready to cut'], ['blocked', 'Refused'], ['all', 'Everything'],
 ];
+const inFilter = (c, k) => k === 'all' ? true
+  : k === 'usable' ? verdictOf[c.n] !== 'blocked'
+  : verdictOf[c.n] === k;
 
 function tally() {
   const n = (k) => D.candidates.filter((c) => verdictOf[c.n] === k).length;
@@ -91,8 +102,7 @@ function filters() {
     const b = el('button', 'seg'); b.type = 'button';
     b.setAttribute('aria-pressed', String(k === filter));
     b.append(document.createTextNode(label));
-    const n = k === 'all' ? D.candidates.length
-      : D.candidates.filter((c) => verdictOf[c.n] === k).length;
+    const n = D.candidates.filter((c) => inFilter(c, k)).length;
     b.append(el('span', 'c', String(n)));
     b.addEventListener('click', () => { filter = k; filters(); cards(); });
     f.append(b);
@@ -106,7 +116,18 @@ function card(c) {
   if (built) {
     const img = document.createElement('img');
     img.src = built.poster; img.alt = ''; img.loading = 'lazy';
-    top.append(img, el('div', 'dur num', built.dur.toFixed(1) + 's'));
+    // Preview on hover, like every clip grid does. preload="none" so forty
+    // cards do not pull four videos before anyone asks.
+    const v = document.createElement('video');
+    v.className = 'prev'; v.src = `clips/${String(c.n).padStart(2, '0')}.mp4`;
+    v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'none';
+    top.append(img, v, el('div', 'dur num', built.dur.toFixed(1) + 's'));
+    top.addEventListener('pointerenter', () => {
+      v.classList.add('on'); v.play().catch(() => {});
+    });
+    top.addEventListener('pointerleave', () => {
+      v.classList.remove('on'); v.pause();
+    });
   } else {
     // THE SOURCE FRAME, LETTERBOXED. It is 16:9 because nothing has reframed
     // it yet, and showing that is more use than a grey rectangle or a fake
@@ -176,7 +197,7 @@ function card(c) {
 
 function cards() {
   const g = $('#cards'); g.textContent = '';
-  let rows = D.candidates.filter((c) => filter === 'all' || verdictOf[c.n] === filter);
+  let rows = D.candidates.filter((c) => inFilter(c, filter));
   rows = sort === 'score'
     ? [...rows].sort((a, b) => b.score - a.score || a.n - b.n)
     : [...rows].sort((a, b) => a.at - b.at);
@@ -207,7 +228,11 @@ function paneTranscript(c) {
     if (keys.has(bare(w.w))) s.classList.add('emph');
     if (booms.some((b) => Math.abs(b - w.t) < 0.45)) s.classList.add('boom');
     s.title = w.t.toFixed(2) + 's';
-    s.addEventListener('click', () => toast(`In-point would move to ${w.t.toFixed(2)}s`));
+    s.addEventListener('click', () => {
+      const v = $('#evid');
+      if (v && v.src) { v.currentTime = Math.max(0, w.t - 0.15); v.play().catch(() => {}); }
+      else toast(`In-point would move to ${w.t.toFixed(2)}s`);
+    });
     tx.append(s);
   });
   const kv = $('#txkv'); kv.textContent = '';
@@ -259,21 +284,26 @@ function editor(n) {
   const c = clipOf[n]; if (!c) return;
   openN = n;
   $('#etitle').textContent = c.hook || c.subject || `Clip ${n}`;
-  $('#eimg').src = c.poster;
+  const vid = $('#evid');
+  vid.poster = c.poster;
+  vid.src = `clips/${String(n).padStart(2, '0')}.mp4`;
+  vid.load();
   const strip = $('#strip'); strip.textContent = '';
   c.strip.forEach((src, i) => {
     const im = document.createElement('img');
     im.src = src; im.alt = ''; im.loading = 'lazy';
     if (i === 1) im.classList.add('on');
     im.addEventListener('click', () => {
-      $('#eimg').src = src;
+      vid.currentTime = c.dur * (i + 0.5) / c.strip.length;
       strip.querySelectorAll('img').forEach((x) => x.classList.toggle('on', x === im));
-      $('#tl i').style.width = ((i + 0.5) / c.strip.length * 100) + '%';
     });
     strip.append(im);
   });
   $('#tl').textContent = '';
-  const fill = el('i'); fill.style.width = '18.75%'; $('#tl').append(fill);
+  const fill = el('i'); fill.style.width = '0%'; $('#tl').append(fill);
+  vid.ontimeupdate = () => {
+    fill.style.width = (vid.currentTime / c.dur * 100) + '%';
+  };
   (c.booms || []).forEach((b) => {
     const mk = el('b'); mk.style.left = (b.t / c.dur * 100) + '%';
     mk.title = `boom ${b.t}s`; $('#tl').append(mk);
@@ -282,6 +312,10 @@ function editor(n) {
   [`1080×1920`, `${c.dur.toFixed(2)}s`, `${c.mb} MB`, `score ${c.score}`,
    `${c.shots} splices`].forEach((x) => m.append(el('span', '', x)));
 
+  $('#guides').onclick = () => {
+    const on = $('#canvas').classList.toggle('noguide');
+    $('#guides').setAttribute('aria-pressed', String(!on));
+  };
   paneTranscript(c);
   radios($('#p1'), 'lay', LAYOUTS, 0,
     'The lower pane is a document viewer, not a gameplay slot.');

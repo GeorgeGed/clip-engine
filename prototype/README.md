@@ -63,3 +63,25 @@ were never measured.
 * **Nothing coloured is ever a number.** The score is ink or white; the blue
   under it is a bar. The accent is structure — a key, a rule, a seam marker.
 * **The accent never touches a photograph.** Frames sit on the sunk neutral.
+
+## A high score on a clip you cannot use is a tease
+
+George, on the first OpusClip-shaped build: *"you gave it a 63 and yet it's
+blocked because it's 43% muted. Why are you even showing that to me if we
+can't even use it?"*
+
+He is right, and it was the first card in the grid. The yield still matters —
+40 of 50 refused is the honest number and the reason the tool is worth
+anything — but it does not have to cost him the top of the page. The default
+filter is now **Usable** (10), with **Refused** (40) one click away and the
+count on the chip either way.
+
+## The editor plays the actual cut
+
+Four preview copies at 540×960 ship beside the page as artifact files
+(`clips/NN.mp4`, 2.5–3.5 MB each, re-encoded from the 18–24 MB masters).
+The cards preview on hover with `preload="none"`, the editor plays with
+controls, the filmstrip seeks, and clicking a word in the transcript jumps
+the video to it. The guides — seam at 0.42 and the platform-UI safe bands —
+sit over the video and can be hidden, because the bottom band lands exactly
+where the player's own controls are.
