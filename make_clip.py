@@ -558,6 +558,27 @@ def _drop_hallucinated(cs, absent, min_share=HALLUCINATION_SHARE):
         (dropped if mute / span > min_share else kept).append((c, mute / span))
     return [c for c, _ in kept], dropped
 
+def _cut_words(clip, st):
+    """`[(cut_second, text)]` for the nucleus gate.
+
+    Read off the same `keeps` everything else is remapped through, and from
+    disk when the captions stage did not run in THIS invocation — a partial
+    run is the normal way this pipeline is driven, and a value that only
+    exists in memory is the defect this file has recorded three times.
+    """
+    words = st.get("words")
+    if words is None:
+        words = [w for u in json.loads(clip.words(ROOT).read_text())["utterances"]
+                 for w in u["words"]]
+    remap = _remap_fn(st["keeps"])
+    out = []
+    for w in words:
+        t = remap(w["start"])
+        if t is not None:
+            out.append((t, w.get("text", "")))
+    return out
+
+
 def _emphasis_anchors(clip, ch, st):
     """The emphasised caption cards' start times, in OUTPUT time.
 
@@ -1325,8 +1346,11 @@ def stage_punch(clip, ch, st):
     # partial run is the normal way this pipeline is driven
     out_dur = st.get("out_dur") or sum(k.length for k in st["keeps"])
     budget = rp.boom_budget(out_dur)
-    auto_base, auto = rp.bold_moments(_cut_audio(clip, ch, st),
-                                      anchors=anchors, limit=budget)
+    gwords = _cut_words(clip, st)
+    gated: list = []
+    auto_base, auto = rp.bold_moments(
+        _cut_audio(clip, ch, st), anchors=anchors, limit=budget,
+        words=gwords, on_gate=lambda t, d, why: gated.append((t, d, why)))
     log(f"  baseline {auto_base:.1f} dBFS; {len(anchors)} emphasised cards to "
         f"anchor to; budget {budget} "
         f"({out_dur:.1f}s / one per {rp.BOOM_EVERY:.0f}s)")
@@ -1343,6 +1367,9 @@ def stage_punch(clip, ch, st):
             if d is None:
                 log(f"     {t:6.2f}s  NOT near any measured candidate — "
                     f"taken literally")
+    for t, d, (word, dist, anchor) in gated:
+        log(f"     gated {t:6.2f}s +{d} dB on {anchor!r} — "
+            f"{word!r} {dist} word(s) ahead demotes the clause")
     for t, d in moments:
         log(f"     {t:6.2f}s  " + (f"+{d} dB" if d is not None else "(spec)"))
     if not moments:

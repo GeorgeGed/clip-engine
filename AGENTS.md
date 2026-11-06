@@ -5149,3 +5149,87 @@ H.264, so deflate buys nothing and costs the whole 83 MB through a CPU.
 Verified against the real job: doctor reports Studio ready, the lookup
 returns `gofns`, a bad URL is refused, and the zip comes back 83,424,916
 bytes holding all four delivered clips.
+
+## THE SIGNAL WAS IN THE WORDS, NOT THE WAVEFORM — the nucleus gate
+
+**The section above concluded that no rule separates George's six boom
+verdicts and shipped a human override. That conclusion was wrong, and an
+adversarial pass over the same six points found the rule.** It is recorded
+here as a correction rather than a rewrite, because the way it was missed is
+the lesson.
+
+**Five metrics were tested and all five were acoustic or positional.** The
+pass ran 34 more — YIN pitch-accent prominence, syllable rate and rate
+change, 2s and 4s passage energy, spectral centroid, attack slope, f0 reset
+and terminal fall, pre-moment silence depth — and **every one failed too**.
+The audio genuinely does not contain it. What was never looked at is the
+WORD SEQUENCE, and the answer was sitting in it.
+
+### The rule
+
+A connective like *but*, *though*, *however* or *as well* marks the clause
+BEFORE it as the satellite of the one after: the speaker is about to
+overrule, qualify or extend what he has just said. **A boom lands as a full
+stop, so putting one on a clause he is in the middle of demoting punctuates
+the wrong half of the sentence.**
+
+| | |
+|---|---|
+| *"they had PRIOR issues **as well**"* | rejected — connective **2 words ahead** |
+| *"don't get paid for a COUPLE months **but** you have the freedom"* | rejected — **2 words ahead** |
+| *"and END up making runs"* | accepted — none within twelve |
+| *"i DON'T want to hear no complaints"* | accepted |
+| *"i JUST don't want to hear it"* | accepted |
+| *"ping issues CHEATERS like if a player..."* | accepted |
+
+`engine/nucleus.py`. A FILTER, run before the ranking; a gated candidate is
+dropped, never nudged. **Forward only** — a connective BEHIND the word
+promotes it (*"but you HAVE the freedom"* makes "have" the nucleus), so
+looking both ways would invert the rule.
+
+### Why this is not the sixth fitted constant
+
+1. **It is invariant from W=3 to W=12.** Sustain separated the same six at
+   exactly one window/threshold pair and nowhere else, which is how it got
+   as far as a stated conclusion before the sweep caught it. A plateau is
+   the test; this one has a wide one.
+2. **It holds on clips it was never fitted to.** On clip 6 it gates 34.19
+   (*"its own issues / it is **still** better than locking players out"*) and
+   so promotes **9.30 "CHEATERS"** — the one moment in this job George
+   pointed at himself, which the dB ranking had buried at third. On clip 12
+   it independently gates 27.25, the moment he rejected, and leaves both he
+   accepted.
+3. **Its only failure mode is one boom fewer**, and both of his complaints
+   were that there was one too many. A filter that errs toward fewer errs in
+   the direction he has asked for twice.
+
+### The result, and the overrides are gone
+
+With the gate on, **every clip is right with no override anywhere**:
+
+| clip | automatic pick | |
+|---|---|---|
+| 06 | **[9.30, 22.57]** | CHEATERS recovered |
+| 08 | [] | unchanged — no qualifying peak |
+| 12 | [2.87, 12.87] | both he accepted, unchanged |
+| 16 | **[21.92]** | the one he called perfect |
+
+`Clip.booms` stays as the escape hatch and both clips' values were CLEARED,
+because naming the answer would hide whether the logic reaches it.
+
+**Only three members of the list have ever fired** across the four built
+clips — `but` (6 occurrences), `still` (1), `as well` (1). The rest are
+there because the class is closed and writing half of it would be the fitted
+version. The known risk is `still`, adversative in *"it is still better
+than"* and temporal in *"he's still playing"*; every occurrence in these
+clips is the adversative one, and a temporal one would cost a clip a boom,
+which is the safe direction. The build log names the word that gated each
+candidate, so a wrong drop is readable rather than silent.
+
+**The generalisable part: when five measurements of the same KIND all fail,
+the next thing to try is a different kind, not a sixth of the same.** Every
+metric tried was a number taken off the waveform. 34 more of those failed.
+One look at the transcript answered it.
+
+21 tests in `tests/test_nucleus.py`, including the W sweep and the
+`as well as` bigram.

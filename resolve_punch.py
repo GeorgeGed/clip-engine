@@ -289,7 +289,7 @@ def _onset(rms, times, i, base, d, max_back=1.20):
 
 def bold_moments(path=SRC, *, min_db=MIN_DB, min_sep=MIN_SEP,
                  skip_head=SKIP_HEAD, limit=MAX_PUNCHES, db_frac=DB_FRAC,
-                 anchors=None, keep=None):
+                 anchors=None, keep=None, words=None, on_gate=None):
     """The `limit` loudest local RMS maxima at least `min_db` over baseline.
 
     RANKED, NOT THRESHOLDED, and that is a stability fix rather than a taste
@@ -365,6 +365,23 @@ def bold_moments(path=SRC, *, min_db=MIN_DB, min_sep=MIN_SEP,
             if t < skip_head:
                 continue
         cand.append((t, round(float(d), 1)))
+    if words:
+        # THE NUCLEUS GATE. A boom does not go on the clause a connective is
+        # about to overrule — see `engine/nucleus`. A filter, so it runs
+        # before the ranking, and a gated candidate is DROPPED rather than
+        # nudged. Its only failure mode is one boom fewer, which is the
+        # direction George's two complaints have both pointed.
+        from engine import nucleus                        # noqa: PLC0415
+        wt = [w[0] for w in words]
+        wx = [w[1] for w in words]
+        live = []
+        for t, d in cand:
+            why = nucleus.gate(t, wt, wx)
+            if why and on_gate:
+                on_gate(t, d, why)
+            if not why:
+                live.append((t, d))
+        cand = live
     if keep:
         # A WATCHED HUMAN'S CALL, snapped to the measured candidates so the
         # moment keeps its own attack refinement and its dB. A time with no
