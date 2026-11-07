@@ -5851,3 +5851,44 @@ inherits whisper's spelling into the title — clip 32 came back as *"FNS:
 IT'S NOT AS BAD FOR VALEN AS YOU THINK"*, a wrong name on the biggest text
 in the clip. `_clean_hook` corrects before upper-casing, since the aliases
 are matched in ordinary case.
+
+### THE CHAT RENDERED, REACHED THE TIMELINE, AND WAS NEVER VISIBLE
+
+Turning the topicality floor into advice was not the whole of "the chat is
+completely missing". With the floor out of the way, clip 07 still shipped
+with no chat on screen — and every log line said it had worked:
+
+    topicality: chat is 11% on-topic ... but chat is ON
+    MODE: reactive  (1 bursts, 17% of the clip)
+       burst  46.5- 58.0s  x4.83 peak 350/min
+    91 messages on the cut
+    Chat: 1717 frames -> rm_Chat.mov
+    appended 4 of 4: V3:1 V4:0 V5:1 V6:1
+
+**`chat_windows.json` was `[]`.** A 13 MB overlay rendered for 28.6 seconds,
+was resolved by path, was appended to V3 — and had no window telling it when
+to be on screen, so not one frame of it was ever seen.
+
+**`reactive` shows the box only ON a burst, and bursts are found in SOURCE
+time across the whole candidate region.** Clip 07's single burst sits at
+source 46.5–58.0s; the cut now starts at 20.5 and runs 28.7s, so the burst
+is past the end. Reactive mode selected itself on a measurement taken
+outside the clip it was about to decorate.
+
+This is the second time an empty window list has silently removed the chat.
+The first is recorded above — *"the continuous chat window came back EMPTY
+on any clip with a non-zero in-point"* — and the lesson taken then was about
+`remap(0.0)`. The general version is the one that matters: **an overlay that
+renders, resolves and appends is not an overlay that is visible**, and
+nothing downstream of `windows()` can tell the difference between "no
+windows because the chat is off" and "no windows because the mode picked
+itself badly".
+
+So an empty window list is now a fallback to `continuous` rather than a
+silent nothing, and if the fallback is also empty it says so in as many
+words. A clip that was going to show chat and shows none is worse than one
+that shows it throughout.
+
+**It also explains the missing sound.** `paper` fires when the chat panel
+settles in; no window, no entrance, no cue — so "there's no sound effects"
+and "there's no chat" were the same defect reported twice.

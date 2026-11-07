@@ -114,7 +114,60 @@
   "delivered": "deliver/fns-04-it-is-genuinely-one-narrative-no-pivot-titleable-in.mp4"
  },
  "fns-07": {
-  "built": false,
-  "error": "Command '['/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/.venv/bin/python', '/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/make_clip.py', '/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/clips/fns-07.json']' returned non-zero exit status 1."
+  "built": true,
+  "qc_ok": true,
+  "seconds": 219,
+  "render": "renders/fns-2905408276-07.mp4",
+  "findings": [
+   {
+    "check": "duration",
+    "ok": true,
+    "detail": "28.70s (want 15-90)"
+   },
+   {
+    "check": "loudness",
+    "ok": true,
+    "detail": "-14.15 LUFS (target -14.0)"
+   },
+   {
+    "check": "true_peak",
+    "ok": true,
+    "detail": "-1.36 dBTP"
+   },
+   {
+    "check": "black_top",
+    "ok": true,
+    "detail": "1719 frames, YMAX min 240"
+   },
+   {
+    "check": "black_bottom",
+    "ok": true,
+    "detail": "1719 frames, YMAX min 238"
+   },
+   {
+    "check": "dead_space",
+    "ok": true,
+    "detail": "0.80s quiet (2.8%, max 8%)"
+   },
+   {
+    "check": "absent_audio",
+    "ok": true,
+    "detail": "0.00s in 0 runs"
+   },
+   {
+    "check": "caption_cadence",
+    "ok": true,
+    "detail": "2.20 cards/s (63 cards)"
+   },
+   {
+    "check": "hallucinated_captions",
+    "ok": true,
+    "detail": "none"
+   }
+  ],
+  "subject": "Free agent market and a guarantee that Sam won't join a team this year",
+  "permission": "explicit",
+  "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release.",
+  "delivered": "deliver/fns-07-sam-won-t-compete-on-an-org-this-year.mp4"
  }
 }

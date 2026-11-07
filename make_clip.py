@@ -1100,8 +1100,25 @@ def stage_chat(clip, ch, st):
     for b in info["bursts"]:
         log(f"     burst {b.start-t0:5.1f}-{b.end-t0:5.1f}s  x{b.mult:.2f} "
             f"peak {b.peak_rate:.0f}/min  hype {b.hype:.2f}")
+    # NO WINDOWS MEANS NO CHAT, WHATEVER THE MODE SAID. `reactive` shows the
+    # box only ON the bursts, and a burst is found in SOURCE time across the
+    # whole candidate region — so on clip 07 the one burst sat at source
+    # 46.5-58.0s, past the end of a cut that starts at 20.5 and runs 28.7s,
+    # and the window list came back empty. The overlay still rendered, still
+    # got appended to V3, and was never once visible: 13 MB of chat nobody
+    # sees, which is indistinguishable from the feature being broken.
+    #
+    # A clip that was going to show chat and shows none is worse than one
+    # that shows it throughout, so this falls back rather than failing quiet.
+    if not wins:
+        log(f"  {mode} mode produced NO windows — its bursts fall outside "
+            f"this cut. Falling back to continuous.")
+        mode, wins, info = cr.windows(raw, t0, t1, remap=remap,
+                                      mode="continuous", out_dur=st["out_dur"])
     for w in wins:
         log(f"     window {w['from']:6.2f}-{w['to']:6.2f}  ({w['to']-w['from']:.2f}s)")
+    if not wins:
+        log("  STILL no windows after the fallback — chat will not appear.")
     st["chat_windows"] = wins
     st["chat_mode"] = mode
 
