@@ -665,6 +665,19 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(chunk)))
             self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
             self.send_header("Accept-Ranges", "bytes")
+            # THE ONE RESPONSE PATH THAT USED TO OMIT THIS. `_send` sets it on
+            # everything else, and a 206 is exactly where it matters: a clip
+            # is REBUILT at the same URL, so a cached byte range is the OLD
+            # render, and a <video> that stitches fresh ranges onto stale ones
+            # plays a clip that never existed. Cloudflare gives a 200/206 with
+            # no Cache-Control a 120-minute edge TTL.
+            #
+            # Today these URLs happen to be extensionless (`/clip/12`, not
+            # `/clip/12.mp4`) and Cloudflare's default cache picks by
+            # EXTENSION, so nothing is cached in practice. That is luck, not
+            # a design — one Cache Rule, or one route gaining a suffix, ends
+            # it. Say what we mean instead.
+            self.send_header("Cache-Control", "no-store")
             self.end_headers()
             self.wfile.write(chunk)
             return

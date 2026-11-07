@@ -57,6 +57,14 @@ cat > "$CFDIR/config.yml" <<CFG
 tunnel: $UUID
 credentials-file: $CREDS
 
+# A RENDER MUST NOT BE INTERRUPTED BY A SELF-UPDATE. cloudflared auto-updates
+# and RESTARTS itself by default; a Resolve build takes minutes and the site
+# is behind this process the whole time.
+no-autoupdate: true
+
+loglevel: info
+logfile: $HOME/Library/Logs/cloudflared.log
+
 ingress:
   - hostname: $HOST
     service: http://127.0.0.1:$PORT

@@ -25,6 +25,33 @@ else
                     || bad "will sleep when idle — see ./service/awake.sh"
 fi
 
+echo "── surviving a reboot"
+# A LaunchAgent lives in gui/$UID and Apple is explicit that an agent
+# "executes only while that user is logged in". So without auto-login the
+# site does NOT come back from a reboot — it comes back from a LOGIN. That
+# matters here because a reboot is not hypothetical: automatic macOS updates
+# restart the machine on their own schedule.
+if sysadminctl -autologin status 2>&1 | grep -qi "is ON"; then
+  ok "automatic login is on — the agent starts without anyone at the keyboard"
+else
+  bad "automatic login is OFF — after a reboot this stays down until you log in"
+fi
+if defaults read /Library/Preferences/com.apple.SoftwareUpdate \
+     AutomaticallyInstallMacOSUpdates 2>/dev/null | grep -q 1; then
+  pend=$(softwareupdate --list --no-scan 2>&1 | grep -c "Action: restart")
+  if [ "${pend:-0}" -gt 0 ]; then
+    bad "$pend macOS update(s) pending that RESTART — an unattended outage is queued"
+  else
+    warn "macOS installs updates automatically; a restart can happen unattended"
+  fi
+fi
+# kcpassword is how macOS stores the auto-login password, obfuscated. One
+# left behind from a previous enablement is both a stale secret and a trap:
+# setting autoLoginUser without rewriting it logs nobody in.
+if [ -f /etc/kcpassword ] && ! sysadminctl -autologin status 2>&1 | grep -qi "is ON"; then
+  warn "/etc/kcpassword exists but auto-login is off — a leftover, and stale"
+fi
+
 echo "── the site"
 if launchctl print "gui/$(id -u)/$LABEL" >/dev/null 2>&1; then
   st=$(launchctl print "gui/$(id -u)/$LABEL" 2>/dev/null | awk '/^\tstate = /{print $3}')

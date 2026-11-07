@@ -5498,3 +5498,70 @@ against this SQLite the site already is one.
   tunnel and the renderer with it. `caffeinate -s` while a batch runs.
 * **One job at a time, still.** That is Resolve, not the web layer, and the
   queue is the honest model of it rather than a UI limit.
+
+### A PERMANENT HOSTNAME: four things the quick tunnel was hiding
+
+George picked `clips.ult-orb.com`, which costs a nameserver move on his live
+publication. `service/` holds the runbook, the backup, the services and the
+checks. Four findings are worth keeping, and **two of them correct claims
+made earlier in this same round.**
+
+**1. "SURVIVES A REBOOT" WAS FALSE, AND THE REBOOT IS SCHEDULED.** The site
+is a LaunchAgent, and Apple is explicit that an agent *"executes only while
+that user is logged in"*. Measured here: `sysadminctl -autologin status` →
+**OFF**, `autoLoginUser` absent. So it survives a LOGIN, not a boot — and
+`AutomaticallyInstallMacOSUpdates = 1` with **macOS 27.2 pending, `Action:
+restart`**, so an unattended outage is queued rather than hypothetical. A
+LaunchDaemon would start earlier and be useless, because the build drives
+Resolve's scripting API and that needs a desktop: **the login requirement
+belongs to Resolve, not to the plist.** `/etc/kcpassword` also exists and is
+395 days older than the current password, so a scripted auto-login would set
+the key and still log nobody in.
+
+**2. THE 206 BRANCH WAS THE ONE PATH WITHOUT `Cache-Control`**, while
+`_send` sets `no-store` on every other. Cloudflare gives a 200/206 with no
+`Cache-Control` a **120-minute edge TTL**, and a clip is REBUILT at the same
+URL — so a `<video>` stitching fresh ranges onto cached ones plays a cut
+that never existed. The first read of this was that `.mp4` is in
+Cloudflare's default-cached extension list; the adversarial pass corrected
+it — **Cloudflare picks by EXTENSION, not MIME**, and `/api/jobs/1/clip/12`
+has none, so nothing was being cached in practice. The header is set anyway:
+*relying on a route happening to lack a suffix is luck, not a design.*
+
+**3. A MEASUREMENT THROUGH A QUICK TUNNEL DOES NOT PROVE A REAL ZONE.**
+Range was verified end to end — 206, exact `Content-Range`, a mid-file 2 MB
+slice byte-identical by sha256, 29.8 MB in 1.71 s — and every one of those
+runs reported `cf-cache-status: DYNAMIC`, which means *"not eligible for
+cache, so the request went to the origin without a cache lookup."*
+trycloudflare does not cache; a real zone does. **The test has to be re-run
+on the permanent hostname**, watching that header. Same family as measuring
+the punch plan from the overwritten delivery: the thing measured was not the
+thing that ships.
+
+**4. CLOUDFLARE'S TERMS RESTRICT SERVING VIDEO ON A FREE PLAN.** Verbatim:
+*"Unless you are an Enterprise customer, Cloudflare offers specific Paid
+Services (e.g., the Developer Platform, Images, and Stream) that you must
+use in order to serve video and other large files via the CDN."* The usual
+escape — a grey-clouded subdomain — **does not exist for a tunnel**: a
+`cfargotunnel.com` target has no public A record, so the CNAME must be
+proxied. Not a blocker for one person watching their own clips; it is worth
+knowing before an agency delivers client video off it. (A research pass
+claimed this clause appears on the Tunnel routing page. It does not — it is
+in the Service-Specific Terms. The term is real, the citation was not.)
+
+**Two smaller ones.** `cloudflared --allowed-mail` (new in 2026.10) gives
+email-PIN auth with no Cloudflare account and no domain — but the binary
+also carries the string *"--allowed-mail is only supported for Quick
+Tunnels"*, so it cannot protect a permanent hostname. And **HTTP/3 is on by
+default on Free zones and is the one documented cause of video failing
+through a Cloudflare Tunnel** (cloudflared #1519); if clips stall on the
+named tunnel having worked on the quick one, turn it off in Speed →
+Protocol Optimization before looking anywhere else.
+
+**And the hostname is not a secret.** Universal SSL issues per-hostname
+certificates, so `clips.ult-orb.com` is published to Certificate
+Transparency within minutes of working, permanently, in a feed scanners
+read. That — not SSO for one person — is why Access goes in front of it.
+Access is free to 50 users, runs at request-phase row 14 against Cache Rules
+at row 18, and was measured not to touch Range or to strip `X-Clip-Key`, so
+the existing gate stays underneath it. See `service/ACCESS.md`.
