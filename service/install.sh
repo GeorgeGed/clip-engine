@@ -20,6 +20,23 @@ PORT="${CLIP_FACTORY_PORT:-8808}"
 [ -x "$PY" ] || { echo "no interpreter at $PY"; exit 1; }
 mkdir -p "$LOGS" "$HOME/Library/LaunchAgents"
 
+# THE KEY HAS TO OUTLIVE THE SHELL THAT MADE IT. start.sh generates one per
+# run, which is right for a throwaway quick tunnel and wrong for a service:
+# a key that changes whenever the agent restarts is a bookmark that stops
+# working for no visible reason. So it is generated once, kept in
+# web/.site-key (gitignored, 0600) and reused on every re-install.
+KEYFILE="$REPO/web/.site-key"
+if [ -z "${CLIP_FACTORY_TOKEN:-}" ] && [ -f "$KEYFILE" ]; then
+  CLIP_FACTORY_TOKEN="$(cat "$KEYFILE")"
+fi
+if [ -z "${CLIP_FACTORY_TOKEN:-}" ] && [ "${1:-}" != "--no-key" ]; then
+  CLIP_FACTORY_TOKEN="$("$PY" -c 'import secrets; print(secrets.token_urlsafe(24))')"
+fi
+if [ -n "${CLIP_FACTORY_TOKEN:-}" ]; then
+  printf '%s' "$CLIP_FACTORY_TOKEN" > "$KEYFILE"
+  chmod 600 "$KEYFILE"
+fi
+
 # The PATH the job will get. Homebrew first, then the user's own bin, then
 # the system — because `ffmpeg` and friends are called by bare name and
 # launchd's default PATH has neither of the first two.
@@ -94,4 +111,10 @@ echo "installed $LABEL"
 echo "  plist   $PLIST"
 echo "  logs    $LOGS/site.{out,err}.log"
 echo "  port    $PORT"
-[ -n "${CLIP_FACTORY_TOKEN:-}" ] && echo "  key     set" || echo "  key     none (local only)"
+if [ -n "${CLIP_FACTORY_TOKEN:-}" ]; then
+  echo "  key     $KEYFILE"
+  echo
+  echo "  http://127.0.0.1:$PORT/?k=$CLIP_FACTORY_TOKEN"
+else
+  echo "  key     none (local only)"
+fi

@@ -41,3 +41,4 @@ jobs/*/retail/
 web/factory.db
 jobs/*/web/
 web/.runner.lock
+web/.site-key
