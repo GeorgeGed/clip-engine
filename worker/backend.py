@@ -44,6 +44,12 @@ class Job:
     stages: list[str]
     note: str = ""
     extra: list[str] = field(default_factory=list)   # e.g. --only 16 --force
+    # THE REVIEWED SPEC LIVES IN THE CONTROL PLANE, NOT ON THE MAC. Every
+    # note George has ever given reduces to editing one of five fields, and
+    # `batch.py specs` regenerating over a reviewed spec has already eaten
+    # four rounds of review once. So the claim carries them down and the
+    # agent writes them to clips/*.json before building.
+    specs: dict = field(default_factory=dict)        # {"12": {...}, ...}
 
 
 class Cancelled(Exception):
@@ -111,10 +117,18 @@ class LocalBackend:
         p.mkdir(parents=True, exist_ok=True)
         return p / f"{stage}.log"
 
-    def publish(self, job: Job, index: int, path: Path, meta: dict) -> str:
+    def upload(self, job: Job, index: int, path: Path, meta: dict) -> str:
         """Locally there is nowhere to upload to; the file is already where
         the site serves it from. Returning the path keeps the contract."""
         return str(path.relative_to(ROOT))
+
+    def record(self, job: Job, index: int, url: str, meta: dict) -> None:
+        """One row per CLIP. The local backend reads from disk, so nothing
+        to write — but the two calls stay separate so both backends have
+        the same shape."""
+
+    def artifact(self, job: Job, kind: str, idx, data=None, url=None) -> None:
+        """Locally the site reads these straight off disk."""
 
     def finish(self, job: Job, state: str, manifest: dict) -> None:
         with self._c() as c:
@@ -130,13 +144,17 @@ class LocalBackend:
 class HttpBackend:
     """A control plane over HTTPS. Six calls, one bearer token.
 
-        POST {base}/claim      {worker, caps}            -> job | null
-        POST {base}/heartbeat  {job, stage, progress}    -> {cancelled: bool}
-        POST {base}/log        {job, stage, text}        -> {}
-        POST {base}/upload-url {job, clip, name, type}   -> {url, headers?, public}
-        POST {base}/clip       {job, clip, url, meta}    -> {}
-        POST {base}/finish     {job, state, manifest}    -> {}
-        POST {base}/health     {worker, health}          -> {}
+        POST {base}/claim      {worker, caps}              -> job | null
+        POST {base}/stage      {job, stage, state, code}   -> {}
+        POST {base}/heartbeat  {job, stage, progress}      -> {cancelled: bool}
+        POST {base}/upload-url {job, clip, name, type}     -> {url, headers?, public}
+        POST {base}/clip       {job, clip, url, meta}      -> {}
+        POST {base}/finish     {job, state, manifest}      -> {}
+        POST {base}/health     {worker, health}            -> {}
+
+    `stage` and `heartbeat` are separate because they meant different things
+    on one endpoint, which a control plane would have to disambiguate by
+    sniffing for a `state` key. One endpoint, one shape.
 
     UPLOADS GO STRAIGHT TO STORAGE, not through the control plane. A clip is
     20 MB and a serverless function is the wrong place to put 20 MB; both
@@ -169,7 +187,8 @@ class HttpBackend:
             return None
         return Job(id=str(j["id"]), name=j["name"], url=j["url"],
                    rights=j["rights"], note=j.get("note", ""),
-                   stages=j.get("stages") or [], extra=j.get("extra") or [])
+                   stages=j.get("stages") or [], extra=j.get("extra") or [],
+                   specs=j.get("specs") or {})
 
     def heartbeat(self, job: Job, stage: str, progress: dict) -> bool:
         try:
@@ -183,15 +202,24 @@ class HttpBackend:
         return not d.get("cancelled")
 
     def stage_state(self, job: Job, stage: str, state: str, code=None) -> None:
-        self._post("heartbeat", {"job": job.id, "stage": stage,
-                                 "state": state, "code": code})
+        self._post("stage", {"job": job.id, "stage": stage,
+                             "state": state, "code": code})
 
     def log_path(self, job: Job, stage: str) -> Path:
         p = ROOT / "jobs" / job.name / "web"
         p.mkdir(parents=True, exist_ok=True)
         return p / f"{stage}.log"
 
-    def publish(self, job: Job, index: int, path: Path, meta: dict) -> str:
+    def upload(self, job: Job, index: int, path: Path, meta: dict) -> str:
+        """Put the bytes in storage and return where they landed.
+
+        DELIBERATELY DOES NOT RECORD A CLIP. A delivery is two files — the
+        mp4 and its sidecar json — and recording both wrote two rows on the
+        same (job_id, idx) primary key, so the second either failed or
+        upserted the mp4's URL away and left the clip unplayable. Found by
+        running the agent against worker/mock_control_plane.py, which is the
+        only reason it was found before the control plane existed.
+        """
         ctype = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
         d = self._post("upload-url", {"job": job.id, "clip": index,
                                       "name": path.name, "type": ctype})
@@ -200,10 +228,25 @@ class HttpBackend:
             headers={"Content-Type": ctype, **(d.get("headers") or {})})
         with urllib.request.urlopen(req, timeout=max(self.timeout, 600)):
             pass
-        url = d.get("public") or d["url"].split("?", 1)[0]
+        return d.get("public") or d["url"].split("?", 1)[0]
+
+    def record(self, job: Job, index: int, url: str, meta: dict) -> None:
+        """One row per clip, written once both its files are up."""
         self._post("clip", {"job": job.id, "clip": index, "url": url,
                             "meta": meta})
-        return url
+
+    def artifact(self, job: Job, kind: str, idx, data=None, url=None) -> None:
+        """Everything the UI needs that is not the finished mp4.
+
+        WITHOUT THIS A CLOUD FRONT END IS A SHELL. The grid needs the scored
+        candidates and their verdicts, the editor needs the spec and the
+        transcript, and both need thumbnails — and all of it is derived on
+        this Mac from files that never leave it. `kind` is one of
+        `candidates`, `spec`, `detail` or `thumb`; `idx` is the clip number
+        or null for whole-job artifacts.
+        """
+        self._post("artifact", {"job": job.id, "kind": kind, "idx": idx,
+                                "data": data, "url": url})
 
     def finish(self, job: Job, state: str, manifest: dict) -> None:
         self._post("finish", {"job": job.id, "state": state,

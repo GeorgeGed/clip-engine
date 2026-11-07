@@ -1,0 +1,64 @@
+{
+ "title": "FNS: STOP COMPLAINING ABOUT UNPAID MONTHS",
+ "subject": "Rant telling complaining players they have it easy and should sacrifice pay for the freedom to pick their own roster",
+ "claim": "\"You guys have it good now... I don't want to hear no complaints\" about not getting paid for a couple months",
+ "duration_s": "59.37s (want 15-90)",
+ "source": {
+  "vod": "2905408276",
+  "in_point_s": 4437.8,
+  "out_point_s": 4525.5,
+  "clip_file_in_point_s": 6.7
+ },
+ "rights": {
+  "permission": "explicit",
+  "note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release."
+ },
+ "chat_overlay": false,
+ "qc": [
+  {
+   "check": "duration",
+   "ok": true,
+   "detail": "59.37s (want 15-90)"
+  },
+  {
+   "check": "loudness",
+   "ok": true,
+   "detail": "-14.10 LUFS (target -14.0)"
+  },
+  {
+   "check": "true_peak",
+   "ok": true,
+   "detail": "-0.70 dBTP"
+  },
+  {
+   "check": "black_top",
+   "ok": true,
+   "detail": "3562 frames, YMAX min 241"
+  },
+  {
+   "check": "black_bottom",
+   "ok": true,
+   "detail": "3562 frames, YMAX min 236"
+  },
+  {
+   "check": "dead_space",
+   "ok": true,
+   "detail": "1.15s quiet (1.9%, max 8%)"
+  },
+  {
+   "check": "absent_audio",
+   "ok": true,
+   "detail": "0.00s in 0 runs"
+  },
+  {
+   "check": "caption_cadence",
+   "ok": true,
+   "detail": "2.27 cards/s (135 cards)"
+  },
+  {
+   "check": "hallucinated_captions",
+   "ok": true,
+   "detail": "none"
+  }
+ ]
+}

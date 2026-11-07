@@ -5565,3 +5565,75 @@ read. That — not SSO for one person — is why Access goes in front of it.
 Access is free to 50 users, runs at request-phase row 14 against Cache Rules
 at row 18, and was measured not to touch Range or to strip `X-Clip-Key`, so
 the existing gate stays underneath it. See `service/ACCESS.md`.
+
+### THE CLOUD CONTRACT, AND THE FOUR BUGS A MOCK FOUND IN AN AFTERNOON
+
+George: *"why are we not using lovable to just make this?"* — and he was
+right. The answer is that the agent already only ever **dials outward**, so
+pointing it at a hosted control plane deletes the tunnel, the domain and the
+DNS entirely. Everything spent on a public URL for a local server was the
+hard way round.
+
+**`worker/mock_control_plane.py` is the reason this is worth trusting.**
+`worker/backend.py` described eight HTTP calls and had never made one
+against anything. Building a cloud app to that description and finding out
+afterwards is the expensive order, so the mock implements the endpoints in
+the stdlib and the real agent runs a real job at it. It found four defects
+in one sitting, and **none of them is visible by reading the code**:
+
+**1. A SIDECAR WAS RECORDED AS A CLIP, ON THE SAME PRIMARY KEY.** A delivery
+is an mp4 *and* its `.json`, and `publish()` both uploaded a file and wrote
+a clip row — so two rows landed on `primary key (job_id, idx)`. The mock was
+taught to reject a duplicate the way Postgres would, and the old code then
+failed with **`HTTP 409 Conflict`, job state `error:HTTPError`, manifest
+empty**. In production it would have upserted the mp4's URL away and left
+the clip unplayable. Split into `upload()` (bytes, returns a URL) and
+`record()` (one row, after both files are up).
+
+**2. `write_specs` REWROTE SPECS THAT HAD NOT CHANGED.** Caught by diffing
+`clips/` against a backup after a round trip that could not have altered any
+content: two files differed, both only in whitespace. Harmless-looking, and
+not: `views.clip_detail` caches against the spec's mtime, so an
+unconditional write silently re-derives every clip's plan through
+`_plan_only`. It now compares parsed content and writes only a real change.
+
+**3. `stage_state` AND `heartbeat` SHARED ONE ENDPOINT** with two different
+payload shapes, so a control plane would have to sniff for a `state` key to
+tell them apart. One endpoint, one shape — `/stage` is its own now. Also
+`health` was sent twice before any work, because `last_health = 0.0` makes
+the loop's own `> 60` test fire immediately.
+
+**4. THE HARNESS ITSELF DEADLOCKED, AND THAT IS THE BEST ONE.**
+`ThreadingHTTPServer` handles `finish` in a worker thread, which sets the
+flag the main loop tests — but the main thread was already blocked inside
+`handle_request()` with **no timeout**, waiting for a connection that would
+never come. The loop condition is only tested *between* calls. So the test
+ran to completion and then hung forever without printing its own verdict,
+which read exactly like a slow job. The timeout goes on **before** the loop.
+Its summary also had to be given `flush=True`: stdout under `nohup` is a
+file, Python block-buffers it, and the verdict died with the process — the
+identical defect as the LaunchAgent's empty log, found twice in one day.
+
+**Two schema bugs, by reading, not by running.** `claim_job`'s WHERE said
+`(needs_resolve or true)`, which is true for every row — the parameter did
+nothing, so a Mac with Resolve closed would claim a job, transcribe for an
+hour and fail at the last stage. And `channel` was `not null` with nothing
+to populate it; it is derived from the job name now.
+
+**What makes a cloud front end possible at all** is the `artifact` channel.
+The grid needs the scored candidates and their verdicts, the editor needs
+the spec and the transcript in cut time, and both need thumbnails — all of
+it derived on the Mac from files that never leave it. The agent pushes each
+kind after the stage that creates it. **And the spec in the control plane is
+the source of truth**, handed down on the claim and applied before any
+build, because `batch.py specs` regenerating over a reviewed spec ate four
+rounds of review once already.
+
+`worker/LOVABLE-BRIEF.md` is what to paste in. Its first instruction is to
+run the mock, because a contract nobody has exercised is a guess.
+
+**One thing to settle before building the editor:** no Supabase Storage page
+documents HTTP Range support either way — five of them checked. The editor
+scrubs 20–40 MB mp4s off 206 responses, so it is `curl -sI -H "Range:
+bytes=0-1023"` against one signed URL, and if it is not a 206 the clips need
+R2 or S3 instead.

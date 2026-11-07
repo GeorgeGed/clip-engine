@@ -214,19 +214,119 @@ def publish_clips(be, job: Job) -> list[dict]:
             except json.JSONDecodeError:
                 pass
         meta["bytes"] = mp4.stat().st_size
-        url = be.publish(job, index, mp4, meta)
+        # BOTH FILES UP FIRST, THEN ONE ROW. A delivery is an mp4 and its
+        # sidecar, and recording each of them as a clip wrote two rows on
+        # one (job_id, idx) primary key — the second upserting the mp4's URL
+        # away and leaving the clip unplayable.
+        url = be.upload(job, index, mp4, meta)
         rec = {"index": index, "url": url, "name": mp4.name}
         if side.exists():
-            rec["sidecar"] = be.publish(job, index, side,
-                                        {"kind": "sidecar", "of": mp4.name})
+            meta["sidecar_url"] = be.upload(
+                job, index, side, {"kind": "sidecar", "of": mp4.name})
+            rec["sidecar"] = meta["sidecar_url"]
+        be.record(job, index, url, meta)
         out.append(rec)
         log(f"  published {mp4.name} -> {url}")
     return out
 
 
+# ----------------------------------------------------------- artifacts -----
+def write_specs(job: Job) -> int:
+    """The control plane's specs win over whatever is on this disk.
+
+    George's every note reduces to editing one of five fields, and the one
+    time `batch.py specs` regenerated over a reviewed spec it silently ate
+    four rounds of review. With a cloud front end the reviewed spec lives
+    there, so it is written down BEFORE any stage runs.
+    """
+    if not job.specs:
+        return 0
+    chan = job.name.split("-")[0]
+    (ROOT / "clips").mkdir(exist_ok=True)
+    n = 0
+    for idx, spec in job.specs.items():
+        p = ROOT / "clips" / f"{chan}-{int(idx):02d}.json"
+        # ONLY WRITE A REAL CHANGE. Rewriting an identical spec in our own
+        # formatting still moves its mtime, and `views.clip_detail` caches
+        # against that mtime — so an unconditional write quietly re-derives
+        # every clip's plan through `_plan_only` for nothing. Caught by
+        # diffing clips/ against a backup after a round trip that could not
+        # have changed any content: two files differed, both only in
+        # whitespace.
+        try:
+            if p.exists() and json.loads(p.read_text()) == spec:
+                continue
+        except (json.JSONDecodeError, OSError):
+            pass                       # unreadable on disk: the sent one wins
+        p.write_text(json.dumps(spec, indent=1))
+        n += 1
+    return n
+
+
+# What the UI needs, and when it becomes true on disk.
+AFTER = {"screen": ("candidates",), "specs": ("spec",),
+         "prep": ("thumb",), "build": ("detail",)}
+
+
+def push_artifacts(be, job: Job, stage: str) -> None:
+    """Send the UI's data up after the stage that creates it.
+
+    A cloud front end cannot derive any of this — it is computed here from
+    files that never leave the Mac. Failures are logged, never fatal: a
+    missing thumbnail is a blank tile, not a lost build.
+    """
+    kinds = AFTER.get(stage)
+    if not kinds or be.name == "local":
+        return
+    sys.path.insert(0, str(ROOT / "web"))
+    try:
+        import views                                   # noqa: PLC0415
+    except Exception as exc:                           # noqa: BLE001
+        log(f"  artifacts: cannot import views ({exc})")
+        return
+    chan = job.name.split("-")[0]
+    try:
+        if "candidates" in kinds:
+            c = views.candidates(job.name)
+            be.artifact(job, "candidates", None, data=c)
+            log(f"  pushed {len(c)} candidates")
+        if "spec" in kinds:
+            n = 0
+            for sp in sorted((ROOT / "clips").glob(f"{chan}-*.json")):
+                idx = int(sp.stem.rsplit("-", 1)[-1])
+                be.artifact(job, "spec", idx,
+                            data=json.loads(sp.read_text()))
+                n += 1
+            log(f"  pushed {n} spec(s)")
+        if "thumb" in kinds:
+            n = 0
+            for c in views.candidates(job.name):
+                f = views.candidate_thumb(job.name, c["n"])
+                if not f:
+                    continue
+                url = be.upload(job, c["n"], f, {"kind": "thumb"})
+                be.artifact(job, "thumb", c["n"], url=url)
+                n += 1
+            log(f"  pushed {n} thumbnail(s)")
+        if "detail" in kinds:
+            n = 0
+            for sp in sorted((ROOT / "clips").glob(f"{chan}-*.json")):
+                idx = int(sp.stem.rsplit("-", 1)[-1])
+                d = views.clip_detail(job.name, idx)
+                if d:
+                    be.artifact(job, "detail", idx, data=d)
+                    n += 1
+            log(f"  pushed {n} clip detail(s)")
+    except Exception as exc:                           # noqa: BLE001
+        log(f"  artifacts after {stage} failed: {type(exc).__name__}: {exc}")
+
+
 # ------------------------------------------------------------- one job -----
 def run_job(be, job: Job) -> str:
     log(f"claimed {job.name}  ({job.rights})  stages: {', '.join(job.stages)}")
+    wrote = write_specs(job)
+    if wrote:
+        log(f"  wrote {wrote} spec(s) from the control plane")
     for stage in job.stages:
         if STOP:
             return "paused"
@@ -248,6 +348,7 @@ def run_job(be, job: Job) -> str:
         if code != 0:
             log(f"  {stage}: exit {code}")
             return f"failed:{stage}"
+        push_artifacts(be, job, stage)
     clips = publish_clips(be, job)
     man_p = ROOT / "jobs" / job.name / "manifest.json"
     manifest = json.loads(man_p.read_text()) if man_p.exists() else {}
@@ -290,7 +391,9 @@ def main() -> int:
     be.health(a.name, caps)
 
     idle_since = time.time()
-    last_health = 0.0
+    # Not 0.0: the loop's own `> 60` test would then fire immediately and
+    # send a second identical health report before any work had happened.
+    last_health = time.time()
     while not STOP:
         if time.time() - last_health > 60:
             last_health = time.time()

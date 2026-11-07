@@ -8,7 +8,10 @@ create table if not exists job (
   id          uuid primary key default gen_random_uuid(),
   name        text not null unique,          -- jobs/<name>; every path is keyed on it
   url         text not null,                 -- the VOD, or a path on the worker's disk
-  channel     text not null,
+  -- Derived, not asked for. `batch.py` takes the channel from the job name
+  -- (`fns-2905408276` -> `fns`), so a separate NOT NULL column with nothing
+  -- populating it is a column the app has to invent a value for.
+  channel     text generated always as (split_part(name, '-', 1)) stored,
   -- NEVER NULL, and not defaulted. The build refuses to start without a
   -- rights basis, and a viewer's chat message is their words on screen.
   rights      text not null check (rights in ('explicit','affiliate','client_owned')),
@@ -24,7 +27,12 @@ create table if not exists job (
   -- a power cut, or a Mac going to sleep, and all three happen.
   claimed_by  text,
   lease_until timestamptz,
-  attempts    int not null default 0
+  attempts    int not null default 0,
+  -- What is LEFT to do. The agent resumes rather than restarts, so the
+  -- claim has to know which stages are outstanding — and claim_job needs it
+  -- to tell a build job from one that only transcribes.
+  stages_remaining text[] not null default array[
+    'ingest','analyse','rank','screen','prep','specs','build','report']
 );
 
 create table if not exists stage (
@@ -46,6 +54,30 @@ create table if not exists clip (
   created_at timestamptz not null default now(),
   primary key (job_id, idx)
 );
+
+-- EVERYTHING THE UI NEEDS THAT IS NOT THE FINISHED MP4.
+--
+-- Without this a cloud front end is a shell: the grid needs the scored
+-- candidates and their verdicts, the editor needs the spec and the
+-- transcript in cut time, and both need thumbnails — and all of it is
+-- derived on the Mac from files that never leave it. The agent pushes each
+-- kind after the stage that creates it.
+create table if not exists artifact (
+  job_id uuid not null references job(id) on delete cascade,
+  kind   text not null check (kind in ('candidates','spec','detail','thumb')),
+  idx    int,                                -- clip number, or null for the job
+  data   jsonb,                              -- for candidates/spec/detail
+  url    text,                               -- for thumb
+  updated_at timestamptz not null default now(),
+  primary key (job_id, kind, coalesce(idx, -1))
+);
+
+-- THE SPEC IN THIS TABLE IS THE SOURCE OF TRUTH, not the copy on the Mac.
+-- Every note George has given reduces to editing one of five fields —
+-- in_point, out_point, booms, chat_mode, hook — and `batch.py specs`
+-- regenerating over a reviewed spec silently ate four rounds of review
+-- once. So the UI writes here, and the claim hands these down for the
+-- agent to apply before it builds.
 
 create table if not exists worker (
   name       text primary key,
@@ -73,7 +105,12 @@ begin
   ), picked as (
     select j.id from job j
      where j.state = 'queued'
-       and (needs_resolve or true)
+       -- A WORKER WITHOUT RESOLVE MUST NOT TAKE A JOB THAT BUILDS. The
+       -- original read `(needs_resolve or true)`, which is true for every
+       -- row — the parameter did nothing and a Mac with Resolve closed
+       -- would claim a job, spend the best part of an hour transcribing,
+       -- and fail at the last stage.
+       and (needs_resolve or not (j.stages_remaining @> array['build']))
      order by j.created_at
      for update skip locked
      limit 1
