@@ -84,13 +84,12 @@ Registrar prices read 2026-11-07:
 
 | | registration | renewal |
 |---|---|---|
-| **Porkbun** | **$51.80** | one listed price, no separate renewal figure shown |
+| **Porkbun** | **$51.80** | **$51.80** — confirmed on the search page |
 | Gandi | €85.50 | **€180.00/yr** |
 
-Gandi's renewal is 2.1x its registration and 3.5x Porkbun's price. Porkbun
-advertises an "everyday low price" rather than a first-year teaser, so the
-single figure is most likely both — but I only saw one number on the page,
-so treat the renewal as unconfirmed until the basket shows it.
+Gandi's renewal is 2.1x its own registration and 3.5x Porkbun's. Porkbun's
+listing reads "At Cost · $51.80 / year · renews at $51.80", so there is no
+first-year teaser and the price holds. That is the one to use.
 
 ### The steps, once the domain exists
 
