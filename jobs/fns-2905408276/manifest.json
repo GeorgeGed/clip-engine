@@ -55,5 +55,62 @@
   "permission": "explicit",
   "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release.",
   "delivered": "deliver/fns-12-one-argument-start-to-finish-the-complaint-the-gener.mp4"
+ },
+ "fns-04": {
+  "built": true,
+  "qc_ok": true,
+  "seconds": 504,
+  "render": "renders/fns-2905408276-04.mp4",
+  "findings": [
+   {
+    "check": "duration",
+    "ok": true,
+    "detail": "39.00s (want 15-90)"
+   },
+   {
+    "check": "loudness",
+    "ok": true,
+    "detail": "-14.24 LUFS (target -14.0)"
+   },
+   {
+    "check": "true_peak",
+    "ok": true,
+    "detail": "-1.19 dBTP"
+   },
+   {
+    "check": "black_top",
+    "ok": true,
+    "detail": "2336 frames, YMAX min 240"
+   },
+   {
+    "check": "black_bottom",
+    "ok": true,
+    "detail": "2336 frames, YMAX min 244"
+   },
+   {
+    "check": "dead_space",
+    "ok": true,
+    "detail": "1.30s quiet (3.3%, max 8%)"
+   },
+   {
+    "check": "absent_audio",
+    "ok": true,
+    "detail": "0.00s in 0 runs"
+   },
+   {
+    "check": "caption_cadence",
+    "ok": true,
+    "detail": "2.46 cards/s (96 cards)"
+   },
+   {
+    "check": "hallucinated_captions",
+    "ok": true,
+    "detail": "none"
+   }
+  ],
+  "subject": "It is genuinely one narrative \u2014 no pivot, titleable in one line \u2014 and it is still a drop, on rule 3 and rule 2, and no in-point fixes either.\n\nRULE 3. The clip's whole subject is one named person and it names him wrong. The transcript says \"um kdrill is the only one that i watched for league of lege",
+  "permission": "explicit",
+  "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release.",
+  "delivered": "deliver/fns-04-it-is-genuinely-one-narrative-no-pivot-titleable-in.mp4"
  }
 }

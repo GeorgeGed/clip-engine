@@ -143,6 +143,64 @@ def _topic(subject: str) -> frozenset:
                      if w not in STOP and len(w) > 3)
 
 
+def cmd_editorial(job, args):
+    """Title and judge every buildable clip. The stage this file has always
+    read and never had.
+
+    `cmd_specs` takes each clip's hook, in-point, topic and verdict from
+    `editorial.json`, and its own log warns when the file is missing — but
+    nothing in the repo wrote it. This VOD's ten entries were written by hand,
+    so the seventeen clips the screen later rescued reached the UI with no
+    title at all and were listed by their `subject` line, which is a
+    description of a clip rather than a name for it.
+    """
+    from engine import editorial
+    d, screened, ed_path, _m = _paths(job)
+    rows = [r for r in json.loads(screened.read_text()) if r["verdict"] == "build"]
+    ranked = json.loads((d / "ranked.json").read_text())
+    ed = json.loads(ed_path.read_text()) if ed_path.exists() else {}
+    force = bool(getattr(args, "force", False))
+    only = {int(x) for x in str(getattr(args, "only", "") or "").replace(",", " ").split()}
+
+    todo = []
+    for r in rows:
+        n = r["n"]
+        if only and n not in only:
+            continue
+        # NEVER REGENERATE AN ENTRY WITHOUT --force. These carry hooks George
+        # has seen and in-points he moved; `specs` eating a reviewed spec is
+        # already the most-repeated defect in this repo.
+        if str(n) in ed and not force:
+            continue
+        wf = d / f"words/{n:02d}.json"
+        if not wf.exists():
+            log(f"   {n:02d} no transcript yet — run prep first")
+            continue
+        m = ranked[n - 1]
+        todo.append({"n": n, "words": json.loads(wf.read_text()),
+                     "subject": m.get("subject", ""), "claim": m.get("claim", "")})
+    if not todo:
+        log(f"[editorial] nothing to do ({len(ed)} entries already)")
+        return ed
+
+    log(f"[editorial] judging {len(todo)}: {[c['n'] for c in todo]}")
+
+    def done(n, e, err):
+        if e is None:
+            log(f"   {n:02d} FAILED: {err}")
+        else:
+            flag = "" if e.verdict == "ship" else "   <- DROP"
+            log(f"   {n:02d} {e.hook}{flag}"
+                + (f"   in_point {e.in_point}" if e.in_point else ""))
+
+    fresh = editorial.judge_many(todo, handle=_channel(job)["name"], on_done=done)
+    ed.update(fresh)
+    ed_path.write_text(json.dumps(ed, indent=1, sort_keys=True))
+    ship = sum(1 for v in ed.values() if v.get("verdict") != "drop")
+    log(f"[editorial] {len(fresh)} judged, {len(ed)} entries, {ship} ship")
+    return ed
+
+
 def cmd_specs(job, args):
     """One spec per clip we intend to build, after topic dedup."""
     from engine.clipspec import Clip, save
@@ -336,8 +394,18 @@ def cmd_build(job, args):
                 # the source timestamps and the rights basis in one place —
                 # that is the difference between a render and something you can
                 # actually publish.
-                slug = re.sub(r"[^a-z0-9]+", "-",
-                              (clip.notes or "").lower())[:52].strip("-")
+                # THE HOOK IS THE TITLE, so it names the file. This slugged
+                # `clip.notes`, which is the editorial pass's REASONING — clip
+                # 04 delivered as
+                # "fns-04-it-is-genuinely-one-narrative-no-pivot-titleable-in.mp4",
+                # an internal note escaped into the name of a deliverable. The
+                # sidecar two lines down already called `clip.hook` the title.
+                # The hook opens with the handle ("FNS: ..."), and the file
+                # already starts with the channel, so stripping it avoids
+                # "fns-04-fns-i-like-people-who...".
+                _h = re.sub(rf"^{re.escape(chan['name'])}\s*(?::|\bon\b)\s*", "",
+                            (clip.hook or clip.notes or ""), flags=re.I)
+                slug = re.sub(r"[^a-z0-9]+", "-", _h.lower())[:52].strip("-")
                 dst = DELIVER / f"{chan['name']}-{clip.index:02d}-{slug}.mp4"
                 subprocess.run(["cp", str(out), str(dst)], check=True)
                 m = json.loads((d / "ranked.json").read_text())[clip.index - 1]
@@ -424,7 +492,8 @@ def cmd_report(job, args):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("job")
-    ap.add_argument("cmd", choices=["screen", "prep", "specs", "build", "report"])
+    ap.add_argument("cmd", choices=["screen", "prep", "editorial", "specs",
+                                    "build", "report"])
     ap.add_argument("--n", type=int, default=50)
     ap.add_argument("--only", default="")
     ap.add_argument("--force", action="store_true")

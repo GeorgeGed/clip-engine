@@ -48,6 +48,18 @@ def candidates(job: str) -> list[dict]:
     if not rp.exists():
         return []
     ranked = json.loads(rp.read_text())
+    # THE TITLE COMES FROM THE EDITORIAL PASS, not from `subject`. `subject`
+    # is a sentence describing the clip — "Why he only watches Worlds finals
+    # through K drill's play-by-play co-stream" — which is what the grid was
+    # showing. The hook is its NAME, and it is the same string burned on
+    # screen and used for the delivered filename.
+    ed = {}
+    ep = d / "editorial.json"
+    if ep.exists():
+        try:
+            ed = json.loads(ep.read_text())
+        except json.JSONDecodeError:
+            ed = {}
     screened = {}
     if sp.exists():
         rows = json.loads(sp.read_text())
@@ -71,6 +83,11 @@ def candidates(job: str) -> list[dict]:
             "strength": round(num("strength") * 100),
             "secs": round(num("seconds"), 1),
             "at": round(num("in_point")),
+            "title": (ed.get(str(i), {}) or {}).get("hook") or "",
+            # The pass can veto a clip. It is advice, not a gate — clicking
+            # one overrides it — but the grid says so rather than hiding it.
+            "vetoed": (ed.get(str(i), {}) or {}).get("verdict") == "drop",
+            "why": (ed.get(str(i), {}) or {}).get("why", ""),
             "verdict": s.get("verdict", ""),
             "block": why(s),
             "muted": s.get("muted"),

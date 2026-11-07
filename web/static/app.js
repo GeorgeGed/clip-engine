@@ -120,8 +120,12 @@ async function paintClips(j) {
         `<p class="ct"></p><p class="cq"></p>` +
         `<div class="act"></div>` +
       `</div>`;
-    el.querySelector('.ct').textContent = c.subject;
-    el.querySelector('.cq').textContent = (c.claim || '').replace(/^"|"$/g, '');
+    // The hook is the clip's NAME; `subject` is a sentence about it. Falling
+    // back to `subject` only matters before the editorial pass has run.
+    el.querySelector('.ct').textContent = c.title || c.subject;
+    el.querySelector('.cq').textContent = c.title
+      ? c.subject
+      : (c.claim || '').replace(/^"|"$/g, '');
     const act = el.querySelector('.act');
     if (done) {
       const a = document.createElement('a');

@@ -5668,3 +5668,64 @@ have been wrong in the opposite direction, so a 3xx now says *follow it or
 authenticate, then re-run*, and the script takes extra curl arguments for
 exactly that. Re-run properly it reports 206, `bytes 0-1023/23969291`, a
 1024-byte body and a byte-identical mid-file slice.
+
+### THE JUDGING PASS THIS FILE HAS ALWAYS READ AND NEVER HAD
+
+George: *"fix the titles."* The cards showed `subject` — *"Why he only
+watches Worlds finals through K drill's play-by-play co-stream"* — which
+describes a clip rather than naming one, and the delivered file for clip 04
+was **`fns-04-it-is-genuinely-one-narrative-no-pivot-titleable-in.mp4`**: an
+internal editorial note escaped into the name of a deliverable.
+
+**Both had one cause.** `cmd_specs` reads each clip's hook, in-point, topic
+and verdict out of `editorial.json`, and `batch.py`'s own comment calls it a
+file "which a judging pass or a human writes" — **and nothing in the repo
+wrote it.** This VOD's ten entries were typed by hand in chat, so the
+seventeen clips the screen later rescued arrived with no title at all.
+
+`engine/editorial.py` + `batch.py <job> editorial` is that stage. One model
+call per clip over its own transcript, returning the hook, the in-point, the
+topic `specs` dedups on, and whether it is one narrative and explains
+itself. 15 of 16 landed first run; the rest of this section is the other one
+and the two bugs it exposed.
+
+**THE HOOK IS HIS CLAIM, COMPRESSED.** The hand-written ones set the
+register — `FNS: STOP COMPLAINING ABOUT UNPAID MONTHS`, `FNS ON WHY THE NEW
+SYSTEM BEATS FRANCHISE` — speaker, then his own argument, ~40 characters so
+it sets on two lines. What came back matches: *SAM WON'T COMPETE ON AN ORG
+THIS YEAR*, *A STREAM TEAM WIN WOULD KILL THE GAME*, *A PASSPORT SHOULDN'T
+STOP YOUR DREAM*.
+
+**`max_tokens` TRUNCATED THE FIRST REPLY, AND THIS FILE ALREADY WARNED.**
+tier3.py records it verbatim — *"a low max_tokens silently cut 24 of 39
+regions on the first full run and every one was reported as unparseable;
+they were valid JSON, just chopped"* — and the new pass reproduced it on its
+very first clip at 1200, cut mid-sentence inside `why`. Raised to 2000, the
+`why` field capped in the prompt, and the error now distinguishes truncation
+from malformation, because they need opposite fixes. **A warning written
+down is not a guard.**
+
+**THE MODEL INVENTED A SPEAKER.** Clip 40 came back as *"VAL: I NEVER
+PLANNED ON COACHING"* — a handle nobody uses, on a desk whose oldest rule is
+never to guess a speaker. The channel is known, so it is not the model's to
+choose: `_clean_hook` strips whatever prefix it picked and pins the real
+one.
+
+**And one clip in seventeen wrapped good JSON in something else**, which a
+whole-string `json.loads` threw away. It takes the first `{...}` now.
+
+The filename follows the title, with the handle stripped so it is not
+`fns-04-fns-i-like-...`. The four existing deliveries were renamed to match:
+`fns-12-stop-complaining-about-unpaid-months.mp4`.
+
+**Vetoes stay out of the grid.** The pass can return `drop`, and four of the
+hand-written entries do — clip 06's for a real reason, that its lower pane
+ran an unrelated transfer story the whole time. But George has shipped clip
+06, clicking a clip overrides the veto anyway, and he has said twice that he
+does not want refusals in front of him. The flag is in the API for whoever
+wants it and nowhere on the card.
+
+**`anthropic` was not installed, so `tier3.py` and `verify.py` were dead
+too** — both import it at call time, so nothing surfaced until something
+called them. The venv had no pip either; `ensurepip` then `pip install
+anthropic` fixed all three.
