@@ -15,6 +15,10 @@ const S = { jobs: [], jobId: null, job: null, cands: [], detail: null,
 
 async function api(path, opts) {
   const r = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...opts });
+  // A 401 means the key cookie is gone — a new tunnel URL, or it expired.
+  // The poll would otherwise toast "key required" every two seconds forever,
+  // so hand the browser back to the key form instead.
+  if (r.status === 401) { location.href = '/'; throw new Error('key required'); }
   const b = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(b.error || `${r.status} ${r.statusText}`);
   return b;

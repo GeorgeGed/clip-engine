@@ -15,9 +15,11 @@ file is wrong, not the pipeline.
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
+import threading
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -87,11 +89,22 @@ def _grab(src: Path, at: float, width: int, out: Path) -> Path | None:
     if not src.exists():
         return None
     out.parent.mkdir(parents=True, exist_ok=True)
+    # WRITE SOMEWHERE ELSE AND RENAME. The grid asks for a screenful of these
+    # at once and the warm thread is making the same ones, so two ffmpegs can
+    # be writing one path while a third request reads it — a half-written
+    # JPEG, which renders as a broken thumbnail and looks like nothing.
+    # `os.replace` is atomic, so a reader sees the old file or the new one.
+    tmp = out.with_name(f".{out.name}.{os.getpid()}.{threading.get_ident()}")
     r = subprocess.run(
         ["ffmpeg", "-y", "-v", "error", "-ss", f"{max(at, 0):.2f}", "-i", str(src),
-         "-frames:v", "1", "-vf", f"scale={width}:-2", "-q:v", "6", str(out)],
+         "-frames:v", "1", "-vf", f"scale={width}:-2", "-q:v", "6",
+         "-f", "mjpeg", str(tmp)],
         capture_output=True)
-    return out if out.exists() and r.returncode == 0 else None
+    if r.returncode != 0 or not tmp.exists():
+        tmp.unlink(missing_ok=True)
+        return None
+    os.replace(tmp, out)
+    return out
 
 
 def _duration(p: Path) -> float:
@@ -205,7 +218,6 @@ def warm(job: str, ns: list[int]) -> None:
             except Exception:                            # noqa: BLE001, S110
                 pass
 
-    import threading                                      # noqa: PLC0415
     threading.Thread(target=go, daemon=True,
                      name=f"warm-{job}").start()
 

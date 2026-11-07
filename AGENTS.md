@@ -5396,3 +5396,105 @@ coarse to carry this. Reverted.
 rules 2 and 3 from the beginning. The window decides whether a clip is
 CUTTABLE. Where it starts is still a human's call, or a Tier 3 pass's —
 and the 17 rescued clips should get one before any of them ships.
+
+## HOSTING IT: three defects that only exist once it is not local
+
+George: *"build the site, needs to be workable then we host"* — then *"yes,
+host it"*. A cloudflared quick tunnel is the whole of hosting here, because
+the renderer cannot move: Resolve's API is on its GUI thread on this Mac.
+`./start.sh --public` is the command.
+
+**Every one of the three things that broke is a property of being reached
+from outside, and none of them is visible on loopback.**
+
+### 1. BINDING TO 127.0.0.1 STOPS PROTECTING ANYTHING BEHIND A TUNNEL
+
+The site binds loopback and that was the entire access control. A tunnel
+connects to that same loopback socket, so **the tunnel's traffic and a local
+browser's are indistinguishable at the bind address** — there is nothing left
+to check. And this is not a viewer: it queues jobs that drive Resolve, writes
+editorial specs over hand-tuned ones, and serves clips whose rights basis is
+George's own permission.
+
+So `--public` generates a key (`CLIP_FACTORY_TOKEN`) and every request needs
+it, by `?k=`, the cookie that sets, or `X-Clip-Key` for a script. Unset means
+local-only and no gate, so plain `./start.sh` is unchanged.
+
+Three details that are not decoration:
+
+* **A page with no key gets the FORM, not a 403.** A quick tunnel's URL
+  changes every run and the cookie does not follow it, so arriving without a
+  key is the normal case.
+* **The cookie is not `Secure`.** One binary serves http on loopback and
+  https through the tunnel; `Secure` silently drops it on the local one.
+* **A good `?k=` is answered with a 303 that strips it**, so the key stops
+  riding in every later request and leaves the address bar. Other query
+  params survive the strip — `frame/08?k=…&t=2&w=250` keeps `t` and `w`.
+
+`hmac.compare_digest`, not `==`.
+
+### 2. "502" WAS AN ACCEPT QUEUE OF 5
+
+The first public load rendered — and the console showed **ten 502s, every one
+a thumbnail or a filmstrip frame** while every JSON call was 200. The obvious
+read is "ffmpeg is too slow behind a tunnel", and it is wrong.
+
+cloudflared's own log says what actually happened:
+
+    dial tcp 127.0.0.1:8808: connect: connection reset by peer
+
+**A reset on DIAL is not a timeout and not a slow handler — the server never
+saw the request.** It is the kernel refusing a connection the listen backlog
+had no room for. `socketserver.TCPServer.request_queue_size` is **5**, and
+`ThreadingHTTPServer` inherits it.
+
+Two things made 5 enough to fail, and both are the tunnel:
+
+* `BaseHTTPRequestHandler.protocol_version` defaults to **HTTP/1.0**, so
+  cloudflared cannot reuse a connection and **dials once per request**;
+* the grid asks for about **sixteen** thumbnails at once.
+
+Sixteen simultaneous dials against a backlog of five. Over loopback the queue
+drains as fast as it fills and the same page is clean, which is why this
+could not have been found before hosting. Now `request_queue_size = 128` and
+`protocol_version = "HTTP/1.1"` — safe only because every response path sets
+`Content-Length` (`_send` always, and `_file`'s 206 branch too). Check that
+before raising the version anywhere else.
+
+**Read the tunnel's log, not the browser's.** Chrome says `502` for a reset
+dial, a dead origin and a slow handler alike; cloudflared distinguishes them
+and names the clip that failed.
+
+Thumbnail writes are also atomic now (`os.replace` off a temp path): the warm
+thread and a screenful of requests can be running ffmpeg at the same path, and
+a half-written JPEG renders as nothing and looks like a missing file.
+
+### 3. THE SITE AND THE AGENT WERE BOTH RUNNERS
+
+`start.sh` started `web/server.py` **and** `worker/agent.py`, and against the
+local SQLite that is two job runners on one Resolve — the invariant this whole
+pipeline rests on. The site queues a job on its in-process `WORK` queue **and**
+leaves the row at `state='queued'`, which is exactly what the agent's claim
+selects.
+
+It is not a race to be narrowed, so it is a lock. `web/runlock.py`: `flock` on
+`web/.runner.lock`, taken by whichever runner starts first and held for the
+life of the process — `flock` releases however the process dies, which a pid
+file does not. The site still serves with the lock held elsewhere (looking at
+a job is always safe) and simply does not start its worker thread; a local
+agent that cannot take it says who holds it and exits 0, because declining is
+the correct outcome, not an error.
+
+`start.sh` now starts the agent **only** when `CLIP_WORKER_URL` is set. That
+is what the agent is for — a second Mac, or a cloud control plane — and
+against this SQLite the site already is one.
+
+### What hosting does NOT fix, stated plainly
+
+* **The URL changes every run.** A quick tunnel is anonymous and ephemeral. A
+  stable address needs a Cloudflare account and a domain (`cloudflared tunnel
+  create` + a CNAME); nothing in the code changes.
+* **The Mac has to be awake, with Resolve open.** Sleep takes the site, the
+  tunnel and the renderer with it. `caffeinate -s` while a batch runs.
+* **One job at a time, still.** That is Resolve, not the web layer, and the
+  queue is the honest model of it rather than a UI limit.

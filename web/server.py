@@ -44,6 +44,7 @@ defaulting, because a default here is how an unlicensed clip ships.
 
 from __future__ import annotations
 
+import hmac
 import io
 import json
 import mimetypes
@@ -62,6 +63,7 @@ from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+import runlock
 import views
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -70,6 +72,17 @@ JOBS = ROOT / "jobs"
 DB = ROOT / "web" / "factory.db"
 VENV = ROOT / ".venv" / "bin" / "python"
 PORT = int(os.environ.get("CLIP_FACTORY_PORT", "8808"))
+
+# A PUBLIC URL NEEDS A KEY, because binding to 127.0.0.1 stops protecting
+# anything the moment a tunnel is pointed at it: the tunnel's traffic arrives
+# on the loopback socket exactly as a local browser's does, so the bind
+# address cannot tell them apart. And this site is not a viewer — it queues
+# jobs that drive Resolve on this Mac, writes editorial specs, and serves
+# finished clips of material whose rights basis is George's own permission.
+#
+# Unset (the default) means local-only use and no gate, so `./start.sh` is
+# unchanged. `--public` generates one.
+TOKEN = os.environ.get("CLIP_FACTORY_TOKEN", "").strip()
 
 RIGHTS = ("explicit", "affiliate", "client_owned")
 
@@ -562,9 +575,44 @@ def job_name_for(url: str, given: str) -> str:
     return given or (f"vod-{vid}" if vid else f"job-{int(time.time())}")
 
 
+KEY_PAGE = b"""<!doctype html><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>Clip Factory</title>
+<style>
+ :root{color-scheme:dark}
+ body{margin:0;min-height:100vh;display:grid;place-items:center;
+      background:#0b0b0c;color:#f4f4f5;
+      font:16px/1.5 ui-sans-serif,system-ui,-apple-system,sans-serif}
+ form{width:min(92vw,340px);display:grid;gap:14px}
+ h1{margin:0;font-size:19px;letter-spacing:-.01em}
+ p{margin:0;color:#a1a1aa;font-size:14px}
+ input{padding:11px 13px;background:#18181b;color:inherit;font:inherit;
+       border:1px solid #2e2e33;border-radius:0;width:100%;box-sizing:border-box}
+ input:focus{outline:none;border-color:#2E5CFF}
+ button{padding:11px;background:#2E5CFF;color:#fff;font:inherit;font-weight:600;
+        border:0;border-radius:0;cursor:pointer}
+</style>
+<form method=get action=/>
+ <h1>Clip Factory</h1>
+ <p>This link needs the key printed in the terminal.</p>
+ <input name=k type=password autofocus autocomplete=current-password
+        placeholder="key" spellcheck=false>
+ <button>Open</button>
+</form>
+"""
+
+
 # -------------------------------------------------------------- http ------
 class Handler(BaseHTTPRequestHandler):
     server_version = "ClipFactory/1.0"
+    # HTTP/1.1, SO A CONNECTION IS REUSED. At 1.0 every request needs its own
+    # TCP connection, and a tunnel is where that stops being free: the grid
+    # asks for ~16 thumbnails at once, cloudflared dials 16 times, and the
+    # ones that do not fit the accept queue are RESET — which the browser
+    # shows as a 502 from Cloudflare and the server never sees at all.
+    # Safe here because every response path sets Content-Length: `_send`
+    # always does, and `_file`'s 206 branch does too.
+    protocol_version = "HTTP/1.1"
 
     def log_message(self, fmt, *args):      # quieter than the default
         pass
@@ -625,6 +673,56 @@ class Handler(BaseHTTPRequestHandler):
             head["Content-Disposition"] = f'attachment; filename="{download}"'
         self._send(200, path.read_bytes(), ctype, head)
 
+    # -- the key
+    def _has_key(self, q: dict) -> bool:
+        """`?k=`, the cookie it sets, or `X-Clip-Key` for a script.
+
+        `compare_digest` rather than `==`, so a wrong key cannot be narrowed
+        by timing it. No key configured means local-only and no gate.
+        """
+        if not TOKEN:
+            return True
+        given = (q.get("k") or [""])[0]
+        if not given:
+            given = self.headers.get("X-Clip-Key") or ""
+        if not given:
+            for part in (self.headers.get("Cookie") or "").split(";"):
+                name, _, val = part.strip().partition("=")
+                if name == "cf_key":
+                    given = urllib.parse.unquote(val)
+                    break
+        return bool(given) and hmac.compare_digest(given, TOKEN)
+
+    def _gate(self, p: str, q: dict) -> bool:
+        """True when the request may proceed; otherwise it has been answered.
+
+        A good `?k=` is turned into a cookie and the key is dropped from the
+        URL, so it stops riding in every later request and in the address
+        bar. A page request with no key gets the form rather than a bare 403
+        — the tunnel URL changes every run and the cookie does not follow it,
+        so landing on a 403 with no way in is the common case, not the odd
+        one. An API request gets 401, which the page reloads on.
+        """
+        if self._has_key(q):
+            if TOKEN and (q.get("k") or [""])[0]:
+                rest = {k: v for k, v in q.items() if k != "k"}
+                dest = p + (("?" + urllib.parse.urlencode(rest, doseq=True))
+                            if rest else "")
+                # Not `Secure`: the same binary serves http on loopback and
+                # https through the tunnel, and `Secure` would drop the
+                # cookie on the local one.
+                self._send(303, b"", "text/plain", extra={
+                    "Location": dest,
+                    "Set-Cookie": "cf_key=" + urllib.parse.quote(TOKEN)
+                                  + "; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000"})
+                return False
+            return True
+        if p.startswith("/api/"):
+            self._json({"error": "key required"}, 401)
+        else:
+            self._send(401, KEY_PAGE, "text/html; charset=utf-8")
+        return False
+
     # -- routes
     def _job(self, job_id: int):
         with db() as c:
@@ -634,6 +732,9 @@ class Handler(BaseHTTPRequestHandler):
         u = urllib.parse.urlparse(self.path)
         q = urllib.parse.parse_qs(u.query)
         p = u.path
+
+        if not self._gate(p, q):
+            return None
 
         if p in ("/", "/index.html"):
             return self._file(WEB / "static" / "index.html")
@@ -765,7 +866,13 @@ class Handler(BaseHTTPRequestHandler):
         self.do_GET()
 
     def do_POST(self):                                  # noqa: N802
-        p = urllib.parse.urlparse(self.path).path
+        u = urllib.parse.urlparse(self.path)
+        p = u.path
+        if not self._gate(p, urllib.parse.parse_qs(u.query)):
+            # Read the body regardless, or the next request on this
+            # keep-alive connection starts mid-JSON.
+            self._body()
+            return None
         body = self._body()
 
         if p == "/api/jobs":
@@ -868,15 +975,39 @@ def main() -> None:
     init_db()
     if not VENV.exists():
         raise SystemExit(f"no interpreter at {VENV}")
-    threading.Thread(target=worker, daemon=True).start()
+    # ONE RUNNER PER MACHINE. If `worker/agent.py` already holds it, this
+    # process still serves the UI — looking at a job is always safe — but it
+    # does not start its own worker thread, because two runners on one
+    # Resolve is the one thing the whole pipeline cannot survive.
+    runner = None
+    try:
+        runner = runlock.take("web/server.py")
+        threading.Thread(target=worker, daemon=True).start()
+    except runlock.Held as other:
+        print(f"  NOT running jobs — {other} holds the runner lock")
+    # THE ACCEPT QUEUE IS 5 BY DEFAULT, inherited from socketserver, and that
+    # is the number the first public run died on: cloudflared's own log said
+    # `dial tcp 127.0.0.1:8808: connect: connection reset by peer`, which is
+    # the kernel refusing a connection the backlog had no room for — not a
+    # timeout, not a slow handler. Over loopback it never shows, because the
+    # queue drains as fast as it fills.
+    ThreadingHTTPServer.request_queue_size = 128
     srv = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
-    print(f"clip factory on http://127.0.0.1:{PORT}  (root {ROOT})")
+    where = f"http://127.0.0.1:{PORT}"
+    if TOKEN:
+        where += f"/?k={TOKEN}"
+    print(f"clip factory on {where}  (root {ROOT})")
+    if TOKEN:
+        print("  a key is set, so every request needs it")
     print(f"  {len(ALL_STAGES)} stages: "
           f"{' -> '.join(s.key for s in ALL_STAGES)}")
     try:
         srv.serve_forever()
     except KeyboardInterrupt:
         pass
+    finally:
+        if runner is not None:
+            runner.close()
 
 
 if __name__ == "__main__":

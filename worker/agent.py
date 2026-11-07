@@ -62,6 +62,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+sys.path.insert(0, str(ROOT / "web"))
+
+import runlock                                          # noqa: E402
 from worker.backend import Cancelled, Job, from_env      # noqa: E402
 
 VENV = ROOT / ".venv" / "bin" / "python"
@@ -267,6 +270,19 @@ def main() -> int:
     signal.signal(signal.SIGTERM, _stop)
 
     be = from_env()
+    # ONE RUNNER PER MACHINE. Against the local SQLite the site is a runner
+    # too — it queues a job AND leaves the row at `state='queued'`, which is
+    # what this claims — so running both would drive one Resolve from two
+    # processes. A cloud control plane is a different queue, so the lock is
+    # only for the local backend.
+    runner = None
+    if be.name == "local":
+        try:
+            runner = runlock.take("worker/agent.py")
+        except runlock.Held as other:
+            log(f"{other} is already the runner on this machine — "
+                "nothing for this agent to do")
+            return 0
     caps = capabilities()
     log(f"{a.name} · backend {be.name} · Resolve "
         + ("ready" if caps["resolve"] else "NOT reachable — "
@@ -311,6 +327,8 @@ def main() -> int:
         if a.once:
             break
     log("stopped")
+    if runner is not None:
+        runner.close()
     return 0
 
 

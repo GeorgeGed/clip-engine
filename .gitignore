@@ -40,3 +40,4 @@ jobs/*/overlays_*/
 jobs/*/retail/
 web/factory.db
 jobs/*/web/
+web/.runner.lock
