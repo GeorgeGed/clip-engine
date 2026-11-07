@@ -540,6 +540,25 @@ def job_json(row: sqlite3.Row) -> dict:
     }
 
 
+def download_name(job: str, n: int) -> str:
+    """`i-like-people-who-explain-things.mp4`, from the clip's own hook.
+
+    Falls back to the render's filename when a clip has no spec or no hook
+    yet — a neutral name beats an empty one.
+    """
+    chan = job.split("-")[0]
+    sp = ROOT / "clips" / f"{chan}-{n:02d}.json"
+    hook = ""
+    if sp.exists():
+        try:
+            hook = (json.loads(sp.read_text()).get("clip", {}) or {}).get("hook") or ""
+        except (json.JSONDecodeError, AttributeError):
+            hook = ""
+    hook = re.sub(rf"^{re.escape(chan)}\s*(?::|\bon\b)\s*", "", hook, flags=re.I)
+    slug = re.sub(r"[^a-z0-9]+", "-", hook.lower())[:52].strip("-")
+    return f"{chan}-{n:02d}-{slug}.mp4" if slug else f"{job}-{n:02d}.mp4"
+
+
 def is_local_vod(s: str) -> bool:
     """A path on this machine, rather than a URL.
 
@@ -848,7 +867,12 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json({"error": "no such job"}, 404)
             fp = clip_path(row["name"], int(m.group(2)))
             if q.get("download"):
-                return self._file(fp, download=f"{fp.stem}.mp4")
+                # NAME THE DOWNLOAD BY ITS TITLE. `fns-2905408276-04.mp4`
+                # tells whoever opens it nothing; `deliver/` has named its
+                # copies by the hook since the titles landed, and a file
+                # pulled from the UI should match.
+                return self._file(fp, download=download_name(
+                    row["name"], int(m.group(2))))
             return self._file(fp)
 
         m = re.fullmatch(r"/api/jobs/(\d+)/clips\.zip", p)
