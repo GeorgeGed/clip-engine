@@ -33,6 +33,12 @@ GARBLES = ROOT / "config" / "handle_garbles.json"
 
 # The desk's rosters, in preference order. Read-only: this pipeline never
 # writes to them, so the two projects cannot disagree about a handle.
+# READ AS UTF-8 EXPLICITLY. `Path.read_text()` uses the LOCALE's encoding,
+# which is UTF-8 in an interactive shell and ASCII in a subprocess or under
+# launchd — and this roster is full of Leviatán, Óscar Cañellas and Tarık
+# Çelik. The direct run worked and the identical call through `batch.py`
+# died with UnicodeDecodeError on byte 0xe2. Same family as launchd's
+# minimal PATH: the environment, not the code, is what differed.
 ROSTERS = [
     Path.home() / "quotes-pipeline" / "config" / "roster.json",
     Path.home() / "valorant-quote-desk" / "worker" / "roster_supplement.json",
@@ -60,7 +66,7 @@ def load() -> dict[str, str]:
         if not p.exists():
             continue
         try:
-            d = json.loads(p.read_text())
+            d = json.loads(p.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, OSError):
             continue
         players = d.get("players", d) if isinstance(d, dict) else d
@@ -77,7 +83,7 @@ def load() -> dict[str, str]:
                 _add(m, a, h)
     if GARBLES.exists():
         try:
-            g = json.loads(GARBLES.read_text())
+            g = json.loads(GARBLES.read_text(encoding="utf-8"))
             skip = {s.lower() for s in g.get("do_not_apply", [])}
             for a, canon in (g.get("garbles") or {}).items():
                 if a.lower() not in skip:
