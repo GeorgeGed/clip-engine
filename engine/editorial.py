@@ -117,7 +117,13 @@ def _clean_hook(h: str, handle: str = "") -> str:
     Truncation cuts at a word boundary: a hook chopped mid-word is a phrase
     nobody said, burned on screen.
     """
-    h = re.sub(r"\s+", " ", (h or "").strip().strip('"\'')).upper()
+    # CORRECT HANDLES BEFORE UPPERCASING, because the aliases are matched in
+    # ordinary case. The title is burned on screen like any caption, and the
+    # editorial pass inherits whisper's spelling from the transcript it
+    # reads — clip 32 came back as "FNS: IT'S NOT AS BAD FOR VALEN AS YOU
+    # THINK", where valen is valyn, Jacob Batio of G2.
+    from engine import handles                           # noqa: PLC0415
+    h = handles.fix(re.sub(r"\s+", " ", (h or "").strip().strip('"\''))).upper()
     if handle:
         H = handle.upper()
         # Drop whatever prefix it chose, then put the real one back.

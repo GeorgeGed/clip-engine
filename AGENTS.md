@@ -5784,3 +5784,70 @@ encodings while `?stage=build` still returns 200, no directory created,
 being read, `169.254.169.254` refused and a real Twitch URL accepted, and
 the cross-job spec write refused with the file byte-identical afterwards
 while its own job can still write.
+
+### FIVE DEFECTS FROM ONE WATCHED CLIP, AND THE BIGGEST WAS A MISSING STAGE
+
+George watched `fns-07` and listed: the subtitle said *"Psalm"* where FNS
+said **s0m**, the clip started too early, the chat was missing, there were
+no sound effects, and the booms felt random. All five traced to something
+findable, and three of them were the same root.
+
+**`editorial` WAS NEVER IN THE PIPELINE.** The chain ran ingest, analyse,
+rank, screen, prep, **specs** — and `cmd_specs` reads each clip's hook and
+in-point out of `editorial.json`, a file nothing wrote. So every spec got
+`in_point 0.0`, which is the top of the candidate REGION: an acoustic
+cluster boundary, not where an argument starts. **10 of 25 specs carried
+it.** Clip 07 opened at 8.0s on *"like need that hella jealous by the way
+which free agents are must pickups"* — half of a chat question. Its real
+in-point is 20.5, on *"i literally named so many you got oxy you got zack
+and you got crash"*. That is the whole of "it starts too early", and it was
+never a tuning problem.
+
+`editorial` runs before `specs` now, and **`specs` FILLS rather than
+refuses**: `in_point 0.0` means nobody decided, so adopting a real value
+loses nothing, while a non-zero one is somebody's decision and is left
+alone. The "never overwrite a reviewed spec" rule was right and was being
+applied to specs the same command had written seconds earlier with
+placeholders.
+
+**NO CHAT AND NO SOUND EFFECTS WERE ONE DEFECT.** The 15% topicality floor
+refused the chat at 11%, and `paper` — the cue that fires when the chat
+panel settles in — is the only cue a clip with no story cards has besides
+the booms. So refusing chat silently removed the sound design too. George
+has now asked for chat on three clips the gate refused (13%, 6%, 11%), and
+**a default that is overridden every single time is not a default**. The
+floor is advice now, the number still prints, and `chat_mode: "off"` is the
+opt-out — which is the case clip 6 actually needed.
+
+### "PSALM" FOR s0m — AND THE LEXICON ALREADY EXISTED
+
+The caption rules have said *"preserve handle casing, acronyms, map names —
+Leviatán, not Leviathan — whisper garbles these constantly"* since the first
+style pass. **Nothing ever enforced it.** A note is not a gate, for the
+seventh time in this file.
+
+**The quote desk had already solved it.** `~/quotes-pipeline/config/roster.json`
+carries **444 players, 88 of them with the exact phonetic aliases whisper
+produces** — `sad hawk` for saadhak, `john cutie` for johnqt, `zeck in` for
+zekken, `jing gee` for Jinggg, `angel` for ANGE1, `davai` for d4v41. Someone
+collected those by hand for the quote cards. `engine/handles.py` reads them
+rather than starting a second list, plus `config/handle_garbles.json` for
+ones this pipeline has seen on screen.
+
+**EXACT ALIAS MATCHES ONLY. No soundex, no edit distance, no "close
+enough".** `psalm` is a real word and on another clip it would be the right
+one; `som` is a recorded alias of s0m and the transcripts are full of
+*something*, *some*, *sometimes*. Both are in the test. A fuzzy matcher
+turns an ordinary word into a real person's name eventually, and that is the
+worst thing this pipeline can do.
+
+Measured on clip 07's own cards: **3 corrected — `psalm`→`s0m` twice, and
+`valen`→`valyn`**, which George had not noticed. `valen` is a recorded alias
+of valyn (Jacob Batio, G2), verified for the desk rather than guessed here,
+and the context is a free-agent list beside oxy and zekken.
+
+**Hooks get it too.** The editorial pass reads the transcript, so it
+inherits whisper's spelling into the title — clip 32 came back as *"FNS:
+IT'S NOT AS BAD FOR VALEN AS YOU THINK"*, a wrong name on the biggest text
+in the clip. `_clean_hook` corrects before upper-casing, since the aliases
+are matched in ordinary case.
