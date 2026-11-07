@@ -26,13 +26,13 @@
   "job": "fns-2905408276",
   "index": 11,
   "channel": "fns",
-  "in_point": 0.0,
+  "in_point": 2.4,
   "out_point": 32.0,
   "region": [
    4767.6,
    4826.59
   ],
-  "hook": null,
+  "hook": "FNS: A STREAM TEAM WIN WOULD KILL THE GAME",
   "cam": [
    1450,
    816,

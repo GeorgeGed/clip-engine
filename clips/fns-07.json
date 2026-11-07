@@ -24,12 +24,12 @@
   "job": "fns-2905408276",
   "index": 7,
   "channel": "fns",
-  "in_point": 0.0,
+  "in_point": 20.5,
   "region": [
    3690.0,
    3757.33
   ],
-  "hook": null,
+  "hook": "FNS: SAM WON'T COMPETE ON AN ORG THIS YEAR",
   "emoji": "\ud83d\ude33",
   "cards": [],
   "chat_mode": null,

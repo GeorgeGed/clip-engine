@@ -1,0 +1,64 @@
+{
+ "title": null,
+ "subject": "Free agent market and a guarantee that Sam won't join a team this year",
+ "claim": "\"He will not compete this year. He will not compete on an org this year. I can guarantee you that.\"",
+ "duration_s": "34.30s (want 15-90)",
+ "source": {
+  "vod": "2905408276",
+  "in_point_s": 3690.0,
+  "out_point_s": 3757.33,
+  "clip_file_in_point_s": 0.0
+ },
+ "rights": {
+  "permission": "explicit",
+  "note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release."
+ },
+ "chat_overlay": false,
+ "qc": [
+  {
+   "check": "duration",
+   "ok": true,
+   "detail": "34.30s (want 15-90)"
+  },
+  {
+   "check": "loudness",
+   "ok": true,
+   "detail": "-14.08 LUFS (target -14.0)"
+  },
+  {
+   "check": "true_peak",
+   "ok": true,
+   "detail": "-1.24 dBTP"
+  },
+  {
+   "check": "black_top",
+   "ok": true,
+   "detail": "2054 frames, YMAX min 240"
+  },
+  {
+   "check": "black_bottom",
+   "ok": true,
+   "detail": "2054 frames, YMAX min 239"
+  },
+  {
+   "check": "dead_space",
+   "ok": true,
+   "detail": "1.15s quiet (3.4%, max 8%)"
+  },
+  {
+   "check": "absent_audio",
+   "ok": true,
+   "detail": "0.00s in 0 runs"
+  },
+  {
+   "check": "caption_cadence",
+   "ok": true,
+   "detail": "2.13 cards/s (73 cards)"
+  },
+  {
+   "check": "hallucinated_captions",
+   "ok": true,
+   "detail": "none"
+  }
+ ]
+}

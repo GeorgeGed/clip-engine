@@ -1,0 +1,22 @@
+{
+  "_meta": {
+    "purpose": "Whisper mis-hearings of player handles, observed in delivered clips.",
+    "why": "The quote desk's roster already carries phonetic aliases ('sad hawk' for saadhak, 'john cutie' for johnqt), but only for 88 of 444 players and not for anyone missing from it. These are the ones this pipeline has actually seen on screen. Add to it when a wrong name ships.",
+    "rule": "An entry is an EXACT phrase whisper produced, mapped to the real handle. No fuzzy matching anywhere: a name on screen that nobody said is the worst thing this pipeline can do."
+  },
+  "garbles": {
+    "psalm": "s0m",
+    "psalms": "s0m",
+    "paper x": "PRX",
+    "paper rex": "Paper Rex",
+    "leviathan": "Leviatán",
+    "hanz": "Hent",
+    "k drill": "Caedrel",
+    "kdrill": "Caedrel"
+  },
+  "seen": {
+    "psalm": "fns-07, delivered 2026-11-07: 'stop typing psalm in my chat' — s0m, the NRG player. George flagged it.",
+    "k drill": "fns-04: 'kdrill' is how whisper hears the League co-streamer Caedrel. Unverified spelling of what FNS actually says — left here but NOT applied until confirmed."
+  },
+  "do_not_apply": ["k drill", "kdrill"]
+}

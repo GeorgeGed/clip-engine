@@ -121,6 +121,16 @@ STAGES: tuple[Stage, ...] = (
     Stage("prep", "Prep",
           "Words, chat and facecam for the survivors. Everything before Resolve.",
           ("batch.py", "{job}", "prep")),
+    # EDITORIAL BEFORE SPECS, which is why every clip used to start too
+    # early. `specs` takes each clip's in-point and hook out of
+    # editorial.json, and this stage was never in the chain — so every spec
+    # was written with in_point 0.0, i.e. the top of the candidate REGION,
+    # which is an acoustic boundary and not where the argument starts.
+    # 10 of 25 specs on this VOD still carry that 0.0.
+    Stage("editorial", "Read",
+          "Decides where each clip starts, what it is called, "
+          "and whether it is one argument.",
+          ("batch.py", "{job}", "editorial")),
     Stage("specs", "Specs",
           "Topic dedup, then one spec per clip.",
           ("batch.py", "{job}", "specs")),

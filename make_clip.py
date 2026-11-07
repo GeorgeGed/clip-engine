@@ -51,6 +51,7 @@ from pathlib import Path
 ROOT = Path(__file__).parent
 sys.path.insert(0, str(ROOT))
 
+from engine import handles                                       # noqa: E402
 from engine import qc                                            # noqa: E402
 from engine.clipspec import load                                 # noqa: E402
 from engine import facecam                                       # noqa: E402
@@ -844,6 +845,18 @@ def stage_captions(clip, ch, st):
         rm = remap_card(c.start, c.end, st["keeps"])
         if rm:
             out.append(type(c)(rm[0], rm[1], c.text, c.words, c.emphasis))
+    # HANDLES, SPELLED THE WAY THE PLAYER SPELLS THEM. Whisper wrote
+    # "psalm" for s0m and it was burned on screen. This file's caption rules
+    # have said "preserve handle casing — Leviatán, not Leviathan — whisper
+    # garbles these constantly" since the first style pass, and nothing ever
+    # enforced it. Exact alias matches only, off the quote desk's own
+    # roster; see engine/handles.py for why there is no fuzzy matching.
+    _hits: list[str] = []
+    _fixed = handles.fix_cards(
+        out, on_change=lambda a, c, n: _hits.append(f"{a!r}->{c}"))
+    if _fixed:
+        log(f"  {_fixed} caption(s) corrected: "
+            f"{', '.join(sorted(set(_hits))[:6])}")
     st["cards"] = out
     dst = st["overlays"] / "cap_kin.mov"
     captions_video.kinetic([{"start": c.start, "end": c.end, "text": c.text,
@@ -1049,13 +1062,18 @@ def stage_chat(clip, ch, st):
     inside = [m for m in raw if t0 <= m["offset"] < t1]
     safe, why, topic = cr.chat_is_safe(inside, subject)
     log(f"  topicality: {why} ({topic['n']} messages in the window)")
-    # AN EXPLICIT `chat_mode` IN THE SPEC IS THE OVERRIDE. The topicality
-    # floor is a default for clips nobody has looked at; once George has
-    # watched one and said "keep the twitch chat, it was good", his call
-    # settles it and the measurement goes in the log as a caveat rather
-    # than a veto.
-    if not safe and not clip.chat_mode:
-        log("  NO CHAT OVERLAY on this clip — it would carry a second narrative")
+    if not safe and clip.chat_mode != "off":
+        log("  ^ below the floor, but chat is ON — set chat_mode \"off\" on "
+            "this clip's spec if the room is talking about something else")
+    # THE FLOOR IS NOW ADVICE, NOT A VETO. George has asked for chat on
+    # three clips in a row that this gate refused — 13%, 6% and now 11% —
+    # and each time he has been right that a clip reads better with the room
+    # in it. A default that has to be overridden every single time is not a
+    # default. `chat_mode: "off"` in the spec is how a clip opts out, which
+    # is the case clip 6 actually needed: its chat was 4% on subject and 29%
+    # about an unrelated transfer, and that number still prints here.
+    if clip.chat_mode == "off":
+        log("  chat off by the spec")
         st["chat_windows"] = []
         (PUBLIC / "chat_windows.json").write_text("[]")
         (PUBLIC / "chat.json").write_text("[]")

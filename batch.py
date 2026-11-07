@@ -294,8 +294,39 @@ def cmd_specs(job, args):
         # `specs` proposes a starting spec; the review owns it afterwards.
         # `--force` is there for when the editorial pass really should win.
         if spec.exists() and not force:
-            log(f"   {n:02d} -> {spec.name} EXISTS, left alone "
-                f"(--force to regenerate from editorial.json)")
+            # FILL WHAT IS MISSING; NEVER CHANGE WHAT IS SET.
+            #
+            # "Left alone" was right against regenerating a reviewed spec and
+            # wrong against one THIS COMMAND wrote moments earlier with
+            # placeholder values. `editorial` was not in the pipeline at all,
+            # so every spec got `in_point 0.0` — the top of the candidate
+            # REGION, which is an acoustic boundary and not where the
+            # argument starts. That is George's "it starts too early", on 10
+            # of 25 specs, and the real in-point was sitting in
+            # editorial.json unable to reach them.
+            #
+            # 0.0 means "nobody decided", so adopting a real value loses
+            # nothing. A non-zero in-point is somebody's decision and is left
+            # exactly as it is.
+            try:
+                cur = json.loads(spec.read_text())
+            except json.JSONDecodeError:
+                cur = {}
+            c = cur.get("clip", {})
+            fills = {}
+            if not float(c.get("in_point") or 0.0) and float(e.get("in_point") or 0.0):
+                fills["in_point"] = float(e["in_point"])
+            if not c.get("hook") and e.get("hook"):
+                fills["hook"] = e["hook"]
+            if fills:
+                c.update(fills)
+                cur["clip"] = c
+                spec.write_text(json.dumps(cur, indent=1) + "\n")
+                log(f"   {n:02d} -> {spec.name} kept, filled "
+                    + ", ".join(f"{k}={v!r}" for k, v in fills.items()))
+            else:
+                log(f"   {n:02d} -> {spec.name} EXISTS, left alone "
+                    f"(--force to regenerate from editorial.json)")
             written.append(spec)
             continue
         # A WINDOW FROM THE SCREEN BEATS THE EDITORIAL PASS'S IN-POINT.

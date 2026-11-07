@@ -112,5 +112,9 @@
   "permission": "explicit",
   "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release.",
   "delivered": "deliver/fns-04-it-is-genuinely-one-narrative-no-pivot-titleable-in.mp4"
+ },
+ "fns-07": {
+  "built": false,
+  "error": "Command '['/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/.venv/bin/python', '/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/make_clip.py', '/Users/georgegeddes/Library/Application Support/Claude/scratch-workspaces/6d38ae6d-05dd-4827-8e46-76304910d38e/68f1a3b0-a8d1-4d98-a822-3205d41bec7a/scratch-2026-10-28-f045e2/clips/fns-07.json']' returned non-zero exit status 1."
  }
 }
