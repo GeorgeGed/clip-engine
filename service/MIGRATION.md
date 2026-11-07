@@ -63,3 +63,42 @@ from the time this was nearly done against a live publication.
     cloudflared tunnel login        # browser; pick the zone
     echo clips.<your-domain> > service/HOST
     ./service/tunnel-setup.sh
+
+---
+
+## This project: clipengine.gg, and why it is the second path
+
+**Cloudflare Registrar does not sell `.gg`.** Checked in the dashboard, not
+assumed — searching `clipengine.gg` returns *"TLD is not supported:
+clipengine.gg can't be registered because the '.gg' extension is not yet
+supported."* So the easy path above is unavailable for this name and the
+domain is registered elsewhere, then delegated.
+
+**That is fine, and it is not the risky case.** Everything the section above
+warns about — the proxy flipping on, robots.txt, CAA locking out a previous
+CA — is about a domain with a LIVE SITE already on it. A newly registered
+domain has nothing to break. The only record will be the tunnel's own, and
+that one is supposed to be proxied.
+
+Registrar prices read 2026-11-07:
+
+| | registration | renewal |
+|---|---|---|
+| **Porkbun** | **$51.80** | one listed price, no separate renewal figure shown |
+| Gandi | €85.50 | **€180.00/yr** |
+
+Gandi's renewal is 2.1x its registration and 3.5x Porkbun's price. Porkbun
+advertises an "everyday low price" rather than a first-year teaser, so the
+single figure is most likely both — but I only saw one number on the page,
+so treat the renewal as unconfirmed until the basket shows it.
+
+### The steps, once the domain exists
+
+1. Register `clipengine.gg`. Porkbun unless the basket says otherwise.
+2. dash.cloudflare.com -> Add a domain -> `clipengine.gg` -> **Free**.
+   There is nothing to import, so there is nothing to grey out.
+3. Cloudflare gives two nameservers. Set them at the registrar, replacing
+   whatever it assigned.
+4. `cloudflared tunnel login`, then `./service/tunnel-setup.sh`.
+   `service/HOST` already says `clips.clipengine.gg`.
+5. `service/ACCESS.md` for the auth in front.
