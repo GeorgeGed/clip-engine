@@ -5922,3 +5922,14 @@ whose lower pane happens to be a dark document, so both are required.
 The box is `{x:64, y:1090, w:580, h:420}`, read out of `Chat.tsx` rather
 than estimated — the first attempt used a rectangle I guessed and it
 straddled the panel edge.
+
+**And the gate printed FAIL on its own line while reporting PASS overall.**
+`Report.ok` is `not any(f.fatal and not f.ok ...)`, and the first version of
+`chat_on_screen` left `fatal` at its default — so the check ran, measured
+correctly, printed `FAIL chat_on_screen: NOT VISIBLE`, and the clip passed.
+That is the same defect as the delivery gate's first version reporting
+`black_top 0 frames` because `-v error` had silenced the thing it was
+parsing: **a check that cannot fail the artifact is not a gate.** It is
+fatal now, and proved three ways — the clip George watched FAILS with chat
+expected, the same file PASSES when chat is genuinely off, and the rebuild
+PASSES at 85% fill.

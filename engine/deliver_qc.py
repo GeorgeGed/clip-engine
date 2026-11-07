@@ -135,7 +135,8 @@ def words_survived(src_words, delivered_path, *, model="base"):
 
 
 def check(path, *, cards=None, absent=None, src_words=None, seam: float = SEAM,
-          duration_range=(15.0, 90.0), verify_words: bool = False) -> Report:
+          duration_range=(15.0, 90.0), verify_words: bool = False,
+          chat_expected: bool | None = None) -> Report:
     from engine import qc
     path = Path(path)
     rep = Report(str(path))
@@ -199,4 +200,24 @@ def check(path, *, cards=None, absent=None, src_words=None, seam: float = SEAM,
             "words_survived", ratio >= WORD_SIMILARITY_MIN,
             f"similarity {ratio:.3f}, {n_said} said / {n_heard} heard" +
             (f", missing {missing}" if missing else "")))
+    # AN OVERLAY THAT RENDERED IS NOT AN OVERLAY THAT IS VISIBLE. Clip 07
+    # shipped with no chat while the build log said "91 messages on the cut",
+    # "1717 frames -> rm_Chat.mov" and "appended 4 of 4: V3:1" — the window
+    # list was empty, so 13 MB of overlay sat on the timeline and was never
+    # on screen for a frame. Only the file settles it.
+    if chat_expected is not None:
+        from engine import chat_visible                   # noqa: PLC0415
+        seen, why = chat_visible.visible(path, dur)
+        # FATAL. `Report.ok` only fails on fatal findings, and the first
+        # version of this left the default — so it printed FAIL on the line
+        # and PASS overall, which is the "a gate that measures nothing reads
+        # as a pass" defect this file already records. A clip that was
+        # supposed to carry chat and carries none is not deliverable.
+        rep.findings.append(Finding(
+            "chat_on_screen", seen == bool(chat_expected),
+            (f"{'visible' if seen else 'NOT VISIBLE'} — {why}"
+             if chat_expected else
+             f"{'VISIBLE but was not planned' if seen else 'absent, as planned'} — {why}"),
+            fatal=True))
+
     return rep

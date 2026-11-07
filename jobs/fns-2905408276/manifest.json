@@ -116,7 +116,7 @@
  "fns-07": {
   "built": true,
   "qc_ok": true,
-  "seconds": 219,
+  "seconds": 225,
   "render": "renders/fns-2905408276-07.mp4",
   "findings": [
    {
@@ -127,22 +127,22 @@
    {
     "check": "loudness",
     "ok": true,
-    "detail": "-14.15 LUFS (target -14.0)"
+    "detail": "-14.14 LUFS (target -14.0)"
    },
    {
     "check": "true_peak",
     "ok": true,
-    "detail": "-1.36 dBTP"
+    "detail": "-1.38 dBTP"
    },
    {
     "check": "black_top",
     "ok": true,
-    "detail": "1719 frames, YMAX min 240"
+    "detail": "1719 frames, YMAX min 239"
    },
    {
     "check": "black_bottom",
     "ok": true,
-    "detail": "1719 frames, YMAX min 238"
+    "detail": "1719 frames, YMAX min 243"
    },
    {
     "check": "dead_space",

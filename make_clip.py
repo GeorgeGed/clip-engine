@@ -1561,6 +1561,7 @@ def stage_render(clip, ch, st):
         if r:
             placed.append({"start": r[0], "end": r[1], "text": c.text})
     rep = deliver_qc.check(out, cards=placed or None, absent=[] if placed else None,
+                           chat_expected=bool(st.get("chat_windows")),
                            seam=ch.seam)
     log(rep.text())
     st["qc"] = rep
