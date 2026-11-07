@@ -78,15 +78,28 @@ collects. Patch the five fields and leave every other key alone.
 
 ## Four things that will bite
 
-**1. Test Range requests before building the editor.** The editor plays
-20–40 MB mp4s by scrubbing, which needs HTTP 206 partial responses. No
-Supabase Storage page documents Range support either way — I checked five
-of them. Settle it in thirty seconds against a real signed URL:
+**1. Range works at the origin — the CDN is the part still untested.**
+The editor plays 20–40 MB mp4s by scrubbing, which needs 206 partial
+responses, and no Supabase *documentation* page mentions Range at all. The
+source settles it: `src/storage/range.ts` has a full `parseRangeHeader`
+handling `bytes=N-M` and suffix ranges, `renderer.ts` sets `Accept-Ranges:
+bytes` and `Content-Range` and takes its status from the backend's
+`httpStatusCode`, and the adapter interface carries `range`, `contentRange`
+and `httpStatusCode` through. So the origin is not a guess any more.
 
-    curl -sI -H "Range: bytes=0-1023" "<signed-url>" | grep -i "206\|content-range"
+What is NOT settled is the CDN in front of a public URL, which is the layer
+most likely to surprise. One command, the moment a real URL exists:
 
-A `206` with `Content-Range` means the editor works. Anything else and the
-clips need a storage layer that does Range — R2 and S3 both do.
+    ./worker/check-range.sh "<public-or-signed-url>"
+
+It checks the 206, the `Content-Range`, that the body is the range and not
+the whole file, that a mid-file slice is byte-identical to the same slice of
+the whole download, and what the caching headers say. If it fails, serve the
+clips from R2 or S3 instead — both do Range.
+
+**A redirect is not a failure.** The first run of that script hit our own
+key gate and got a 303; calling that "Range broken" would have been wrong in
+the other direction, so it now says so explicitly.
 
 **2. The free tier is too small to be the answer.** 1 GB storage is about
 30 clips, the upload cap is 50 MB against clips of 20–40, and **a free

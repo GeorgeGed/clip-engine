@@ -5637,3 +5637,34 @@ documents HTTP Range support either way — five of them checked. The editor
 scrubs 20–40 MB mp4s off 206 responses, so it is `curl -sI -H "Range:
 bytes=0-1023"` against one signed URL, and if it is not a 206 the clips need
 R2 or S3 instead.
+
+### SUPABASE STORAGE DOES RANGE — read from its source, not its docs
+
+The open question left for the cloud front end was whether a clip served
+from Supabase Storage can be scrubbed, since the editor plays 20–40 MB mp4s
+off 206 responses. **Not one Supabase documentation page mentions Range** —
+five were checked — which is how it stayed open.
+
+The source answers it. `supabase/storage` has `src/storage/range.ts` with a
+complete `parseRangeHeader` (both `bytes=N-M` and suffix `bytes=-N`, with
+validation), `renderer.ts` sets `Accept-Ranges: bytes` and `Content-Range`
+and takes its status from the backend's `httpStatusCode`, and
+`backend/adapter.ts` carries `range`, `contentRange` and `httpStatusCode`
+through the interface. **A vendor's docs being silent is not evidence of
+absence when the thing is open source.**
+
+What that does NOT settle is the **CDN in front of a public URL**, which is
+the layer most likely to surprise and cannot be read. `worker/check-range.sh`
+is that test as one command: 206, `Content-Range`, a body that is the range
+rather than the whole file, a mid-file slice byte-identical to the same
+slice of the full download, and the caching posture — which matters because
+a clip is REBUILT at the same key, so anything cacheable serves a mix of old
+and new bytes.
+
+**Validating the checker caught the checker.** Its first run went at our own
+site with the key in the query string and got a **303** — the key gate
+redirecting to set its cookie. Reporting that as "Range is broken" would
+have been wrong in the opposite direction, so a 3xx now says *follow it or
+authenticate, then re-run*, and the script takes extra curl arguments for
+exactly that. Re-run properly it reports 206, `bytes 0-1023/23969291`, a
+1024-byte body and a byte-identical mid-file slice.
