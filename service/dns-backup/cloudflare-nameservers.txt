@@ -1,0 +1,24 @@
+ult-orb.com — the Cloudflare nameservers assigned to this zone
+assigned 2026-11-07, Free plan, account Georgegeddes123@…
+
+  felipe.ns.cloudflare.com
+  josephine.ns.cloudflare.com
+
+REPLACING (delete all three at WordPress.com, not some — a partial switch is
+the "mixed name servers" error WordPress's own SSL troubleshooting names):
+
+  ns1.wordpress.com
+  ns2.wordpress.com
+  ns3.wordpress.com
+
+Zone state at hand-off: 5 records imported, ALL set to DNS only (grey), Bot
+Preference Sync off, AI crawler policies left at their defaults so nothing
+about the publication changes.
+
+  A     ult-orb.com   192.0.78.206   DNS only
+  A     ult-orb.com   192.0.78.156   DNS only
+  CNAME www           ult-orb.com    DNS only
+  TXT   _dmarc        v=DMARC1;p=non…
+  TXT   ult-orb.com   v=spf1 include:_sp…
+
+To roll back: set the three wordpress.com nameservers again at my.wordpress.com.
