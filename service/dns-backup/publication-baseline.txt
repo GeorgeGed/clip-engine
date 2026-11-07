@@ -1,0 +1,20 @@
+== resolution ==
+   NS      ns1.wordpress.com. ns2.wordpress.com. ns3.wordpress.com. 
+   apex A  192.0.78.156 192.0.78.206 
+   www     ult-orb.com. 192.0.78.156 192.0.78.206 ult-orb.com. 
+   SPF     "v=spf1 include:_spf.wpcloud.com ~all" 
+   DMARC   "v=DMARC1;p=none;" 
+   MX      
+   CAA     (none — correct: any CA may issue)
+
+== the site itself ==
+   status  200
+   title   <title>Ult Orb &#8211; An Independent Esports Publication</title>
+   bytes   285959
+   www     200 -> https://ult-orb.com/
+
+== TLS ==
+   issuer=C=US, O=Google Trust Services, CN=WR1
+   subject=CN=tls.automattic.com
+   notBefore=Oct 16 06:49:35 2026 GMT
+   notAfter=Jan 14 06:49:34 2027 GMT

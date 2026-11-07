@@ -1,0 +1,33 @@
+ult-orb.com — DNS as it stands BEFORE any Cloudflare migration
+captured 2026-11-07T15:59:41Z against the authoritative servers
+authoritative NS: ns1.wordpress.com. ns3.wordpress.com. ns2.wordpress.com. 
+
+== apex ==
+--- SOA
+    ns1.wordpress.com. hostmaster.wordpress.com. 2026061406 14400 7200 604800 300
+--- NS
+    ns1.wordpress.com.
+    ns2.wordpress.com.
+    ns3.wordpress.com.
+--- A
+    192.0.78.206
+    192.0.78.156
+--- TXT
+    "v=spf1 include:_spf.wpcloud.com ~all"
+
+== names that exist ==
+    www                    A:ult-orb.com.,192.0.78.156,192.0.78.206, CNAME:ult-orb.com., TXT:ult-orb.com.,"v=spf1 include:_spf.wpcloud.com ~all", MX:ult-orb.com.,
+    _dmarc                 A:, CNAME:, TXT:"v=DMARC1;p=none;", MX:,
+
+== does the zone allow AXFR (a full dump)? ==
+; Transfer failed.
+
+== registrar ==
+       Registrar URL: http://www.wordpress.com
+       Creation Date: 2026-06-14T09:41:50Z
+       Registry Expiry Date: 2028-06-14T09:41:50Z
+       Registrar: Automattic Inc.
+       Domain Status: clientTransferProhibited https://icann.org/epp#clientTransferProhibited
+       Name Server: NS1.WORDPRESS.COM
+       Name Server: NS2.WORDPRESS.COM
+       Name Server: NS3.WORDPRESS.COM
