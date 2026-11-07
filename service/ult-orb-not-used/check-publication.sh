@@ -40,7 +40,12 @@ probe() {
   echo "== the site itself =="
   echo "   status  $(curl -sL -o /dev/null -w '%{http_code}' --max-time 20 https://ult-orb.com/)"
   echo "   title   $(curl -sL --max-time 20 https://ult-orb.com/ 2>/dev/null | grep -oiE '<title[^>]*>[^<]*</title>' | head -1)"
-  echo "   bytes   $(curl -sL --max-time 20 https://ult-orb.com/ 2>/dev/null | wc -c | tr -d ' ')"
+  # ROUNDED, because a live WordPress page churns a few dozen bytes between
+  # requests and an exact count makes every run look like a regression. The
+  # failure this is here to catch is the page becoming an error page, which
+  # moves it by tens of KB, not by 50 bytes.
+  b=$(curl -sL --max-time 20 https://ult-orb.com/ 2>/dev/null | wc -c | tr -d ' ')
+  echo "   size    ~$(( (b + 2500) / 5000 * 5 ))KB"
   echo "   www     $(curl -sL -o /dev/null -w '%{http_code} -> %{url_effective}' --max-time 20 https://www.ult-orb.com/)"
   echo
   echo "== TLS =="

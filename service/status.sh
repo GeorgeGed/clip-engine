@@ -9,7 +9,7 @@
 # that look alike from outside, so each gets its own line.
 set -uo pipefail
 cd "$(dirname "$0")/.."
-HOST="${TUNNEL_HOST:-clips.ult-orb.com}"
+HOST="${TUNNEL_HOST:-$(cat "$(dirname "$0")/HOST" 2>/dev/null || echo clips.example.com)}"
 PORT="${CLIP_FACTORY_PORT:-8808}"
 LABEL=com.clipfactory.site
 ok()   { printf '  \033[32mOK\033[0m    %s\n' "$1"; }
@@ -102,10 +102,12 @@ else
 fi
 
 echo "── $HOST"
-ns=$(dig +short NS ult-orb.com | head -1)
+zone="${HOST#*.}"          # clips.example.com -> example.com
+ns=$(dig +short NS "$zone" | head -1)
 case "$ns" in
-  *cloudflare*) ok "zone is on Cloudflare ($ns)" ;;
-  *)            bad "zone is still on $ns — see service/MIGRATION.md" ;;
+  *cloudflare*) ok "$zone is on Cloudflare ($ns)" ;;
+  "")           bad "$zone does not resolve — is the domain registered?" ;;
+  *)            bad "$zone is on $ns, not Cloudflare — see service/MIGRATION.md" ;;
 esac
 # No `|| echo 000` — curl already writes 000 for a failed request, and the
 # fallback concatenated onto it, printing "000000".

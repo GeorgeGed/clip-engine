@@ -10,7 +10,7 @@
 == the site itself ==
    status  200
    title   <title>Ult Orb &#8211; An Independent Esports Publication</title>
-   bytes   285959
+   size    ~285KB
    www     200 -> https://ult-orb.com/
 
 == TLS ==

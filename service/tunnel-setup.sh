@@ -10,7 +10,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 REPO="$(pwd)"
 NAME="${TUNNEL_NAME:-clip-factory}"
-HOST="${TUNNEL_HOST:-clips.ult-orb.com}"
+HOST="${TUNNEL_HOST:-$(cat "$REPO/service/HOST" 2>/dev/null || echo clips.example.com)}"
 PORT="${CLIP_FACTORY_PORT:-8808}"
 CFDIR="$HOME/.cloudflared"
 
