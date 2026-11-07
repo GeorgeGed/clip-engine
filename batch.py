@@ -183,7 +183,26 @@ def cmd_specs(job, args):
         else:
             groups.append({"topic": t, "lead": r, "also": []})
             kept.append(r)
-    log(f"[specs] {len(rows)} buildable -> {len(kept)} after topic dedup")
+    # `--only N` SKIPS THE DEDUP. Topic dedup is right for a batch — five of
+    # this VOD's survivors argue the same thing and shipping all five ships
+    # one idea five times. It is wrong when a person has pointed at one clip
+    # and asked for it: they are not asking for a balanced batch, they are
+    # asking for that clip. So the UI's "make this one" writes its spec here
+    # regardless of what leads its topic group.
+    want = {int(x) for x in str(getattr(args, "only", "") or "").replace(",", " ").split()}
+    if want:
+        # A NAMED CLIP ALSO OVERRIDES AN EDITORIAL DROP. The pass vetoes for
+        # real reasons — two narratives, opens mid-thought — but those are
+        # advice, and a person who has clicked this clip has outvoted them.
+        # Silently writing nothing would look like a broken button.
+        by_n = {r["n"]: r for r in rows}
+        missing = sorted(want - set(by_n))
+        if missing:
+            log(f"[specs] --only {sorted(want)}: {missing} are not buildable, skipped")
+        kept = [by_n[n] for n in sorted(want & set(by_n))]
+        log(f"[specs] --only: writing {[r['n'] for r in kept]}, dedup bypassed")
+    else:
+        log(f"[specs] {len(rows)} buildable -> {len(kept)} after topic dedup")
     for g in groups:
         if g["also"]:
             log(f"   {g['lead']['n']:02d} leads; held: "
@@ -197,8 +216,12 @@ def cmd_specs(job, args):
         m = ranked[n - 1]
         e = ed.get(str(n), {})
         if e.get("verdict") == "drop":
-            log(f"   {n:02d} DROPPED by the editorial pass: {e.get('why','')[:60]}")
-            continue
+            if n not in want:
+                log(f"   {n:02d} DROPPED by the editorial pass: {e.get('why','')[:60]}")
+                continue
+            log(f"   {n:02d} the editorial pass DROPPED this one — "
+                f"{e.get('why','')[:70]} — building anyway because it was "
+                f"asked for by name")
         cam = (cams.get(str(n)) or {}).get("rect")
         spec = ROOT / f"clips/{chan['name']}-{n:02d}.json"
         # NEVER OVERWRITE A SPEC THAT EXISTS. **Every round of George's review

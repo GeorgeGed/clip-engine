@@ -956,7 +956,23 @@ class Handler(BaseHTTPRequestHandler):
             if not row:
                 return self._json({"error": "no such job"}, 404)
             if not spec_path(row["name"], n).exists():
-                return self._json({"error": f"no spec for clip {n:02d}"}, 404)
+                # WRITE ITS SPEC FIRST, rather than refusing. `batch.py specs`
+                # dedups by topic and keeps one clip per argument, which is
+                # right for a batch and wrong the moment someone points at a
+                # clip and asks for it — they want THAT clip, not a balanced
+                # set. `--only` bypasses the dedup and the editorial veto.
+                # It is seconds of JSON, so it runs inline instead of taking
+                # a turn through the queue.
+                r = subprocess.run(
+                    [str(VENV), "batch.py", row["name"], "specs",
+                     "--only", str(n)],
+                    cwd=ROOT, capture_output=True, text=True, timeout=120)
+                if not spec_path(row["name"], n).exists():
+                    tail = (r.stdout or r.stderr or "").strip().splitlines()
+                    return self._json(
+                        {"error": "could not prepare that clip: "
+                                  + (tail[-1] if tail else "no spec written")},
+                        409)
             if RUNNING.get("job_id") is not None:
                 return self._json(
                     {"error": "a job is already running — one at a time, "

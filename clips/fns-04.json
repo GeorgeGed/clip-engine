@@ -1,0 +1,48 @@
+{
+ "channel": {
+  "name": "fns",
+  "cam": [
+   1456,
+   818,
+   1920,
+   1080
+  ],
+  "seam": 0.42,
+  "chrome": 92,
+  "fps": 60,
+  "grade": {
+   "NodeIndex": "1",
+   "Slope": "1.06 1.06 1.07",
+   "Offset": "-0.012 -0.012 -0.010",
+   "Power": "1.06 1.06 1.06",
+   "Saturation": "1.18"
+  },
+  "arc": null,
+  "vod_id": "2905408276",
+  "permission": "explicit",
+  "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release."
+ },
+ "clip": {
+  "job": "fns-2905408276",
+  "index": 4,
+  "channel": "fns",
+  "in_point": 0.0,
+  "out_point": null,
+  "region": [
+   3281.9,
+   3332.08
+  ],
+  "hook": "FNS: I LIKE PEOPLE WHO EXPLAIN THINGS",
+  "cam": [
+   1450,
+   816,
+   1920,
+   1080
+  ],
+  "emoji": "\ud83d\ude33",
+  "cards": [],
+  "chat_mode": null,
+  "booms": null,
+  "notes": "It is genuinely one narrative \u2014 no pivot, titleable in one line \u2014 and it is still a drop, on rule 3 and rule 2, and no in-point fixes either.\n\nRULE 3. The clip's whole subject is one named person and it names him wrong. The transcript says \"um kdrill is the only one that i watched for league of lege"
+ }
+}
