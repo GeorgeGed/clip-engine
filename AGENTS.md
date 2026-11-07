@@ -5729,3 +5729,58 @@ wants it and nowhere on the card.
 too** — both import it at call time, so nothing surfaced until something
 called them. The venv had no pip either; `ensurepip` then `pip install
 anthropic` fixed all three.
+
+### WHAT A PUBLIC URL EXPOSED, AND THE ONE THAT NEEDED NO ATTACKER
+
+The site went from a read-only page to one with a button that **runs
+subprocesses on this Mac** — it drives Resolve, hands a pasted URL to
+yt-dlp, and spawns ffmpeg per thumbnail. An adversarial pass over
+`web/server.py` returned 16 findings, 5 refuted. Three reviewers
+independently found the same traversal, which is some evidence it was the
+obvious one.
+
+**THE WORST ONE IS NOT A SECURITY BUG AT ALL.** `spec_path` keys on the
+CHANNEL — `name.split("-")[0]` — so every job from one streamer maps to the
+same `clips/<chan>-NN.json`. `read_specs` knows this and skips a spec whose
+`clip.job` is another VOD; **`write_spec` did not**. So pasting a SECOND FNS
+VOD and editing clip 12 overwrote the first VOD's reviewed `in_point 23.3`,
+`out_point 86.8` and `chat_mode "continuous"` — the exact four rounds of
+George's notes that `specs` ate once before. No attacker, no key, just the
+product working as built. **This repo has now recorded the same shape five
+times**, and the fix each time is the one already written three lines away:
+`read_specs` had the guard, and the write path never got it.
+
+**`?stage=` WAS A PATH.** `GET /api/jobs/1/log?stage=../../../../var/log/install`
+returned the tail of any `*.log` on the machine, and every such request also
+ran `mkdir -p` on the traversed path — **a GET with a filesystem side
+effect**. The reviewer reproduced all four probes against an isolated copy.
+`do_POST` already validated the identical value against `STAGE_BY_KEY`; the
+GET simply never did, which makes it an omission rather than a design.
+
+**AND IT READ THE KEY BACK OUT OF THE API THE KEY PROTECTS.** `main()`
+printed `http://127.0.0.1:8808/?k=<token>` at startup, which under launchd
+is a file *inside the tree the app serves from* —
+`jobs/_service/site.out.log`, holding every token ever used across restarts.
+So rotating the key revoked nothing from anyone who could still read that
+file. The key is not printed now, and the log was truncated.
+
+Four more, all real and all cheap:
+
+| | |
+|---|---|
+| **An idle connection owned a thread forever.** The stdlib reads the whole request line and headers BEFORE `do_GET` runs, so the key gate cannot stop it — a caller with no key at all parked threads by sending headers slowly. `timeout = 20` on the handler. |
+| **A rejected POST was still drained.** `_body()` trusted the caller's `Content-Length` with no cap, on the branch that had ALREADY returned 401. Closing the connection solves the framing problem the drain existed for without reading a byte. |
+| **`?k=` never authenticated a POST.** The cookie-upgrade branch keyed on the presence of a valid `?k=` and not on the method, so every state-changing request carrying one got a 303 that did nothing. One of three documented ways in, broken for all four write routes. |
+| **A non-ASCII key crashed the gate.** `hmac.compare_digest` raises `TypeError` on `str` with any non-ASCII character, and the value is attacker-controlled — `?k=é` took the handler down before it could answer. Compare bytes. |
+
+The job URL now has to be a Twitch VOD or a local path. It was checked only
+with `startswith("http")` and then handed to yt-dlp as an argument, so the
+box could be pointed at anything it could reach with the result readable in
+the stage log.
+
+**Every fix was verified by sending the attack.** Traversal 400 in all three
+encodings while `?stage=build` still returns 200, no directory created,
+`?k=é` 401 instead of a crash, a 50 MB unauthenticated body refused without
+being read, `169.254.169.254` refused and a real Twitch URL accepted, and
+the cross-job spec write refused with the file byte-identical afterwards
+while its own job can still write.

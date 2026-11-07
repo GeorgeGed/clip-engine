@@ -228,16 +228,23 @@ WORK: "queue.Queue[tuple[int, list[str]]]" = queue.Queue()
 RUNNING: dict[str, object] = {"job_id": None, "stage": None, "proc": None}
 
 
-def log_path(job_name: str, stage: str) -> Path:
+def log_path(job_name: str, stage: str, *, create: bool = False) -> Path:
+    """`create` ONLY where a stage is about to write.
+
+    It used to mkdir unconditionally, so a GET that merely READ a log created
+    directories — and since `stage` arrived raw off the query string, at a
+    path of the caller's choosing.
+    """
     p = JOBS / job_name / "web" / f"{stage}.log"
-    p.parent.mkdir(parents=True, exist_ok=True)
+    if create:
+        p.parent.mkdir(parents=True, exist_ok=True)
     return p
 
 
 def run_stage(job_id: int, job_name: str, url: str, rights: str,
               stage: Stage, extra: tuple[str, ...] = ()) -> int:
     """One stage as a subprocess, output tee'd to its own log."""
-    out = log_path(job_name, stage.key)
+    out = log_path(job_name, stage.key, create=True)
     set_stage(job_id, stage.key, state="running", started=time.time(),
               ended=None, code=None)
     RUNNING["stage"] = stage.key
@@ -277,7 +284,8 @@ def worker() -> None:
                                "and set Preferences > System > General > "
                                "External scripting using to Local. "
                                + "; ".join(doc["notes"]))
-                        log_path(row["name"], key).write_text(why + "\n")
+                        log_path(row["name"], key,
+                                 create=True).write_text(why + "\n")
                         set_stage(job_id, key, state="failed",
                                   ended=time.time(), code=1)
                         failed = f"{key} (Resolve not reachable)"
@@ -467,6 +475,17 @@ def write_spec(name: str, index: int, patch: dict,
     if err:
         return None, err
     d = json.loads(sp.read_text())
+    # THE SAME GUARD `read_specs` ALREADY APPLIES. `spec_path` keys on the
+    # CHANNEL (`name.split("-")[0]`), so every job from one streamer maps to
+    # the same clips/<chan>-NN.json. Reading knows that and skips another
+    # VOD's clip; writing did not — so a second FNS VOD overwrote the first
+    # one's reviewed in_point, out_point and chat_mode. This needs no
+    # attacker: pasting a second FNS link was enough. Same defect this repo
+    # has recorded four times, one layer further out.
+    owner = str((d.get("clip") or {}).get("job", ""))
+    if owner and owner != name:
+        return None, (f"clips/{sp.name} belongs to job {owner}, not {name} — "
+                      f"refusing to overwrite another VOD's reviewed spec")
     c = d.setdefault("clip", {})
     changed = {k: (c.get(k), v) for k, v in clean.items() if c.get(k) != v}
     c.update(clean)
@@ -632,6 +651,12 @@ class Handler(BaseHTTPRequestHandler):
     # Safe here because every response path sets Content-Length: `_send`
     # always does, and `_file`'s 206 branch does too.
     protocol_version = "HTTP/1.1"
+    # WITHOUT THIS A CONNECTION THAT NEVER FINISHES ITS REQUEST OWNS A THREAD
+    # FOREVER. The key is checked in do_GET/do_POST, which the stdlib only
+    # reaches after reading the whole request line and headers — so a caller
+    # with no key at all can still park threads by sending headers slowly.
+    # `timeout` is honoured by StreamRequestHandler and drops them.
+    timeout = 20
 
     def log_message(self, fmt, *args):      # quieter than the default
         pass
@@ -652,9 +677,19 @@ class Handler(BaseHTTPRequestHandler):
     def _json(self, obj, code: int = 200) -> None:
         self._send(code, json.dumps(obj).encode(), "application/json")
 
+    # Every JSON endpoint here takes a handful of fields. A megabyte is
+    # already absurd; the point is that there WAS no ceiling.
+    MAX_BODY = 1 << 20
+
     def _body(self) -> dict:
         n = int(self.headers.get("Content-Length") or 0)
         if not n:
+            return {}
+        if n > self.MAX_BODY:
+            # Do not read it. `rfile.read(n)` trusted a number the caller
+            # chose, with no cap and no socket timeout, so one unauthenticated
+            # POST could hold a thread and allocate as much as it liked.
+            self.close_connection = True
             return {}
         try:
             return json.loads(self.rfile.read(n) or b"{}")
@@ -723,7 +758,13 @@ class Handler(BaseHTTPRequestHandler):
                 if name == "cf_key":
                     given = urllib.parse.unquote(val)
                     break
-        return bool(given) and hmac.compare_digest(given, TOKEN)
+        # COMPARE BYTES. `hmac.compare_digest` raises TypeError on str with
+        # any non-ASCII character, and `given` is attacker-controlled — so a
+        # key of "é" took the handler down before it could answer at all.
+        if not given:
+            return False
+        return hmac.compare_digest(given.encode("utf-8", "surrogateescape"),
+                                   TOKEN.encode("utf-8"))
 
     def _gate(self, p: str, q: dict) -> bool:
         """True when the request may proceed; otherwise it has been answered.
@@ -736,7 +777,13 @@ class Handler(BaseHTTPRequestHandler):
         one. An API request gets 401, which the page reloads on.
         """
         if self._has_key(q):
-            if TOKEN and (q.get("k") or [""])[0]:
+            # ONLY UPGRADE A NAVIGATION. The branch exists to move the key
+            # out of the address bar, which is a GET concern — firing it on a
+            # POST turned every state-changing request carrying ?k= into a
+            # 303 that did nothing, so one of the three documented ways in
+            # never worked for build, spec or job creation.
+            if (TOKEN and (q.get("k") or [""])[0]
+                    and self.command in ("GET", "HEAD")):
                 rest = {k: v for k, v in q.items() if k != "k"}
                 dest = p + (("?" + urllib.parse.urlencode(rest, doseq=True))
                             if rest else "")
@@ -815,6 +862,13 @@ class Handler(BaseHTTPRequestHandler):
         m = re.fullmatch(r"/api/jobs/(\d+)/log", p)
         if m:
             stage = (q.get("stage") or ["ingest"])[0]
+            # `stage` REACHES A FILESYSTEM PATH, so it is not free text. Left
+            # unchecked, ?stage=../../../../var/log/install read any *.log on
+            # the Mac — including jobs/_service/site.out.log, which had the
+            # site's own key printed in it. `do_POST` already validates the
+            # same value against this table; the GET simply never did.
+            if stage not in STAGE_BY_KEY:
+                return self._json({"error": f"no such stage {stage!r}"}, 400)
             with db() as c:
                 row = c.execute("SELECT * FROM job WHERE id=?",
                                 (int(m.group(1)),)).fetchone()
@@ -906,9 +960,12 @@ class Handler(BaseHTTPRequestHandler):
         u = urllib.parse.urlparse(self.path)
         p = u.path
         if not self._gate(p, urllib.parse.parse_qs(u.query)):
-            # Read the body regardless, or the next request on this
-            # keep-alive connection starts mid-JSON.
-            self._body()
+            # DO NOT DRAIN IT — CLOSE. Draining was there so a keep-alive
+            # connection did not start mid-JSON, but it meant an
+            # unauthenticated POST could make the server read a body of any
+            # size it declared. Closing solves the framing problem without
+            # reading a byte.
+            self.close_connection = True
             return None
         body = self._body()
 
@@ -917,11 +974,17 @@ class Handler(BaseHTTPRequestHandler):
             rights = str(body.get("rights", "")).strip()
             channel = str(body.get("channel", "")).strip()
             note = str(body.get("note", "")).strip()
-            if not url.startswith(("http://", "https://")) \
-                    and not is_local_vod(url):
+            # A TWITCH VOD OR A LOCAL FILE — NOT ANY URL. The only check was
+            # a startswith on http(s), and this value goes straight to
+            # yt-dlp as an argument, so the box could be pointed at anything
+            # it could reach and the result read back through the stage log.
+            # The pipeline only supports these two anyway.
+            ok_url = (re.match(r"https?://(www\.)?twitch\.tv/videos?/\d+", url)
+                      or re.match(r"https?://(www\.)?twitch\.tv/[\w-]+/v(ideo)?/\d+", url))
+            if not ok_url and not is_local_vod(url):
                 return self._json(
-                    {"error": "give a Twitch VOD URL, or the path to a VOD "
-                              "already on this machine"}, 400)
+                    {"error": "give a Twitch VOD URL (twitch.tv/videos/…), or "
+                              "the path to a VOD already on this machine"}, 400)
             if rights not in RIGHTS:
                 return self._json(
                     {"error": f"rights must be one of {', '.join(RIGHTS)} — "
@@ -1046,12 +1109,14 @@ def main() -> None:
     # queue drains as fast as it fills.
     ThreadingHTTPServer.request_queue_size = 128
     srv = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
-    where = f"http://127.0.0.1:{PORT}"
+    print(f"clip factory on http://127.0.0.1:{PORT}  (root {ROOT})")
     if TOKEN:
-        where += f"/?k={TOKEN}"
-    print(f"clip factory on {where}  (root {ROOT})")
-    if TOKEN:
-        print("  a key is set, so every request needs it")
+        # THE KEY IS NOT PRINTED. Under launchd stdout is a file inside the
+        # tree this app serves from, so printing it put the master
+        # credential into jobs/_service/site.out.log — readable through the
+        # very API it protects, and accumulating every token ever used, so
+        # rotating the key did not revoke anything.
+        print("  a key is set; it is in web/.site-key")
     print(f"  {len(ALL_STAGES)} stages: "
           f"{' -> '.join(s.key for s in ALL_STAGES)}")
     try:
