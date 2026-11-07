@@ -5892,3 +5892,33 @@ that shows it throughout.
 **It also explains the missing sound.** `paper` fires when the chat panel
 settles in; no window, no entrance, no cue — so "there's no sound effects"
 and "there's no chat" were the same defect reported twice.
+
+### A GATE FOR THE INVISIBLE OVERLAY, AND THE PROBE THAT READ BACKWARDS
+
+The chat fix above is a fix; it is not a guard. `engine/chat_visible.py`
+measures the finished file, because the plan said chat on a clip that had
+none and every log line agreed with the plan.
+
+**THE FIRST PROBE REPORTED THE OPPOSITE OF THE TRUTH.** It counted saturated
+coloured pixels in the chat box, reasoning that usernames are colourful —
+and the clip WITHOUT chat scored **44,386** against the one with chat at
+**7,664**. The panel is near-black and it COVERS the VCT roster board, which
+is full of team colours and flags; removing it reveals more colour, not
+less. Calibrating against a known-good and a known-bad is the only reason
+that was caught, and it would have shipped a check that passed exactly the
+clips it existed to fail.
+
+Two signals, because either alone is wrong:
+
+| | clip 12 | clip 16 | clip 04 | clip 07 as George watched it |
+|---|---|---|---|---|
+| panel fill | 83% | 86% | 84% | **19%** |
+| coloured px/frame | 8090 | 10513 | 7936 | 6411 |
+
+Fill separates them cleanly; colour does not separate them at all, because
+the board underneath is colourful too. But fill alone would pass a clip
+whose lower pane happens to be a dark document, so both are required.
+
+The box is `{x:64, y:1090, w:580, h:420}`, read out of `Chat.tsx` rather
+than estimated — the first attempt used a rectangle I guessed and it
+straddled the panel edge.
