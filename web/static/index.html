@@ -126,13 +126,15 @@ input:focus,select:focus{outline:none;border-color:var(--accent)}
 <div class="wrap">
 
   <section id="s-drop" class="drop">
-    <h1>Drop a Twitch VOD. Get the clips <em>worth posting</em>.</h1>
+    <h1>Drop a VOD. Get the clips <em>worth posting</em>.</h1>
     <p>It watches the whole stream, finds the moments that carry, and cuts them
-       vertical with captions, chat and sound.</p>
+       vertical with captions, chat and sound. Paste a Twitch link, or the path
+       to a file already on this Mac.</p>
     <div class="form">
       <div class="row">
-        <input id="url" type="url" inputmode="url" spellcheck="false"
-               placeholder="https://twitch.tv/videos/…">
+        <input id="url" type="text" inputmode="url" spellcheck="false"
+               autocapitalize="off" autocomplete="off"
+               placeholder="twitch.tv/videos/… or /Users/you/Movies/stream.mp4">
         <button class="go" id="start" disabled>Get clips</button>
       </div>
       <div class="row">

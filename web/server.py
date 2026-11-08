@@ -838,9 +838,44 @@ class Handler(BaseHTTPRequestHandler):
             # Helix `Get Videos` returns user_login, title and duration; the
             # credentials are the ones `engine.detect_crowd` already reads.
             src = (q.get("url") or [""])[0]
+            # A LOCAL FILE ANSWERS THE SAME QUESTION. The pipeline has
+            # accepted a path on this machine since `ingest.fetch` was found
+            # to adopt one rather than calling yt-dlp — but the UI could not
+            # reach it: the field was `type="url"` so a browser refused a
+            # path before submitting, and the Start button was gated on a
+            # Twitch lookup that a path can never produce. The capability
+            # existed and was unusable, which is worse than absent.
+            #
+            # A multipart upload stays out: the source is a 6 GB 1080p60
+            # file, this is one stdlib thread, and the file is already on the
+            # disk the pipeline reads from. What a browser cannot give is a
+            # path, so the path is typed or pasted — and this confirms the
+            # file is really there before an hour of work starts.
+            if is_local_vod(src):
+                f = Path(src).expanduser()
+                dur = ""
+                try:
+                    r = subprocess.run(
+                        ["ffprobe", "-v", "error", "-show_entries",
+                         "format=duration", "-of", "csv=p=0", str(f)],
+                        capture_output=True, text=True, timeout=30)
+                    secs = float((r.stdout or "0").strip() or 0)
+                    if secs:
+                        dur = (f"{int(secs // 3600)}h{int(secs % 3600 // 60):02d}m"
+                               f"{int(secs % 60):02d}s")
+                except (OSError, ValueError, subprocess.SubprocessError):
+                    pass
+                gb = f.stat().st_size / 1e9
+                return self._json({
+                    "channel": "",          # a file has none; the stem names the job
+                    "title": f.name,
+                    "duration": dur or f"{gb:.1f} GB",
+                    "created": "", "local": True})
             m = re.search(r"/videos?/(\d+)", src)
             if not m:
-                return self._json({"error": "not a Twitch VOD URL"}, 400)
+                return self._json(
+                    {"error": "not a Twitch VOD URL, and no file at that path"},
+                    400)
             try:
                 sys.path.insert(0, str(ROOT))
                 from engine.detect_crowd import Helix      # noqa: PLC0415

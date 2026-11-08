@@ -28,13 +28,23 @@ let looked = null, lookTimer = null;
 $('#url').addEventListener('input', () => {
   clearTimeout(lookTimer); looked = null; gate();
   const u = $('#url').value.trim();
-  if (!/\/videos?\/\d+/.test(u)) { $('#meta').textContent = ''; return; }
-  $('#meta').textContent = 'Looking it up…';
+  // A TWITCH VOD **OR** A PATH ON THIS MAC. The server has always accepted
+  // both, and this test was the reason only one of them could be used: a
+  // path never matched, so the lookup never ran, so `looked` stayed null and
+  // the Start button could not enable. An absolute path or a ~ is enough to
+  // try — the server confirms the file is actually there and says how long
+  // it is, which is what you want to know before an hour of work starts.
+  const isPath = /^[~/]/.test(u);
+  if (!isPath && !/\/videos?\/\d+/.test(u)) { $('#meta').textContent = ''; return; }
+  $('#meta').textContent = isPath ? 'Checking that file…' : 'Looking it up…';
   lookTimer = setTimeout(async () => {
     try {
       const d = await api('/api/lookup?url=' + encodeURIComponent(u));
       looked = d;
-      $('#meta').innerHTML = `<b>${esc(d.channel)}</b> &middot; ${esc(d.title)} &middot; ${esc(d.duration)}`;
+      // A file has no channel, so do not render an empty bold span before a
+      // separator — it reads as a missing value rather than an absent one.
+      $('#meta').innerHTML = (d.channel ? `<b>${esc(d.channel)}</b> &middot; ` : '')
+        + `${esc(d.title)} &middot; ${esc(d.duration)}`;
     } catch (e) { looked = null; $('#meta').innerHTML = `<span class="err">${esc(e.message)}</span>`; }
     gate();
   }, 450);
@@ -47,7 +57,7 @@ $('#start').addEventListener('click', async () => {
   $('#start').disabled = true;
   try {
     const j = await api('/api/jobs', { method: 'POST', body: JSON.stringify({
-      url: $('#url').value.trim(), channel: looked.channel,
+      url: $('#url').value.trim(), channel: looked.channel || '',
       rights: $('#rights').value, note: looked.title || '' }) });
     open(j.id);
   } catch (e) {
