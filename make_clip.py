@@ -724,6 +724,62 @@ def _cam(clip, ch, st):
     return st["cam"]
 
 
+# The Resolve project every clip for a channel is built in. It is NOT
+# per-clip: the pool items and the project settings are worth reusing, and
+# `stage_assemble` already matches pool entries by resolved file path so the
+# shared pool is safe.
+PROJECT = {"fns": "fns-clip08-reference"}
+
+
+def _project(r, ch):
+    """LOAD THE PROJECT BY NAME. NEVER TAKE WHATEVER IS OPEN.
+
+    Every Resolve stage here used `GetProjectManager().GetCurrentProject()`,
+    which is whatever project Resolve happens to have open — and that is a
+    property of how Resolve was last launched, not of this build.
+
+    IT COST FOUR BUILDS AND LOOKED LIKE A RESOLVE CRASH. After the Mac
+    rebooted, relaunching Resolve opened a fresh **Untitled Project** rather
+    than reopening the clip project, so the build composed a vertical 60fps
+    timeline — Fusion caption titles, qtrle alpha overlays, six tracks —
+    inside a project set to **3840x2160 @ 24fps**. It built without
+    complaint and then killed Resolve at the Deliver page every single time,
+    with the log ending on "Main view page is changed to 11" and no crash
+    report. Measured, which is the only reason it was found:
+
+        fns-clip08-reference          1080x1920 @ 60
+        Untitled Project …194835      3840x2160 @ 24
+
+    A minimal render on a fresh project worked in 26s, which is what proved
+    Resolve itself was healthy and the timeline was not.
+
+    So the settings are ASSERTED here, from the Channel, every build — not
+    assumed from a project someone set up by hand months ago. `GetSetting`
+    returns strings, so compare as strings.
+    """
+    pm = r.GetProjectManager()
+    name = PROJECT.get(ch.name, f"{ch.name}-clips")
+    proj = pm.LoadProject(name) or pm.CreateProject(name)
+    if proj is None:
+        raise RuntimeError(
+            f"could not load or create the Resolve project {name!r}. "
+            "Close any open project in Resolve and retry.")
+    want = {"timelineResolutionWidth": "1080",
+            "timelineResolutionHeight": "1920",
+            "timelineFrameRate": f"{float(ch.fps):g}"}
+    for k, v in want.items():
+        got = str(proj.GetSetting(k))
+        if got.rstrip("0").rstrip(".") != v.rstrip("0").rstrip("."):
+            if not proj.SetSetting(k, v):
+                raise RuntimeError(
+                    f"project {name!r} has {k}={got!r}, this build needs "
+                    f"{v!r}, and Resolve refused to change it. A vertical "
+                    f"60fps timeline inside a landscape 24fps project "
+                    f"renders as a crash, not as an error.")
+            log(f"  project {name}: {k} {got} -> {v}")
+    return proj
+
+
 def stage_cut(clip, ch, st):
     src = clip.source(ROOT)
     fps = ch.fps
@@ -761,7 +817,7 @@ def stage_cut(clip, ch, st):
     log(f"  {src_dur:.1f}s -> {out_dur:.1f}s in {len(kp)} shots, "
         f"{(len(kp)-1)/(out_dur/60):.1f} cuts/min")
     r = connect(); r.OpenPage("edit")
-    proj = r.GetProjectManager().GetCurrentProject()
+    proj = _project(r, ch)
     mp = proj.GetMediaPool()
     r.GetMediaStorage().AddItemListToMediaPool([str(src)])
     item = next(i for i in mp.GetRootFolder().GetClipList()
@@ -1196,7 +1252,7 @@ def _render_comp(comp, out_dir, fps):
 # ----------------------------------------------------------- assemble ----
 def stage_assemble(clip, ch, st):
     r = connect(); r.OpenPage("edit")
-    proj = r.GetProjectManager().GetCurrentProject()
+    proj = _project(r, ch)
     mp = proj.GetMediaPool()
     tl = proj.GetCurrentTimeline()
     fps = ch.fps
@@ -1360,7 +1416,7 @@ def stage_assemble(clip, ch, st):
 def stage_punch(clip, ch, st):
     import resolve_punch as rp
     r = connect(); r.OpenPage("edit")
-    proj = r.GetProjectManager().GetCurrentProject()
+    proj = _project(r, ch)
     tl = proj.GetCurrentTimeline(); mp = proj.GetMediaPool()
     start = tl.GetStartFrame()
     v1 = sorted(tl.GetItemListInTrack("video", 1) or [], key=lambda i: i.GetStart())
@@ -1461,7 +1517,7 @@ def stage_punch(clip, ch, st):
 def stage_render(clip, ch, st):
     from engine.render_ffmpeg import _finish_audio, house_eq
     r = connect()
-    proj = r.GetProjectManager().GetCurrentProject()
+    proj = _project(r, ch)
     for j in (proj.GetRenderJobList() or []):
         proj.DeleteRenderJob(j["JobId"])
     tag = clip.slug
