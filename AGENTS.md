@@ -6303,3 +6303,302 @@ thread, and a disk at 93%.
 while the single-clip download had used the hook since the titles landed.
 Two paths answering the same question differently. Now 13 entries for six
 clips — each mp4 beside its `.json`, named by title.
+
+## TWO RENDERERS, ONE EDIT — and the gate that says they agree
+
+George: *"we should continue to use davinci when we are testing new formats -
+but i agree on how we build out the opus clip."*
+
+That is the right split and it is better than the migration I was about to
+propose. **Resolve is the format workbench** — a new look is built and judged
+there, because the timeline can be opened and nudged. **The native ffmpeg
+path is the production line** — headless, parallel, cloud-reachable — for
+clips whose format is already settled. Same edit decisions, two renderers,
+and nothing currently working gets touched.
+
+### Build-or-buy: Vizard was checked properly and it cannot express the edit
+
+Asked whether to wrap `vizard.ai/api` as an esports product instead. Read
+their docs and ToS rather than guessing, and the answer is structural, not a
+matter of quality:
+
+* **it returns finished MP4s and the clip object has NO start or end
+  timestamp** — you cannot find out where in the VOD a clip came from, let
+  alone re-cut it;
+* **in/out points are not settable.** You get `preferLength` buckets
+  (<30s, 30-60s, 60-90s) and keywords. Four rounds of George's notes on clip
+  12's in-point have nowhere to go;
+* **caption style is not a request field.** It lives in a `templateId` built
+  in their WEB UI, so it is unreachable from code;
+* no two-pane layout (only 9:16 / 1:1 / 4:5 / 16:9), no alpha-overlay input,
+  no audio controls at all;
+* "editing mode", where you bring your own cut, **caps at 3 minutes** and
+  still applies their layout and captions. So it is not a renderer either.
+
+**The esports-specific killer: Vizard has a `removeSilenceSwitch`.** This VOD
+is **35.8% absent audio**, and on a DMCA-muted stream dead air is speech you
+cannot hear. That switch splices across unheard speech — the exact feature
+refused twice here and measured six times. Muted VODs are the norm in
+esports, not a corner case.
+
+**And the ToS forbids the business model:** *"You may not assign, resell,
+sub-license or otherwise transfer or delegate any of your rights or
+obligations hereunder, in whole or in part, without our prior written
+consent."* Total liability is capped at **$50**, and users grant a
+*"perpetual, irrevocable... sub-licensable licence"* on content put through
+it — which would be client footage.
+
+So the pipeline's value was never the rendering. Vizard renders fine for
+anyone at $20/month. What it cannot do is know that a boom goes on a claim
+word and not a consequence word, that chat needs 15% on-topic to be worth
+showing, or that `s0m` is a person.
+
+### `engine/render_parity.py` — parity means NO DECISION DIFFERS
+
+Two renderers will never produce the same pixels: Resolve composites in
+linear light, the scalers differ, the encoders differ. So a pixel-difference
+threshold is the wrong instrument — loose enough to pass two honest renders
+and it passes a renderer that dropped a pane.
+
+**IT NEEDS TWO INSTRUMENTS AND THEY ARE ORTHOGONAL.** Measured on clip 12
+against controls built from it:
+
+| instrument | honest | wrong | gap |
+|---|---|---|---|
+| row profile (geometry) | <=0.43 | shift 5.0 / seam 14.0 / other clip 27.0 | **12x** |
+| facecam d-saturation (grade) | <=0.05 | 1.88 / 15.10 | **38x** |
+| facecam d(R-B) white point | <=0.55 | 11.9 | 22x |
+
+**A mismatched facecam CDL moves the row profile by only 1.5x the honest
+floor** — 0.527 against a 0.43 floor, a knife edge — while the geometry
+failures move the white point by 0.06-0.15. **Either instrument alone passes
+a real failure.** `tests/test_render_parity.py` asserts the orthogonality
+itself, so a later tidy-up cannot quietly drop one: it checks that
+`wrong_grade` is caught by the grade instrument and that the geometry
+instrument does not see it.
+
+Both thresholds sit mid-plateau (4.7x / 16x / 5.5x headroom), which is the
+standard this file requires after `sustain` separated six points at exactly
+one parameter setting and nowhere else.
+
+**THE SEAM IS VERIFIED, NOT DETECTED, and that is a correction.** The first
+version hunted the largest horizontal gradient near 0.42H and returned 842
+(0.4385) with total confidence. That is **the bottom edge of VLR.gg's
+NAVIGATION BAR** — static because the page never scrolls, and a stronger edge
+than the facecam-to-document transition it was looking for. Rows 810-850
+measure 51.3 / 51.2 / 51.1 / 51.4 / 51.2 across nine frames, identical,
+which is the tell. A moved seam shifts both panes and the row profile already
+catches it at 14x, so a blind detector only added a way to be wrong.
+
+The honest controls are ffmpeg-against-ffmpeg. **Resolve-against-ffmpeg will
+vary by more**, so `--calibrate` exists to re-measure the floor once a real
+native render lands. Move the thresholds deliberately if it has risen; do not
+loosen them by guessing.
+
+### THE LOWER PANE'S ZOOM HAS NEVER DONE ANYTHING
+
+`cuts.content_framings` cycles five `(cx, zoom)` pairs — (0.50,1.00),
+(0.34,1.12), (0.62,1.06), (0.44,1.18), (0.58,1.02) — and its docstring says
+*"Zoom > 1 narrows the window, which makes the text BIGGER"*. **It does
+not.** Under `fill=True` the vertical axis always limits, so the content
+scale is pinned at 1113.6/988 = **1.127126 for all five entries** and the
+visible window is **958.19 x 988 in every one**. The zoom reaches the render
+only as a PAN, by shifting the clamped x0: 480.9 / 378.0 / 535.2 / 365.7 /
+499.7, a 169.5px span on a 1920px source.
+
+Verified in the delivered file by fitting the visible source x0 per frame:
+481.00 / 378.00 / 535.25 / 535.25 / 365.75 / 481.00 / 378.00 at NCC
+0.9992-0.9998, within **0.09px** of prediction, with the scale held at 1.1271
+for every one.
+
+**Same class as the crop-based "zoom" that rendered at exactly 1.00x** and
+passed two eyeball checks on stills. The port must reproduce the pan-only
+behaviour first; implementing the zoom as the docstring describes would be a
+real editorial change and a parity failure, and it should be raised as the
+former rather than discovered as the latter.
+
+### THE OVERLAYS ARE COMPOSITED ONE FRAME EARLY
+
+Measured by correlating `cap_kin.mov`'s own alpha coverage against the dark
+share of the caption band in the raw Resolve render, over 80 frames spanning
+an entrance cluster:
+
+| offset | -2 | **-1** | 0 | +1 | +2 |
+|---|---|---|---|---|---|
+| NCC | 0.8591 | **0.9925** | 0.8697 | 0.8112 | 0.7505 |
+
+**Overlay frame n+1 is composited at render frame n** — the render shows each
+overlay frame 16.7ms early. That is Resolve's MarkIn-renders-one-frame-
+before-the-mark behaviour, already recorded here, leaking into overlay
+placement. Imperceptible on captions changing 2.3 times a second, and it is a
+RESOLVE ARTEFACT: **the native path must not reproduce it**, which means a
+strict frame-exact parity check on fast-changing overlay content will flag
+the ffmpeg version being more correct than the reference.
+
+It also silently wrecks any measurement that compares an overlay file against
+the render — which is how it was found. The first attempt at the alpha test
+below returned a bimodal result, observed values of exactly 1.000 or 0.000
+and nothing between, which is not a compositing model but a misalignment.
+**Establish frame alignment before measuring anything across two files.**
+
+### Linear-light compositing is RULED OUT for the full-frame alpha overlays
+
+The survey flagged this as the one thing it had not verified, because this
+file records Resolve compositing in linear light with a `(1-alpha)**2.4`
+transfer and a 12x luma-ratio difference against ffmpeg. If that applied to
+`cap_kin.mov`, every antialiased glyph edge would be wrong.
+
+Measured on 8,802 antialiased edge pixels, alignment corrected: take the
+caption's **hard black stroke** (foreground luma < 35) at partial alpha, read
+the background from a uniform run of fully-transparent pixels beside it, and
+compare against both models in code values.
+
+| | straight alpha | linear light |
+|---|---|---|
+| weighted mean error | **17.93** | 29.60 |
+
+Observed edges are consistently **darker** than straight alpha, and linear
+light predicts **brighter** — so it is ruled out in the direction that
+matters, and ffmpeg's ordinary `overlay` needs no gamma work here.
+
+**Be honest about the residual**: observed runs 10-25 code values below
+straight alpha and reaches 0 where straight predicts 24.6. That is not
+explained. The likely cause is h264 edge ringing on 1-2px glyph edges rather
+than a compositing model, and the earlier linear-light finding was measured
+on a **full-pane uniform-alpha dip** — a different regime, so both can be
+true. Anything composited at large area and uniform alpha still has to be
+solved through the gamma.
+
+### What the survey established, measured rather than read
+
+Geometry inverted out of `resolve_layout.plan()` and then **best-fit against
+the source**, which is the only way this project has ever caught a transform
+that does nothing:
+
+| | fitted | predicted | delta |
+|---|---|---|---|
+| seam | 806.34 | 806.40 | **0.06px** (NCC 0.999584) |
+| content scale | 1.1272 | 1.127126 | — |
+| facecam scale | 2.9640 | 2.964706 | 0.02% |
+| facecam src ytop | 343.950 | 344.000 | 0.05px |
+
+* **`cam` is not what you see.** `plan()` uses `fill=True` everywhere, so the
+  facecam throws away 59.86 source px off EACH side (24.7% of its width) and
+  the content pane shows only the middle 958 of 1920 columns.
+* **No masking is needed** because under fill the vertical axis limits
+  whenever src_aspect > pane_aspect — true for every cam here (1.771-1.779 vs
+  the pane's 1.3393). **It would flip for R5's 1.16:1 chat-reference cam**,
+  and then the facecam would overflow across the seam. That needs a guard,
+  not an assumption.
+* **The CDL is one static grade on the FACECAM ONLY** (`Channel.arc` is None
+  for fns): Slope 1.06/1.06/1.07, Offset -0.012/-0.012/-0.010, Power 1.06,
+  Saturation 1.18. **Measured in the render the saturation lands 1.2088-1.2248,
+  not 1.18**, and the slope/offset/power terms are a 1-3 code-value nudge at
+  the noise floor — so saturation is the only term worth matching precisely.
+* Pane heights are non-integer (806.4 / 1113.6). ffmpeg must split 806 + 1114,
+  a 0.05% scale error and 0.42-0.60px of content shift at the pane edges.
+  **Decide the rounding once and record it** rather than discovering it as a
+  1px drift in a parity report.
+
+### THE NATIVE RENDERER BUILT A CLIP, AND THE GATE FOUND ONE REAL DIFFERENCE
+
+`engine/render_native.py` composes the three measured modules and takes the
+cut from `make_clip._plan_only` — the one implementation of the plan, never
+re-derived. Clip 12 rendered end to end with **no Resolve at all**: 2716
+frames, 1080x1920 @60, **33s of wall clock** for the composite and ~50s with
+the loudness finish, against a Resolve build that needs a logged-in desktop
+and cannot run two clips at once.
+
+`engine.render_parity`: **10 of 12 checks pass.**
+
+| | |
+|---|---|
+| duration | 45.300s vs 45.300s, **0.00 frames** |
+| grade saturation | d 0.655 (tol 0.80) |
+| grade white point | d(R-B) +0.66 (tol 3.0) |
+| black frames | 0 of 2716 in either pane |
+| loudness | -14.00 vs -14.10 LUFS, **-1.30 dBTP** |
+| captions | 7/7 sampled frames agree |
+| bottom pane | **+0px at every sampled time** |
+| vertical | **+0px at every sampled time** |
+| **top pane** | **+10px — FAIL** |
+| **geometry** | **row profile 2.895 (tol 2.0) — FAIL, same cause** |
+
+**ONE FAULT, AND IT IS THE FACECAM'S HORIZONTAL CENTRING.** The gate reported
+"best fit +10px, residual 1.7" — a LOW residual at a NON-ZERO shift, which is
+the exact signature it was built to catch: right crop, wrong place.
+
+Fit at full resolution with BOTH position and width free, on normalised
+profiles so a level difference between the two grades cannot move the
+optimum:
+
+| | Resolve render | native | `plan()` predicts |
+|---|---|---|---|
+| facecam src x0 (inset 0) | 1508.50 | **1512.25** | **1512.45** |
+| visible width | 352.6 | **350.1** | **351.1** |
+
+**THE NATIVE PATH IS THE ONE THAT MATCHES THE ARITHMETIC.** It reproduces
+`resolve_layout.plan()` to a quarter of a source pixel. The RESOLVE RENDER
+departs from `plan()` by 3.75 source px left and 1.5px wider, reproducibly,
+at every sampled time and every inset (dx +3.75 / +3.75 / +4.00 / +3.75 /
++4.50). The survey independently saw the same direction on clip 15 — fitted
+xleft 1495.40 against a predicted 1495.86 — but eight times smaller.
+
+So `plan()` does not fully describe what Resolve renders, and the gap is
+channel- or cam-dependent. About 1% of the pane width and visually
+negligible; **the tolerance is NOT being widened to hide it**, because a
+threshold moved to make a failure disappear is how the knife-edge defects in
+this file got shipped. It is recorded as an open, attributed difference.
+
+Unexplained and worth naming: a single quantised `ZoomX` would produce both
+symptoms at once (a smaller zoom is a wider visible region, and zoom scales
+about the CANVAS centre so it also shifts position), but `plan()` computes
+Pan after zoom and would compensate exactly, so that only works if Pan is
+quantised too. Not established.
+
+### THE PICTURE IS 2716 FRAMES AND THE OVERLAYS ARE 2710
+
+Measured on clip 12, and the three numbers all disagree:
+
+| | |
+|---|---|
+| sum of each keep's rounded span (`round(end*fps) - round(start*fps)`) | **2716** — what Resolve's V1 holds |
+| `round(out_dur * fps)` = `st["total"]` at caption time | **2710** |
+| `cap_kin.mov` and `rm_Chat.mov` | **2710** |
+| delivered | **2715** |
+
+`stage_captions` renders the overlays from `st["total"]`, and only later does
+`stage_assemble` recount the picture off V1 and log *"picture is N frames,
+not round(out_dur*fps)"*. By then the movies are on disk at the smaller
+number, so **the last 6 frames of clip 12 carry picture with no captions and
+no chat.** This file already records the opposite half of the same seam —
+overlays sized from `round(out_dur*fps)` OUTRAN V1 by 2 frames and rendered
+black, fixed by cutting them to the picture. Cutting them to a picture that
+is then recounted larger is the other side of it.
+
+**Round the START and END of each keep, never the LENGTH.** `make_clip:849`
+hands Resolve `round(k.start*fps), round(k.end*fps)`, so a keep's span is the
+difference of two independently rounded numbers. Rounding the length instead
+drifts, because each keep then rounds on its own origin.
+
+Delivered 2715 = 2716 - 1, which is Resolve's MarkIn eating timeline frame 0.
+The native path emits the full 2716 — one frame MORE than Resolve, inside the
+gate's one-frame tolerance, and the more correct of the two.
+
+**The one-frame overlay offset, confirmed from the other side.** A
+side-by-side of the two renders at t=17.6 happened to land on frame 1056 and
+showed a caption card in the native render that Resolve does not have.
+Measured per frame in the caption band:
+
+| frame | cap_kin.mov coverage | Resolve ink | native ink |
+|---|---|---|---|
+| 1055 | 0.3232 | 0.1702 | 0.1693 |
+| **1056** | **0.3232** | **0.0003** | **0.1693** |
+| 1057 | 0.0000 | 0.0004 | 0.0003 |
+
+The card's last frame is 1056. Native holds it there because the overlay file
+does; **Resolve drops it one frame early.** Correlated over an 80-frame
+window: **Resolve best offset +1, native +0.** So this is the known MarkIn
+artefact, not a composite bug, and the native path is the correct one — which
+is why `render_parity`'s caption check compares whether a caption is UP on a
+sampled frame rather than demanding frame-exact equality.
