@@ -6026,3 +6026,280 @@ search can land on a neighbouring syllable rather than the card's own word …
 if he flags the words again, the fix is a stress model, not another
 constant."* It is the same finding, now with a third data point. **Do not
 add a fourth constant to it.**
+
+## THE HANDLE LEXICON TURNED ORDINARY SPEECH INTO A NAME — the mirror bug, shipped
+
+`engine/handles.py` was written one round earlier because a delivered clip's
+captions read *"Psalm"* where FNS said **s0m**. Its stated rule is **exact
+alias matches only, no soundex, no edit distance**, with the reason given in
+as many words: *"a fuzzy matcher turns an ordinary word into a real person's
+name eventually, and that is the worst thing this pipeline can do."*
+
+**The rule was right and it was not enough.** `load()` adds every roster
+handle as its own alias so casing can be corrected (`ethan` -> `Ethan`), and
+**123 of the resulting 599 keys are ordinary English words**:
+
+| key | becomes | in a sentence |
+|---|---|---|
+| `after` | **AfteR** | *"if you just start sucking **after** then they're going to be replacements"* |
+| `life` | **Life** | *"that's not how **life** works always"* |
+| `texture` | **t3xture** | the texture of the game |
+| `tick` | **TcK** | every tick of the spike timer |
+| `rose` | **Rosé** | a rose by any other name |
+| also | `less` `key` `net` `master` `happy` `cloud` `rain` `heat` `exit` `knight` `spring` `seven` `solo` `oxy` `neon` | |
+
+Exactness cannot catch it, because **`after` IS an exact match for AfteR's own
+handle.** Two delivered clips carried it — clip 08's build log reads
+`'after'->AfteR` and clip 12's `'life'->Life` — and I reported clip 12's in
+this file as the handle fix *working*.
+
+**NO MEASUREMENT SEPARATES THE TWO CLASSES, and the obvious ones were tried.**
+Swept against how often the speaker himself says each one across 31
+transcripts: `oxy` 5 (a real player) beside `after` 4 (a preposition),
+`psalm` 2 (a real garble) beside `less` 2. A plain dictionary-membership test
+denies `psalm`, `forsaken`, `leviathan` and `narrate` too — the valuable ones.
+
+So the **ASYMMETRY OF THE FAILURE MODES** decides it, the way `MAX_PUNCHES`
+and the nucleus gate's direction were decided:
+
+* denying costs a casing or spelling miss on a real handle — recoverable,
+  visible, and it only ever reproduces whisper's own spelling;
+* applying wrongly puts a real person's name over words nobody said.
+
+The deny list is **VENDORED** in `config/handle_garbles.json`, not computed
+from `/usr/share/dict/words` at load time: two machines deciding differently
+about a name on screen is this file's most-repeated defect with a person's
+name attached. **A config with no deny list RAISES** rather than loading,
+because failing open restores the defect. An entry is overridden only by
+`garbles` — a garble a human has seen on screen — which is how `psalm` ->
+`s0m` survives. `tests/test_handles.py`: **25 failures against the pre-fix
+state, zero after.**
+
+### `read_text()` USES THE LOCALE'S ENCODING — in a second and third file
+
+UTF-8 interactively, **ASCII in a subprocess**. `engine/handles.py` was fixed
+for exactly this one round ago; `story.api_key()` had it too and it **killed
+clip 16's entire build** on a non-ASCII byte in the `.env` it reads for the
+Flickr key, inside `stage_captions`. `tier3.py` passed `errors="replace"`,
+which stops the crash and still decodes with the wrong codec. Both are
+explicit now and verified under `env -i … LC_ALL=C`.
+
+## THE EDITORIAL PASS NOW JUDGES THE WINDOW — and its in-point still is not usable
+
+`screen_clips.best_window` returns a span only when the whole region FAILS the
+mute gate, and **that span is the clip**. Handing the judging pass the whole
+region therefore asked it where a different, longer piece of audio should
+start, and it answered accordingly: **15 of 17 windowed clips came back with
+an in-point at or before the window's start**, pointing at audio the clip does
+not contain. Times are rebased to 0 so the prompt's *"seconds from the
+beginning of THIS transcript"* stays literally true, and the offset goes back
+on before storage, so `editorial.json` holds one kind of number.
+
+**IT IS DETERMINISTIC, which was worth checking rather than assuming.** The
+same input judged three times:
+
+| clip 33 | drop / drop / drop | in 82.00 / 82.00 / 82.00 |
+| clip 27 | ship / ship / ship | in 1.50 / 1.50 / 1.50 |
+
+Only the hook's *wording* varies. So the three verdicts that flipped — 33
+ship->drop, 27 and 31 drop->ship — are the window being read, not the dice.
+Clip 33's window is about bundle revenue where its region was about player
+freedom, which is the "a clean window is not a clip" failure caught by the
+pass instead of by George watching a delivered file. Clips 25 and 31 gain
+titles they never had.
+
+### The in-point adoption is REVERTED, on a 4–4 blind panel
+
+Eight clips, both candidate openings presented as X and Y with the position
+swapped on alternate cases, three judges each on a different rule (opens on a
+complete clause / explains itself / includes the prompt):
+
+| | |
+|---|---|
+| majority to the model reading the window | **4 of 8** |
+| majority to the window's own acoustic edge | **4 of 8** |
+
+A sign test on 4–4 is **p = 1.0 — not weak evidence, no evidence.** An
+adversarial critic then found the comparison fails all three standards this
+file uses to accept a rule: **no swept parameter with a plateau** (the margins
+are categorical), **no held-out clips** (all eight are in the comparison), and
+**a failure mode that is not benign** — a wrong in-point ships a clip opening
+mid-thought, the defect George has named by clip number four times.
+
+Three more things it found that are worth more than the vote:
+
+1. **THE PANEL WAS SELECTED ON THE DEPENDENT VARIABLE.** Eleven clips have a
+   window where the two methods differ; the panel got seven of them plus clip
+   07. Every clip in it carries `verdict: ship`. The two left out that carry
+   `drop` (14, 33) are precisely the cases where the transcript-reading method
+   had **already flagged itself as having failed** — clip 14's own note reads
+   *"It opens mid-thought on 'but not like absurd amounts'"*.
+2. **THE REAL FINDING INDICTS BOTH METHODS EQUALLY.** Of the 16 candidate
+   in-points, **8 land strictly inside a word**, four by 0.36–0.76s — clip
+   28's acoustic candidate is 0.76s inside *"how"*, the word one judge called
+   "missing"; clip 50's transcript candidate is 0.50s inside *"unless"*, and
+   the panel passed that one 3–0 **clear** believing it opened on *"forget
+   orgs"*. Zero of eight acoustic candidates and only four of eight
+   transcript candidates land even on an utterance start. **Neither generator
+   produces a sentence start**, which is the stated limitation measured
+   instead of assumed.
+3. **RULE 2 INVERTS ON A TRANSCRIPT ARTIFACT.** On three clips the prompt lens
+   picked the candidate *without* the question, because the question is cut
+   mid-interrogative and *"a severed interrogative reads as a broken file"* —
+   worse than no prompt. On a fourth it picked the candidate *with* the
+   question. What flipped it is whether whisper's boundary fell before or
+   after the question word. So **"include the prompt" needs the precondition
+   "only if the prompt is whole"**, and that exception currently lives in
+   prose and in no code — the shape of defect this file has now recorded
+   eight times.
+
+**And a correction to the commit one earlier.** Its "15 in-points before the
+window / 2 inside" is the **pre-change** measurement; after re-judging the
+file reads 5 and 11, and the clip-33 corroboration it cites (*"named 81.6
+against a window opening at 82.0, 0.4s apart"*) no longer holds — that entry
+now reads 82.00 and `drop`. The measurement justified the change and then the
+change invalidated the measurement, which is worth saying rather than leaving
+two numbers in the record that cannot both be true.
+
+## IT WAS NEVER RESOLVE: A VERTICAL CLIP BUILT INSIDE A 4K 24fps PROJECT
+
+George: *"keeps crashing."* Four builds in a row died at the Deliver page and
+I blamed the app twice, in writing, before measuring.
+
+Every Resolve stage took its project from
+`GetProjectManager().GetCurrentProject()` — **whatever Resolve happens to
+have open**, which is a property of how Resolve was last launched and not of
+the build. The Mac rebooted at 16:53; relaunching Resolve opened a fresh
+Untitled Project rather than reopening the clip project:
+
+| | resolution | fps |
+|---|---|---|
+| `fns-clip08-reference` | 1080x1920 | 60 |
+| `Untitled Project …194835` | **3840x2160** | **24** |
+
+So the build composed a vertical 60fps timeline — six tracks, Fusion caption
+titles, qtrle alpha overlays — inside a 4K landscape 24fps project. It built
+without one complaint and killed Resolve every time.
+
+**Every clip that rendered that day did so BEFORE the reboot** — 04 at 16:24,
+06 at 16:29, 08 at 16:35 — because Resolve still had the right project open
+from the previous session. The pipeline had always depended on that and never
+said so.
+
+### Three things made it look like an app crash, and all three are traps
+
+1. **The API answers `None` for every METHOD when Resolve goes away**, so
+   `proj.StartRendering(...)` raises `TypeError: 'NoneType' object is not
+   callable` — which reads exactly like the `hasattr` lie recorded above and
+   is nothing of the kind. My first guard tested the RESULT (`if not job`)
+   and could never fire, because the failure is on the attribute lookup.
+   `callable(getattr(proj, "AddRenderJob", None))` is the test.
+2. **`IsRenderingInProgress()` never returns False**, and the wait loop had
+   no ceiling — one build sat **fifty minutes at 0.0% CPU** with no output
+   file and not one line of log. Now bounded at 20x the picture duration
+   with a 120s floor; a reference render of a 45s clip takes 9 seconds.
+3. **There is no crash report in DiagnosticReports**, because the dialog is
+   Blackmagic's own "Problem Report for DaVinci Resolve" and not Apple's. So
+   checking the normal place says "no crash" while a crash dialog is on
+   screen, stacked one per crash, blocking the GUI thread.
+
+`resolve_driver.blocking_dialog()` asks System Events for Resolve's window
+titles and `doctor()` reports one, so the site and the agent refuse before
+the hour rather than during it. **It is a pattern list, not "anything but the
+main window"** — the first version flagged `Project Manager`, Resolve's
+ordinary startup window, and would have stopped every build. A false positive
+stops work; a false negative now only costs the bounded wait.
+
+**WHAT PROVED IT WAS NOT RESOLVE** was a minimal Deliver probe: new project,
+one source clip, the same H.264 Master preset — **rendered in 26 seconds**,
+Resolve alive afterwards, every call answering. Build the smallest thing that
+exercises the suspect instruction before blaming the tool.
+
+`_project(r, ch)` now loads by name, creates if absent, and ASSERTS
+resolution and frame rate from the Channel every build, raising with the
+numbers named — because a vertical timeline in a landscape project fails as a
+crash and not as an error.
+
+## THE GATE WAS FATAL IN THE REPORT NOBODY ACTS ON
+
+Clip 08 shipped having failed its own gate. Its log, in order:
+
+    FAIL  fns-2905408276-08.mp4
+       FAIL chat_on_screen   NOT VISIBLE — panel fill 17% (want >=50%)
+    PASS  fns-2905408276-08.mp4
+    [fns-08] -> deliver/fns-08-valorant-s-job-security-problem.mp4
+
+Two QC passes over one file, disagreeing, and the one that decides delivery
+won. Three defects compounded, and **every one is a shape already in this
+file**:
+
+1. **`batch._qc_for` never passed `chat_expected`**, and `deliver_qc` SKIPS
+   the check when it is None — so the fatal finding was never produced in the
+   only report whose `.ok` copies a file into `deliver/`. Making it fatal the
+   round before changed nothing. *Two numbers that are supposed to be the
+   same number, derived twice* — and the second time this exact check has
+   been defeated, after the first version left `fatal` at its default.
+2. **A THIN reactive plan is the same failure as an EMPTY one.** The fallback
+   written for clip 07 fires on `wins == []`. Clip 08 found two real bursts
+   covering **6% of the clip**, so the list was non-empty and the box was on
+   screen under two seconds in forty-five. The floor is now the gate's own
+   `DARK_MIN`, imported rather than re-typed: a planner aiming below the gate
+   it will be judged by is the same defect again.
+3. **`chat_windows.json` was on a shared path** (`vendor/…/public/`),
+   overwritten by every clip — the identical defect recorded for
+   `punches.json`, which was moved into the clip's own overlays directory for
+   exactly this reason while chat_windows never was.
+
+`tests/test_gate_parity.py` compares the keyword arguments both call sites
+pass to `deliver_qc.check`, so a signal the build asks about and the gate does
+not is caught in milliseconds rather than needing a rendered clip. Two
+failures against the pre-fix code, zero after.
+
+**And the gate degrades silently for anything built earlier**: six of the
+seven deliveries re-gate as `chat: not expected`, because their per-clip
+windows file predates the fix. Measured directly instead — all seven show the
+panel at **83–86% fill**. A gate that reports "not checked" as a pass is the
+same family as one that cannot fail the artifact.
+
+## THE HANDLE LEXICON, SECOND CORRECTION: INFLECTED WORDS
+
+`/usr/share/dict/words` carries base forms, so `sign` is in it and `signed` is
+not — and the first deny list tested membership only. Twenty roster keys came
+straight back through: `tens` -> **TenZ**, `kicks` -> **Kicks**, `sharks` ->
+**Sharks**, `fields` -> **Fields**, `pancakes` -> **Paincakes**, `darker` ->
+**Darker**. *"He got tens of kicks in"* would have named two players.
+
+Caught because clip 08's build reported `'signed'->signed` — an identity
+entry, harmless in itself, and the tell that a whole class was still live.
+`is_english()` strips the twelve suffixes the dictionary omits and re-tests
+the stem; multi-word aliases and anything under four characters are exempt.
+123 -> 143 keys denied, and `psalms -> s0m` survives because a confirmed
+garble overrides the list.
+
+`python -m engine.handles --rebuild-deny-list` regenerates it, so the
+vendored list is reproducible rather than retyped — and `load()` still never
+reads the dictionary, which the test asserts by walking the AST. Slicing the
+file put the dictionary PATHS, a module constant above the generator, on the
+wrong side: the check passed while measuring nothing true.
+
+## THE LOCAL-FILE SOURCE EXISTED AND COULD NOT BE REACHED
+
+*"upload their vod."* `ingest.fetch` has ADOPTED an existing path instead of
+calling yt-dlp since it was written, `is_local_vod` is the server check and
+`job_name_for` derives a job name from the file's stem. The UI blocked it in
+three places: the field was `type="url"` so a browser refused a path before
+submitting, the lookup only fired on `/videos/\d+` so a path never produced a
+`looked` object, and `gate()` requires one so Start could never enable.
+
+**A capability that exists and cannot be reached is worse than one that is
+absent, because nothing reports it missing.** `/api/lookup` now answers for a
+path — confirming the file is there and ffprobing its duration before an hour
+of transcription starts.
+
+A multipart upload stays out, unchanged: a 6 GB 1080p60 file, one stdlib
+thread, and a disk at 93%.
+
+**And the whole-job zip named clips by VOD id and dropped every sidecar**,
+while the single-clip download had used the hook since the titles landed.
+Two paths answering the same question differently. Now 13 entries for six
+clips — each mp4 beside its `.json`, named by title.
