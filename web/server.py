@@ -981,17 +981,36 @@ class Handler(BaseHTTPRequestHandler):
                                 (int(m.group(1)),)).fetchone()
             if not row:
                 return self._json({"error": "no such job"}, 404)
-            files = [clip_path(row["name"], c["index"])
-                     for c in read_clips(row["name"])]
-            files = [f for f in files if f.exists()]
-            if not files:
+            # NAME THEM BY THEIR TITLE, AND BRING THE SIDECAR. The single
+            # download has used `download_name` since the titles landed, and
+            # this zip did not — so one click gave you
+            # `fns-2905408276-04.mp4`, which this project's own note calls a
+            # name that "tells whoever posts it nothing". The two paths
+            # answer the same question and must answer it the same way.
+            #
+            # The `.json` beside each delivery carries the title, the source
+            # timestamps and the rights basis, and `batch.py` says plainly
+            # why: that is the difference between a render and something you
+            # can actually publish. A zip of bare mp4s throws it away at the
+            # last step, which is the defect the agent's upload had.
+            want = []
+            for c in read_clips(row["name"]):
+                f = clip_path(row["name"], c["index"])
+                if not f.exists():
+                    continue
+                name = download_name(row["name"], c["index"]) or f.name
+                want.append((f, name))
+                side = (ROOT / "deliver" / name).with_suffix(".json")
+                if side.exists():
+                    want.append((side, side.name))
+            if not want:
                 return self._json({"error": "no clips built yet"}, 404)
             buf = io.BytesIO()
             with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as z:
                 # STORED, not DEFLATED: these are already H.264, so deflate
                 # buys nothing and costs the whole file through a CPU.
-                for f in files:
-                    z.write(f, f.name)
+                for f, arcname in want:
+                    z.write(f, arcname)
             return self._send(200, buf.getvalue(), "application/zip",
                               extra={"Content-Disposition":
                                      f'attachment; filename="{row["name"]}-clips.zip"'})
