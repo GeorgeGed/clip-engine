@@ -335,6 +335,19 @@ def cmd_specs(job, args):
         # at all — so it is not a suggestion to weigh against a default of
         # 0.0, it is the reason this clip is in the list.
         win = r.get("window")
+        # NO ENTRY MEANS NOBODY DECIDED, AND THAT MUST NOT BE SILENT.
+        # `editorial` runs before this stage now, so every buildable clip
+        # should have a verdict by the time we get here. When one does not —
+        # a clip the screen rescued after the pass ran, say — the in-point
+        # falls back to 0.0, which is the top of the candidate REGION: an
+        # acoustic cluster boundary, not where the argument starts. That is
+        # the exact defect the stage was added to fix, so it is named here
+        # instead of being written into a spec that looks decided.
+        if not e and not win:
+            log(f"   {n:02d} !! NO EDITORIAL ENTRY — in_point falls back to "
+                f"0.0 (the top of the region, not where the argument "
+                f"starts) and the clip gets no hook. Run: batch.py {job} "
+                f"editorial --only {n}")
         in_pt = float(e.get("in_point", 0.0))
         out_pt = None
         note = e.get("why") or m["subject"]
@@ -438,6 +451,24 @@ def cmd_build(job, args):
                             (clip.hook or clip.notes or ""), flags=re.I)
                 slug = re.sub(r"[^a-z0-9]+", "-", _h.lower())[:52].strip("-")
                 dst = DELIVER / f"{chan['name']}-{clip.index:02d}-{slug}.mp4"
+                # ONE CLIP, ONE DELIVERY. The hook names the file, so editing
+                # a hook and rebuilding wrote a SECOND delivery beside the
+                # first and left both: clip 07 sat in here twice, under its
+                # old subject-derived name and its new title, same clip, two
+                # different cuts. Whoever posts from this folder has no way
+                # to tell which is current, and the website's spec editor
+                # makes a hook edit an ordinary thing to do.
+                #
+                # Bounded to this channel and this clip index, and it names
+                # what it removes — a silent delete in a delivery folder is
+                # worse than a stale file.
+                for old_mp4 in sorted(DELIVER.glob(
+                        f"{chan['name']}-{clip.index:02d}-*.mp4")):
+                    if old_mp4 == dst:
+                        continue
+                    log(f"[{key}] superseding {old_mp4.name}")
+                    old_mp4.unlink()
+                    old_mp4.with_suffix(".json").unlink(missing_ok=True)
                 subprocess.run(["cp", str(out), str(dst)], check=True)
                 m = json.loads((d / "ranked.json").read_text())[clip.index - 1]
                 side = dst.with_suffix(".json")

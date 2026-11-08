@@ -32,7 +32,7 @@ create table if not exists job (
   -- claim has to know which stages are outstanding — and claim_job needs it
   -- to tell a build job from one that only transcribes.
   stages_remaining text[] not null default array[
-    'ingest','analyse','rank','screen','prep','specs','build','report']
+    'ingest','analyse','rank','screen','prep','editorial','specs','build','report']
 );
 
 create table if not exists stage (

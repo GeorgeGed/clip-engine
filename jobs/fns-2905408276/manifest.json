@@ -2,38 +2,38 @@
  "fns-12": {
   "built": true,
   "qc_ok": true,
-  "seconds": 207,
+  "seconds": 341,
   "render": "renders/fns-2905408276-12.mp4",
   "findings": [
    {
     "check": "duration",
     "ok": true,
-    "detail": "59.37s (want 15-90)"
+    "detail": "45.30s (want 15-90)"
    },
    {
     "check": "loudness",
     "ok": true,
-    "detail": "-14.10 LUFS (target -14.0)"
+    "detail": "-14.07 LUFS (target -14.0)"
    },
    {
     "check": "true_peak",
     "ok": true,
-    "detail": "-0.70 dBTP"
+    "detail": "-1.17 dBTP"
    },
    {
     "check": "black_top",
     "ok": true,
-    "detail": "3562 frames, YMAX min 241"
+    "detail": "2715 frames, YMAX min 241"
    },
    {
     "check": "black_bottom",
     "ok": true,
-    "detail": "3562 frames, YMAX min 236"
+    "detail": "2715 frames, YMAX min 238"
    },
    {
     "check": "dead_space",
     "ok": true,
-    "detail": "1.15s quiet (1.9%, max 8%)"
+    "detail": "0.00s quiet (0.0%, max 8%)"
    },
    {
     "check": "absent_audio",
@@ -43,7 +43,7 @@
    {
     "check": "caption_cadence",
     "ok": true,
-    "detail": "2.27 cards/s (135 cards)"
+    "detail": "2.30 cards/s (104 cards)"
    },
    {
     "check": "hallucinated_captions",
@@ -51,10 +51,10 @@
     "detail": "none"
    }
   ],
-  "subject": "One argument start to finish: the complaint, the generational put-down, the rebuttal, the trade. He quotes the view he is answering inside the clip \u2014 \"i don't want to hear no complaints about oh i'm not going to get paid for a couple months this is disgusting the turnaround time's too fast\" \u2014 so rul",
+  "subject": "Rant telling complaining players they have it easy. in_point 23.30 lands INSIDE the word \"you\", whose span is 55% Twitch mute, so the caption gate drops its card and the in-point skips to \"guys\". out_point 86.34 ends on \"salary\" per George; 86.15 clips it to \"salad\", 86.22 is the earliest clean cut, and 86.34 is the acoustic trough. Chat forced on at his instruction despite 13% topicality.",
   "permission": "explicit",
   "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release.",
-  "delivered": "deliver/fns-12-one-argument-start-to-finish-the-complaint-the-gener.mp4"
+  "delivered": "deliver/fns-12-stop-complaining-about-unpaid-months.mp4"
  },
  "fns-04": {
   "built": true,

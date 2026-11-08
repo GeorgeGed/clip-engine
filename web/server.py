@@ -1052,24 +1052,43 @@ class Handler(BaseHTTPRequestHandler):
                                 (job_id,)).fetchone()
             if not row:
                 return self._json({"error": "no such job"}, 404)
-            if not spec_path(row["name"], n).exists():
-                # WRITE ITS SPEC FIRST, rather than refusing. `batch.py specs`
-                # dedups by topic and keeps one clip per argument, which is
-                # right for a batch and wrong the moment someone points at a
-                # clip and asks for it — they want THAT clip, not a balanced
-                # set. `--only` bypasses the dedup and the editorial veto.
-                # It is seconds of JSON, so it runs inline instead of taking
-                # a turn through the queue.
+            # DECIDE, THEN SPEC, THEN BUILD — every time, not only when the
+            # spec is missing.
+            #
+            # `editorial` is what says where a clip starts and what it is
+            # called; `specs` only copies that across. The chain runs them in
+            # that order, but this button is the main path in the product and
+            # it ran NEITHER when a spec already existed — so a spec written
+            # before the judging pass, carrying `in_point 0.0` (the top of
+            # the candidate region, an acoustic boundary and not where the
+            # argument starts), was handed straight to the build. That is
+            # George's "the clip starts too early", reachable from the UI
+            # after being fixed in the chain.
+            #
+            # Both are safe to re-run and that is the whole reason this can
+            # be unconditional: `editorial` skips a clip it has already
+            # judged, and `specs` FILLS a missing in-point or hook and never
+            # changes one that is set. `--only` also bypasses the topic dedup
+            # and the editorial veto, which is right here — somebody has
+            # pointed at this clip and asked for it, not for a balanced
+            # batch. Seconds of JSON plus at most one model call, so it runs
+            # inline rather than taking a turn through the queue.
+            for argv, why in (
+                    (("editorial", "--only", str(n)), "judge"),
+                    (("specs", "--only", str(n)), "spec")):
                 r = subprocess.run(
-                    [str(VENV), "batch.py", row["name"], "specs",
-                     "--only", str(n)],
-                    cwd=ROOT, capture_output=True, text=True, timeout=120)
-                if not spec_path(row["name"], n).exists():
+                    [str(VENV), "batch.py", row["name"], *argv],
+                    cwd=ROOT, capture_output=True, text=True, timeout=180)
+                if r.returncode != 0:
                     tail = (r.stdout or r.stderr or "").strip().splitlines()
                     return self._json(
-                        {"error": "could not prepare that clip: "
-                                  + (tail[-1] if tail else "no spec written")},
+                        {"error": f"could not {why} that clip: "
+                                  + (tail[-1] if tail else f"{argv[0]} failed")},
                         409)
+            if not spec_path(row["name"], n).exists():
+                return self._json(
+                    {"error": "could not prepare that clip: no spec written"},
+                    409)
             if RUNNING.get("job_id") is not None:
                 return self._json(
                     {"error": "a job is already running — one at a time, "

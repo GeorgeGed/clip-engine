@@ -5933,3 +5933,96 @@ parsing: **a check that cannot fail the artifact is not a gate.** It is
 fatal now, and proved three ways — the clip George watched FAILS with chat
 expected, the same file PASSES when chat is genuinely off, and the rebuild
 PASSES at 85% fill.
+
+## THE CHAIN WAS DEFINED IN THREE PLACES AND ONLY ONE OF THEM GOT THE FIX
+
+George: *"now update this logic for all clips moving forward because as i said
+we are building an opus clip style website here."*
+
+The clip-07 fixes that live inside `make_clip.py` — handle correction, the
+continuous chat fallback, the fatal `chat_on_screen` gate — were general the
+moment they were written, because every build goes through that file. **The
+one that mattered most was not.** `editorial` is the stage that decides where
+a clip starts and what it is called, and it was added to `web/server.py`'s
+chain and to nothing else:
+
+| | |
+|---|---|
+| `worker/agent.py` | **no command for it at all.** `backend.py` derives the stage LIST from `site.ALL_STAGES`, so a claimed job would hand `editorial` to `run_stage()` and **KeyError on a dict that had never heard of it** — after ingest, transcription and screening had already run |
+| `worker/schema.sql` | its default `stages_remaining` omitted it, so any job created in the control plane skips the judging pass outright and every clip is written with `in_point 0.0` |
+| the website's **build button** | ran neither `editorial` nor `specs` when a spec already existed |
+
+That last one is the worst, because it is the main path in the product. A
+spec written before the judging pass — carrying `in_point 0.0`, the top of
+the candidate region, an acoustic cluster boundary and not where the argument
+starts — was handed straight to the build. **"The clip starts too early",
+fixed in the chain and still reachable from the UI.** The route now runs
+`editorial --only N` then `specs --only N` every time, unconditionally, which
+is only safe because both are idempotent by design: `editorial` skips a clip
+it has judged, and `specs` FILLS a missing in-point or hook and never changes
+one that is set.
+
+**It makes a model call from a LaunchAgent, so it was tested in that
+environment, not this one.** `env -i HOME=… PATH=/usr/bin:/bin LC_ALL=C` —
+`tier3._api_key()` falls back to reading the `.env` files when
+`ANTHROPIC_API_KEY` is unset, the key resolves and the model answers. Three
+defects today came from a service's environment differing from a shell's (the
+LaunchAgent's `PATH`, the empty log from block-buffered stdout, `read_text()`
+using the locale's encoding), so this is now the first thing to check on
+anything the server shells out to.
+
+### `tests/test_stages.py`, and it fails three ways against the old code
+
+The repo's most-repeated defect is two numbers that are supposed to be the
+same number, derived twice; a pipeline chain is that with four copies. The
+test asserts every stage in `ALL_STAGES` has an agent command, that
+`editorial` precedes `specs` in both, that `build` is last and the only
+Resolve stage, and that **the SQL default IS the chain, in order**. Reverted
+against the pre-fix code it reports:
+
+    FAIL  every stage in the chain has an agent command — missing: ['editorial']
+    FAIL  editorial before specs in the agent's commands
+    FAIL  the SQL default is the chain, in order
+
+A note is not a gate, for the eighth time in this file. `cmd_specs` also now
+NAMES a clip that reaches it with no editorial entry instead of writing a
+0.0 in-point that looks decided — the screen can rescue a clip after the pass
+has run, and that clip is the one that would start too early.
+
+### ONE CLIP, ONE DELIVERY — a hook edit orphaned the old file
+
+The hook names the delivery (`fns-07-sam-won-t-compete-on-an-org-this-year.mp4`),
+which is right, and nothing removed the previous name. So clip 07 sat in
+`deliver/` **twice**: the 34.30s cut from `in_point 0.0` with `title: null`
+beside the 28.70s cut from 20.5 with its title. Same clip, two different
+edits, no way for whoever posts it to tell which is current — and the
+website's spec editor makes editing a hook an ordinary thing to do. A rebuild
+now supersedes any other `<channel>-<NN>-*.mp4`, bounded to that channel and
+that index, and **names what it removes**; a silent delete in a delivery
+folder is worse than a stale file. The site itself was never ambiguous: it
+serves `renders/<slug>.mp4`, one deterministic path per clip.
+
+### The booms are not random, and the measurement says where they ARE soft
+
+Clip 07's note was *"the booms seem really random"*. Measured in the bed,
+where the cue is isolated — the master's low band is contaminated by his own
+voice and reported four "peaks", only one of which is a boom:
+
+| | |
+|---|---|
+| planned moment | **19.81s** |
+| the boom in the bed | starts 19.58, peak 19.86, **energy centroid 19.81** |
+| the zoom opens | 19.62, 190ms ahead — a zoom already in when the word lands |
+
+**Dead on.** The perceptual lead (the centroid, 237ms for this sound) is
+doing its job. What it lands on is the fourth repetition of the clip's own
+guarantee — *"He will not compete this year. He will not compete. He will not
+compete. He will not compete on an org this year, I can guarantee"* — which
+is the right moment by any reading.
+
+Inside that phrase it sits on **"will"**, 0.12s before "not" and 0.24s before
+"compete". This file already records that softness verbatim — *"the attack
+search can land on a neighbouring syllable rather than the card's own word …
+if he flags the words again, the fix is a stress model, not another
+constant."* It is the same finding, now with a third data point. **Do not
+add a fourth constant to it.**

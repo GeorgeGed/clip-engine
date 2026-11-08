@@ -78,6 +78,14 @@ STAGE_ARGV = {
     "rank":    ("run.py", "rank", "--job", "{job}"),
     "screen":  ("batch.py", "{job}", "screen"),
     "prep":    ("batch.py", "{job}", "prep"),
+    # EDITORIAL BEFORE SPECS. `specs` reads each clip's in-point and hook out
+    # of editorial.json; with this stage absent every spec was written with
+    # in_point 0.0 — the top of the candidate REGION, an acoustic boundary
+    # and not where the argument starts. That is "the clip starts too early",
+    # and it was missing from this runner after being fixed in the web one:
+    # backend.py derives the stage LIST from site.ALL_STAGES, so a claim
+    # would hand `editorial` to run_stage() and KeyError on this dict.
+    "editorial": ("batch.py", "{job}", "editorial"),
     "specs":   ("batch.py", "{job}", "specs"),
     "build":   ("batch.py", "{job}", "build"),
     "report":  ("batch.py", "{job}", "report"),
