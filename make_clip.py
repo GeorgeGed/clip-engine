@@ -1166,9 +1166,30 @@ def stage_chat(clip, ch, st):
     #
     # A clip that was going to show chat and shows none is worse than one
     # that shows it throughout, so this falls back rather than failing quiet.
+    # AN EMPTY PLAN IS THE OBVIOUS FAILURE; A THIN ONE IS THE SAME FAILURE.
+    # The fallback above was written for clip 07, whose single burst fell
+    # outside the cut entirely and left `wins == []`. Clip 08 is the version
+    # that slips past it: reactive found two real bursts covering **6% of
+    # the clip**, so the list is non-empty and the box is on screen for
+    # under two seconds in forty-five. Measured on the delivered file, the
+    # chat gate read **17% panel fill against a 50% floor** — it failed, and
+    # the clip shipped anyway for a separate reason (below).
+    #
+    # The floor is the GATE'S OWN NUMBER, imported rather than re-typed. A
+    # planner that aims below the gate it will be judged by is two numbers
+    # that are supposed to be one, which is this file's oldest defect.
+    from engine.chat_visible import DARK_MIN                  # noqa: PLC0415
+    span = max(st["out_dur"], 1e-6)
+    covered = sum(w["to"] - w["from"] for w in wins) / span
     if not wins:
         log(f"  {mode} mode produced NO windows — its bursts fall outside "
             f"this cut. Falling back to continuous.")
+        mode, wins, info = cr.windows(raw, t0, t1, remap=remap,
+                                      mode="continuous", out_dur=st["out_dur"])
+    elif covered < DARK_MIN:
+        log(f"  {mode} mode covers only {covered:.0%} of the clip, under the "
+            f"chat gate's own {DARK_MIN:.0%} floor — the box would flicker "
+            f"rather than be present. Falling back to continuous.")
         mode, wins, info = cr.windows(raw, t0, t1, remap=remap,
                                       mode="continuous", out_dur=st["out_dur"])
     for w in wins:
@@ -1210,7 +1231,15 @@ def stage_chat(clip, ch, st):
                                for f in m["frags"]]})
     kept.sort(key=lambda m: m["t"])
     (PUBLIC / "chat.json").write_text(json.dumps(kept, indent=1))
+    # TWO COPIES, AND THE CLIP'S OWN IS THE AUTHORITY. PUBLIC is where
+    # Remotion reads at render time and is shared by every clip, so after
+    # the next build it describes a DIFFERENT clip — the identical defect
+    # this file records for `punches.json`, which was moved into the clip's
+    # own overlays directory for exactly this reason and chat_windows never
+    # was. Anything reading it later (the sfx cue, the delivery gate) must
+    # read the per-clip copy.
     (PUBLIC / "chat_windows.json").write_text(json.dumps(wins, indent=1))
+    (st["overlays"] / "chat_windows.json").write_text(json.dumps(wins, indent=1))
     log(f"  {len(kept)} messages on the cut ({pre} pre-roll, {dropped} dropped "
         f"into removed spans)")
 
@@ -1281,6 +1310,8 @@ def stage_assemble(clip, ch, st):
     # `shutter` when a photo card lands.
     cues = []
     wins = st.get("chat_windows")
+    if not wins and (st["overlays"] / "chat_windows.json").exists():
+        wins = json.loads((st["overlays"] / "chat_windows.json").read_text())
     if not wins and (PUBLIC / "chat_windows.json").exists():
         # the chat stage ran in an earlier invocation; its windows are the
         # truth about when the box arrives, so read them rather than

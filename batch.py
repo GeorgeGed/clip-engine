@@ -562,8 +562,33 @@ def _qc_for(clip, ch, out):
         r = remap_card(c.start, c.end, st["keeps"])
         if r:
             placed.append({"start": r[0], "end": r[1], "text": c.text})
+    # THE GATE THAT DECIDES DELIVERY HAS TO ASK THE SAME QUESTION.
+    #
+    # `make_clip` runs its own QC with `chat_expected=bool(st["chat_windows"])`
+    # and this one did not pass it at all — so `chat_on_screen` was SKIPPED
+    # here, in the only report whose `.ok` decides whether a clip ships.
+    # Clip 08 printed `FAIL chat_on_screen: NOT VISIBLE — panel fill 17%`
+    # from make_clip's pass and was delivered seconds later by this one.
+    # Making the finding fatal did nothing, because the fatal finding was
+    # never produced in the pass that mattered.
+    #
+    # That is this file's most-repeated defect — two numbers that are
+    # supposed to be the same number, derived twice — and it is the SECOND
+    # time it has hit this exact check, after the first version left
+    # `fatal` at its default and printed FAIL while reporting PASS.
+    #
+    # The per-clip `chat_windows.json` is the honest source: `rm_Chat.mov`
+    # existing only says the overlay was RENDERED, which is precisely the
+    # thing clip 07 proved says nothing about whether it is on screen.
+    wf = ROOT / f"jobs/{clip.job}/overlays_{clip.index:02d}/chat_windows.json"
+    chat_expected = None
+    if wf.exists():
+        try:
+            chat_expected = bool(json.loads(wf.read_text()))
+        except json.JSONDecodeError:
+            chat_expected = None
     return deliver_qc.check(out, cards=placed, absent=[], src_words=ws,
-                            seam=ch.seam)
+                            seam=ch.seam, chat_expected=chat_expected)
 
 
 # ------------------------------------------------------------- report ----
