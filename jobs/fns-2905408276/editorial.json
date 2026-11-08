@@ -1,12 +1,12 @@
 {
  "11": {
   "explains_itself": true,
-  "hook": "FNS: A STREAM TEAM WIN WOULD KILL THE GAME",
-  "in_point": 2.4,
+  "hook": "FNS: STREAM TEAM WINNING WOULD KILL THE GAME",
+  "in_point": 2.3,
   "one_narrative": true,
   "topic": "stream team winning embarrasses game",
   "verdict": "ship",
-  "why": "He says a stream-team tournament win would be embarrassing for the game, and that they'll likely lose to stronger teams. Starts at the question, after the leftover fragment."
+  "why": "[judged on the screen's window 0.0-32.0s, not the whole region] He says a tournament win by an all-streamer lineup would be embarrassing and bad for the game. Starts at the question, after the leftover team-name fragment; the closing kickoff question is a separate topic."
  },
  "12": {
   "explains_itself": true,
@@ -19,12 +19,12 @@
  },
  "14": {
   "explains_itself": false,
-  "hook": "FNS: TOP PLAYERS CAN WAIT OUT ORG PULLBACK",
-  "in_point": 2.7,
+  "hook": "FNS: TOP PLAYERS JUST WAIT OUT THE PULLBACK",
+  "in_point": 35.5,
   "one_narrative": false,
-  "topic": "orgs pulling back investment",
+  "topic": "top players outlast org pullback",
   "verdict": "drop",
-  "why": "Argues top players lose only a few months of pay since orgs never overpaid. It opens on an unnamed 'he' and ends on a profitability pivot, so it can't stand alone."
+  "why": "[judged on the screen's window 22.5-72.0s, not the whole region] It opens mid-thought on 'but not like absurd amounts', and the quoted 'dumb amount' line and the pullback setup are cut off. It also pivots to org profitability and revs at 45.6."
  },
  "15": {
   "explains_itself": true,
@@ -46,12 +46,12 @@
  },
  "18": {
   "explains_itself": false,
-  "hook": "FNS: G2 WILL BE GOOD NO MATTER WHAT",
-  "in_point": 14.0,
+  "hook": "FNS: 100 THIEVES BEING VERY SOLID",
+  "in_point": 24.0,
   "one_narrative": false,
-  "topic": "new roster team rundown",
+  "topic": "team rosters rundown",
   "verdict": "drop",
-  "why": "Opens mid-thought on an unseen Sentinels lineup, and the end drifts into a Valens LFT tangent that needs context. The rundown is also rambling, with a forgotten team and filler."
+  "why": "[judged on the screen's window 24.0-59.0s, not the whole region] It skims 100 Thieves, Crew and an unnamed last team with no single argument, and the G2 claim isn't in it. It opens mid-list and ends on 'one more team left'."
  },
  "23": {
   "explains_itself": true,
@@ -64,39 +64,39 @@
  },
  "25": {
   "explains_itself": true,
-  "hook": "FNS: I DON'T EMPATHIZE WITH UNPAID MONTHS",
-  "in_point": 1.8,
+  "hook": "FNS: I DON'T WANT TO HEAR ABOUT UNPAID MONTHS",
+  "in_point": 71.0,
   "one_narrative": true,
-  "topic": "unpaid months open circuit",
+  "topic": "players complaining about pay",
   "verdict": "ship",
-  "why": "He argues players should stop complaining about skipped salary because he went through worse for years. It starts at 'a lot of these people are grown men', cutting the dangling fragment before it."
+  "why": "[judged on the screen's window 57.0-103.5s, not the whole region] He argues players have it easy today, citing his own hard travel to LANs, and says he won't hear complaints about unpaid months. It starts at 'dude, I'm telling you', cutting the mid-sentence fragment."
  },
  "27": {
-  "explains_itself": false,
-  "hook": "FNS: IT IS A LITERAL EVEN PLAYING FIELD",
-  "in_point": 0.0,
-  "one_narrative": false,
-  "topic": "open circuit even playing field",
-  "verdict": "drop",
-  "why": "The first 86s argue the open circuit is fair, but the format is never named. It ends on a rebuttal about early days that is not FNS's claim and cannot stand alone."
+  "explains_itself": true,
+  "hook": "FNS: IT'S A LITERAL EVEN PLAYING FIELD",
+  "in_point": 1.5,
+  "one_narrative": true,
+  "topic": "even playing field format",
+  "verdict": "ship",
+  "why": "[judged on the screen's window 0.0-94.0s, not the whole region] He argues the format is fair because everyone grinds from the bottom, then backs it with his Envy and CLG come-ups. Starting at 1.5 skips the vague 'pessimistic' opener and begins on the claim."
  },
  "28": {
   "explains_itself": true,
-  "hook": "FNS: TOO MUCH SUPPORT UTIL TO BE A DUELIST",
-  "in_point": 2.5,
+  "hook": "FNS: TOO MUCH SUPPORT UTIL FOR A PURE DUELIST",
+  "in_point": 9.9,
   "one_narrative": true,
-  "topic": "new agent too supportive",
+  "topic": "new agent not a duelist",
   "verdict": "ship",
-  "why": "He argues the new agent has too much support utility to be a pure duelist, then backs it with her ability. It starts at the chat question, after the thank-yous, so the agent is identified."
+  "why": "[judged on the screen's window 3.0-29.5s, not the whole region] He argues the new agent has too much support utility to be a pure duelist. It starts at 6.9 where he opens with 'I looked more into the new agent', which sets up the claim."
  },
  "29": {
   "explains_itself": true,
-  "hook": "FNS: I'M GOING LIVE WHILE COACHING, CHAT OFF",
-  "in_point": 15.2,
+  "hook": "FNS: I'M KEEPING CHAT OFF WHILE I COACH",
+  "in_point": 31.8,
   "one_narrative": true,
-  "topic": "streaming while coaching, chat off",
+  "topic": "chat off while coaching",
   "verdict": "ship",
-  "why": "He argues he'll stream his coaching with chat off and a delay so nobody can 'L coach' him. It starts at 15.2, after the VOD-review aside and the 'I'm in the sky' side chat."
+  "why": "[judged on the screen's window 19.5-50.0s, not the whole region] He argues chat has to be off while he coaches live, so nobody can bait him with 'L coach' when a player ignores his call. Starts at 'I'm not gonna have chat up', after the dangling opener."
  },
  "30": {
   "explains_itself": true,
@@ -108,49 +108,49 @@
   "why": "ONE NARRATIVE: every line serves \"don't take the partner-team seat, make your own lineup and qualify in\". It opens on the choice \u2014 \"they don't have to join a partnered team if they don't want to if they have a higher chance they feel of like winning with a lineup they can make out of scratch\" (4.5) "
  },
  "31": {
-  "explains_itself": false,
-  "hook": "FNS: OUR STREAM TEAM WOULD STOP TRYING",
+  "explains_itself": true,
+  "hook": "FNS: STREAM TEAM WOULD STOP TRYING TO QUALIFY",
   "in_point": 0.0,
-  "one_narrative": false,
-  "topic": "stream team open qualifier",
-  "verdict": "drop",
-  "why": "The claim lands at 10-19s, then 23s of dead air and an unexplained 'bro thinks he's gonna make it' follow. It ends on a new question about underrated players, so it can't stand alone."
+  "one_narrative": true,
+  "topic": "stream team open qualifier pressure",
+  "verdict": "ship",
+  "why": "[judged on the screen's window 0.0-26.0s, not the whole region] He wants to see unsponsored open qualifier teams upset partnered ones, then jokes his stream team would stop trying to avoid qualifying. The setup is at the top, so it starts at 0.0."
  },
  "32": {
   "explains_itself": true,
-  "hook": "FNS: IT'S NOT AS BAD FOR VALYN AS YOU THINK",
+  "hook": "FNS: VALYN IS A TERRIBLE EXAMPLE",
   "in_point": 0.0,
   "one_narrative": true,
-  "topic": "new system and released players",
+  "topic": "released franchise players new system",
   "verdict": "ship",
-  "why": "It opens on the objection that released franchise players like Valen get hurt, then gives the rebuttal that Valen has enough money to wait. The setup is at 0.0, so it starts at the top."
+  "why": "[judged on the screen's window 0.0-46.5s, not the whole region] Pushes back on the claim that the new system hurts released franchise players, saying Valen has already made enough money. It starts at 0.0 because the opening line is the objection he answers."
  },
  "33": {
-  "explains_itself": true,
-  "hook": "FNS: NON-PARTNERED PLAYERS GET MORE FREEDOM",
-  "in_point": 81.6,
-  "one_narrative": true,
-  "topic": "non-partnered freedom next year",
-  "verdict": "ship",
-  "why": "He says missing partnership costs bundle sales but gives orgs and players more freedom next year. Starts at 81.6, since the C9/EG and Crazy Raccoons banter before it is a different subject."
+  "explains_itself": false,
+  "hook": "FNS: NON-PARTNERED ORGS LOSE BUNDLE MONEY",
+  "in_point": 84.8,
+  "one_narrative": false,
+  "topic": "non-partnered orgs lose bundles",
+  "verdict": "drop",
+  "why": "[judged on the screen's window 82.0-110.0s, not the whole region] It opens on \"they\" with no referent, and at 18.8 it turns to a question about champs rewards that goes unanswered. The claim about next-year freedom never appears."
  },
  "34": {
   "explains_itself": true,
-  "hook": "FNS: TOO FAST, BUT NOT THE END OF THE WORLD",
-  "in_point": 3.7,
+  "hook": "FNS: PLENTY OF TIME TO FIGURE OUT ROSTERS",
+  "in_point": 35.2,
   "one_narrative": true,
-  "topic": "open qualifier turnaround",
+  "topic": "open qualifier roster time",
   "verdict": "ship",
-  "why": "He concedes the turnaround is too fast, then argues partnered teams and non-qualifiers had time to build rosters. It starts at 3.7 to skip the dangling PaperX fragment."
+  "why": "[judged on the screen's window 33.0-91.0s, not the whole region] Argues partnered teams have kickoff slots and non-qualifiers had all of Champs to sort rosters. Starts at 2.2 to skip the filler 'Okay' and open on the argument."
  },
  "38": {
   "explains_itself": true,
-  "hook": "FNS: THIS SENTINELS LINEUP IS INSANE",
+  "hook": "FNS: THIS IS AN INSANE SENTINELS LINEUP",
   "in_point": 0.0,
   "one_narrative": true,
-  "topic": "sentinels rebuilt super team",
+  "topic": "sentinels rumored rebuild lineup",
   "verdict": "ship",
-  "why": "He argues the rumored Sentinels rebuild is an ideal super team, backed by the Real Madrid 2014-17 comparison. It opens on the roster reveal, so the setup is already in frame. Trim the mod aside at 140.6."
+  "why": "[judged on the screen's window 0.0-25.5s, not the whole region] He argues the rumored Sentinels rebuild is their best lineup, an insane one. It opens on 'sentinels rebuild', so it already starts at the top. The Real Madrid comparison isn't in this transcript, so the hook leaves it out."
  },
  "4": {
   "explains_itself": false,
@@ -163,12 +163,12 @@
  },
  "40": {
   "explains_itself": true,
-  "hook": "FNS: I'M COACHING FOR FUN, NOT A BIG ORG",
-  "in_point": 0.0,
+  "hook": "FNS: I NEVER PLANNED ON COACHING, IT'S FUN",
+  "in_point": 32.6,
   "one_narrative": true,
-  "topic": "coaching for fun only",
+  "topic": "coaching for fun, unpaid",
   "verdict": "ship",
-  "why": "Val answers whether he planned to coach: it's unpaid, for fun, and he wouldn't coach a big org. It starts at 0.0 because the question is there and the answer needs it."
+  "why": "[judged on the screen's window 25.0-112.5s, not the whole region] Val argues he's coaching unpaid for fun, to mix it with streaming and learn. It starts at 'no, I never actually planned on coaching', after the chatter. The big-org ending is cut off, so the title leaves it out."
  },
  "42": {
   "explains_itself": false,
@@ -195,25 +195,25 @@
   "one_narrative": true,
   "topic": "open qualifier rookie pipeline",
   "verdict": "ship",
-  "why": "He argues that open qualifiers motivate unpaid young players by showing rookies who made it, giving teams more talent to pick from. It starts at 0.0 because the open qualifier subject is named in the first line."
+  "why": "[judged on the screen's window 0.0-29.0s, not the whole region] He argues open qualifiers motivate unpaid young players by showing rookies who made it, which widens the talent pool. It starts at 0.0 because the perk is named in the first line. The last line begins a new thread, so trim it."
  },
  "47": {
   "explains_itself": true,
-  "hook": "FNS: A PASSPORT SHOULDN'T STOP YOUR DREAM",
-  "in_point": 49.0,
+  "hook": "FNS: A PASSPORT SHOULD NOT STOP YOUR DREAM",
+  "in_point": 56.8,
   "one_narrative": true,
-  "topic": "passports in open circuit",
+  "topic": "passport worries are overblown",
   "verdict": "ship",
-  "why": "He argues qualifying teams will get sponsors and can sort out passports. It starts at 'okay listen', after the chat thank-yous, where the passport argument begins."
+  "why": "[judged on the screen's window 52.5-114.5s, not the whole region] He argues that teams who qualify will get sponsors and can expedite passports, so the worry is overblown. It starts at the passport concern, and the whole clip stays on that point."
  },
  "50": {
   "explains_itself": true,
   "hook": "FNS: FORGET ORGS, JUST BE GOOD AND WIN",
-  "in_point": 2.6,
+  "in_point": 14.0,
   "one_narrative": true,
-  "topic": "tier two skips org backing",
+  "topic": "tier two should ignore orgs",
   "verdict": "ship",
-  "why": "Argues orgs only back proven teams, so tier two should form rosters and win open qualifiers. Starts at 'you're not always going to get org backing', which cuts the vague 'this is normal' opener."
+  "why": "[judged on the screen's window 5.0-86.0s, not the whole region] Argues orgs only back proven rosters, so tier two should form teams and win open qualifiers. It starts at 9.0 because 4.4 opens on a dangling 'they' and 'unless'; orgs are named from there on."
  },
  "6": {
   "explains_itself": true,

@@ -89,7 +89,7 @@ def api_key() -> str:
                 Path.home() / "quotes-pipeline/.env"):
         if not env.exists():
             continue
-        for ln in env.read_text().splitlines():
+        for ln in env.read_text(encoding="utf-8", errors="replace").splitlines():
             m = re.match(r"\s*(?:export\s+)?FLICKR_API_KEY\s*=\s*['\"]?([^'\"\s]+)",
                          ln)
             if m:

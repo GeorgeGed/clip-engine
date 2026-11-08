@@ -111,7 +111,8 @@ def _api_key() -> str:
         return os.environ["ANTHROPIC_API_KEY"]
     for src in KEY_SOURCES:
         try:
-            txt = pathlib.Path(src).expanduser().read_text(errors="replace")
+            txt = pathlib.Path(src).expanduser().read_text(
+                encoding="utf-8", errors="replace")
         except Exception:
             continue
         m = re.search(r'^\s*(?:export\s+)?ANTHROPIC_API_KEY\s*=\s*["\']?([^"\'\n]+)',

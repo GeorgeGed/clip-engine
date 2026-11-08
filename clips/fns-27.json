@@ -26,13 +26,13 @@
   "job": "fns-2905408276",
   "index": 27,
   "channel": "fns",
-  "in_point": 0.0,
+  "in_point": 1.5,
   "out_point": 94.0,
   "region": [
    1958.0,
    2082.69
   ],
-  "hook": null,
+  "hook": "FNS: IT'S A LITERAL EVEN PLAYING FIELD",
   "cam": [
    1450,
    344,

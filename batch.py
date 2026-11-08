@@ -177,7 +177,37 @@ def cmd_editorial(job, args):
             log(f"   {n:02d} no transcript yet — run prep first")
             continue
         m = ranked[n - 1]
-        todo.append({"n": n, "words": json.loads(wf.read_text()),
+        words = json.loads(wf.read_text())
+        # JUDGE THE WINDOW, NOT THE REGION.
+        #
+        # `screen_clips.best_window` returns a span when the whole region
+        # FAILS the mute/cadence gate, and that span is the clip. Handing the
+        # pass the whole region then asks it where a DIFFERENT, longer piece
+        # of audio should start — and on this VOD 15 of 17 windowed clips came
+        # back with an in-point at or BEFORE the window's start, i.e. inside
+        # audio the clip does not contain. That is why those clips still open
+        # mid-clause, which AGENTS.md has carried as unsolved.
+        #
+        # Times are REBASED to 0 rather than passed through, because the
+        # prompt promises "in_point is in seconds from the beginning of THIS
+        # transcript" and "0.0 is correct whenever the material already begins
+        # at the top". Both stay literally true on a rebased window; passing
+        # [82.0] as the first line would make the model guess which origin we
+        # meant. The offset goes back on below.
+        win = r.get("window")
+        off = 0.0
+        if win:
+            lo, hi = float(win["in"]), float(win["out"])
+            us = [dict(u, start=float(u["start"]) - lo)
+                  for u in words.get("utterances", [])
+                  if lo <= float(u["start"]) < hi]
+            if us:
+                words, off = {**words, "utterances": us}, lo
+                log(f"   {n:02d} judging the screen's window "
+                    f"{lo:.1f}-{hi:.1f}s ({len(us)} utterances), not the "
+                    f"{m['out_point'] - m['in_point']:.0f}s region")
+        todo.append({"n": n, "words": words, "offset": off,
+                     "window": win if off or (win and us) else None,
                      "subject": m.get("subject", ""), "claim": m.get("claim", "")})
     if not todo:
         log(f"[editorial] nothing to do ({len(ed)} entries already)")
@@ -194,6 +224,17 @@ def cmd_editorial(job, args):
                 + (f"   in_point {e.in_point}" if e.in_point else ""))
 
     fresh = editorial.judge_many(todo, handle=_channel(job)["name"], on_done=done)
+    # BACK TO CLIP-FILE SECONDS. Every other in-point in this pipeline — the
+    # spec, the window, the snap — is measured from the start of the clip
+    # FILE, so a windowed judgement is shifted back before it is stored.
+    # editorial.json must hold one kind of number, not two.
+    for c in todo:
+        e = fresh.get(str(c["n"]))
+        if e and c.get("window"):
+            lo, hi = float(c["window"]["in"]), float(c["window"]["out"])
+            e["in_point"] = round(float(e["in_point"]) + c["offset"], 2)
+            e["why"] = (f"[judged on the screen's window {lo:.1f}-{hi:.1f}s, "
+                        f"not the whole region] " + e.get("why", ""))
     ed.update(fresh)
     ed_path.write_text(json.dumps(ed, indent=1, sort_keys=True))
     ship = sum(1 for v in ed.values() if v.get("verdict") != "drop")
@@ -354,29 +395,6 @@ def cmd_specs(job, args):
         note = e.get("why") or m["subject"]
         if win:
             in_pt, out_pt = float(win["in"]), float(win["out"])
-            # THE LATER OF THE TWO, which is the only direction that is safe.
-            #
-            # The window is the span that makes the clip CUTTABLE — the
-            # editorial pass reads a transcript with holes in it where the
-            # mutes are, so it can name an in-point that has no audio behind
-            # it, and on 15 of this VOD's 17 windowed clips it names one at
-            # or before the window's start. The window has to win there.
-            #
-            # Where its in-point falls INSIDE the window it is strictly
-            # better: same clean audio, but it starts where the argument
-            # starts instead of on an acoustic boundary. Clip 33 is the
-            # corroboration — the pass independently named 81.6 against a
-            # window opening at 82.0, 0.4s apart, reading only the words.
-            #
-            # And this is the same number derived twice: a spec that already
-            # existed got the editorial value through the fill above (clip 07
-            # is 20.5, not the window's 14.5, and that is the cut George
-            # accepted), while a NEW spec took the window and ignored it. Two
-            # paths, one answer.
-            if win["in"] < ed_in < out_pt - 10.0:
-                log(f"   {n:02d} window opens {in_pt:.1f} but the argument "
-                    f"starts {ed_in:.1f} — taking the later")
-                in_pt = ed_in
             note = (f"{note}  Cut to {in_pt:.0f}-{out_pt:.0f}s by the screen: "
                     f"the whole region is {r['src_s']:.0f}s and fails the gate, "
                     f"this window is {win['muted']:.0%} muted at "

@@ -81,15 +81,55 @@ def load() -> dict[str, str]:
             _add(m, h, h)                       # the handle itself, for casing
             for a in pl.get("aliases") or []:
                 _add(m, a, h)
-    if GARBLES.exists():
-        try:
-            g = json.loads(GARBLES.read_text(encoding="utf-8"))
-            skip = {s.lower() for s in g.get("do_not_apply", [])}
-            for a, canon in (g.get("garbles") or {}).items():
-                if a.lower() not in skip:
-                    m[re.sub(r"\s+", " ", a.strip().lower())] = canon
-        except (json.JSONDecodeError, OSError):
-            pass
+    # THE GARBLE CONFIG IS NOT OPTIONAL, because it carries the deny list.
+    # Swallowing a read error here would silently restore the defect below,
+    # which is the wrong direction to fail in.
+    g = json.loads(GARBLES.read_text(encoding="utf-8"))
+    norm = lambda a: re.sub(r"\s+", " ", str(a).strip().lower())  # noqa: E731
+    confirmed = {norm(a) for a in (g.get("garbles") or {})}
+
+    # A HANDLE THAT IS ALSO AN ORDINARY ENGLISH WORD IS NEVER APPLIED FROM THE
+    # TOKEN ALONE. `_add(m, h, h)` puts every handle in as its own alias so
+    # casing can be corrected — and 123 of the 599 resulting keys are ordinary
+    # words. `after` is the player AfteR, `less` is Less, `life` is Life,
+    # `texture` is t3xture, `tick` is TcK, `rose` is Rosé. Uncorrected, "the
+    # texture of the game" is burned on screen as "the t3xture of the game"
+    # and "after the match" names a Turkish player. It SHIPPED: clip 08's
+    # build log reads `'after'->AfteR` and clip 12's `'life'->Life`.
+    #
+    # This is the exact mirror of the bug this module was written for, and the
+    # module's own rule — exact matches only, no fuzzy matching — does not
+    # catch it, because `after` IS an exact match for AfteR's own handle.
+    #
+    # NO MEASUREMENT SEPARATES THE TWO CLASSES. Swept against how often the
+    # speaker himself says each one across 31 transcripts: `oxy` 5 (a real
+    # player) beside `after` 4 (a preposition), `psalm` 2 (a real garble)
+    # beside `less` 2. A dictionary test alone would also deny `psalm`,
+    # `forsaken`, `leviathan` and `narrate`, which are the valuable ones.
+    #
+    # So the ASYMMETRY decides it, the same way MAX_PUNCHES and the nucleus
+    # gate's direction were decided. Denying costs a casing or spelling miss
+    # on a real handle: recoverable, visible, and it only ever reproduces
+    # whisper's own spelling. Applying wrongly puts a real person's name over
+    # words nobody said, which is the worst thing this pipeline can do.
+    # An entry is restored ONLY by `garbles`, i.e. a garble a human has seen
+    # on screen — which is how `psalm` -> s0m survives.
+    amb = g.get("ambiguous_with_english")
+    if amb is None:
+        raise RuntimeError(
+            f"{GARBLES} has no `ambiguous_with_english` list. Without it every "
+            f"roster handle that is also an English word gets applied to "
+            f"ordinary speech — `after` becomes AfteR. Refusing to load a map "
+            f"that would do that.")
+    for a in amb:
+        k = norm(a)
+        if k not in confirmed:
+            m.pop(k, None)
+
+    skip = {norm(x) for x in g.get("do_not_apply", [])}
+    for a, canon in (g.get("garbles") or {}).items():
+        if norm(a) not in skip:
+            m[norm(a)] = canon
     _MAP = m
     return m
 
