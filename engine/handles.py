@@ -134,6 +134,85 @@ def load() -> dict[str, str]:
     return m
 
 
+# The English suffixes that /usr/share/dict/words does NOT carry. The
+# dictionary holds base forms, so `sign` is in it and `signed` is not — which
+# let a whole class of ordinary words back through the deny list: `tens` ->
+# TenZ, `kicks` -> Kicks, `sharks` -> Sharks, `fields` -> Fields, `pancakes`
+# -> Paincakes, `darker` -> Darker. "he got tens" would have read "he got
+# TenZ".
+_SUFFIXES = [("s", ""), ("es", ""), ("ed", ""), ("ed", "e"), ("d", ""),
+             ("ing", ""), ("ing", "e"), ("er", ""), ("er", "e"), ("ly", ""),
+             ("ies", "y"), ("ied", "y")]
+_DICTS = ("/usr/share/dict/words", "/usr/dict/words")
+
+
+def english_words() -> set[str]:
+    """The system word list, or an empty set when there is none."""
+    for d in _DICTS:
+        p = Path(d)
+        if p.exists():
+            return {w.strip().lower()
+                    for w in p.read_text(encoding="utf-8", errors="replace").splitlines()
+                    if w.strip()}
+    return set()
+
+
+def is_english(key: str, words: set[str]) -> str | None:
+    """The English word `key` is, directly or as an inflection of a word in
+    the list. Returns the stem it matched, or None.
+
+    Multi-word aliases are exempt: `paper rex` is not an English word however
+    its parts read, and a phrase that long is not something a speaker says by
+    accident. So is anything under four characters, where suffix-stripping
+    produces noise rather than stems."""
+    k = key.strip().lower()
+    if k in words:
+        return k
+    if " " in k or len(k) < 4:
+        return None
+    for suf, repl in _SUFFIXES:
+        if k.endswith(suf) and len(k) - len(suf) >= 3:
+            stem = k[:len(k) - len(suf)] + repl
+            if stem in words:
+                return stem
+    return None
+
+
+def rebuild_deny_list() -> int:
+    """Regenerate `ambiguous_with_english` in the garble config from the
+    system dictionary, and write it back. Run this after the roster changes:
+
+        .venv/bin/python -m engine.handles --rebuild-deny-list
+
+    The list is VENDORED rather than computed at load time because two
+    machines deciding differently about a name on screen is this repo's
+    most-repeated defect with a person's name attached.
+    """
+    words = english_words()
+    if not words:
+        raise RuntimeError(f"no system word list at any of {_DICTS}")
+    cfg = json.loads(GARBLES.read_text(encoding="utf-8"))
+    # Build the raw roster map, BEFORE any denial, so the list is complete.
+    global _MAP
+    saved, _MAP = _MAP, None
+    try:
+        cfg_no_deny = dict(cfg, ambiguous_with_english=[])
+        GARBLES.write_text(json.dumps(cfg_no_deny, indent=1, ensure_ascii=False) + "\n",
+                           encoding="utf-8")
+        _MAP = None
+        raw = dict(load())
+    finally:
+        _MAP = saved
+        GARBLES.write_text(json.dumps(cfg, indent=1, ensure_ascii=False) + "\n",
+                           encoding="utf-8")
+    amb = sorted(k for k in raw if is_english(k, words))
+    cfg["ambiguous_with_english"] = amb
+    GARBLES.write_text(json.dumps(cfg, indent=1, ensure_ascii=False) + "\n",
+                       encoding="utf-8")
+    _MAP = None
+    return len(amb)
+
+
 def fix(text: str, *, on_change=None) -> str:
     """Rewrite handles in one caption's text.
 
@@ -174,3 +253,12 @@ def fix_cards(cards, *, on_change=None) -> int:
             c.text = new
             changed += 1
     return changed
+
+
+if __name__ == "__main__":                                    # pragma: no cover
+    import sys
+    if "--rebuild-deny-list" in sys.argv:
+        n = rebuild_deny_list()
+        print(f"{GARBLES}: ambiguous_with_english = {n} keys")
+    else:
+        print(__doc__)

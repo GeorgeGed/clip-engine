@@ -69,6 +69,20 @@ def test_ordinary_words_are_left_alone():
         ("forsaken", "f0rsakeN"),
         ("narrate", "N4RRATE"),
         ("destroyer", "destroyeR"),
+        # INFLECTED FORMS. The dictionary carries base forms only, so `sign`
+        # is in it and `signed` is not — which let a whole second class
+        # through the first version of the deny list. "he got tens" would
+        # have read "he got TenZ".
+        ("tens", "TenZ"),
+        ("kicks", "Kicks"),
+        ("sharks", "Sharks"),
+        ("fields", "Fields"),
+        ("pancakes", "Paincakes"),
+        ("darker", "Darker"),
+        ("shanks", "Shanks"),
+        ("spitfires", "Spitfires"),
+        ("signed", "signed"),
+        ("forsaking", "f0rsakeN"),
     ]:
         got = handles.fix(word)
         check(f"{word!r} is left alone", got == word,
@@ -83,6 +97,7 @@ def test_in_a_sentence():
         "every tick of the spike timer",
         "a rose by any other name",
         "the key is that life after a loss is still a life",
+        "he got tens of kicks in and the sharks were signed",
     ]:
         got = handles.fix(src)
         check(f"unchanged: {src!r}", got == src, f"became {got!r}")
@@ -125,8 +140,26 @@ def test_the_deny_list_is_vendored_not_computed():
     check("the ambiguous list is checked in", isinstance(amb, list) and len(amb) > 50,
           f"{len(amb) if isinstance(amb, list) else amb}")
     src = (ROOT / "engine" / "handles.py").read_text(encoding="utf-8")
-    check("handles.py does not read a system dictionary at load time",
-          "/usr/share/dict" not in src)
+    check("the list is regenerable from a documented command",
+          "--rebuild-deny-list" in src and "def rebuild_deny_list" in src,
+          "python -m engine.handles --rebuild-deny-list")
+    # `load()` itself must not touch the dictionary — only the generator may.
+    # Walk the AST rather than slicing the file: the dictionary PATHS are a
+    # module constant that sits above the generator, so a text split put them
+    # on the wrong side and the check measured nothing true.
+    import ast
+    tree = ast.parse(src)
+    fn = next(n for n in tree.body
+              if isinstance(n, ast.FunctionDef) and n.name == "load")
+    called = {n.func.id for n in ast.walk(fn)
+              if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)}
+    names = {n.id for n in ast.walk(fn) if isinstance(n, ast.Name)}
+    check("load() does not call the dictionary-reading generator",
+          "english_words" not in called and "english_words" not in names,
+          f"calls: {sorted(called)}")
+    check("load() does not name a dictionary path",
+          not any("dict/words" in c.value for c in ast.walk(fn)
+                  if isinstance(c, ast.Constant) and isinstance(c.value, str)))
     # The override path has to be LIVE, not just present: at least one
     # confirmed garble must also be on the deny list, or nothing proves that
     # `garbles` actually beats it. `psalm` and `leviathan` are both ordinary
