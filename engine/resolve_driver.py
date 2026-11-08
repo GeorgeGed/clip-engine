@@ -102,9 +102,88 @@ def doctor() -> Diagnosis:
         notes.append("This is the free edition. Timeline construction still works "
                      "via FCPXML import (engine/fcpxml.py); rendering and grading "
                      "from here do not.")
+    # A DIALOG IS WORSE THAN A CLOSED APP, because the app looks fine. Only
+    # worth asking when Resolve is up: with nothing running there are no
+    # windows and the question is meaningless.
+    if running:
+        dlg = blocking_dialog()
+        if dlg:
+            notes.append(
+                f"Resolve has a modal window open — {dlg!r} — and it is "
+                f"waiting on a human. The scripting API answers with None "
+                f"while it is up, so a render will hang rather than fail. "
+                f"Dismiss it in Resolve and retry.")
     if not notes:
         notes.append("Ready.")
     return Diagnosis(app, api, lib, importable, running, studio, notes)
+
+
+# WHAT COUNTS AS BLOCKING, and why this is a pattern list rather than
+# "anything that is not the main window".
+#
+# The first version flagged any window other than "DaVinci Resolve", and the
+# very first thing it caught was **"Project Manager"** — which is Resolve's
+# ordinary startup window, not a modal, and which `make_clip` resolves by
+# creating or loading its own project. Treating it as blocking would have
+# made `doctor()` report "not ready" and the site refuse to build at all.
+#
+# A false POSITIVE here stops work; a false NEGATIVE only costs the render
+# wait its (now bounded) timeout, which fails with a readable message. So
+# the asymmetry says be conservative: name the dialogs that are known to
+# block, and let the list grow as they are met.
+_BLOCKING_PATTERNS = (
+    "problem report",      # Blackmagic's own crash reporter — today's culprit
+    "crash",
+    "error",
+    "warning",
+    "alert",
+    "already exists",      # the overwrite prompt this file has warned about
+    "unsaved",
+)
+
+
+def blocking_dialog(timeout: float = 5.0) -> str:
+    """The title of a modal window waiting on a human, or "".
+
+    THIS FILE ALREADY RECORDED THE SYMPTOM AND NOTHING EVER CHECKED FOR IT.
+    AGENTS.md: *"Resolve wedged again, this time at 3% CPU with the API
+    blocked — not a busy loop, so most likely a modal dialog."* It was a
+    modal dialog, and today it was **Blackmagic's own crash reporter** —
+    "Problem Report for DaVinci Resolve", with Don't Ask Again / Ignore /
+    Send. Three builds died on it:
+
+      * API methods resolve to None, so `proj.StartRendering` raises
+        `TypeError: 'NoneType' object is not callable` — which reads exactly
+        like the `hasattr` lie this file warns about and is nothing of the
+        kind;
+      * `IsRenderingInProgress()` never returns False, so the render wait
+        loop span forever with make_clip alive and Resolve at 0.0% CPU;
+      * nothing reported any of it. One build sat for fifty minutes.
+
+    There is no crash report in DiagnosticReports for it, because the dialog
+    is Blackmagic's and not Apple's — so looking there says "no crash" while
+    a crash dialog is on screen.
+
+    System Events needs Accessibility permission. Without it this returns ""
+    rather than raising: a diagnostic that refuses to run must not become the
+    reason a build fails.
+    """
+    import subprocess                                      # noqa: PLC0415
+    try:
+        r = subprocess.run(
+            ["osascript", "-e",
+             'tell application "System Events" to tell process "Resolve" '
+             'to get name of every window'],
+            capture_output=True, text=True, timeout=timeout)
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    if r.returncode != 0:
+        return ""
+    for w in (w.strip() for w in (r.stdout or "").split(",")):
+        low = w.lower()
+        if w and any(pat in low for pat in _BLOCKING_PATTERNS):
+            return w
+    return ""
 
 
 def connect():

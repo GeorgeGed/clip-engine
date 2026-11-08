@@ -55,7 +55,7 @@ from engine import handles                                       # noqa: E402
 from engine import qc                                            # noqa: E402
 from engine.clipspec import load                                 # noqa: E402
 from engine import facecam                                       # noqa: E402
-from engine.resolve_driver import connect                        # noqa: E402
+from engine.resolve_driver import connect, blocking_dialog       # noqa: E402
 from engine.resolve_layout import Frame, plan, apply             # noqa: E402
 from engine.resolve_captions import cards, emphasis_keys, mark_emphasis  # noqa: E402
 from engine.cuts import framings, content_framings               # noqa: E402
@@ -1488,9 +1488,32 @@ def stage_render(clip, ch, st):
                             "CustomName": f"{tag}_src",
                             "MarkIn": mark_in, "MarkOut": mark_out,
                             "SelectAllFrames": False})
-    job = proj.AddRenderJob(); proj.StartRendering([job])
+    job = proj.AddRenderJob()
+    if not job:
+        raise RuntimeError(
+            "AddRenderJob returned nothing. Resolve usually refuses here "
+            "because a modal window is open: "
+            + (blocking_dialog() or "no dialog found"))
+    proj.StartRendering([job])
     t0 = time.time()
+    # BOUND IT. This loop was `while IsRenderingInProgress(): sleep(1)` with
+    # no ceiling, and when Resolve has a modal window open the call never
+    # returns False — so a build sat here for FIFTY MINUTES at 0.0% CPU with
+    # nothing rendering and nothing said. A reference render of a 45s clip
+    # takes about 9 seconds, so 20x the picture duration with a two-minute
+    # floor is generous by two orders of magnitude and still finite.
+    budget = max(120.0, (picture / ch.fps) * 20)
     while proj.IsRenderingInProgress():
+        if time.time() - t0 > budget:
+            dlg = blocking_dialog()
+            raise RuntimeError(
+                f"Resolve has been 'rendering' for {time.time()-t0:.0f}s "
+                f"against a {budget:.0f}s budget and produced nothing. "
+                + (f"It has a modal window open — {dlg!r} — which blocks the "
+                   f"scripting API: dismiss it in Resolve and retry."
+                   if dlg else
+                   "No modal window is visible, so this is a genuine hang; "
+                   "quit Resolve and retry."))
         time.sleep(1)
     log(f"  resolve render {time.time()-t0:.0f}s")
     eq, mid = ROOT / "renders/_eq.mov", ROOT / "renders/_mid.mp4"
