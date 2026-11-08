@@ -1054,6 +1054,40 @@ class Handler(BaseHTTPRequestHandler):
                     {"error": f"rights must be one of {', '.join(RIGHTS)} — "
                               f"the build refuses to start without one"}, 400)
             name = job_name_for(url, channel)
+            # THE RIGHTS BASIS IS DECLARED HERE, SO IT IS WRITTEN HERE.
+            #
+            # `batch.py` refuses to build a channel whose spec has no
+            # `permission` — correctly, because never shipping a source
+            # without a rights basis is the oldest rule in this project. But
+            # the only place a human declares one is this form, and nothing
+            # carried it into the channel spec. So a new streamer's VOD
+            # would ingest, transcribe, screen and spec for the best part of
+            # an hour and then stop at the build on a file the operator did
+            # not know they had to write.
+            #
+            # Only ever CREATED, never overwritten: a channel already on
+            # file carries a permission someone wrote deliberately, often
+            # with a note narrower than the four words this form offers, and
+            # a routine write eating hand-set state is the defect this repo
+            # has recorded more than any other.
+            chan_file = ROOT / "channels" / f"{name.split('-')[0]}.json"
+            if not chan_file.exists():
+                try:
+                    sys.path.insert(0, str(ROOT))
+                    import batch as _b                      # noqa: PLC0415
+                    spec = _b._channel(name)                # house defaults
+                    spec["permission"] = rights
+                    spec["permission_note"] = (
+                        f"Declared on the site when job {name!r} was created. "
+                        f"A viewer's chat message is their words on screen — "
+                        f"confirm before a wide release.")
+                    chan_file.write_text(
+                        json.dumps(spec, indent=1) + "\n", encoding="utf-8")
+                except Exception as exc:                    # noqa: BLE001
+                    return self._json(
+                        {"error": f"could not create the channel spec for "
+                                  f"{name.split('-')[0]!r}: "
+                                  f"{type(exc).__name__}: {exc}"}, 500)
             now = time.time()
             try:
                 with db() as c:

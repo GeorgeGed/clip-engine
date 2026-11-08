@@ -415,8 +415,67 @@ def cmd_specs(job, args):
     return written
 
 
+def vod_id_for(job: str) -> str:
+    """The VOD id, taken from the JOB NAME rather than the channel file.
+
+    A job is `<channel>-<vod id>`, so the id is already in the name — and
+    `Channel.vod_id` held a second copy. That is this repo's most-repeated
+    defect with a real consequence attached: the id is what
+    `twitch_chat.fetch` pulls chat with, so a SECOND VOD from a channel
+    already on file would fetch the FIRST one's chat and composite real
+    viewers' messages onto lines they were never written about. That exact
+    thing has shipped here once, from the media-pool collision, and it took
+    George watching the clip to catch.
+
+    A local file has no VOD id and gets "", which is what `make_clip`
+    already treats as "no chat for this clip".
+    """
+    tail = job.rsplit("-", 1)[-1] if "-" in job else ""
+    return tail if tail.isdigit() else ""
+
+
 def _channel(job):
-    c = json.loads((ROOT / f"channels/{job.split('-')[0]}.json").read_text())
+    """The channel spec, created with house defaults the first time a
+    channel is seen.
+
+    THIS CRASHED ON ANY CHANNEL BUT `fns`. It was a bare `read_text()` with
+    no existence check, so the first thing a new streamer's VOD met was a
+    FileNotFoundError several stages in — after ingest and transcription had
+    already run. Everything in the file except two values is house style,
+    which is the same reason it belongs in code: the seam, the chrome crop,
+    the frame rate and the grade are measured once for the project, not per
+    streamer, and the facecam rect is DETECTED per clip by `facecam.detect`
+    because a streamer moves their own layout between scenes.
+
+    The two that are not defaults:
+
+      * `permission` — a rights basis, which is a human's assertion and
+        never a default. The site writes it from the job's declared rights
+        when it creates the job; a channel file reaching here without one
+        still stops the build, as it always has.
+      * `vod_id` — no longer stored at all; `vod_id_for` derives it.
+    """
+    f = ROOT / f"channels/{job.split('-')[0]}.json"
+    if not f.exists():
+        name = job.split("-")[0]
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(json.dumps({
+            "name": name,
+            # a placeholder only: `facecam.detect` measures the real rect
+            # per clip, and `prep` writes it into each spec.
+            "cam": [1456, 818, 1920, 1080],
+            "seam": 0.42, "chrome": 92, "fps": 60,
+            "grade": {"NodeIndex": "1", "Slope": "1.06 1.06 1.07",
+                      "Offset": "-0.012 -0.012 -0.010",
+                      "Power": "1.06 1.06 1.06", "Saturation": "1.18"},
+            "arc": None,
+            "permission": "", "permission_note": "",
+        }, indent=1) + "\n", encoding="utf-8")
+        log(f"[channel] created channels/{name}.json with house defaults — "
+            f"it has NO rights basis, so set `permission` before building")
+    c = json.loads(f.read_text(encoding="utf-8"))
+    # ONE SOURCE FOR THE VOD ID, and the job name is it.
+    c["vod_id"] = vod_id_for(job) or c.get("vod_id") or None
     return c
 
 
