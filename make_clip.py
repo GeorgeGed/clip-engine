@@ -1488,12 +1488,28 @@ def stage_render(clip, ch, st):
                             "CustomName": f"{tag}_src",
                             "MarkIn": mark_in, "MarkOut": mark_out,
                             "SelectAllFrames": False})
+    # CHECK THE ATTRIBUTE, NOT THE RESULT. When Resolve goes away the proxy
+    # resolves every METHOD to None, so `proj.AddRenderJob()` raises
+    # `TypeError: 'NoneType' object is not callable` on the lookup — there is
+    # never a result to test. The first version of this guard tested the
+    # result and could not fire. `callable()` is the test; `hasattr` is not,
+    # because this file records that hasattr LIES on these remote proxies and
+    # returns True for methods that do not exist.
+    if not callable(getattr(proj, "AddRenderJob", None)):
+        dlg = blocking_dialog()
+        raise RuntimeError(
+            "Resolve's scripting API has stopped answering — AddRenderJob is "
+            "not callable, which means the app has gone away or is blocked. "
+            + (f"It has a modal window open: {dlg!r}. Dismiss it and retry."
+               if dlg else
+               "No modal window is visible, so Resolve has most likely "
+               "crashed. Its own log ends on 'Main view page is changed to "
+               "11' (the Deliver page) each time this happens."))
     job = proj.AddRenderJob()
     if not job:
         raise RuntimeError(
-            "AddRenderJob returned nothing. Resolve usually refuses here "
-            "because a modal window is open: "
-            + (blocking_dialog() or "no dialog found"))
+            "AddRenderJob returned nothing, so Resolve refused the job. "
+            + (blocking_dialog() or "No modal window is visible."))
     proj.StartRendering([job])
     t0 = time.time()
     # BOUND IT. This loop was `while IsRenderingInProgress(): sleep(1)` with
