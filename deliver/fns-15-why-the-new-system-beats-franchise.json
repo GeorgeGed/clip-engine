@@ -1,0 +1,64 @@
+{
+ "title": "FNS ON WHY THE NEW SYSTEM BEATS FRANCHISE",
+ "subject": "Open-qualifier system is clearly better than franchise for players",
+ "claim": "\"This is a clearly better system than franchise. It's not close.\"",
+ "duration_s": "27.10s (want 15-90)",
+ "source": {
+  "vod": "2905408276",
+  "in_point_s": 1050.9,
+  "out_point_s": 1084.09,
+  "clip_file_in_point_s": 0.0
+ },
+ "rights": {
+  "permission": "explicit",
+  "note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release."
+ },
+ "chat_overlay": true,
+ "qc": [
+  {
+   "check": "duration",
+   "ok": true,
+   "detail": "27.10s (want 15-90)"
+  },
+  {
+   "check": "loudness",
+   "ok": true,
+   "detail": "-14.09 LUFS (target -14.0)"
+  },
+  {
+   "check": "true_peak",
+   "ok": true,
+   "detail": "-1.07 dBTP"
+  },
+  {
+   "check": "black_top",
+   "ok": true,
+   "detail": "1624 frames, YMAX min 242"
+  },
+  {
+   "check": "black_bottom",
+   "ok": true,
+   "detail": "1624 frames, YMAX min 241"
+  },
+  {
+   "check": "dead_space",
+   "ok": true,
+   "detail": "1.55s quiet (5.7%, max 8%)"
+  },
+  {
+   "check": "absent_audio",
+   "ok": true,
+   "detail": "0.00s in 0 runs"
+  },
+  {
+   "check": "caption_cadence",
+   "ok": true,
+   "detail": "2.14 cards/s (58 cards)"
+  },
+  {
+   "check": "hallucinated_captions",
+   "ok": true,
+   "detail": "none"
+  }
+ ]
+}

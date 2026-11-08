@@ -169,5 +169,62 @@
   "permission": "explicit",
   "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release.",
   "delivered": "deliver/fns-07-sam-won-t-compete-on-an-org-this-year.mp4"
+ },
+ "fns-15": {
+  "built": true,
+  "qc_ok": true,
+  "seconds": 223,
+  "render": "renders/fns-2905408276-15.mp4",
+  "findings": [
+   {
+    "check": "duration",
+    "ok": true,
+    "detail": "27.10s (want 15-90)"
+   },
+   {
+    "check": "loudness",
+    "ok": true,
+    "detail": "-14.09 LUFS (target -14.0)"
+   },
+   {
+    "check": "true_peak",
+    "ok": true,
+    "detail": "-1.07 dBTP"
+   },
+   {
+    "check": "black_top",
+    "ok": true,
+    "detail": "1624 frames, YMAX min 242"
+   },
+   {
+    "check": "black_bottom",
+    "ok": true,
+    "detail": "1624 frames, YMAX min 241"
+   },
+   {
+    "check": "dead_space",
+    "ok": true,
+    "detail": "1.55s quiet (5.7%, max 8%)"
+   },
+   {
+    "check": "absent_audio",
+    "ok": true,
+    "detail": "0.00s in 0 runs"
+   },
+   {
+    "check": "caption_cadence",
+    "ok": true,
+    "detail": "2.14 cards/s (58 cards)"
+   },
+   {
+    "check": "hallucinated_captions",
+    "ok": true,
+    "detail": "none"
+   }
+  ],
+  "subject": "One narrative start to finish, no pivot: puzzlement, claim, mechanism, payoff. \"I can't see why any player would be complaining about this\" (0.00) -> \"Why am I seeing so much pessimism on my timeline about this system?\" (10.11) -> \"This is a clearly better system than Franchise. It's not close.\" (16",
+  "permission": "explicit",
+  "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release.",
+  "delivered": "deliver/fns-15-why-the-new-system-beats-franchise.mp4"
  }
 }

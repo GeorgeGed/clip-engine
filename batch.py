@@ -348,11 +348,35 @@ def cmd_specs(job, args):
                 f"0.0 (the top of the region, not where the argument "
                 f"starts) and the clip gets no hook. Run: batch.py {job} "
                 f"editorial --only {n}")
-        in_pt = float(e.get("in_point", 0.0))
+        ed_in = float(e.get("in_point") or 0.0)
+        in_pt = ed_in
         out_pt = None
         note = e.get("why") or m["subject"]
         if win:
             in_pt, out_pt = float(win["in"]), float(win["out"])
+            # THE LATER OF THE TWO, which is the only direction that is safe.
+            #
+            # The window is the span that makes the clip CUTTABLE — the
+            # editorial pass reads a transcript with holes in it where the
+            # mutes are, so it can name an in-point that has no audio behind
+            # it, and on 15 of this VOD's 17 windowed clips it names one at
+            # or before the window's start. The window has to win there.
+            #
+            # Where its in-point falls INSIDE the window it is strictly
+            # better: same clean audio, but it starts where the argument
+            # starts instead of on an acoustic boundary. Clip 33 is the
+            # corroboration — the pass independently named 81.6 against a
+            # window opening at 82.0, 0.4s apart, reading only the words.
+            #
+            # And this is the same number derived twice: a spec that already
+            # existed got the editorial value through the fill above (clip 07
+            # is 20.5, not the window's 14.5, and that is the cut George
+            # accepted), while a NEW spec took the window and ignored it. Two
+            # paths, one answer.
+            if win["in"] < ed_in < out_pt - 10.0:
+                log(f"   {n:02d} window opens {in_pt:.1f} but the argument "
+                    f"starts {ed_in:.1f} — taking the later")
+                in_pt = ed_in
             note = (f"{note}  Cut to {in_pt:.0f}-{out_pt:.0f}s by the screen: "
                     f"the whole region is {r['src_s']:.0f}s and fails the gate, "
                     f"this window is {win['muted']:.0%} muted at "
