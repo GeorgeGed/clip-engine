@@ -12,7 +12,7 @@ Controls are built here from a delivered clip rather than kept as fixtures,
 so the test is reproducible and cannot drift from the renderer:
 
     HONEST   a re-encode; a softer bicubic/crf26 pass
-    WRONG    a 10px pane shift            (geometry)
+    WRONG    a 10px pane shift            (geometry — a VERTICAL crop)
              the seam moved 0.42 -> 0.45  (geometry)
              a mismatched facecam CDL     (grade)
              a different clip entirely    (both)
@@ -123,13 +123,15 @@ def main():
         print("test_the_two_instruments_are_orthogonal")
         # Each instrument must be the ONLY one catching at least one control,
         # or it is redundant and the second one is not earning its runtime.
-        geo = {"geometry", "top pane", "bottom pane"}
+        geo = {"geometry", "levels",
+               "top pane x", "top pane y", "bottom pane x", "bottom pane y"}
         gra = {"grade sat", "grade white"}
         for k, want, other_set, why in (
                 ("wrong_seam", geo, gra, "a moved seam is geometry"),
                 ("wrong_grade", gra, geo,
-                 "a mismatched CDL moves the row profile only 1.5x the "
-                 "honest floor — the geometry instrument cannot see it")):
+                 "a mismatched CDL moves the facecam band's median by only "
+                 "1.24 against an honest 1.32 — the geometry and levels "
+                 "instruments cannot see it")):
             if k not in reps:
                 continue
             f = failed(reps[k])

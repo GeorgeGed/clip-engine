@@ -1,0 +1,69 @@
+{
+ "title": "FNS: A STREAM TEAM WIN WOULD KILL THE GAME",
+ "subject": "Streamer's all-streamer team: a win would embarrass the game, and he expects them to lose",
+ "claim": "\"It would be so bad for the game. I think the game would die right there... genuinely embarrassing\"",
+ "duration_s": "19.70s (want 15-90)",
+ "source": {
+  "vod": "2905408276",
+  "in_point_s": 4767.6,
+  "out_point_s": 4826.59,
+  "clip_file_in_point_s": 2.4
+ },
+ "rights": {
+  "permission": "explicit",
+  "note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release."
+ },
+ "chat_overlay": true,
+ "qc": [
+  {
+   "check": "duration",
+   "ok": true,
+   "detail": "19.70s (want 15-90)"
+  },
+  {
+   "check": "loudness",
+   "ok": true,
+   "detail": "-14.27 LUFS (target -14.0)"
+  },
+  {
+   "check": "true_peak",
+   "ok": true,
+   "detail": "-1.29 dBTP"
+  },
+  {
+   "check": "black_top",
+   "ok": true,
+   "detail": "1180 frames, YMAX min 241"
+  },
+  {
+   "check": "black_bottom",
+   "ok": true,
+   "detail": "1180 frames, YMAX min 237"
+  },
+  {
+   "check": "dead_space",
+   "ok": true,
+   "detail": "0.00s quiet (0.0%, max 8%)"
+  },
+  {
+   "check": "absent_audio",
+   "ok": true,
+   "detail": "0.00s in 0 runs"
+  },
+  {
+   "check": "caption_cadence",
+   "ok": true,
+   "detail": "2.28 cards/s (45 cards)"
+  },
+  {
+   "check": "hallucinated_captions",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "check": "chat_on_screen",
+   "ok": true,
+   "detail": "visible \u2014 panel fill 85% of the box (want >=50%), 9368 coloured px/frame (want >=400)"
+  }
+ ]
+}

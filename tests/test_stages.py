@@ -71,11 +71,18 @@ def test_build_is_last_and_the_only_resolve_stage():
     """Everything that can fail cheaply has to fail before Resolve starts, or
     a VOD dropped with Resolve closed transcribes for an hour and then dies."""
     needs = set(agent.NEEDS_RESOLVE)
-    check("build is the only Resolve stage", needs == {"build"}, str(needs))
+    # The native renderer is `make_clip`'s default, so a build no longer
+    # needs a GUI app and this set is normally EMPTY. The invariant that
+    # matters is unchanged and is the one asserted: if any stage does need
+    # Resolve, it must not run before the cheap stages, or a job claimed on a
+    # machine without it transcribes for an hour and then dies.
+    check("no stage needs Resolve, or only `build` does",
+          needs <= {"build"}, str(needs) or "none")
     before = [k for k in CHAIN if k not in ("build", "report")]
     check("nothing that needs Resolve runs before the cheap stages",
           all(CHAIN.index(n) > max(CHAIN.index(b) for b in before) for n in needs),
-          f"build at {CHAIN.index('build')} of {len(CHAIN)}")
+          f"build at {CHAIN.index('build')} of {len(CHAIN)}, "
+          f"Resolve-gated: {sorted(needs) or 'nothing'}")
 
 
 def test_sql_default_matches_the_chain():

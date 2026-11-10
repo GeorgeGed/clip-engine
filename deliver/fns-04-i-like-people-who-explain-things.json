@@ -23,12 +23,12 @@
   {
    "check": "loudness",
    "ok": true,
-   "detail": "-14.24 LUFS (target -14.0)"
+   "detail": "-14.25 LUFS (target -14.0)"
   },
   {
    "check": "true_peak",
    "ok": true,
-   "detail": "-1.19 dBTP"
+   "detail": "-1.01 dBTP"
   },
   {
    "check": "black_top",
@@ -43,7 +43,7 @@
   {
    "check": "dead_space",
    "ok": true,
-   "detail": "1.30s quiet (3.3%, max 8%)"
+   "detail": "1.65s quiet (4.2%, max 8%)"
   },
   {
    "check": "absent_audio",

@@ -457,8 +457,24 @@ def command(*, base_source: str | Path, overlays: Sequence[Overlay],
            "-filter_complex", graph, "-map", "[ncv]", "-map", "[nca]"]
     if dur is not None:
         cmd += ["-t", f"{dur:.4f}"]
+    # TAG THE COLOUR. The Resolve delivery carries bt709 primaries and
+    # transfer; an untagged file leaves a player to guess, and these clips go
+    # to platforms that re-encode. It changes no pixel — only the VUI — and
+    # the loudness finish is `-c:v copy`, so the tags survive to delivery.
     cmd += ["-c:v", "libx264", "-crf", str(crf), "-preset", preset,
             "-pix_fmt", pix_fmt, "-r", f"{fps:g}",
+            "-color_primaries", "bt709", "-color_trc", "bt709",
+            "-colorspace", "bt709", "-color_range", "tv",
+            # AND THE FLAGS ALONE DO NOT WORK ON THIS BUILD. Measured on a
+            # 64x64 testsrc, mov and mp4 alike: ffmpeg's libx264 wrapper
+            # writes matrix_coefficients into the VUI and silently DROPS
+            # colour_primaries and transfer_characteristics, whatever is
+            # passed. `h264_metadata` writes all three, costs no re-encode,
+            # and survives the loudness finish because that is `-c:v copy`.
+            # The flags above stay: they are what swscale reads, and they
+            # state the intent even where the muxer ignores them.
+            "-bsf:v", "h264_metadata=colour_primaries=1:"
+                      "transfer_characteristics=1:matrix_coefficients=1",
             "-c:a", audio_codec, "-ar", "48000", str(out)]
     return cmd
 

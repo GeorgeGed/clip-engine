@@ -1,0 +1,69 @@
+{
+ "title": "FNS: A PASSPORT SHOULDN'T STOP YOUR DREAM",
+ "subject": "Passport worries about the open circuit are overblown; qualifying teams will get sponsors and can sort it out",
+ "claim": "\"A passport should not stop you from literally living out your dream.\" Teams that qualify should already be getting passports.",
+ "duration_s": "46.40s (want 15-90)",
+ "source": {
+  "vod": "2905408276",
+  "in_point_s": 95.3,
+  "out_point_s": 210.2,
+  "clip_file_in_point_s": 52.5
+ },
+ "rights": {
+  "permission": "explicit",
+  "note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release."
+ },
+ "chat_overlay": true,
+ "qc": [
+  {
+   "check": "duration",
+   "ok": true,
+   "detail": "46.40s (want 15-90)"
+  },
+  {
+   "check": "loudness",
+   "ok": true,
+   "detail": "-14.03 LUFS (target -14.0)"
+  },
+  {
+   "check": "true_peak",
+   "ok": true,
+   "detail": "-1.42 dBTP"
+  },
+  {
+   "check": "black_top",
+   "ok": true,
+   "detail": "2781 frames, YMAX min 241"
+  },
+  {
+   "check": "black_bottom",
+   "ok": true,
+   "detail": "2781 frames, YMAX min 239"
+  },
+  {
+   "check": "dead_space",
+   "ok": true,
+   "detail": "1.10s quiet (2.4%, max 8%)"
+  },
+  {
+   "check": "absent_audio",
+   "ok": false,
+   "detail": "0.75s in 1 runs"
+  },
+  {
+   "check": "caption_cadence",
+   "ok": true,
+   "detail": "2.44 cards/s (113 cards)"
+  },
+  {
+   "check": "hallucinated_captions",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "check": "chat_on_screen",
+   "ok": true,
+   "detail": "visible \u2014 panel fill 87% of the box (want >=50%), 7746 coloured px/frame (want >=400)"
+  }
+ ]
+}

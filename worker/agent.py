@@ -90,7 +90,14 @@ STAGE_ARGV = {
     "build":   ("batch.py", "{job}", "build"),
     "report":  ("batch.py", "{job}", "report"),
 }
-NEEDS_RESOLVE = {"build"}
+# NOTHING NEEDS RESOLVE ANY MORE. `build` did, and this gate existed because
+# build is LAST — a job claimed with Resolve closed would ingest, transcribe,
+# detect, screen and spec for the best part of an hour and then die on the
+# scripting API. `make_clip --renderer native` is the default and composites
+# with ffmpeg, so an agent on a Mac with no Resolve installed can take a job
+# end to end. The gate below still fires for anything listed here, so putting
+# "build" back is all it takes to run the GUI path on a dedicated host.
+NEEDS_RESOLVE: set[str] = set()
 
 STOP = False
 

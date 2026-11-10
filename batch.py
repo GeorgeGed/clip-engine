@@ -25,13 +25,19 @@ them is shipping one idea five times, which is worse for a channel than
 shipping two clips. `specs` groups by topic and keeps the strongest of each
 group; the rest stay in the manifest as held, not deleted.
 
-**3. RESOLVE IS A SINGLE GUI APP, SO BUILDS ARE SERIAL.** The scripting API
-is served on its GUI thread, one project and one timeline at a time, and it
-wedges on a modal dialog. Remotion's `public/` directory is also shared, so
-two clips cannot render overlays at once. Everything CHEAP — transcription,
-chat, facecam detection — runs in `prep` ahead of time; only the Resolve
-build is serialised, and each clip is independent so a failure costs one
-clip and not the run.
+**3. BUILDS RUN IN LANES, AND WHAT LIMITED THEM WAS NOT THE RENDERER.**
+This said "Resolve is a single GUI app, so builds are serial" — true of
+`--renderer resolve`, and the native ffmpeg path has been the default for a
+while. What actually made the native path serial was two silent collisions:
+the PNG sequence directory was keyed by COMPOSITION NAME, so two clips wrote
+the same 1020 `Bait` filenames into one directory and the mixture encoded
+with no error at all; and `Root.tsx` imported its chat, windows, duration
+and story list out of one shared `public/` tree, which webpack inlines at
+bundle time, so `--public-dir` could not have fixed it either. Both are
+fixed, and what is left is MEMORY — `lanes_for()` measures free pages
+against ~1.9 GB a lane and runs that many. Everything CHEAP — transcription,
+chat, facecam detection — still runs in `prep` ahead of time, and each clip
+is independent so a failure costs one clip and not the run.
 
 **4. EVERY CLIP IS GATED ON THE ARTIFACT.** `engine/deliver_qc` runs on the
 rendered file, not the plan. A clip that fails does not go in the delivery
@@ -46,7 +52,10 @@ and falls back to safe defaults with a warning when there is none.
 from __future__ import annotations
 
 import argparse
+import concurrent.futures as cf
 import json
+import os
+import pathlib
 import re
 import subprocess
 import sys
@@ -55,6 +64,8 @@ import traceback
 from pathlib import Path
 
 ROOT = Path(__file__).parent
+sys.path.insert(0, str(ROOT))
+from engine import jsonstore                                   # noqa: E402
 sys.path.insert(0, str(ROOT))
 
 DELIVER = ROOT / "deliver"
@@ -235,8 +246,14 @@ def cmd_editorial(job, args):
             e["in_point"] = round(float(e["in_point"]) + c["offset"], 2)
             e["why"] = (f"[judged on the screen's window {lo:.1f}-{hi:.1f}s, "
                         f"not the whole region] " + e.get("why", ""))
-    ed.update(fresh)
-    ed_path.write_text(json.dumps(ed, indent=1, sort_keys=True))
+    # MERGE UNDER A LOCK, THROUGH A TEMP PATH. `ed` was read at the top of
+    # this function, before up to 27 model calls — so two of these running
+    # at once (one click on a clip while the chain's `editorial` stage is
+    # going) lose everything the other judged, and a write interrupted part
+    # way leaves `editorial.json` as JSON that cannot be parsed, which fails
+    # every later read of the job. The lock is around the merge only, never
+    # around the model calls.
+    ed = jsonstore.merge(ed_path, fresh, sort_keys=True)
     ship = sum(1 for v in ed.values() if v.get("verdict") != "drop")
     log(f"[editorial] {len(fresh)} judged, {len(ed)} entries, {ship} ship")
     return ed
@@ -488,9 +505,227 @@ def _channel_obj(job):
 
 
 # -------------------------------------------------------------- build ----
+def lanes_for(want: int | None = None) -> int:
+    """How many clips may build at once, measured against free memory.
+
+    George: *"why doesnt it let me clip multiple clips at once? needs to
+    allow this possibility"*. Two things were in the way and neither was a
+    policy: a PNG sequence directory keyed by composition name, and
+    `Root.tsx` importing its per-clip data out of one shared `public/`
+    directory. Both are fixed; what is left is a real resource limit.
+
+    **Measured on this machine**, 16 GB, during an overlay render: a build
+    peaks near 1.9 GB (Chrome tabs plus ffmpeg), and free+inactive with
+    nothing building reads 2.4-4.1 GB with swap already 90% full. So two
+    lanes fit and a third thrashes — and thrashing is worse than queueing,
+    because swap pressure slows the lane that is already running.
+
+    This is a BUDGET TO MEASURE AGAINST, not a swept curve: the per-lane
+    figure is a fit to one configuration. `CLIP_LANES` overrides it, and a
+    machine with less free memory than two lanes need drops to one rather
+    than being told it cannot build.
+    """
+    want = want or int(os.environ.get("CLIP_LANES", "2"))
+    want = max(1, want)
+    free = _free_gb()
+    if free is None:
+        return want
+    # NOT `free // LANE_GB`. Floating-point floor division on these values
+    # is a knife edge: `3.8 // 1.9` is **1.0**, because 3.8 is stored as
+    # 3.7999999999999998 — so a machine with exactly two lanes' worth of
+    # memory got one, for a reason that is representation and not memory.
+    # This repo's own record is full of thresholds that turned out to be
+    # knife edges, so the comparison is explicit and has a named reserve
+    # either side of it.
+    fits = 1
+    while free >= (fits + 1) * LANE_GB + RESERVE_GB and fits < want:
+        fits += 1
+    if fits < want:
+        log(f"[build] {want} lanes asked for, {free:.1f} GB free at "
+            f"~{LANE_GB:.1f} GB a lane plus {RESERVE_GB:.1f} GB reserved "
+            f"— running {fits}")
+    return min(want, fits)
+
+
+# MEASURED, not modelled — see the note in `lanes_for`. `RESERVE_GB` is the
+# headroom left for the machine itself, so the last lane never takes the
+# final free page: swap on this machine is already 90% full, and thrashing
+# slows the lane that is already running.
+LANE_GB = float(os.environ.get("CLIP_LANE_GB", "1.0"))
+RESERVE_GB = float(os.environ.get("CLIP_RESERVE_GB", "0.8"))
+
+
+def _free_gb() -> float | None:
+    """Free + inactive, in GB. Inactive pages are reclaimable, so counting
+    only `free` reads this machine as having almost nothing."""
+    try:
+        out = subprocess.run(["vm_stat"], capture_output=True, text=True,
+                             check=True).stdout
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    page = 4096
+    m = re.search(r"page size of (\d+)", out)
+    if m:
+        page = int(m.group(1))
+    got = {}
+    for key in ("free", "inactive", "speculative"):
+        m = re.search(rf"Pages {key}:\s+(\d+)", out)
+        if m:
+            got[key] = int(m.group(1))
+    if "free" not in got:
+        return None
+    return (got.get("free", 0) + got.get("inactive", 0)) * page / 1024 ** 3
+
+
+def clip_log(d, index: int) -> Path:
+    """Where ONE clip's build output goes.
+
+    With lanes, the parent's stdout cannot carry every clip's output — two
+    make_clip processes interleaving line by line is unreadable, and the
+    website reads a log per clip to say which one it is on. So each lane
+    writes its own file and the parent keeps the headlines.
+    """
+    f = d / "web" / f"build-{index:02d}.log"
+    f.parent.mkdir(parents=True, exist_ok=True)
+    return f
+
+
+def _build_one(spec, chan, d, manifest, args) -> tuple[str, bool]:
+    """One clip, start to delivered. Returns (key, shipped)."""
+    from engine.clipspec import load
+    key = spec.stem
+    clip, ch = load(spec)
+    out = ROOT / f"renders/{clip.slug}.mp4"
+    t0 = time.time()
+    lg = clip_log(d, clip.index)
+    log(f"[{key}] building — output in {lg.relative_to(ROOT)}")
+    with lg.open("w") as fh:
+        fh.write(f"$ make_clip.py {spec.name} "
+                 f"--renderer {getattr(args, 'renderer', 'native')}\n\n")
+        fh.flush()
+        try:
+            # NATIVE BY DEFAULT — `make_clip`'s own default, passed
+            # explicitly so the build log says which renderer made the file.
+            # Resolve stays reachable with `--renderer resolve` for format
+            # work; it is the one path that cannot run two at a time,
+            # because its API is served on its GUI thread.
+            #
+            # STDERR INTO THE SAME FILE. It used to inherit the parent's, so
+            # a traceback went wherever the caller's stderr pointed — under
+            # the site that is the service log, not the build log the page
+            # reads. A failed clip recorded `returned non-zero exit status 1`
+            # and nothing else.
+            subprocess.run([sys.executable, str(ROOT / "make_clip.py"),
+                            str(spec), "--renderer",
+                            getattr(args, "renderer", "native")],
+                           check=True, stdout=fh, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            log(f"[{key}] BUILD FAILED: {e} — see {lg.relative_to(ROOT)}")
+            jsonstore.merge(manifest, {key: {"built": False, "error": str(e),
+                                             "log": str(lg.relative_to(ROOT))}})
+            return key, False
+    # gate on the ARTIFACT
+    try:
+        rep = _qc_for(clip, ch, out)
+        soft = [f.check for f in rep.findings if not f.ok]
+        log(f"[{key}] {'PASS' if rep.ok else 'FAIL'}"
+            + (f" — noted: {', '.join(soft)}" if soft else " — every check"))
+        lg.open("a").write("\n" + rep.text() + "\n")
+        entry = {"built": True, "qc_ok": rep.ok,
+                 "seconds": round(time.time() - t0),
+                 "render": str(out.relative_to(ROOT)),
+                 "log": str(lg.relative_to(ROOT)),
+                 "findings": [{"check": f.check, "ok": f.ok, "detail": f.detail}
+                              for f in rep.findings],
+                 "subject": clip.notes,
+                 "permission": chan.get("permission"),
+                 "permission_note": chan.get("permission_note", "")}
+        if rep.ok:
+            entry["delivered"] = str(_deliver(clip, chan, d, out, rep)
+                                     .relative_to(ROOT))
+            log(f"[{key}] -> {entry['delivered']}  (+ sidecar)")
+        else:
+            log(f"[{key}] HELD BACK — failed the delivery gate")
+        jsonstore.merge(manifest, {key: entry})
+        return key, rep.ok
+    except Exception:
+        log(f"[{key}] QC ERROR\n{traceback.format_exc()}")
+        jsonstore.merge(manifest, {key: {"built": True, "qc_ok": False,
+                                         "error": "qc raised",
+                                         "log": str(lg.relative_to(ROOT))}})
+        return key, False
+
+
+def _deliver(clip, chan, d, out, rep) -> Path:
+    """A DELIVERABLE NEEDS A NAME AND A SIDECAR. "fns-2905408276-06.mp4"
+    tells whoever posts it nothing, and they also need the title, the source
+    timestamps and the rights basis in one place — that is the difference
+    between a render and something you can actually publish."""
+    # THE HOOK IS THE TITLE, so it names the file. This slugged `clip.notes`,
+    # which is the editorial pass's REASONING — clip 04 delivered as
+    # "fns-04-it-is-genuinely-one-narrative-no-pivot-titleable-in.mp4", an
+    # internal note escaped into the name of a deliverable. The hook opens
+    # with the handle ("FNS: ..."), and the file already starts with the
+    # channel, so stripping it avoids "fns-04-fns-i-like-people-who...".
+    _h = re.sub(rf"^{re.escape(chan['name'])}\s*(?::|\bon\b)\s*", "",
+                (clip.hook or clip.notes or ""), flags=re.I)
+    slug = re.sub(r"[^a-z0-9]+", "-", _h.lower())[:52].strip("-")
+    dst = DELIVER / f"{chan['name']}-{clip.index:02d}-{slug}.mp4"
+    # ONE CLIP, ONE DELIVERY. The hook names the file, so editing a hook and
+    # rebuilding wrote a SECOND delivery beside the first and left both:
+    # clip 07 sat in here twice, under its old subject-derived name and its
+    # new title, same clip, two different cuts. Whoever posts from this
+    # folder has no way to tell which is current, and the website's spec
+    # editor makes a hook edit an ordinary thing to do.
+    #
+    # Bounded to this channel and this clip index, and it names what it
+    # removes — a silent delete in a delivery folder is worse than a stale
+    # file.
+    for old_mp4 in sorted(DELIVER.glob(f"{chan['name']}-{clip.index:02d}-*.mp4")):
+        if old_mp4 == dst:
+            continue
+        log(f"[{clip.job}-{clip.index:02d}] superseding {old_mp4.name}")
+        old_mp4.unlink()
+        old_mp4.with_suffix(".json").unlink(missing_ok=True)
+    subprocess.run(["cp", str(out), str(dst)], check=True)
+    m = json.loads((d / "ranked.json").read_text())[clip.index - 1]
+    dst.with_suffix(".json").write_text(json.dumps({
+        "title": clip.hook,
+        "subject": m.get("subject"),
+        "claim": m.get("claim"),
+        "duration_s": next((f.detail for f in rep.findings
+                            if f.check == "duration"), None),
+        "source": {"vod": chan.get("vod_id"),
+                   "in_point_s": m.get("in_point"),
+                   "out_point_s": m.get("out_point"),
+                   "clip_file_in_point_s": clip.in_point},
+        "rights": {"permission": chan.get("permission"),
+                   "note": chan.get("permission_note")},
+        # whether the overlay was BUILT, not whether chat was fetched — the
+        # topicality reading is advisory and a sidecar that claims an
+        # overlay that is not there is a false statement in a deliverable
+        "chat_overlay": (d / f"overlays_{clip.index:02d}/rm_Chat.mov").exists(),
+        "qc": [{"check": f.check, "ok": f.ok, "detail": f.detail}
+               for f in rep.findings],
+    }, indent=1))
+    return dst
+
+
 def cmd_build(job, args):
-    """Serial, because Resolve is one GUI app and Remotion shares public/."""
-    from engine import deliver_qc, qc
+    """Build the specced clips, up to `lanes_for()` of them at once.
+
+    **What made this serial was never ffmpeg.** Two things were, both
+    silent: the PNG sequence directory was keyed by COMPOSITION NAME, so two
+    clips wrote the same 1020 `Bait` filenames into one directory and the
+    mixture encoded cleanly; and `Root.tsx` imported its chat, windows,
+    duration and story list out of one shared `public/` tree, which webpack
+    inlines at bundle time. The first is a temp dir per call now and the
+    second arrives as `--props`. What remains is memory, which `lanes_for`
+    measures.
+
+    `--renderer resolve` forces one lane: its scripting API is served on
+    Resolve's GUI thread and two timelines cannot be built at once.
+    """
     from engine.clipspec import load
     d, _s, _e, manifest = _paths(job)
     chan = _channel(job)
@@ -499,113 +734,113 @@ def cmd_build(job, args):
         want = {int(x) for x in args.only.split(",")}
         specs = [s for s in specs if int(s.stem.split("-")[-1]) in want]
     DELIVER.mkdir(exist_ok=True)
-    man = json.loads(manifest.read_text()) if manifest.exists() else {}
     if not chan.get("permission"):
         sys.exit(f"channels/{chan['name']}.json has no `permission` — "
                  "never ship a source without a rights basis. Set it to one of "
                  "explicit | affiliate | client_owned with a note.")
 
+    # SKIP BEFORE LAUNCHING, not inside the lane, so the lane count is the
+    # number of clips that will actually build.
+    man = json.loads(manifest.read_text()) if manifest.exists() else {}
+    todo = []
     for spec in specs:
-        key = spec.stem
-        clip, ch = load(spec)
+        clip, _ch = load(spec)
         out = ROOT / f"renders/{clip.slug}.mp4"
-        if man.get(key, {}).get("qc_ok") and out.exists() and not args.force:
-            log(f"[{key}] already built and passed — skipping")
+        if man.get(spec.stem, {}).get("qc_ok") and out.exists() and not args.force:
+            log(f"[{spec.stem}] already built and passed — skipping")
             continue
-        log(f"\n=== {key} ===")
-        t0 = time.time()
-        try:
-            subprocess.run([sys.executable, str(ROOT / "make_clip.py"), str(spec)],
-                           check=True)
-        except subprocess.CalledProcessError as e:
-            log(f"[{key}] BUILD FAILED: {e}")
-            man[key] = {"built": False, "error": str(e)}
-            manifest.write_text(json.dumps(man, indent=1))
-            continue
-        # gate on the ARTIFACT
-        try:
-            rep = _qc_for(clip, ch, out)
-            log(rep.text())
-            man[key] = {"built": True, "qc_ok": rep.ok, "seconds": round(time.time()-t0),
-                        "render": str(out.relative_to(ROOT)),
-                        "findings": [{"check": f.check, "ok": f.ok, "detail": f.detail}
-                                     for f in rep.findings],
-                        "subject": clip.notes,
-                        "permission": chan.get("permission"),
-                        "permission_note": chan.get("permission_note", "")}
-            if rep.ok:
-                # A DELIVERABLE NEEDS A NAME AND A SIDECAR. "fns-2905408276-06.mp4"
-                # tells whoever posts it nothing, and they also need the title,
-                # the source timestamps and the rights basis in one place —
-                # that is the difference between a render and something you can
-                # actually publish.
-                # THE HOOK IS THE TITLE, so it names the file. This slugged
-                # `clip.notes`, which is the editorial pass's REASONING — clip
-                # 04 delivered as
-                # "fns-04-it-is-genuinely-one-narrative-no-pivot-titleable-in.mp4",
-                # an internal note escaped into the name of a deliverable. The
-                # sidecar two lines down already called `clip.hook` the title.
-                # The hook opens with the handle ("FNS: ..."), and the file
-                # already starts with the channel, so stripping it avoids
-                # "fns-04-fns-i-like-people-who...".
-                _h = re.sub(rf"^{re.escape(chan['name'])}\s*(?::|\bon\b)\s*", "",
-                            (clip.hook or clip.notes or ""), flags=re.I)
-                slug = re.sub(r"[^a-z0-9]+", "-", _h.lower())[:52].strip("-")
-                dst = DELIVER / f"{chan['name']}-{clip.index:02d}-{slug}.mp4"
-                # ONE CLIP, ONE DELIVERY. The hook names the file, so editing
-                # a hook and rebuilding wrote a SECOND delivery beside the
-                # first and left both: clip 07 sat in here twice, under its
-                # old subject-derived name and its new title, same clip, two
-                # different cuts. Whoever posts from this folder has no way
-                # to tell which is current, and the website's spec editor
-                # makes a hook edit an ordinary thing to do.
-                #
-                # Bounded to this channel and this clip index, and it names
-                # what it removes — a silent delete in a delivery folder is
-                # worse than a stale file.
-                for old_mp4 in sorted(DELIVER.glob(
-                        f"{chan['name']}-{clip.index:02d}-*.mp4")):
-                    if old_mp4 == dst:
-                        continue
-                    log(f"[{key}] superseding {old_mp4.name}")
-                    old_mp4.unlink()
-                    old_mp4.with_suffix(".json").unlink(missing_ok=True)
-                subprocess.run(["cp", str(out), str(dst)], check=True)
-                m = json.loads((d / "ranked.json").read_text())[clip.index - 1]
-                side = dst.with_suffix(".json")
-                side.write_text(json.dumps({
-                    "title": clip.hook,
-                    "subject": m.get("subject"),
-                    "claim": m.get("claim"),
-                    "duration_s": next((f.detail for f in rep.findings
-                                        if f.check == "duration"), None),
-                    "source": {"vod": chan.get("vod_id"),
-                               "in_point_s": m.get("in_point"),
-                               "out_point_s": m.get("out_point"),
-                               "clip_file_in_point_s": clip.in_point},
-                    "rights": {"permission": chan.get("permission"),
-                               "note": chan.get("permission_note")},
-                    # whether the overlay was BUILT, not whether chat was
-                    # fetched — the topicality gate refuses it on half the
-                    # clips, and a sidecar that claims one that is not there
-                    # is a false statement in a deliverable
-                    "chat_overlay": (d / f"overlays_{clip.index:02d}/rm_Chat.mov").exists(),
-                    "qc": [{"check": f.check, "ok": f.ok, "detail": f.detail}
-                           for f in rep.findings],
-                }, indent=1))
-                man[key]["delivered"] = str(dst.relative_to(ROOT))
-                log(f"[{key}] -> {dst.relative_to(ROOT)}  (+ sidecar)")
-            else:
-                log(f"[{key}] HELD BACK — failed the delivery gate")
-        except Exception:
-            log(f"[{key}] QC ERROR\n{traceback.format_exc()}")
-            man[key] = {"built": True, "qc_ok": False, "error": "qc raised"}
-        manifest.write_text(json.dumps(man, indent=1))
+        todo.append(spec)
+    if not todo:
+        log("[build] nothing to build")
+        log(f"\n-> {manifest}")
+        return
+
+    lanes = 1 if getattr(args, "renderer", "native") == "resolve" \
+        else lanes_for(getattr(args, "lanes", None))
+    lanes = min(lanes, len(todo))
+    log(f"[build] {len(todo)} clip(s), {lanes} at a time")
+    if lanes == 1:
+        for spec in todo:
+            log(f"\n=== {spec.stem} ===")
+            _build_one(spec, chan, d, manifest, args)
+    else:
+        with cf.ThreadPoolExecutor(max_workers=lanes) as ex:
+            futs = {ex.submit(_build_one, spec, chan, d, manifest, args): spec
+                    for spec in todo}
+            for fut in cf.as_completed(futs):
+                # re-raise here rather than letting the executor swallow it
+                # on shutdown; one clip's crash must not take the batch
+                try:
+                    fut.result()
+                except Exception:
+                    log(f"[{futs[fut].stem}] LANE CRASHED\n"
+                        f"{traceback.format_exc()}")
     log(f"\n-> {manifest}")
+    log(f"\n-> {manifest}")
+
+
+class _Reused:
+    """A recorded `deliver_qc.Report`, read back rather than recomputed."""
+
+    def __init__(self, d):
+        self.ok = bool(d["ok"])
+        F = type("F", (), {})
+        self.findings = []
+        for f in d["findings"]:
+            o = F()
+            o.check, o.ok, o.detail = f["check"], f["ok"], f["detail"]
+            o.fatal = f.get("fatal", True)
+            self.findings.append(o)
+
+    def text(self):
+        head = "PASS" if self.ok else "FAIL"
+        rows = "\n".join(f"   {'ok  ' if f.ok else 'FAIL'} {f.check:22} {f.detail}"
+                          for f in self.findings)
+        return f"{head}  (reusing the gate's own report)\n{rows}"
+
+
+def _recorded_qc(clip, out):
+    """The report `make_clip._gate` already wrote for THIS file, or None.
+
+    The gate ran twice on every clip: once in `make_clip` on the artifact it
+    had just rendered, and again here — and this one also re-derived the cut
+    through `_plan_only`, which decodes every frame of the source. Measured
+    at roughly 35s a clip, about sixteen minutes across this job, to reach a
+    verdict computed seconds earlier.
+
+    **BOTH GATES STAY.** Clip 08 shipped on a PASS from one call site while
+    the other printed FAIL, so deleting one is not an option — but reusing
+    the SAME report is strictly better than running two that can disagree.
+    The reuse is keyed on the mp4's own path, mtime and size, so a stale
+    record cannot read as a pass: if anything differs the gate runs again.
+    """
+    f = ROOT / f"jobs/{clip.job}/overlays_{clip.index:02d}/qc.json"
+    if not (f.exists() and out.exists()):
+        return None
+    try:
+        d = json.loads(f.read_text())
+    except (OSError, ValueError):
+        return None
+    st = out.stat()
+    # RESOLVE BOTH SIDES. `make_clip` records an absolute path and a caller
+    # may hold a relative one for the same file; a string compare then
+    # rejects a report that is perfectly valid and silently costs the 35s
+    # this exists to save — a failure that looks like nothing at all.
+    try:
+        same = pathlib.Path(d.get("mp4", "")).resolve() == out.resolve()
+    except OSError:
+        same = False
+    if (not same or d.get("size") != st.st_size
+            or abs(float(d.get("mtime", -1)) - st.st_mtime) > 1e-6):
+        return None
+    return _Reused(d)
 
 
 def _qc_for(clip, ch, out):
     """QC with the clip's own caption plan, so the hallucination check is real."""
+    reused = _recorded_qc(clip, out)
+    if reused is not None:
+        return reused
     from engine import deliver_qc, qc
     from engine.resolve_captions import cards
     from engine.tighten import remap_card
@@ -639,15 +874,16 @@ def _qc_for(clip, ch, out):
     # The per-clip `chat_windows.json` is the honest source: `rm_Chat.mov`
     # existing only says the overlay was RENDERED, which is precisely the
     # thing clip 07 proved says nothing about whether it is on screen.
-    wf = ROOT / f"jobs/{clip.job}/overlays_{clip.index:02d}/chat_windows.json"
-    chat_expected = None
-    if wf.exists():
-        try:
-            chat_expected = bool(json.loads(wf.read_text()))
-        except json.JSONDecodeError:
-            chat_expected = None
+    # ONE FUNCTION, BOTH CALL SITES. This read `chat_windows.json`, which
+    # exists for only two of the eight clips that have a chat overlay — so
+    # for the other six the check silently SKIPPED, which is how a gate
+    # reports "not checked" as a pass. `make_clip.chat_expected` answers the
+    # question the gate is actually asking, from the spec and the overlay.
+    import make_clip as mk
+    overlays = ROOT / f"jobs/{clip.job}/overlays_{clip.index:02d}"
     return deliver_qc.check(out, cards=placed, absent=[], src_words=ws,
-                            seam=ch.seam, chat_expected=chat_expected)
+                            seam=ch.seam,
+                            chat_expected=mk.chat_expected(clip, overlays))
 
 
 # ------------------------------------------------------------- report ----
@@ -685,6 +921,13 @@ def main():
     ap.add_argument("--n", type=int, default=50)
     ap.add_argument("--only", default="")
     ap.add_argument("--force", action="store_true")
+    ap.add_argument("--lanes", type=int, default=None,
+                    help="how many clips to build at once (default: as many "
+                         "as free memory allows, at ~1.9 GB a lane; "
+                         "CLIP_LANES sets the ceiling)")
+    ap.add_argument("--renderer", default="native", choices=("native", "resolve"),
+                    help="native: ffmpeg, headless, no GUI app in the path. "
+                         "resolve: the timeline, for format work.")
     a = ap.parse_args()
     globals()[f"cmd_{a.cmd}"](a.job, a)
 

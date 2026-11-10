@@ -1,0 +1,69 @@
+{
+ "title": "FNS: ONE RESULT AND ORGS FIGHT FOR YOU",
+ "subject": "Players who missed out on the league can just grind open qualifiers and orgs will pick them up",
+ "claim": "Missing the league doesn't mean orgs give up on Val. Orgless players should just grind the open qualifiers, and the speaker doesn't see what anyone is complaining about.",
+ "duration_s": "82.30s (want 15-90)",
+ "source": {
+  "vod": "2905408276",
+  "in_point_s": 929.5,
+  "out_point_s": 1040.6,
+  "clip_file_in_point_s": 2.58
+ },
+ "rights": {
+  "permission": "explicit",
+  "note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release."
+ },
+ "chat_overlay": true,
+ "qc": [
+  {
+   "check": "duration",
+   "ok": true,
+   "detail": "82.30s (want 15-90)"
+  },
+  {
+   "check": "loudness",
+   "ok": true,
+   "detail": "-14.12 LUFS (target -14.0)"
+  },
+  {
+   "check": "true_peak",
+   "ok": true,
+   "detail": "-1.35 dBTP"
+  },
+  {
+   "check": "black_top",
+   "ok": true,
+   "detail": "4937 frames, YMAX min 242"
+  },
+  {
+   "check": "black_bottom",
+   "ok": true,
+   "detail": "4937 frames, YMAX min 238"
+  },
+  {
+   "check": "dead_space",
+   "ok": true,
+   "detail": "1.05s quiet (1.3%, max 8%)"
+  },
+  {
+   "check": "absent_audio",
+   "ok": true,
+   "detail": "0.00s in 0 runs"
+  },
+  {
+   "check": "caption_cadence",
+   "ok": true,
+   "detail": "2.36 cards/s (194 cards)"
+  },
+  {
+   "check": "hallucinated_captions",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "check": "chat_on_screen",
+   "ok": true,
+   "detail": "visible \u2014 panel fill 85% of the box (want >=50%), 7749 coloured px/frame (want >=400)"
+  }
+ ]
+}

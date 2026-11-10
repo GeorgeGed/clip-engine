@@ -23,22 +23,22 @@
   {
    "check": "loudness",
    "ok": true,
-   "detail": "-14.07 LUFS (target -14.0)"
+   "detail": "-14.08 LUFS (target -14.0)"
   },
   {
    "check": "true_peak",
    "ok": true,
-   "detail": "-1.17 dBTP"
+   "detail": "-1.28 dBTP"
   },
   {
    "check": "black_top",
    "ok": true,
-   "detail": "2715 frames, YMAX min 241"
+   "detail": "2716 frames, YMAX min 241"
   },
   {
    "check": "black_bottom",
    "ok": true,
-   "detail": "2715 frames, YMAX min 238"
+   "detail": "2716 frames, YMAX min 236"
   },
   {
    "check": "dead_space",
@@ -59,6 +59,11 @@
    "check": "hallucinated_captions",
    "ok": true,
    "detail": "none"
+  },
+  {
+   "check": "chat_on_screen",
+   "ok": true,
+   "detail": "visible \u2014 panel fill 83% of the box (want >=50%), 8079 coloured px/frame (want >=400)"
   }
  ]
 }

@@ -166,7 +166,8 @@ TAIL = 1.2
 
 def windows(messages, t0: float, t1: float, *, remap=None, mode: str | None = None,
             out_dur: float | None = None, min_window: float = MIN_WINDOW,
-            lead: float = LEAD, tail: float = TAIL):
+            lead: float = LEAD, tail: float = TAIL,
+            cut: tuple[float, float] | None = None):
     """The chat's on-screen windows, in OUTPUT time.
 
     `remap(src_t) -> out_t | None` maps VOD seconds onto the finished cut,
@@ -176,10 +177,24 @@ def windows(messages, t0: float, t1: float, *, remap=None, mode: str | None = No
 
     **continuous** returns one window covering the clip — the resting state,
     which is what clip 8 ships. **reactive** returns one window per burst.
+
+    `t0` stays the REMAP ORIGIN — the region start, which is the zero of the
+    clip file the keeps were measured in — and must not be moved. `cut` is
+    where the finished clip actually begins and ends in those same VOD
+    seconds, and is where bursts are looked for.
+
+    THOSE ARE DIFFERENT NUMBERS WHENEVER THE IN-POINT MOVED, and conflating
+    them is why clip 07's log read "reactive mode produced NO windows": its
+    one burst sat at source 46.5-58.0s, searched for across the whole 120s
+    region, while the cut ran from 20.5 for 28.7s. The burst was real, it
+    was outside the clip, and the overlay rendered and was never visible.
+    Searching the cut also gives `classify` a resting rate measured around
+    the CLIP rather than around the region, which is the comparison the
+    burst multiple was always meant to be against.
     """
-    info = classify(messages, t0, t1)
+    lo, hi = cut if cut else (t0, t1)
+    info = classify(messages, lo, hi)
     mode = mode or info["mode"]
-    span = t1 - t0
 
     def out(x):
         if remap is None:
@@ -199,8 +214,8 @@ def windows(messages, t0: float, t1: float, *, remap=None, mode: str | None = No
 
     wins = []
     for b in info["bursts"]:
-        a_src = max(t0, b.start - lead)
-        b_src = min(t1, b.end + tail)
+        a_src = max(lo, b.start - lead)
+        b_src = min(hi, b.end + tail)
         a, bb = out(a_src), out(b_src)
         if a is None or bb is None or bb - a < min_window:
             continue
@@ -351,6 +366,33 @@ ON_TOPIC_FLOOR = 0.15
 RIVAL_CEILING = 0.20     # a single competing story taking this much is worse
 
 
+def _author(m) -> str:
+    return (m.author if hasattr(m, "author") else m.get("author", "")) or ""
+
+
+def is_notice(m) -> bool:
+    """Is this Twitch's own sub/gift notice rather than a viewer talking?
+
+    Twitch renders one as the chatter's name followed by its own sentence —
+    `tetrixszn subscribed with Prime. They've subscribed for 5 months!` — so
+    the structural tell is that the TEXT starts with the AUTHOR'S name. That
+    needs no phrase list and cannot go stale when Twitch rewords a notice.
+
+    It matters because the notice's own vocabulary gets scored as if a viewer
+    had written it: `... subscribed at Tier 1. They've subscribed for 9
+    months!` counted as ON TOPIC on clips about tier-1 teams. Measured: 1 of
+    104 on clip 12 and 3 of 109 on clip 47, two of which scored on-topic.
+
+    The cost is that a notice carrying a real tail ("...9 months! hello my
+    favorite streamer") loses that tail from the SHARE. That is one vote in a
+    hundred and it errs toward a LOWER on-topic reading, which is the
+    conservative side of an advisory floor. It does not remove the message
+    from the screen — only from the measurement.
+    """
+    a = _author(m).strip().lower()
+    return bool(a) and _text(m).strip().lower().startswith(a)
+
+
 def topicality(messages, subject: str, *, extra_stop=frozenset()):
     """What share of the visible chat is about the clip's own subject.
 
@@ -361,18 +403,33 @@ def topicality(messages, subject: str, *, extra_stop=frozenset()):
             if w not in STOP and w not in extra_stop and len(w) > 3}
     if not keys:
         return {"on_topic": None, "n": 0, "keys": []}
+    # A KEY AND A WORD HAVE TO MATCH SYMMETRICALLY. Truncating both to five
+    # characters and intersecting made the test depend on which side was
+    # longer: key `team` matched only "team" (`"teams"[:5]` is "teams"),
+    # and key `teams` matched only "teams". Either spelling in the subject
+    # line silently halved what counted, on the single most common noun in
+    # this material.
+    #
+    # The prefix relation is symmetric and keeps the original looseness:
+    # both sides are still capped at five characters, and every key is over
+    # three, so the loosest possible match is a four-character shared prefix
+    # — which is what stemming to five was reaching for.
     stems = {k[:5] for k in keys}
-    n = on = 0
+    n = on = notices = 0
     for m in messages:
+        if is_notice(m):
+            notices += 1
+            continue
         t = _text(m).strip()
         if len(t) < 3:
             continue
         n += 1
-        words = {w[:5] for w in re.findall(r"[a-z]+", t.lower())}
-        if words & stems:
+        words = {w[:5] for w in re.findall(r"[a-z]+", t.lower()) if len(w) > 3}
+        if any(w == s or w.startswith(s) or s.startswith(w)
+               for w in words for s in stems):
             on += 1
     return {"on_topic": round(on / n, 3) if n else None, "n": n,
-            "keys": sorted(keys)}
+            "notices": notices, "keys": sorted(keys)}
 
 
 def chat_is_safe(messages, subject: str, *, floor: float = ON_TOPIC_FLOOR):

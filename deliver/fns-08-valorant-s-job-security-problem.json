@@ -1,0 +1,69 @@
+{
+ "title": "FNS ON VALORANT'S JOB SECURITY PROBLEM",
+ "subject": "Reaction to a team missing the partnership cycle and what it means for player job security",
+ "claim": "Non-partner orgs only signing teams after cups or masters is worse for the scene, but \"people are blowing it out of proportion.\"",
+ "duration_s": "45.00s (want 15-90)",
+ "source": {
+  "vod": "2905408276",
+  "in_point_s": 5978.8,
+  "out_point_s": 6045.89,
+  "clip_file_in_point_s": 8.85
+ },
+ "rights": {
+  "permission": "explicit",
+  "note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release."
+ },
+ "chat_overlay": true,
+ "qc": [
+  {
+   "check": "duration",
+   "ok": true,
+   "detail": "45.00s (want 15-90)"
+  },
+  {
+   "check": "loudness",
+   "ok": true,
+   "detail": "-14.04 LUFS (target -14.0)"
+  },
+  {
+   "check": "true_peak",
+   "ok": true,
+   "detail": "-1.20 dBTP"
+  },
+  {
+   "check": "black_top",
+   "ok": true,
+   "detail": "2698 frames, YMAX min 242"
+  },
+  {
+   "check": "black_bottom",
+   "ok": true,
+   "detail": "2698 frames, YMAX min 242"
+  },
+  {
+   "check": "dead_space",
+   "ok": true,
+   "detail": "1.60s quiet (3.6%, max 8%)"
+  },
+  {
+   "check": "absent_audio",
+   "ok": true,
+   "detail": "0.00s in 0 runs"
+  },
+  {
+   "check": "caption_cadence",
+   "ok": true,
+   "detail": "2.22 cards/s (100 cards)"
+  },
+  {
+   "check": "hallucinated_captions",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "check": "chat_on_screen",
+   "ok": true,
+   "detail": "visible \u2014 panel fill 85% of the box (want >=50%), 7566 coloured px/frame (want >=400)"
+  }
+ ]
+}

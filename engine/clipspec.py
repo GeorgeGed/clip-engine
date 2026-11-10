@@ -112,6 +112,50 @@ class Clip:
     # refinement; one with no candidate near it is taken literally and the
     # build log says so.
     booms: list[float] | None = None
+    # ---- THE OPTIONS, and why these and not a Look object ----------------
+    #
+    # George: *"we need to add more options to the actual clips themselves,
+    # some of them will just need basic cuts with different colour subtitles
+    # and no chat, some will need no booms, some will need other advanced
+    # cuts"*.
+    #
+    # Three of those four already existed — `chat_mode: "off"`, `booms: []`,
+    # and the in/out points that make a "basic cut". Subtitle colour did
+    # not, and `stories` could not be switched off at all.
+    #
+    # **THE SCOPE IS DELIBERATELY NARROW, and the reason is measured.** The
+    # obvious move is a whole `Look` dataclass covering every style value.
+    # Checked: `framings` has five live call sites and none passes `cycle`;
+    # `_shot_index` four and none passes `min_shot`; `PUNCH_INSET` and
+    # `PUNCH_HOLD` are typed TWICE, in `render_native` and `native_layout`,
+    # behind a silent `except`; and `tighten.removals`' own defaults
+    # (0.12/0.45) are stale against the shipped 0.08/0.20, so an unset field
+    # would quietly revert dead-air policy. Exposing a value that is read
+    # from two places gives Resolve one number and the native path another,
+    # and `render_parity` would report that as the two RENDERERS
+    # disagreeing — which is the "IT WAS NEVER RESOLVE" misdiagnosis, run
+    # again. So only fields with ONE call site are here; the rest need the
+    # duplicates collapsed first.
+    #
+    # The other rule: **expose a field only where a fatal check measures its
+    # consequence.** Cue level qualifies — true peak caught the boom at
+    # -0.41 once. Caption `y` does not: `engine.gates.check` never runs on
+    # the production chain, so caption safe-area and caption-vs-graphic
+    # overlap are not live, and a preset could put a story card under the
+    # captions with nothing to catch it.
+    #
+    # Caption colours, by NAME from `engine.caption_colour`. `None` is the
+    # house pair. The emphasis colour is the ~13% of cards drawn in accent;
+    # `caption_fill` is the body. Both are measured against the caption's
+    # own hard black stroke at a 4.5:1 floor, so "use our brand blue"
+    # (#2E5CFF, 4.09:1) is REFUSED by name with the lifted alternative.
+    caption_fill: str | None = None
+    caption_emph: str | None = None
+    # Whether `engine.story` may find a photo card for an org this clip
+    # names. "auto" is the behaviour that shipped; "off" is the switch that
+    # was missing. A card that names real people and cannot be turned off is
+    # the wrong default on a quote desk.
+    stories: str = "auto"
     notes: str = ""
 
     def source(self, root: Path) -> Path:

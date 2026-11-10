@@ -2,8 +2,9 @@
  "fns-12": {
   "built": true,
   "qc_ok": true,
-  "seconds": 341,
+  "seconds": 254,
   "render": "renders/fns-2905408276-12.mp4",
+  "log": "jobs/fns-2905408276/web/build-12.log",
   "findings": [
    {
     "check": "duration",
@@ -13,22 +14,22 @@
    {
     "check": "loudness",
     "ok": true,
-    "detail": "-14.07 LUFS (target -14.0)"
+    "detail": "-14.08 LUFS (target -14.0)"
    },
    {
     "check": "true_peak",
     "ok": true,
-    "detail": "-1.17 dBTP"
+    "detail": "-1.28 dBTP"
    },
    {
     "check": "black_top",
     "ok": true,
-    "detail": "2715 frames, YMAX min 241"
+    "detail": "2716 frames, YMAX min 241"
    },
    {
     "check": "black_bottom",
     "ok": true,
-    "detail": "2715 frames, YMAX min 238"
+    "detail": "2716 frames, YMAX min 236"
    },
    {
     "check": "dead_space",
@@ -49,6 +50,11 @@
     "check": "hallucinated_captions",
     "ok": true,
     "detail": "none"
+   },
+   {
+    "check": "chat_on_screen",
+    "ok": true,
+    "detail": "visible \u2014 panel fill 83% of the box (want >=50%), 8079 coloured px/frame (want >=400)"
    }
   ],
   "subject": "Rant telling complaining players they have it easy. in_point 23.30 lands INSIDE the word \"you\", whose span is 55% Twitch mute, so the caption gate drops its card and the in-point skips to \"guys\". out_point 86.34 ends on \"salary\" per George; 86.15 clips it to \"salad\", 86.22 is the earliest clean cut, and 86.34 is the acoustic trough. Chat forced on at his instruction despite 13% topicality.",
@@ -59,7 +65,7 @@
  "fns-04": {
   "built": true,
   "qc_ok": true,
-  "seconds": 504,
+  "seconds": 333,
   "render": "renders/fns-2905408276-04.mp4",
   "findings": [
    {
@@ -70,12 +76,12 @@
    {
     "check": "loudness",
     "ok": true,
-    "detail": "-14.24 LUFS (target -14.0)"
+    "detail": "-14.25 LUFS (target -14.0)"
    },
    {
     "check": "true_peak",
     "ok": true,
-    "detail": "-1.19 dBTP"
+    "detail": "-1.01 dBTP"
    },
    {
     "check": "black_top",
@@ -90,7 +96,7 @@
    {
     "check": "dead_space",
     "ok": true,
-    "detail": "1.30s quiet (3.3%, max 8%)"
+    "detail": "1.65s quiet (4.2%, max 8%)"
    },
    {
     "check": "absent_audio",
@@ -111,7 +117,7 @@
   "subject": "It is genuinely one narrative \u2014 no pivot, titleable in one line \u2014 and it is still a drop, on rule 3 and rule 2, and no in-point fixes either.\n\nRULE 3. The clip's whole subject is one named person and it names him wrong. The transcript says \"um kdrill is the only one that i watched for league of lege",
   "permission": "explicit",
   "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release.",
-  "delivered": "deliver/fns-04-it-is-genuinely-one-narrative-no-pivot-titleable-in.mp4"
+  "delivered": "deliver/fns-04-i-like-people-who-explain-things.mp4"
  },
  "fns-07": {
   "built": true,
@@ -226,5 +232,553 @@
   "permission": "explicit",
   "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release.",
   "delivered": "deliver/fns-15-why-the-new-system-beats-franchise.mp4"
+ },
+ "fns-06": {
+  "built": true,
+  "qc_ok": true,
+  "seconds": 332,
+  "render": "renders/fns-2905408276-06.mp4",
+  "findings": [
+   {
+    "check": "duration",
+    "ok": true,
+    "detail": "38.46s (want 15-90)"
+   },
+   {
+    "check": "loudness",
+    "ok": true,
+    "detail": "-14.09 LUFS (target -14.0)"
+   },
+   {
+    "check": "true_peak",
+    "ok": true,
+    "detail": "-0.57 dBTP"
+   },
+   {
+    "check": "black_top",
+    "ok": true,
+    "detail": "2303 frames, YMAX min 241"
+   },
+   {
+    "check": "black_bottom",
+    "ok": true,
+    "detail": "2303 frames, YMAX min 240"
+   },
+   {
+    "check": "dead_space",
+    "ok": true,
+    "detail": "1.50s quiet (3.9%, max 8%)"
+   },
+   {
+    "check": "absent_audio",
+    "ok": true,
+    "detail": "0.00s in 0 runs"
+   },
+   {
+    "check": "caption_cadence",
+    "ok": true,
+    "detail": "2.34 cards/s (90 cards)"
+   },
+   {
+    "check": "hallucinated_captions",
+    "ok": true,
+    "detail": "none"
+   }
+  ],
+  "subject": "Open qualifiers in the new circuit will be plagued by tech issues. in_point 2.02 drops the dangling \"in the new circuit i already said this\" so the clip opens on a complete clause and the claim lands ~3s in instead of 9.5s.  booms named rather than ranked: George said \"ping issues, cheaters there should be zooms because it's when he's loud\", and that moment (9.30) ranks THIRD by level (+3.54) behind 22.57 (+3.96) and 34.19 (+3.72). At a 2-boom budget the automatic pick drops it. 22.57 keeps the loudest; 34.19 is the one given up, and no verdict exists on either.  booms override CLEARED ([9.3, 22.57]): the nucleus gate reaches the same answer on its own, so naming it would hide whether the logic works.",
+  "permission": "explicit",
+  "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release.",
+  "delivered": "deliver/fns-06-open-qualifiers-will-be-a-mess.mp4"
+ },
+ "fns-08": {
+  "built": true,
+  "qc_ok": true,
+  "seconds": 318,
+  "render": "renders/fns-2905408276-08.mp4",
+  "findings": [
+   {
+    "check": "duration",
+    "ok": true,
+    "detail": "45.00s (want 15-90)"
+   },
+   {
+    "check": "loudness",
+    "ok": true,
+    "detail": "-14.04 LUFS (target -14.0)"
+   },
+   {
+    "check": "true_peak",
+    "ok": true,
+    "detail": "-1.20 dBTP"
+   },
+   {
+    "check": "black_top",
+    "ok": true,
+    "detail": "2698 frames, YMAX min 242"
+   },
+   {
+    "check": "black_bottom",
+    "ok": true,
+    "detail": "2698 frames, YMAX min 242"
+   },
+   {
+    "check": "dead_space",
+    "ok": true,
+    "detail": "1.60s quiet (3.6%, max 8%)"
+   },
+   {
+    "check": "absent_audio",
+    "ok": true,
+    "detail": "0.00s in 0 runs"
+   },
+   {
+    "check": "caption_cadence",
+    "ok": true,
+    "detail": "2.22 cards/s (100 cards)"
+   },
+   {
+    "check": "hallucinated_captions",
+    "ok": true,
+    "detail": "none"
+   },
+   {
+    "check": "chat_on_screen",
+    "ok": true,
+    "detail": "visible \u2014 panel fill 85% of the box (want >=50%), 7566 coloured px/frame (want >=400)"
+   }
+  ],
+  "subject": "Ship, trimmed from the front. The subject line carries the defect in its own wording \u2014 \"Reaction to a team missing the partnership cycle AND what it means for player job security\" \u2014 and the news half is unusable regardless. Measured on the clip file rather than the mute map: 4.44s of the first 9.09s",
+  "permission": "explicit",
+  "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release.",
+  "delivered": "deliver/fns-08-valorant-s-job-security-problem.mp4"
+ },
+ "fns-16": {
+  "built": true,
+  "qc_ok": true,
+  "seconds": 258,
+  "render": "renders/fns-2905408276-16.mp4",
+  "findings": [
+   {
+    "check": "duration",
+    "ok": true,
+    "detail": "30.96s (want 15-90)"
+   },
+   {
+    "check": "loudness",
+    "ok": true,
+    "detail": "-14.31 LUFS (target -14.0)"
+   },
+   {
+    "check": "true_peak",
+    "ok": true,
+    "detail": "-1.11 dBTP"
+   },
+   {
+    "check": "black_top",
+    "ok": true,
+    "detail": "1853 frames, YMAX min 242"
+   },
+   {
+    "check": "black_bottom",
+    "ok": true,
+    "detail": "1853 frames, YMAX min 242"
+   },
+   {
+    "check": "dead_space",
+    "ok": true,
+    "detail": "1.10s quiet (3.6%, max 8%)"
+   },
+   {
+    "check": "absent_audio",
+    "ok": true,
+    "detail": "0.00s in 0 runs"
+   },
+   {
+    "check": "caption_cadence",
+    "ok": true,
+    "detail": "2.26 cards/s (70 cards)"
+   },
+   {
+    "check": "hallucinated_captions",
+    "ok": true,
+    "detail": "none"
+   }
+  ],
+  "subject": "Successful teams hide internal problems. in_point 7.58, not 3.72: the clip was opening on \"here's the other thing you guys have to understand about teams that are succeeding and\" \u2014 a continuation marker referring to something the viewer never heard, which is rule 3 and the \"as I was saying\" opening. 7.58 starts on the contrast itself, \"obviously for teams that are FAILING you're gonna assume there are problems / for teams that SUCCEED they had prior issues as well\", which is the claim and is self-contained. Chat forced on at George's instruction despite 6% topicality. cam left at 344: hiding his \"17,082\" viewer counter needs the rect top BELOW it, and the pane zoom is 806/height, so every crop that hides it raises the zoom (3.05x -> 3.70x) \u2014 which George rejected. The two cannot both be had; the counter is his own overlay and stays. booms: George on the 2-boom build \u2014 \"first boom is basically pointless, remove, second one is perfect\". The budget gives this 31s clip one; the automatic pick would keep 4.84 (+3.96 dB) over 21.92 (+3.83), a 0.13 dB near-tie in a 4 dB range, so the surviving one is named here.  booms override CLEARED ([21.92]): the nucleus gate reaches the same answer on its own, so naming it would hide whether the logic works.",
+  "permission": "explicit",
+  "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release.",
+  "delivered": "deliver/fns-16-winning-teams-have-issues-too.mp4"
+ },
+ "fns-18": {
+  "built": true,
+  "qc_ok": true,
+  "seconds": 377,
+  "render": "renders/fns-2905408276-18.mp4",
+  "findings": [
+   {
+    "check": "duration",
+    "ok": true,
+    "detail": "23.44s (want 15-90)"
+   },
+   {
+    "check": "loudness",
+    "ok": true,
+    "detail": "-14.29 LUFS (target -14.0)"
+   },
+   {
+    "check": "true_peak",
+    "ok": true,
+    "detail": "-1.28 dBTP"
+   },
+   {
+    "check": "black_top",
+    "ok": true,
+    "detail": "1402 frames, YMAX min 242"
+   },
+   {
+    "check": "black_bottom",
+    "ok": true,
+    "detail": "1402 frames, YMAX min 238"
+   },
+   {
+    "check": "dead_space",
+    "ok": true,
+    "detail": "0.75s quiet (3.2%, max 8%)"
+   },
+   {
+    "check": "absent_audio",
+    "ok": true,
+    "detail": "0.00s in 0 runs"
+   },
+   {
+    "check": "caption_cadence",
+    "ok": true,
+    "detail": "2.22 cards/s (52 cards)"
+   },
+   {
+    "check": "hallucinated_captions",
+    "ok": true,
+    "detail": "none"
+   },
+   {
+    "check": "chat_on_screen",
+    "ok": true,
+    "detail": "visible \u2014 panel fill 85% of the box (want >=50%), 11212 coloured px/frame (want >=400)"
+   }
+  ],
+  "subject": "Team-by-team rundown of how the new rosters look  Cut to 24-59s by the screen: the whole region is 80s and fails the gate, this window is 24% muted at 14 cuts/min. The window makes it BUILDABLE; whether it is one narrative and explains itself is still an editorial call.",
+  "permission": "explicit",
+  "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release.",
+  "delivered": "deliver/fns-18-100-thieves-being-very-solid.mp4"
+ },
+ "fns-32": {
+  "built": true,
+  "qc_ok": true,
+  "seconds": 188,
+  "render": "renders/fns-2905408276-32.mp4",
+  "findings": [
+   {
+    "check": "duration",
+    "ok": true,
+    "detail": "32.80s (want 15-90)"
+   },
+   {
+    "check": "loudness",
+    "ok": true,
+    "detail": "-14.19 LUFS (target -14.0)"
+   },
+   {
+    "check": "true_peak",
+    "ok": true,
+    "detail": "-1.23 dBTP"
+   },
+   {
+    "check": "black_top",
+    "ok": true,
+    "detail": "1967 frames, YMAX min 241"
+   },
+   {
+    "check": "black_bottom",
+    "ok": true,
+    "detail": "1967 frames, YMAX min 239"
+   },
+   {
+    "check": "dead_space",
+    "ok": true,
+    "detail": "1.85s quiet (5.6%, max 8%)"
+   },
+   {
+    "check": "absent_audio",
+    "ok": true,
+    "detail": "0.00s in 0 runs"
+   },
+   {
+    "check": "caption_cadence",
+    "ok": true,
+    "detail": "2.44 cards/s (80 cards)"
+   },
+   {
+    "check": "hallucinated_captions",
+    "ok": true,
+    "detail": "none"
+   },
+   {
+    "check": "chat_on_screen",
+    "ok": true,
+    "detail": "visible \u2014 panel fill 85% of the box (want >=50%), 9427 coloured px/frame (want >=400)"
+   }
+  ],
+  "subject": "Whether released franchise players like Valin get hurt by the new system  Cut to 0-46s by the screen: the whole region is 60s and fails the gate, this window is 25% muted at 4 cuts/min. The window makes it BUILDABLE; whether it is one narrative and explains itself is still an editorial call.",
+  "permission": "explicit",
+  "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release.",
+  "delivered": "deliver/fns-32-it-s-not-as-bad-for-valyn-as-you-think.mp4"
+ },
+ "fns-11": {
+  "built": true,
+  "qc_ok": true,
+  "seconds": 123,
+  "render": "renders/fns-2905408276-11.mp4",
+  "findings": [
+   {
+    "check": "duration",
+    "ok": true,
+    "detail": "19.70s (want 15-90)"
+   },
+   {
+    "check": "loudness",
+    "ok": true,
+    "detail": "-14.27 LUFS (target -14.0)"
+   },
+   {
+    "check": "true_peak",
+    "ok": true,
+    "detail": "-1.29 dBTP"
+   },
+   {
+    "check": "black_top",
+    "ok": true,
+    "detail": "1180 frames, YMAX min 241"
+   },
+   {
+    "check": "black_bottom",
+    "ok": true,
+    "detail": "1180 frames, YMAX min 237"
+   },
+   {
+    "check": "dead_space",
+    "ok": true,
+    "detail": "0.00s quiet (0.0%, max 8%)"
+   },
+   {
+    "check": "absent_audio",
+    "ok": true,
+    "detail": "0.00s in 0 runs"
+   },
+   {
+    "check": "caption_cadence",
+    "ok": true,
+    "detail": "2.28 cards/s (45 cards)"
+   },
+   {
+    "check": "hallucinated_captions",
+    "ok": true,
+    "detail": "none"
+   },
+   {
+    "check": "chat_on_screen",
+    "ok": true,
+    "detail": "visible \u2014 panel fill 85% of the box (want >=50%), 9368 coloured px/frame (want >=400)"
+   }
+  ],
+  "subject": "Streamer's all-streamer team: a win would embarrass the game, and he expects them to lose  Cut to 0-32s by the screen: the whole region is 59s and fails the gate, this window is 25% muted at 13 cuts/min. The window makes it BUILDABLE; whether it is one narrative and explains itself is still an editorial call. asked: remove the booms \u2014 Setting booms to an empty list removes the one boom the pipeline chose at 13.65 output-seconds, and no others will be added.",
+  "permission": "explicit",
+  "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release.",
+  "delivered": "deliver/fns-11-a-stream-team-win-would-kill-the-game.mp4"
+ },
+ "fns-47": {
+  "built": true,
+  "qc_ok": true,
+  "seconds": 260,
+  "render": "renders/fns-2905408276-47.mp4",
+  "log": "jobs/fns-2905408276/web/build-47.log",
+  "findings": [
+   {
+    "check": "duration",
+    "ok": true,
+    "detail": "46.40s (want 15-90)"
+   },
+   {
+    "check": "loudness",
+    "ok": true,
+    "detail": "-14.03 LUFS (target -14.0)"
+   },
+   {
+    "check": "true_peak",
+    "ok": true,
+    "detail": "-1.42 dBTP"
+   },
+   {
+    "check": "black_top",
+    "ok": true,
+    "detail": "2781 frames, YMAX min 241"
+   },
+   {
+    "check": "black_bottom",
+    "ok": true,
+    "detail": "2781 frames, YMAX min 239"
+   },
+   {
+    "check": "dead_space",
+    "ok": true,
+    "detail": "1.10s quiet (2.4%, max 8%)"
+   },
+   {
+    "check": "absent_audio",
+    "ok": false,
+    "detail": "0.75s in 1 runs"
+   },
+   {
+    "check": "caption_cadence",
+    "ok": true,
+    "detail": "2.44 cards/s (113 cards)"
+   },
+   {
+    "check": "hallucinated_captions",
+    "ok": true,
+    "detail": "none"
+   },
+   {
+    "check": "chat_on_screen",
+    "ok": true,
+    "detail": "visible \u2014 panel fill 87% of the box (want >=50%), 7746 coloured px/frame (want >=400)"
+   }
+  ],
+  "subject": "Passport worries about the open circuit are overblown; qualifying teams will get sponsors and can sort it out  Cut to 52-114s by the screen: the whole region is 115s and fails the gate, this window is 18% muted at 13 cuts/min. The window makes it BUILDABLE; whether it is one narrative and explains itself is still an editorial call.",
+  "permission": "explicit",
+  "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release.",
+  "delivered": "deliver/fns-47-a-passport-shouldn-t-stop-your-dream.mp4"
+ },
+ "fns-23": {
+  "built": true,
+  "qc_ok": true,
+  "seconds": 776,
+  "render": "renders/fns-2905408276-23.mp4",
+  "findings": [
+   {
+    "check": "duration",
+    "ok": true,
+    "detail": "82.30s (want 15-90)"
+   },
+   {
+    "check": "loudness",
+    "ok": true,
+    "detail": "-14.12 LUFS (target -14.0)"
+   },
+   {
+    "check": "true_peak",
+    "ok": true,
+    "detail": "-1.35 dBTP"
+   },
+   {
+    "check": "black_top",
+    "ok": true,
+    "detail": "4937 frames, YMAX min 242"
+   },
+   {
+    "check": "black_bottom",
+    "ok": true,
+    "detail": "4937 frames, YMAX min 238"
+   },
+   {
+    "check": "dead_space",
+    "ok": true,
+    "detail": "1.05s quiet (1.3%, max 8%)"
+   },
+   {
+    "check": "absent_audio",
+    "ok": true,
+    "detail": "0.00s in 0 runs"
+   },
+   {
+    "check": "caption_cadence",
+    "ok": true,
+    "detail": "2.36 cards/s (194 cards)"
+   },
+   {
+    "check": "hallucinated_captions",
+    "ok": true,
+    "detail": "none"
+   },
+   {
+    "check": "chat_on_screen",
+    "ok": true,
+    "detail": "visible \u2014 panel fill 85% of the box (want >=50%), 7749 coloured px/frame (want >=400)"
+   }
+  ],
+  "subject": "ONE NARRATIVE. He concedes the premise \u2014 \"i'm not trying to say sr shouldn't be in it fly quest shouldn't be in it there's just not enough slots i guess and it sucks that they didn't make it in\" \u2014 turns it on \"but i don't think that instantly means that they are now gonna just give up on val they ha asked: remove the boom, cut down on the length \u2014 Set booms to an empty list to remove both sound effects, and ended the clip at source 105.94, right after 'multiple orgs will fight for you', which cuts the trailing 'one good result and more opportunities' tail and trims about 4 seconds.",
+  "permission": "explicit",
+  "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release.",
+  "delivered": "deliver/fns-23-one-result-and-orgs-fight-for-you.mp4"
+ },
+ "fns-29": {
+  "built": true,
+  "qc_ok": false,
+  "seconds": 393,
+  "render": "renders/fns-2905408276-29.mp4",
+  "findings": [
+   {
+    "check": "duration",
+    "ok": true,
+    "detail": "23.90s (want 15-90)"
+   },
+   {
+    "check": "loudness",
+    "ok": false,
+    "detail": "-14.99 LUFS (target -14.0)"
+   },
+   {
+    "check": "true_peak",
+    "ok": true,
+    "detail": "-1.19 dBTP"
+   },
+   {
+    "check": "black_top",
+    "ok": true,
+    "detail": "1434 frames, YMAX min 242"
+   },
+   {
+    "check": "black_bottom",
+    "ok": true,
+    "detail": "1434 frames, YMAX min 237"
+   },
+   {
+    "check": "dead_space",
+    "ok": false,
+    "detail": "3.75s quiet (15.7%, max 8%)"
+   },
+   {
+    "check": "absent_audio",
+    "ok": false,
+    "detail": "3.03s in 1 runs"
+   },
+   {
+    "check": "caption_cadence",
+    "ok": true,
+    "detail": "2.09 cards/s (50 cards)"
+   },
+   {
+    "check": "hallucinated_captions",
+    "ok": true,
+    "detail": "none"
+   },
+   {
+    "check": "chat_on_screen",
+    "ok": true,
+    "detail": "visible \u2014 panel fill 83% of the box (want >=50%), 11297 coloured px/frame (want >=400)"
+   }
+  ],
+  "subject": "Streamer announces he'll livestream while coaching, with chat off and a delay  Cut to 20-50s by the screen: the whole region is 84s and fails the gate, this window is 24% muted at 7 cuts/min. The window makes it BUILDABLE; whether it is one narrative and explains itself is still an editorial call.",
+  "permission": "explicit",
+  "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release."
  }
 }

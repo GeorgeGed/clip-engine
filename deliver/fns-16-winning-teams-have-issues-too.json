@@ -1,0 +1,64 @@
+{
+ "title": "FNS: WINNING TEAMS HAVE ISSUES TOO",
+ "subject": "Successful teams often hide internal problems, with Vitality as a speculative example",
+ "claim": "\"Teams that succeed had prior issues as well... sometimes teams are dead going into whole ass events and end up making runs.\"",
+ "duration_s": "30.96s (want 15-90)",
+ "source": {
+  "vod": "2905408276",
+  "in_point_s": 1906.3,
+  "out_point_s": 1952.51,
+  "clip_file_in_point_s": 7.58
+ },
+ "rights": {
+  "permission": "explicit",
+  "note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release."
+ },
+ "chat_overlay": true,
+ "qc": [
+  {
+   "check": "duration",
+   "ok": true,
+   "detail": "30.96s (want 15-90)"
+  },
+  {
+   "check": "loudness",
+   "ok": true,
+   "detail": "-14.31 LUFS (target -14.0)"
+  },
+  {
+   "check": "true_peak",
+   "ok": true,
+   "detail": "-1.11 dBTP"
+  },
+  {
+   "check": "black_top",
+   "ok": true,
+   "detail": "1853 frames, YMAX min 242"
+  },
+  {
+   "check": "black_bottom",
+   "ok": true,
+   "detail": "1853 frames, YMAX min 242"
+  },
+  {
+   "check": "dead_space",
+   "ok": true,
+   "detail": "1.10s quiet (3.6%, max 8%)"
+  },
+  {
+   "check": "absent_audio",
+   "ok": true,
+   "detail": "0.00s in 0 runs"
+  },
+  {
+   "check": "caption_cadence",
+   "ok": true,
+   "detail": "2.26 cards/s (70 cards)"
+  },
+  {
+   "check": "hallucinated_captions",
+   "ok": true,
+   "detail": "none"
+  }
+ ]
+}

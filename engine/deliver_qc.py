@@ -24,7 +24,9 @@ pass decides them, which is why `batch.py` keeps them in a separate stage.
 from __future__ import annotations
 
 import difflib
+import os
 import re
+import tempfile
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -83,12 +85,24 @@ def black_frames(path, *, seam: float = SEAM, floor: int = 16):
         # the regex then matches nothing — which this gate reported as "0
         # frames, no black frames found", i.e. a PASS from a check that
         # measured nothing. Write to a file instead and read it back.
-        tmp = Path(f"/tmp/_ymax_{name}_{abs(hash(str(path))) % 99999}.txt")
-        _ff(["ffmpeg", "-v", "error", "-i", str(path),
-             "-vf", f"crop={crop},signalstats,metadata=print:"
-                    f"key=lavfi.signalstats.YMAX:file={tmp}", "-f", "null", "-"])
-        txt = tmp.read_text() if tmp.exists() else ""
-        tmp.unlink(missing_ok=True)
+        # A UNIQUE PATH, NOT A HASH OF THE FILENAME. This was
+        # `/tmp/_ymax_{name}_{abs(hash(str(path))) % 99999}.txt`, and
+        # `hash()` on a `str` is salted per interpreter — so two gates
+        # running at once (two clips building in lanes) collide at roughly
+        # 2 in 99999 and one reads the OTHER clip's YMAX values, on a check
+        # that is FATAL. A one-in-fifty-thousand wrong delivery verdict is
+        # not a risk worth keeping for a filename.
+        fd, tmp_s = tempfile.mkstemp(prefix=f"_ymax_{name}_", suffix=".txt")
+        os.close(fd)
+        tmp = Path(tmp_s)
+        try:
+            _ff(["ffmpeg", "-v", "error", "-i", str(path),
+                 "-vf", f"crop={crop},signalstats,metadata=print:"
+                        f"key=lavfi.signalstats.YMAX:file={tmp}",
+                 "-f", "null", "-"])
+            txt = tmp.read_text() if tmp.exists() else ""
+        finally:
+            tmp.unlink(missing_ok=True)
         vals = [float(x) for x in re.findall(r"YMAX=(\d+\.?\d*)", txt)]
         if not vals:
             raise RuntimeError(

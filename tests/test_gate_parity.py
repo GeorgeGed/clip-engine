@@ -99,13 +99,91 @@ def test_the_fatal_flag_is_still_set():
           "a check that cannot fail the artifact is not a gate")
 
 
+def test_a_reused_report_is_keyed_to_the_file():
+    """THE GATE NOW RUNS ONCE AND IS READ TWICE, so a stale record must not
+    read as a pass.
+
+    `make_clip._gate` writes its report to `overlays_NN/qc.json` and
+    `batch._recorded_qc` reads it back instead of re-measuring the same mp4
+    and re-deriving the cut — about 11s a clip, measured. That is only safe
+    because the record names the file: its path, its size and its mtime. A
+    reuse keyed on nothing but existence would be the same defect as
+    `-v error` silencing `volumedetect` — a check that measures nothing and
+    reports a pass.
+    """
+    import json
+    import tempfile
+    sys.path.insert(0, str(ROOT))
+    import batch
+
+    src = ROOT / "make_clip.py"
+    txt = src.read_text(encoding="utf-8")
+    i = txt.find('"qc.json"')
+    for key in ('"mp4"', '"mtime"', '"size"', '"ok"'):
+        check(f"the recorded report carries {key}", key in txt[i - 400:i + 700],
+              "without it a stale record cannot be told from a fresh one")
+
+    bt = (ROOT / "batch.py").read_text(encoding="utf-8")
+    j = bt.find("def _recorded_qc")
+    body = bt[j:j + 1800]
+    for want in ("st_size", "st_mtime", "resolve()"):
+        check(f"the reuse compares {want}", want in body)
+
+    # and it actually refuses a record that does not match the file
+    d = pathlib.Path(tempfile.mkdtemp())
+    mp4 = d / "x.mp4"
+    mp4.write_bytes(b"x" * 10)
+    ov = d / "overlays_99"
+    ov.mkdir()
+
+    class C:
+        job, index = str(d.name), 99
+
+    def rec(**kw):
+        base = {"mp4": str(mp4), "mtime": mp4.stat().st_mtime,
+                "size": mp4.stat().st_size, "ok": True, "findings": []}
+        base.update(kw)
+        (ov / "qc.json").write_text(json.dumps(base))
+
+    old_root = batch.ROOT
+    try:
+        batch.ROOT = d.parent
+        (d.parent / f"jobs").mkdir(exist_ok=True)
+        tgt = d.parent / "jobs" / C.job
+        tgt.mkdir(parents=True, exist_ok=True)
+        import shutil
+        shutil.copytree(ov, tgt / "overlays_99", dirs_exist_ok=True)
+
+        def load_rec(**kw):
+            base = {"mp4": str(mp4), "mtime": mp4.stat().st_mtime,
+                    "size": mp4.stat().st_size, "ok": True, "findings": []}
+            base.update(kw)
+            (tgt / "overlays_99" / "qc.json").write_text(json.dumps(base))
+
+        load_rec()
+        check("a matching record is reused",
+              batch._recorded_qc(C, mp4) is not None)
+        load_rec(size=999)
+        check("a record whose size disagrees is refused",
+              batch._recorded_qc(C, mp4) is None)
+        load_rec(mtime=1.0)
+        check("a record whose mtime disagrees is refused",
+              batch._recorded_qc(C, mp4) is None)
+        load_rec(mp4="/somewhere/else.mp4")
+        check("a record naming another file is refused",
+              batch._recorded_qc(C, mp4) is None)
+    finally:
+        batch.ROOT = old_root
+
+
 if __name__ == "__main__":
     print(__doc__.strip().splitlines()[0])
     print()
     for fn in (test_both_call_sites_pass_the_same_signals,
                test_chat_expected_specifically,
                test_a_none_chat_expected_skips_rather_than_passes,
-               test_the_fatal_flag_is_still_set):
+               test_the_fatal_flag_is_still_set,
+               test_a_reused_report_is_keyed_to_the_file):
         print(fn.__name__)
         fn()
         print()

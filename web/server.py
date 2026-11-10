@@ -64,6 +64,9 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 import runlock
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from engine import caption_colour                                # noqa: E402
 import views
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -237,6 +240,36 @@ def set_stage(job_id: int, key: str, **kw) -> None:
 WORK: "queue.Queue[tuple[int, list[str]]]" = queue.Queue()
 RUNNING: dict[str, object] = {"job_id": None, "stage": None, "proc": None}
 
+# ONE CLIP AT A TIME WAS A CODE DEFECT, NOT A POLICY.
+#
+# George: *"why doesnt it let me clip multiple clips at once? needs to allow
+# this possibility"*. The 409 said it was "because Remotion's public/
+# directory is shared between clips", which was true and was fixable: the
+# per-clip data now goes out as `--props` instead of being `import`ed from
+# that shared tree, and the PNG sequence directory is a temp dir per call
+# rather than one named after the composition. Both of those collided
+# SILENTLY — a clean render of the wrong clip's material.
+#
+# What is left is memory, which `batch.lanes_for()` measures (~1.9 GB a
+# lane against free+inactive pages). So this is a QUEUE with lanes, not a
+# refusal: clicking six clips enqueues six and they come out in order, which
+# is the half of the ask that matters most for bulk.
+CLIPQ: "queue.Queue[tuple[int, int]]" = queue.Queue()
+# keyed by (job_id, clip index) -> {"proc", "started"}
+BUILDING: dict[tuple[int, int], dict] = {}
+QUEUED: set[tuple[int, int]] = set()
+_BLOCK = threading.Lock()
+
+
+def clip_lanes() -> int:
+    """How many clip builds may run at once. Measured, not assumed."""
+    try:
+        sys.path.insert(0, str(ROOT))
+        import batch                                          # noqa: PLC0415
+        return batch.lanes_for()
+    except Exception:                                          # noqa: BLE001
+        return 1
+
 
 def log_path(job_name: str, stage: str, *, create: bool = False) -> Path:
     """`create` ONLY where a stage is about to write.
@@ -249,6 +282,16 @@ def log_path(job_name: str, stage: str, *, create: bool = False) -> Path:
     if create:
         p.parent.mkdir(parents=True, exist_ok=True)
     return p
+
+
+def clip_log_path(job_name: str, index: int) -> Path:
+    """ONE LOG PER CLIP, because lanes interleave.
+
+    `batch.clip_log` writes the same path; this reads it. Two make_clip
+    processes writing line-interleaved into one file is unreadable, and the
+    page needs to say which clip is on which frame.
+    """
+    return JOBS / job_name / "web" / f"build-{index:02d}.log"
 
 
 def run_stage(job_id: int, job_name: str, url: str, rights: str,
@@ -271,6 +314,61 @@ def run_stage(job_id: int, job_name: str, url: str, rights: str,
     return code
 
 
+def clip_worker() -> None:
+    """Build ONE clip, as its own subprocess, in its own lane.
+
+    Deliberately NOT the chain's worker: the chain's stages must run in
+    order and a job's `ingest` cannot overlap its `analyse`, while two
+    different clips of the same job are independent by construction — that
+    is the whole premise of `batch.py`. Keeping them separate also means a
+    clip build cannot be starved behind an hour of transcription.
+    """
+    while True:
+        job_id, n = CLIPQ.get()
+        key = (job_id, n)
+        try:
+            with db() as c:
+                row = c.execute("SELECT * FROM job WHERE id=?",
+                                (job_id,)).fetchone()
+            if row is None:
+                continue
+            with _BLOCK:
+                QUEUED.discard(key)
+                BUILDING[key] = {"proc": None, "started": time.time()}
+            set_job(job_id, state="running")
+            out = log_path(row["name"], "build", create=True)
+            cmd = [str(VENV), "batch.py", row["name"], "build",
+                   "--only", str(n), "--force"]
+            # Append, not truncate: with lanes, several clips write their
+            # headlines into this one file and the last to start must not
+            # erase the others'. Each clip's detail is in its own log.
+            with out.open("a") as fh:
+                fh.write(f"\n$ {' '.join(cmd)}\n")
+                fh.flush()
+                proc = subprocess.Popen(cmd, cwd=ROOT, stdout=fh,
+                                        stderr=subprocess.STDOUT)
+                with _BLOCK:
+                    BUILDING[key]["proc"] = proc
+                code = proc.wait()
+            with _BLOCK:
+                BUILDING.pop(key, None)
+                busy = any(k[0] == job_id for k in BUILDING) \
+                    or any(k[0] == job_id for k in QUEUED) \
+                    or RUNNING.get("job_id") == job_id
+            if not busy:
+                set_job(job_id, state="done" if code == 0
+                        else f"failed:build {n:02d}")
+            set_stage(job_id, "build",
+                      state="done" if code == 0 else "failed",
+                      ended=time.time(), code=code)
+        except Exception as exc:                               # noqa: BLE001
+            with _BLOCK:
+                BUILDING.pop(key, None)
+            set_job(job_id, state=f"error:{exc}")
+        finally:
+            CLIPQ.task_done()
+
+
 def worker() -> None:
     while True:
         job_id, keys, extra = WORK.get()
@@ -287,19 +385,15 @@ def worker() -> None:
                 if RUNNING.get("cancel") == job_id:
                     failed = f"{key} (cancelled)"
                     break
-                if key == "build":
-                    doc = resolve_doctor(force=True)
-                    if not doc["ok"]:
-                        why = ("DaVinci Resolve is not reachable — open it, "
-                               "and set Preferences > System > General > "
-                               "External scripting using to Local. "
-                               + "; ".join(doc["notes"]))
-                        log_path(row["name"], key,
-                                 create=True).write_text(why + "\n")
-                        set_stage(job_id, key, state="failed",
-                                  ended=time.time(), code=1)
-                        failed = f"{key} (Resolve not reachable)"
-                        break
+                # THE RESOLVE GATE IS GONE. `build` used to be blocked here
+                # unless DaVinci Resolve was open and answering, because the
+                # build drove its scripting API — and since build is LAST,
+                # a job dropped with Resolve closed would transcribe and
+                # screen for the best part of an hour before dying. The
+                # native renderer composites with ffmpeg and is the default,
+                # so there is nothing left to be open. `/api/doctor` still
+                # reports Resolve's state, because the GUI path is still
+                # there for format work and it is worth seeing.
                 code = run_stage(job_id, row["name"], row["url"],
                                  row["rights"], STAGE_BY_KEY[key], extra)
                 if code != 0:
@@ -355,6 +449,20 @@ def read_screen(name: str) -> list[dict]:
     return out
 
 
+# A render's duration, memoised on its own mtime and size. The grid polls
+# every two seconds and ffprobe is a process, so this cannot run per request
+# — and a rebuild changes both, so the memo cannot go stale.
+_DUR: dict[tuple, float] = {}
+
+
+def clip_seconds(mp4: Path) -> float:
+    st = mp4.stat()
+    key = (str(mp4), st.st_mtime_ns, st.st_size)
+    if key not in _DUR:
+        _DUR[key] = views._duration(mp4)
+    return _DUR[key]
+
+
 def read_clips(name: str) -> list[dict]:
     """Delivered clips: whatever renders/ holds for this job, plus its QC."""
     out = []
@@ -363,10 +471,18 @@ def read_clips(name: str) -> list[dict]:
     if man.exists():
         try:
             m = json.loads(man.read_text())
-            for row in (m if isinstance(m, list) else m.get("clips", [])):
-                if isinstance(row, dict) and "index" in row:
-                    qc[int(row["index"])] = row
-        except (json.JSONDecodeError, ValueError, TypeError):
+            # THE MANIFEST IS A DICT KEYED BY SPEC STEM — `{"fns-12": {...}}`
+            # — and the index is in the KEY, not the row. This looked for a
+            # list of rows carrying `"index"`, a shape `batch.py` has never
+            # written, so `qc` came back empty for every clip and the grid
+            # offered each render for download with no verdict attached.
+            rows = (m.items() if isinstance(m, dict)
+                    else [(str(r.get("index", "")), r) for r in m])
+            for key, row in rows:
+                k = re.search(r"(\d+)$", str(key))
+                if k and isinstance(row, dict):
+                    qc[int(k.group(1))] = row
+        except (json.JSONDecodeError, ValueError, TypeError, AttributeError):
             pass
     for mp4 in sorted((ROOT / "renders").glob(f"{name}-*.mp4")):
         if mp4.name.endswith("_src.mov"):
@@ -375,12 +491,21 @@ def read_clips(name: str) -> list[dict]:
         if not m:
             continue
         idx = int(m.group(1))
+        row = qc.get(idx, {})
         out.append({
             "index": idx,
             "file": mp4.name,
             "size_mb": round(mp4.stat().st_size / 1e6, 1),
             "modified": mp4.stat().st_mtime,
-            "qc": qc.get(idx, {}),
+            # THE CLIP'S OWN LENGTH, measured on the file. There was no such
+            # field, so the grid fell through to the CANDIDATE REGION's
+            # length and every badge was wrong — a 1:04 label over a 0:45
+            # video, up to 54s out. Do NOT reach for the manifest's
+            # `seconds`: that is how long the BUILD took (323 for a 45s
+            # clip), which is the same trap one field over.
+            "seconds": round(clip_seconds(mp4), 1),
+            "qc_ok": row.get("qc_ok"),
+            "qc": row,
         })
     return out
 
@@ -389,7 +514,7 @@ def read_clips(name: str) -> list[dict]:
 # THE SPEC IS WHERE THE REVIEW LIVES, and until now the site could not see it.
 #
 # Every note George has sent over six rounds reduced to editing one of these
-# five fields and rebuilding that one clip: the in-point, the out-point, which
+# a handful of spec fields and rebuilding that one clip: the in-point, the out-point, which
 # booms survive, whether the chat overlay is forced on, and the hook line.
 # Nothing else about a clip has ever been the thing he changed. That loop ran
 # through chat, by hand, which is the actual bottleneck in "upload a VOD and
@@ -397,8 +522,14 @@ def read_clips(name: str) -> list[dict]:
 #
 # `batch.py specs` already refuses to overwrite a spec a human has edited, so
 # these writes are safe against a re-run of the stage that proposed them.
-REVIEWABLE = ("in_point", "out_point", "booms", "chat_mode", "hook")
-CHAT_MODES = ("continuous", "reactive")
+REVIEWABLE = ("in_point", "out_point", "booms", "chat_mode", "hook",
+              "caption_fill", "caption_emph", "stories")
+# "off" IS THE DOCUMENTED OPT-OUT and was not accepted here, so the site
+# could not express the one setting `make_clip` tells the operator to use —
+# its own log says *set chat_mode "off" on this clip's spec if the room is
+# talking about something else*, and saving that from the page was refused.
+CHAT_MODES = ("continuous", "reactive", "off")
+STORY_MODES = ("auto", "off")
 
 
 def spec_path(name: str, index: int) -> Path:
@@ -448,6 +579,14 @@ def _clean(patch: dict) -> tuple[dict, str | None]:
                 f = float(v)
             except (TypeError, ValueError):
                 return {}, f"{k} must be a number of seconds"
+            # `float()` ACCEPTS "nan" AND "inf". Either one round-trips
+            # through `round()` and `json.dumps` writes a bare NaN/Infinity
+            # token, which is not JSON — so a reviewed spec would be saved
+            # in a state that `json.loads` refuses and every later read of
+            # that clip fails. `f < 0` does not catch nan, because every
+            # comparison with nan is False.
+            if f != f or f in (float("inf"), float("-inf")):
+                return {}, f"{k} must be a real number of seconds"
             if f < 0:
                 return {}, f"{k} cannot be negative"
             out[k] = round(f, 3)
@@ -458,6 +597,8 @@ def _clean(patch: dict) -> tuple[dict, str | None]:
                 xs = sorted(round(float(x), 2) for x in v)
             except (TypeError, ValueError):
                 return {}, "booms must be times in seconds, comma separated"
+            if any(x != x or x in (float("inf"), float("-inf")) for x in xs):
+                return {}, "a boom must be a real time in seconds"
             if any(x < 0 for x in xs):
                 return {}, "a boom cannot sit at a negative time"
             out[k] = xs
@@ -465,6 +606,22 @@ def _clean(patch: dict) -> tuple[dict, str | None]:
             if v not in CHAT_MODES:
                 return {}, f"chat_mode must be one of {', '.join(CHAT_MODES)}"
             out[k] = v
+        elif k == "stories":
+            if v not in STORY_MODES:
+                return {}, f"stories must be one of {', '.join(STORY_MODES)}"
+            out[k] = v
+        elif k in ("caption_fill", "caption_emph"):
+            # THE PALETTE REFUSES, NOT THIS. `caption_colour.rgba` measures
+            # the colour against the caption's own hard black stroke at a
+            # 4.5:1 floor — so "use our brand blue" (#2E5CFF, 4.09:1) comes
+            # back refused BY NAME with the lifted alternative, which is
+            # better than a validator here that would have to repeat the
+            # measurement and could come to disagree with it.
+            try:
+                caption_colour.rgba(v)
+            except ValueError as exc:
+                return {}, str(exc)
+            out[k] = str(v).strip().lower()
         else:
             out[k] = str(v)
     if "in_point" in out and "out_point" in out and out["out_point"] is not None \
@@ -530,12 +687,55 @@ def progress(name: str, stage: str) -> dict:
     lines = [ln.rstrip() for ln in tail.splitlines() if ln.strip()]
     out = {"line": lines[-1][:160] if lines else ""}
     if stage == "build":
-        started = BUILD_MARK.findall(tail)
-        out["done"] = len(BUILD_DONE.findall(tail))
+        # WHICH CLIP, FROM THE WHOLE LOG — NOT THE TAIL. The marker is one
+        # line per clip (`=== fns-11 ===`) and Remotion writes one line per
+        # FRAME, so a 1180-frame overlay buries it: measured, the marker sat
+        # 23k characters back in a 8k window. `progress.clip` then vanished,
+        # so the page knew a build was running and not which card it was,
+        # and the card it belonged to showed nothing. The tail is still what
+        # reports the current LINE; only the marker needs the whole file.
+        try:
+            whole = lp.read_text(errors="replace")
+        except OSError:
+            whole = tail
+        started = BUILD_MARK.findall(whole)
+        out["done"] = len(BUILD_DONE.findall(whole))
         out["total"] = len(read_specs(name))
         if started:
             out["clip"] = started[-1]
+        # AND ONE ENTRY PER LANE. With clips building at once there is no
+        # single "which clip is it on" — each lane writes its own log and
+        # the page matches by index, so a card shows its OWN frame count
+        # instead of whichever lane happened to write last.
+        out["clips"] = clips_in_flight(name)
     return out
+
+
+def clips_in_flight(name: str) -> list[dict]:
+    """What each lane is doing, read from the lane's own log."""
+    rows = []
+    with _BLOCK:
+        live = sorted(n for (jid, n) in BUILDING
+                      if JOBS_BY_ID.get(jid) == name)
+        waiting = sorted(n for (jid, n) in QUEUED
+                         if JOBS_BY_ID.get(jid) == name)
+    for n in live:
+        lp = clip_log_path(name, n)
+        line = ""
+        if lp.exists():
+            try:
+                tail = lp.read_text(errors="replace")[-4000:]
+                ls = [x.rstrip() for x in tail.splitlines() if x.strip()]
+                line = ls[-1][:160] if ls else ""
+            except OSError:
+                pass
+        rows.append({"n": n, "state": "building", "line": line})
+    rows += [{"n": n, "state": "queued", "line": ""} for n in waiting]
+    return rows
+
+
+# job_id -> name, so `clips_in_flight` need not hit the database on a 2s poll
+JOBS_BY_ID: dict[int, str] = {}
 
 
 # ------------------------------------------------------------- delivery ---
@@ -561,12 +761,37 @@ def job_json(row: sqlite3.Row) -> dict:
         "screen": read_screen(row["name"]),
         "specs": read_specs(row["name"]),
         "clips": read_clips(row["name"]),
-        "active": RUNNING.get("job_id") == row["id"],
-        "active_stage": RUNNING.get("stage") if RUNNING.get("job_id") == row["id"] else None,
-        "progress": (progress(row["name"], RUNNING["stage"])
-                     if RUNNING.get("job_id") == row["id"] and RUNNING.get("stage")
-                     else {}),
+        **_activity(row),
     }
+
+
+def _activity(row: sqlite3.Row) -> dict:
+    """Is anything happening on this job, and what.
+
+    TWO RUNNERS NOW, and this only knew about one. The chain holds
+    `RUNNING`; a per-clip build holds a LANE, and `RUNNING["job_id"]` stays
+    None for it — so after the lanes landed, a clip could be building with
+    the page reporting the job idle and the card showing nothing. That is
+    the exact symptom George already reported once ("the clips are basically
+    just not cutting"), and it would have been reintroduced by the fix for
+    it.
+    """
+    jid, name = row["id"], row["name"]
+    JOBS_BY_ID[jid] = name
+    chain = RUNNING.get("job_id") == jid
+    with _BLOCK:
+        lanes = [n for (j, n) in BUILDING if j == jid]
+        waiting = [n for (j, n) in QUEUED if j == jid]
+    if chain:
+        return {"active": True, "active_stage": RUNNING.get("stage"),
+                "progress": (progress(name, RUNNING["stage"])
+                             if RUNNING.get("stage") else {})}
+    if lanes or waiting:
+        # `active_stage` is what the page keys its build UI off, so a lane
+        # has to report "build" even though no chain stage is running.
+        return {"active": True, "active_stage": "build",
+                "progress": progress(name, "build")}
+    return {"active": False, "active_stage": None, "progress": {}}
 
 
 def download_name(job: str, n: int) -> str:
@@ -597,10 +822,31 @@ def is_local_vod(s: str) -> bool:
     source is a 6 GB 1080p60 file, the server is one stdlib thread, and the
     file is already on the same disk the pipeline reads from.
     """
+    # IT MUST BE A VIDEO, NOT MERELY A FILE. This was `is_file()`, which
+    # accepts /etc/passwd, ~/.ssh/id_rsa or any other readable path on the
+    # machine — and the site SERVES its own stage logs, so a path that fails
+    # downstream can surface the file's contents in the error it prints. An
+    # audit queued `vod-passwd -> /etc/passwd` and the form took it.
+    #
+    # The suffix is not the test either, because a file named .mp4 need not
+    # be one. ffprobe reading a video stream out of it IS the definition of
+    # the thing being accepted, so that is the test; it parses a header and
+    # costs milliseconds, and the `/api/lookup` route already ffprobes the
+    # same path for its duration.
     try:
-        return bool(s) and Path(s).expanduser().is_file()
+        f = Path(s).expanduser()
+        if not s or not f.is_file():
+            return False
     except OSError:
         return False
+    try:
+        r = subprocess.run(
+            ["ffprobe", "-v", "error", "-select_streams", "v:0",
+             "-show_entries", "stream=codec_type", "-of", "csv=p=0", str(f)],
+            capture_output=True, text=True, timeout=20)
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return r.returncode == 0 and r.stdout.strip() == "video"
 
 
 def job_name_for(url: str, given: str) -> str:
@@ -668,6 +914,45 @@ class Handler(BaseHTTPRequestHandler):
     # `timeout` is honoured by StreamRequestHandler and drops them.
     timeout = 20
 
+    # BUT THE SAME TIMEOUT IS ON THE SOCKET WHILE THE RESPONSE IS WRITTEN,
+    # AND THAT SILENTLY TRUNCATED EVERY SLOW DOWNLOAD. A clip is 24-30 MB and
+    # the whole body goes out in one `wfile.write`, which blocks until the
+    # kernel has taken it all; past 20 seconds the socket raises and the
+    # client has a 200, a correct Content-Length and a short file. Measured
+    # on clip 12 at `--limit-rate 300k`: 7,825,704 bytes of 26,584,815 — 29%
+    # — after 25.2s, curl exit 18. Anything under roughly 1 MB/s loses its
+    # download, which through a tunnel is most of them, and the 139 MiB zip
+    # would need 7 MB/s sustained.
+    #
+    # The timeout belongs on READING a request, where a dribbling client is
+    # the hazard, not on writing a body the client asked for. So the body
+    # write gets a budget scaled to its own size, with a floor: a reader
+    # slower than this is not a reader.
+    MIN_SEND_RATE = 20_000          # bytes/s — 26 MB gets 22 minutes
+
+    def _write_body(self, body: bytes) -> None:
+        """Write a response body with a timeout proportional to its size."""
+        try:
+            self.connection.settimeout(
+                max(self.timeout, len(body) / self.MIN_SEND_RATE))
+        except OSError:
+            pass
+        try:
+            self.wfile.write(body)
+        except (BrokenPipeError, ConnectionResetError):
+            # A <video> SEEKING IS NOT AN ERROR. The player asks for a range,
+            # gets what it needs and closes the socket, and the stdlib then
+            # logs a full traceback per abandoned request. The service log
+            # filled with them — and a real failure hid in that noise for a
+            # whole diagnosis, which is the actual cost of logging something
+            # normal as an exception.
+            self.close_connection = True
+        finally:
+            try:
+                self.connection.settimeout(self.timeout)
+            except OSError:
+                pass
+
     def log_message(self, fmt, *args):      # quieter than the default
         pass
 
@@ -678,11 +963,16 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
+        # The page is served from the same origin as the clips and the JSON,
+        # and `_file` guesses a content type from a filename. Costs nothing
+        # and closes the sniffing class outright.
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("Referrer-Policy", "no-referrer")
         for k, v in (extra or {}).items():
             self.send_header(k, v)
         self.end_headers()
         if self.command != "HEAD":
-            self.wfile.write(body)
+            self._write_body(body)
 
     def _json(self, obj, code: int = 200) -> None:
         self._send(code, json.dumps(obj).encode(), "application/json")
@@ -743,7 +1033,11 @@ class Handler(BaseHTTPRequestHandler):
             # it. Say what we mean instead.
             self.send_header("Cache-Control", "no-store")
             self.end_headers()
-            self.wfile.write(chunk)
+            if self.command != "HEAD":
+                # A HEAD with a Range used to send the body anyway, which
+                # desynchronises a keep-alive connection: the next response
+                # on that socket is read as the tail of this one.
+                self._write_body(chunk)
             return
         head = {"Accept-Ranges": "bytes"}
         if download:
@@ -829,6 +1123,28 @@ class Handler(BaseHTTPRequestHandler):
             return self._file(WEB / "static" / "index.html")
         if re.fullmatch(r"/[A-Za-z0-9._-]+\.(js|css|svg|png|ico|woff2?)", p):
             return self._file(WEB / "static" / p.lstrip("/"))
+
+        if p == "/api/options":
+            # WHAT THE PAGE MAY OFFER, from the code that enforces it. A
+            # colour list typed into the JavaScript is two places deciding
+            # the same thing — this repo's most-repeated defect — and it
+            # would go stale the moment a colour was added or refused.
+            # Every ratio here is measured, so the page can show it.
+            return self._json({
+                "caption_colours": [
+                    {"name": n, "hex": h,
+                     "ratio": round(caption_colour.ratio(
+                         [int(h.lstrip("#")[i:i + 2], 16) for i in (0, 2, 4)]), 2)}
+                    for n, h in sorted(caption_colour.PALETTE.items())],
+                "caption_refused": [
+                    {"name": n, "hex": h, "why": w}
+                    for n, (h, w) in sorted(caption_colour.REFUSED.items())],
+                "caption_default": {"fill": caption_colour.DEFAULT_FILL,
+                                    "emph": caption_colour.DEFAULT_EMPH},
+                "chat_modes": list(CHAT_MODES),
+                "story_modes": list(STORY_MODES),
+                "lanes": clip_lanes(),
+            })
 
         if p == "/api/doctor":
             return self._json(resolve_doctor())
@@ -1043,8 +1359,14 @@ class Handler(BaseHTTPRequestHandler):
             # yt-dlp as an argument, so the box could be pointed at anything
             # it could reach and the result read back through the stage log.
             # The pipeline only supports these two anyway.
-            ok_url = (re.match(r"https?://(www\.)?twitch\.tv/videos?/\d+", url)
-                      or re.match(r"https?://(www\.)?twitch\.tv/[\w-]+/v(ideo)?/\d+", url))
+            # `re.match` ANCHORS ONLY AT THE START, so every one of these
+            # passed: .../videos/123/../../evil, .../videos/123@evil.com,
+            # .../videos/123?x=../../. The value is handed to yt-dlp as an
+            # argument, so the tail is not inert. `fullmatch`, with the query
+            # string the only thing allowed after the id — Twitch's own
+            # timestamp links are `?t=1h2m3s`.
+            ok_url = (re.fullmatch(r"https?://(www\.)?twitch\.tv/videos?/\d+/?(\?[^#]*)?", url)
+                      or re.fullmatch(r"https?://(www\.)?twitch\.tv/[\w-]+/v(ideo)?/\d+/?(\?[^#]*)?", url))
             if not ok_url and not is_local_vod(url):
                 return self._json(
                     {"error": "give a Twitch VOD URL (twitch.tv/videos/…), or "
@@ -1102,7 +1424,17 @@ class Handler(BaseHTTPRequestHandler):
                     409)
             for s in ALL_STAGES:
                 set_stage(job_id, s.key)
-            # THE WHOLE CHAIN. The promise is 'drop a VOD, get\n            # clips'; stopping at `specs` delivered specs.\n            WORK.put((job_id, [s.key for s in ALL_STAGES], ()))
+            # THE WHOLE CHAIN. The promise is "drop a VOD, get clips";
+            # stopping at `specs` delivered specs.
+            #
+            # THIS LINE WAS INSIDE A COMMENT. An edit collapsed the comment
+            # and the call onto ONE line with literal "\n" in the text, so
+            # `WORK.put` was commented out and creating a job inserted a row,
+            # wrote nine pending stages, set the state to "queued" — and
+            # queued nothing. Every status the UI showed wastrue of the
+            # database and false of the machine. It parses, it lints, it
+            # returns 201, and the product does not work.
+            WORK.put((job_id, [s.key for s in ALL_STAGES], ()))
             return self._json({"id": job_id, "name": name}, 201)
 
         m = re.fullmatch(r"/api/jobs/(\d+)/run", p)
@@ -1131,6 +1463,66 @@ class Handler(BaseHTTPRequestHandler):
             if not err:
                 views.invalidate(row["name"], int(m.group(2)))
             return self._json({"error": err} if err else res, 400 if err else 200)
+
+        # ── ask the AI to change this clip ────────────────────────────
+        #
+        # "remove the booms", "cut the end", "turn the chat off". The model
+        # returns a PATCH over the same five reviewable fields the editor
+        # drawer exposes, and that patch goes through `_clean` and
+        # `write_spec` exactly as a typed edit does. The model never touches
+        # the file, so the worst a bad reply can do is be refused — and
+        # everything the house style owns stays in code, unreachable from
+        # here by design.
+        m = re.fullmatch(r"/api/jobs/(\d+)/ask/(\d+)", p)
+        if m:
+            job_id, n = int(m.group(1)), int(m.group(2))
+            with db() as c:
+                row = c.execute("SELECT * FROM job WHERE id=?",
+                                (job_id,)).fetchone()
+            if not row:
+                return self._json({"error": "no such job"}, 404)
+            said = str(body.get("ask", "")).strip()
+            if not said:
+                return self._json({"error": "say what you want changed"}, 400)
+            if len(said) > 600:
+                return self._json({"error": "that is too long to be an edit"}, 400)
+            sp = spec_path(row["name"], n)
+            if not sp.exists():
+                return self._json({"error": f"no spec at {sp.name}"}, 404)
+            try:
+                spec = (json.loads(sp.read_text(encoding="utf-8"))
+                        .get("clip") or {})
+                detail = views.clip_detail(row["name"], n)
+                words = [(w["t"], w.get("s", w["t"]), w.get("e", w["t"]), w["w"])
+                         for w in (detail.get("words") or [])]
+                from engine import ask as ask_mod             # noqa: PLC0415
+                ans = ask_mod.interpret(said, spec=spec, detail=detail,
+                                        words=words)
+            except Exception as exc:                          # noqa: BLE001
+                return self._json(
+                    {"error": f"{type(exc).__name__}: {exc}"[:300]}, 502)
+            if ans.refused:
+                # NOT AN ERROR, AND NOT A BUILD. Saying no to "make the
+                # captions bigger" is the right answer; rebuilding anyway
+                # because something must happen is not.
+                return self._json({"refused": ans.refused, "why": ans.why})
+            res, err = write_spec(row["name"], n, ans.patch,
+                                  f"asked: {said}"
+                                  + (f" — {ans.why}" if ans.why else ""))
+            if err:
+                return self._json({"error": err, "patch": ans.patch}, 400)
+            views.invalidate(row["name"], n)
+            if RUNNING.get("job_id") is not None:
+                return self._json({"patch": ans.patch, "why": ans.why,
+                                   "saved": True, "queued": False,
+                                   "note": "saved — a job is already running, "
+                                           "so the rebuild has to wait"})
+            set_stage(job_id, "build", state="pending", code=None,
+                      started=None, ended=None)
+            set_job(job_id, state="queued")
+            WORK.put((job_id, ["build"], ("--only", str(n), "--force")))
+            return self._json({"patch": ans.patch, "why": ans.why,
+                               "saved": True, "queued": True})
 
         m = re.fullmatch(r"/api/jobs/(\d+)/build/(\d+)", p)
         if m:
@@ -1177,17 +1569,41 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(
                     {"error": "could not prepare that clip: no spec written"},
                     409)
-            if RUNNING.get("job_id") is not None:
-                return self._json(
-                    {"error": "a job is already running — one at a time, "
-                              "because Resolve is a single GUI app"}, 409)
+            # ENQUEUE, DO NOT REFUSE. This used to 409 with "one at a
+            # time, because Remotion's public/ directory is shared between
+            # clips" — which was true and is now fixed (the per-clip data
+            # goes out as `--props`, and the PNG sequence directory is a
+            # temp dir per call). What is left is memory, and a lane limit
+            # is a queue, not a rejection: clicking six clips enqueues six.
+            #
+            # The ONE thing still refused is overlapping the CHAIN's own
+            # build stage on the same job, which walks every spec itself —
+            # two writers on one clip's artifacts, which is the collision
+            # class this whole round exists to remove.
+            key = (job_id, n)
+            with _BLOCK:
+                if RUNNING.get("job_id") == job_id \
+                        and RUNNING.get("stage") == "build":
+                    return self._json(
+                        {"error": "this job's own build stage is running and "
+                                  "walks every clip — wait for it, or cancel "
+                                  "it, then ask for this one"}, 409)
+                if key in BUILDING or key in QUEUED:
+                    return self._json(
+                        {"error": f"clip {n:02d} is already being cut"}, 409)
+                QUEUED.add(key)
+                JOBS_BY_ID[job_id] = row["name"]
+                waiting = sum(1 for k in QUEUED if k[0] == job_id)
+                live = sum(1 for k in BUILDING if k[0] == job_id)
             # --force, because a rebuild after a note is exactly the case the
             # "already built and passed, skipping" guard would swallow.
-            set_stage(job_id, "build", state="pending", code=None,
-                      started=None, ended=None)
-            set_job(job_id, state="queued")
-            WORK.put((job_id, ["build"], ("--only", str(n), "--force")))
-            return self._json({"queued": "build", "clip": n})
+            set_stage(job_id, "build", state="running", code=None,
+                      started=time.time(), ended=None)
+            set_job(job_id, state="running")
+            CLIPQ.put(key)
+            return self._json({"queued": "build", "clip": n,
+                               "lanes": clip_lanes(),
+                               "building": live, "waiting": waiting})
 
         m = re.fullmatch(r"/api/jobs/(\d+)/cancel", p)
         if m:
@@ -1210,12 +1626,28 @@ def main() -> None:
         raise SystemExit(f"no interpreter at {VENV}")
     # ONE RUNNER PER MACHINE. If `worker/agent.py` already holds it, this
     # process still serves the UI — looking at a job is always safe — but it
-    # does not start its own worker thread, because two runners on one
-    # Resolve is the one thing the whole pipeline cannot survive.
+    # does not start its own worker thread.
+    #
+    # THE REASON CHANGED AND THE RULE DID NOT. It used to be Resolve: one
+    # GUI app, one scripting API on its GUI thread, and two runners would
+    # fight over it. The native renderer took Resolve out of the build, and
+    # it is tempting to call that the mass-production unlock — it is not,
+    # yet. Remotion renders every overlay through a SHARED `public/`
+    # directory, so two clips building at once still corrupt each other.
+    # Dropping Resolve removed one of the two causes of serialisation; the
+    # overlay renderer is the other, and it is also 85% of the wall clock.
     runner = None
     try:
         runner = runlock.take("web/server.py")
         threading.Thread(target=worker, daemon=True).start()
+        # ONE THREAD PER LANE. `clip_lanes()` measures free memory against
+        # ~1.9 GB a lane, so the number is the machine's, not a guess — and
+        # the threads only wait on a queue, so starting a couple costs
+        # nothing when nothing is building.
+        lanes = clip_lanes()
+        for _ in range(lanes):
+            threading.Thread(target=clip_worker, daemon=True).start()
+        print(f"  {lanes} clip-build lane(s)")
     except runlock.Held as other:
         print(f"  NOT running jobs — {other} holds the runner lock")
     # THE ACCEPT QUEUE IS 5 BY DEFAULT, inherited from socketserver, and that

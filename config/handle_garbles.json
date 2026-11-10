@@ -4,7 +4,10 @@
   "why": "The quote desk's roster already carries phonetic aliases ('sad hawk' for saadhak, 'john cutie' for johnqt), but only for 88 of 444 players and not for anyone missing from it. These are the ones this pipeline has actually seen on screen. Add to it when a wrong name ships.",
   "rule": "An entry is an EXACT phrase whisper produced, mapped to the real handle. No fuzzy matching anywhere: a name on screen that nobody said is the worst thing this pipeline can do.",
   "ambiguous_rule": "A roster handle or alias that is ALSO an ordinary English word is never applied on the strength of the token alone — `after` is the player AfteR, `less` is the player Less, `texture` is t3xture, `tick` is TcK, `rose` is Rosé. Applying those turns a common word into a real person's name on screen, which this file already calls the worst thing this pipeline can do. Denying them costs a casing or spelling miss on a real handle, which is recoverable and visible. The failure modes are not symmetric, and no measurement separates the two classes: swept against how often the speaker himself says each one, `oxy` (5) sits beside `after` (4) and `psalm` (2) beside `less` (2). So the asymmetry decides it. An entry here is overridden ONLY by an explicit entry in `garbles`, i.e. a garble a human has seen on screen and confirmed.",
-  "ambiguous_generated_by": "keys of engine.handles.load() intersected with /usr/share/dict/words (234,456 entries, macOS 27). Vendored rather than computed at load time so the result cannot change with the host."
+  "ambiguous_generated_by": "keys of engine.handles.load() intersected with /usr/share/dict/words (234,456 entries, macOS 27). Vendored rather than computed at load time so the result cannot change with the host.",
+  "notes": [
+   "psalm -> s0m is CONFIRMED BY GEORGE (2026-11-10): \"psalm is not a player anymore - it's s0m\". Do not remove it on the strength of a web search: Harrison \"psalm\" Chang appears on The Guard's old rosters, which looks like a counter-example and is not — it is the same person under the handle he no longer uses. A search that finds a historical handle is not evidence that the correction is wrong."
+  ]
  },
  "garbles": {
   "psalm": "s0m",

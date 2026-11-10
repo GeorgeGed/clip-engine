@@ -25,6 +25,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 JOBS = ROOT / "jobs"
 
+# Bump when the shape of `clip_detail` changes. `_fresh` compares mtimes and
+# cannot see that the thing on disk is a different kind of answer.
+DETAIL_V = 2
+
 
 def ui_dir(job: str) -> Path:
     p = JOBS / job / "ui"
@@ -88,6 +92,13 @@ def candidates(job: str) -> list[dict]:
             # one overrides it — but the grid says so rather than hiding it.
             "vetoed": (ed.get(str(i), {}) or {}).get("verdict") == "drop",
             "why": (ed.get(str(i), {}) or {}).get("why", ""),
+            # WHAT MADE THE SCORE. `virality.score` computes these and
+            # `rank` stores them per clip, and nothing has ever shown them —
+            # so the grid printed a two-digit number with no way to ask what
+            # it was counting. The weights are a stated opinion, not a
+            # learned model; see the docstring in `engine/virality.py`.
+            "components": r.get("components") or {},
+            "flags": r.get("flags") or [],
             "verdict": s.get("verdict", ""),
             "block": why(s),
             "muted": s.get("muted"),
@@ -100,8 +111,9 @@ def candidates(job: str) -> list[dict]:
 
 
 # ------------------------------------------------------------- pictures ---
-def _grab(src: Path, at: float, width: int, out: Path) -> Path | None:
-    if _fresh(out, src):
+def _grab(src: Path, at: float, width: int, out: Path,
+          *extra: Path) -> Path | None:
+    if _fresh(out, src, *extra):
         return out
     if not src.exists():
         return None
@@ -135,12 +147,31 @@ def _duration(p: Path) -> float:
 
 def candidate_thumb(job: str, n: int) -> Path | None:
     """A frame of the raw candidate region — 16:9, because nothing has
-    reframed it yet. The tile showing that is the point."""
+    reframed it yet. The tile showing that is the point.
+
+    GRAB INSIDE THE CLIP, NOT INSIDE THE REGION. A region runs up to a
+    couple of minutes and the clip is a cut inside it, so 28% of the region
+    is usually a frame the clip does not contain — the same region-vs-clip
+    error the length badge had, in the picture instead of the number. When a
+    spec exists, 28% of the CUT is used and the spec joins the freshness
+    key, so editing an in-point re-grabs rather than serving the old frame.
+    """
     hits = sorted((JOBS / job / "clips_1080").glob(f"{n:02d}_*.mp4"))
     if not hits:
         return None
     src = hits[0]
-    return _grab(src, _duration(src) * 0.28, 224, ui_dir(job) / f"cand{n:02d}.jpg")
+    spec = ROOT / "clips" / f"{job.split('-')[0]}-{n:02d}.json"
+    at = _duration(src) * 0.28
+    try:
+        c = (json.loads(spec.read_text(encoding="utf-8")).get("clip") or {})
+        a = float(c.get("in_point") or 0.0)
+        b = c.get("out_point")
+        b = float(b) if b is not None else _duration(src)
+        if b > a:
+            at = a + (b - a) * 0.28
+    except (OSError, json.JSONDecodeError, TypeError, ValueError):
+        pass
+    return _grab(src, at, 224, ui_dir(job) / f"cand{n:02d}.jpg", spec)
 
 
 def render_path(job: str, n: int) -> Path:
@@ -166,7 +197,12 @@ def clip_detail(job: str, n: int) -> dict:
     mp4 = render_path(job, n)
     out = ui_dir(job) / f"detail{n:02d}.json"
     if _fresh(out, spec, mp4):
-        return json.loads(out.read_text())
+        cached = json.loads(out.read_text())
+        # A SHAPE CHANGE IS STALENESS TOO. `_fresh` only compares mtimes, so
+        # a cache written before `words` carried source times would be served
+        # for ever and the ask box would get rows with one clock on them.
+        if cached.get("v") == DETAIL_V:
+            return cached
     if not spec.exists():
         return {}
 
@@ -182,7 +218,8 @@ def clip_detail(job: str, n: int) -> dict:
           "meta": ranked[n - 1]}
     try:
         mc._plan_only(clip, ch, st)
-        words = [{"t": round(t, 2), "w": w} for t, w in mc._cut_words(clip, st)]
+        words = [{"t": round(t, 2), "s": round(a, 2), "e": round(b, 2), "w": w}
+                 for t, a, b, w in mc._cut_words_full(clip, st)]
         gated: list = []
         budget = rp.boom_budget(st["out_dur"])
         _b, booms = rp.bold_moments(
@@ -196,6 +233,7 @@ def clip_detail(job: str, n: int) -> dict:
 
     dur = _duration(mp4) if mp4.exists() else st["out_dur"]
     d = {
+        "v": DETAIL_V,
         "n": n, "dur": round(dur, 2),
         "built": mp4.exists(),
         "mb": round(mp4.stat().st_size / 1e6, 1) if mp4.exists() else None,

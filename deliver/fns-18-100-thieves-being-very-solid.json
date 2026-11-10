@@ -1,0 +1,69 @@
+{
+ "title": "FNS: 100 THIEVES BEING VERY SOLID",
+ "subject": "Team-by-team rundown of how the new rosters look",
+ "claim": "G2 is gonna be good no matter what; 100 Thieves are very solid; Crew only have Lotus in their map pool",
+ "duration_s": "23.44s (want 15-90)",
+ "source": {
+  "vod": "2905408276",
+  "in_point_s": 3892.1,
+  "out_point_s": 3971.6,
+  "clip_file_in_point_s": 24.0
+ },
+ "rights": {
+  "permission": "explicit",
+  "note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release."
+ },
+ "chat_overlay": true,
+ "qc": [
+  {
+   "check": "duration",
+   "ok": true,
+   "detail": "23.44s (want 15-90)"
+  },
+  {
+   "check": "loudness",
+   "ok": true,
+   "detail": "-14.29 LUFS (target -14.0)"
+  },
+  {
+   "check": "true_peak",
+   "ok": true,
+   "detail": "-1.28 dBTP"
+  },
+  {
+   "check": "black_top",
+   "ok": true,
+   "detail": "1402 frames, YMAX min 242"
+  },
+  {
+   "check": "black_bottom",
+   "ok": true,
+   "detail": "1402 frames, YMAX min 238"
+  },
+  {
+   "check": "dead_space",
+   "ok": true,
+   "detail": "0.75s quiet (3.2%, max 8%)"
+  },
+  {
+   "check": "absent_audio",
+   "ok": true,
+   "detail": "0.00s in 0 runs"
+  },
+  {
+   "check": "caption_cadence",
+   "ok": true,
+   "detail": "2.22 cards/s (52 cards)"
+  },
+  {
+   "check": "hallucinated_captions",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "check": "chat_on_screen",
+   "ok": true,
+   "detail": "visible \u2014 panel fill 85% of the box (want >=50%), 11212 coloured px/frame (want >=400)"
+  }
+ ]
+}

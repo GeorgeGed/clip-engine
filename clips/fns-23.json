@@ -41,6 +41,8 @@
   "emoji": "\ud83d\ude33",
   "cards": [],
   "chat_mode": null,
-  "notes": "ONE NARRATIVE. He concedes the premise \u2014 \"i'm not trying to say sr shouldn't be in it fly quest shouldn't be in it there's just not enough slots i guess and it sucks that they didn't make it in\" \u2014 turns it on \"but i don't think that instantly means that they are now gonna just give up on val they ha"
+  "notes": "ONE NARRATIVE. He concedes the premise \u2014 \"i'm not trying to say sr shouldn't be in it fly quest shouldn't be in it there's just not enough slots i guess and it sucks that they didn't make it in\" \u2014 turns it on \"but i don't think that instantly means that they are now gonna just give up on val they ha asked: remove the boom, cut down on the length \u2014 Set booms to an empty list to remove both sound effects, and ended the clip at source 105.94, right after 'multiple orgs will fight for you', which cuts the trailing 'one good result and more opportunities' tail and trims about 4 seconds.",
+  "booms": [],
+  "out_point": 105.94
  }
 }

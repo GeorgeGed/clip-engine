@@ -73,12 +73,31 @@ TRUE_PEAK_MAX = -0.55      # -1.0 asked; AAC decode overshoots, so the request c
 LUFS_DELTA = 0.5           # deliver_qc's own band is +-0.7, so parity is tighter
 DUR_FRAMES = 1.0           # one frame. A 1-frame drop cost clip 12 its payoff.
 
-# --- the two instruments, each set in the middle of its measured plateau --
-PROFILE_MAX = 2.0          # honest <=0.43, wrong >=5.0 — 4.7x headroom
+# --- the instruments, each set in the middle of its measured plateau -----
+# GEOMETRY IS MEASURED ON THE ROW PROFILE'S GRADIENT, NOT ITS LEVEL, and the
+# reason is a third Resolve artefact found when the first real cross-renderer
+# pair was gated. Resolve writes an alpha overlay's RGB into the limited-range
+# luma slot WITHOUT the full->limited conversion: `rm_Chat.mov`'s panel is
+# exactly #18181B (24,24,27) at alpha 255, which a bt709 `tv` file should
+# store as Y' 36.8; the native render stores 35.8 and Resolve stores 22.9.
+# That uniform 13-code-value crush covers 420 rows and carried 67.5% of the
+# whole row-profile residual — a LEVELS artefact contaminating a GEOMETRY
+# instrument, pushing an otherwise-clean pair to 2.040 against a 2.0 floor.
+# A gradient has no DC term, so it cannot see a uniform offset at all.
+# Measured on the full 45s pair, not the 12s calibration slice: honest 0.757
+# worst, the nearest failure 1.872. sqrt(0.757*1.872) = 1.19, so 1.2 is the
+# geometric MIDDLE of the plateau — 1.58x above honest, 1.56x below wrong.
+GRAD_MAX = 1.2             # honest <=0.76, 10px vertical shift 1.87, seam 2.20
+LEVEL_MAX = 3.5            # honest <=1.32, a content-pane lift reads 8.02
 SAT_MAX = 0.80             # honest <=0.05, wrong >=1.88 — 16x headroom
 WHITEPOINT_MAX = 3.0       # honest <=0.55, wrong >=11.9 — 5.5x headroom
 OFFSET_PX = 2              # a 2px pane shift is invisible; 3px is a different crop
 CAPTION_INK_MIN = 0.002    # share of the caption band above the ink floor
+
+# Row bands that hold NO alpha overlay in this format, so the two renderers
+# must agree on their LEVELS exactly — the facecam above the hook line, and
+# the content pane below the chat box. Measured honest: +0.16 and +0.00.
+OVERLAY_FREE = (("facecam", 100, 660), ("content", 1550, 1880))
 
 PROF_W = 216               # 1080/5. Scaled HORIZONTALLY only, so every row survives.
 GRADE_W, GRADE_H = 270, 202
@@ -117,6 +136,21 @@ def row_profile(path: Path, at: float, h: int) -> list[float] | None:
     return [sum(raw[y * PROF_W:(y + 1) * PROF_W]) / PROF_W for y in range(h)]
 
 
+def row_gradient(prof: list[float]) -> list[float]:
+    """The row profile's first difference — the levels-blind geometry signal.
+
+    A uniform brightness offset over any band contributes NOTHING here,
+    because every pair of adjacent rows is shifted by the same amount and
+    the difference cancels. A geometric displacement moves every edge in the
+    profile, so it shows up undiminished. Measured on the real pair: the
+    level metric separates a 10px vertical shift from honest by 2.17x and
+    this one by 4.30x, and a moved seam by 4.82x against 5.06x — better on
+    both, and immune to the overlay-levels artefact that was eating the
+    level metric's whole margin.
+    """
+    return [prof[i + 1] - prof[i] for i in range(len(prof) - 1)]
+
+
 def pane_cols(path: Path, at: float, y0: int, y1: int, h: int) -> list[float]:
     """Mean luma per COLUMN over a row band — the signal for a lateral fit."""
     raw = _raw(["-ss", f"{at:.3f}", "-i", str(path), "-frames:v", "1",
@@ -128,6 +162,34 @@ def pane_cols(path: Path, at: float, y0: int, y1: int, h: int) -> list[float]:
     n = max(1, y1 - y0)
     return [sum(raw[y * PROF_W + x] for y in range(y0, y1)) / n
             for x in range(PROF_W)]
+
+
+def pane_rows(path: Path, at: float, x0: int, x1: int, h: int) -> list[float]:
+    """Mean luma per ROW over a column band — the signal for a vertical fit.
+
+    The companion to `pane_cols`, and the gate ran without it for a round.
+    The row profile DOES catch a vertical fault — the test's `wrong_shift`
+    control is a 10px vertical crop and instrument 1 rejects it — but it
+    cannot say which pane moved or by how much, so a report could name a
+    horizontal fault while the same cause was also moving content
+    vertically. That is what happened to clip 12's facecam rect, and the
+    round's own record then carried a `vertical +0px` row for a check that
+    did not exist.
+
+    The vertical axis is never downscaled (`row_profile` scales horizontally
+    only), so a shift found here is already in output pixels. The column band
+    is inset from the pane edges, where the two renderers' rounding of a
+    non-integer pane width shows up and is not the fault being looked for.
+    """
+    raw = _raw(["-ss", f"{at:.3f}", "-i", str(path), "-frames:v", "1",
+                "-vf", f"scale={PROF_W}:{h}:flags=bilinear,format=gray",
+                "-f", "rawvideo", "-"])
+    if len(raw) < PROF_W * h:
+        return []
+    x0, x1 = max(0, x0), min(PROF_W, x1)
+    n = max(1, x1 - x0)
+    return [sum(raw[y * PROF_W + x] for x in range(x0, x1)) / n
+            for y in range(h)]
 
 
 def best_offset(a: list[float], b: list[float], span: int = 12) -> tuple[int, float]:
@@ -295,26 +357,58 @@ def compare(reference: str | Path, candidate: str | Path, *,
     ts = [span * (i + 0.5) / samples for i in range(samples)]
 
     # instrument 1 — geometry (covers the seam: moving it shifts both panes)
-    res = []
+    res, grad = [], []
     for t in ts:
         ra, rb = row_profile(a, t, h), row_profile(b, t, h)
         if ra and rb:
             res.append(sum(abs(x - y) for x, y in zip(ra, rb)) / h)
-    r.add("geometry", res and max(res) <= PROFILE_MAX,
-          f"row profile {st.mean(res):.3f} mean / {max(res):.3f} worst "
-          f"(tol {PROFILE_MAX}; honest <=0.43, a moved seam reads 14.0)"
-          if res else "no frames read")
+            da, db = row_gradient(ra), row_gradient(rb)
+            grad.append(sum(abs(x - y) for x, y in zip(da, db)) / len(da))
+    r.add("geometry", grad and max(grad) <= GRAD_MAX,
+          f"row gradient {st.mean(grad):.3f} mean / {max(grad):.3f} worst "
+          f"(tol {GRAD_MAX}; honest <=0.76, a 10px shift 1.87, a seam 2.20)"
+          f"   [level metric {st.mean(res):.3f}, diagnostic only — see "
+          f"GRAD_MAX on why it is not the gate]"
+          if grad else "no frames read")
+
+    # LEVELS, on the bands that carry no overlay. The geometry instrument is
+    # deliberately blind to a uniform offset, so without this a renderer that
+    # got every pane in the right place and the wrong brightness would pass.
+    lv = []
+    for name, y0, y1 in OVERLAY_FREE:
+        d = []
+        for t in ts:
+            pa, pb = row_profile(a, t, h), row_profile(b, t, h)
+            if pa and pb and y1 <= len(pa):
+                d.append(st.median(pb[y] - pa[y] for y in range(y0, y1)))
+        if d:
+            lv.append((name, max(d, key=abs)))
+    worst = max(lv, key=lambda kv: abs(kv[1])) if lv else None
+    r.add("levels", worst is not None and abs(worst[1]) <= LEVEL_MAX,
+          (f"{worst[0]} band median {worst[1]:+.2f} (tol {LEVEL_MAX}; honest "
+           f"<=1.32, a content-pane lift reads 8.02); "
+           + ", ".join(f"{k} {v:+.2f}" for k, v in lv))
+          if worst else "no overlay-free band read")
 
     cut = int(round(h * seam))
     mid = ts[len(ts) // 2]
     scale = int(va["width"]) / PROF_W
+    # BOTH AXES, PER PANE. One cause can move a pane on both — clip 12's
+    # facecam rect differed in x0 AND y0 — so naming only the lateral shift
+    # describes half the fault.
+    bx0, bx1 = int(0.15 * PROF_W), int(0.85 * PROF_W)
     for name, y0, y1 in (("top pane", int(0.05 * h), cut - 8),
                          ("bottom pane", cut + 8, int(0.95 * h))):
         s, resid = best_offset(pane_cols(a, mid, y0, y1, h),
                                pane_cols(b, mid, y0, y1, h))
-        r.add(name, abs(s) * scale <= OFFSET_PX,
+        r.add(f"{name} x", abs(s) * scale <= OFFSET_PX,
               f"best fit {s * scale:+.0f}px, residual {resid:.1f} "
               f"(low residual at a NON-ZERO shift = right crop, wrong place)")
+        # The vertical profile is at full output resolution, so no `scale`.
+        sy, residy = best_offset(pane_rows(a, mid, bx0, bx1, h)[y0:y1],
+                                 pane_rows(b, mid, bx0, bx1, h)[y0:y1])
+        r.add(f"{name} y", abs(sy) <= OFFSET_PX,
+              f"best fit {sy:+d}px, residual {residy:.1f}")
 
     # instrument 2 — grade, facecam only
     ga = [facecam_grade(a, t, seam=seam, h=h) for t in ts]
@@ -376,22 +470,26 @@ def calibrate(reference: str | Path, candidate: str | Path,
     span = min(float(_probe(a)["format"]["duration"]),
                float(_probe(b)["format"]["duration"]))
     ts = [span * (i + 0.5) / samples for i in range(samples)]
-    res = []
+    res, grd = [], []
     for t in ts:
         ra, rb = row_profile(a, t, h), row_profile(b, t, h)
         if ra and rb:
             res.append(sum(abs(x - y) for x, y in zip(ra, rb)) / h)
+            da, db = row_gradient(ra), row_gradient(rb)
+            grd.append(sum(abs(x - y) for x, y in zip(da, db)) / len(da))
     ga = [facecam_grade(a, t, h=h) for t in ts]
     gb = [facecam_grade(b, t, h=h) for t in ts]
     ok = [(x, y) for x, y in zip(ga, gb) if x and y]
     return {
-        "profile_mean": st.mean(res) if res else None,
-        "profile_worst": max(res) if res else None,
-        "profile_tol": PROFILE_MAX,
+        "gradient_mean": st.mean(grd) if grd else None,
+        "gradient_worst": max(grd) if grd else None,
+        "gradient_tol": GRAD_MAX,
+        "level_mean": st.mean(res) if res else None,
+        "level_worst": max(res) if res else None,
         "sat_delta": abs(st.mean(x[1] for x, _ in ok)
                          - st.mean(y[1] for _, y in ok)) if ok else None,
         "sat_tol": SAT_MAX,
-        "headroom": (PROFILE_MAX / max(res)) if res and max(res) else None,
+        "headroom": (GRAD_MAX / max(grd)) if grd and max(grd) else None,
     }
 
 

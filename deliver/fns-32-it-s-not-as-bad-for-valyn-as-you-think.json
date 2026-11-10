@@ -1,0 +1,69 @@
+{
+ "title": "FNS: IT'S NOT AS BAD FOR VALYN AS YOU THINK",
+ "subject": "Whether released franchise players like Valin get hurt by the new system",
+ "claim": "\"It's not fucked to the degree that you think it is... Valin is a terrible example because he's already made enough money.\"",
+ "duration_s": "32.80s (want 15-90)",
+ "source": {
+  "vod": "2905408276",
+  "in_point_s": 1155.0,
+  "out_point_s": 1215.37,
+  "clip_file_in_point_s": 0.0
+ },
+ "rights": {
+  "permission": "explicit",
+  "note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release."
+ },
+ "chat_overlay": true,
+ "qc": [
+  {
+   "check": "duration",
+   "ok": true,
+   "detail": "32.80s (want 15-90)"
+  },
+  {
+   "check": "loudness",
+   "ok": true,
+   "detail": "-14.19 LUFS (target -14.0)"
+  },
+  {
+   "check": "true_peak",
+   "ok": true,
+   "detail": "-1.23 dBTP"
+  },
+  {
+   "check": "black_top",
+   "ok": true,
+   "detail": "1967 frames, YMAX min 241"
+  },
+  {
+   "check": "black_bottom",
+   "ok": true,
+   "detail": "1967 frames, YMAX min 239"
+  },
+  {
+   "check": "dead_space",
+   "ok": true,
+   "detail": "1.85s quiet (5.6%, max 8%)"
+  },
+  {
+   "check": "absent_audio",
+   "ok": true,
+   "detail": "0.00s in 0 runs"
+  },
+  {
+   "check": "caption_cadence",
+   "ok": true,
+   "detail": "2.44 cards/s (80 cards)"
+  },
+  {
+   "check": "hallucinated_captions",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "check": "chat_on_screen",
+   "ok": true,
+   "detail": "visible \u2014 panel fill 85% of the box (want >=50%), 9427 coloured px/frame (want >=400)"
+  }
+ ]
+}

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Composition, staticFile} from 'remotion';
+import {Composition, getInputProps, staticFile} from 'remotion';
 import './fonts';
 import {StatCard, ExhibitFrame} from './Graphics';
 import {StatChip, RatioBar, RosterGrid, PairCounter} from './Chips';
@@ -17,6 +17,34 @@ import chatWindows from '../public/chat_windows.json';
 import clip from '../public/clip.json';
 import stories from '../public/stories.json';
 import {Stage, Dir, Kind, EXIT} from './motion';
+
+// ─────────────────────────────────────────────────────────────────────────
+// PER-CLIP DATA ARRIVES AS inputProps. THE IMPORTS ABOVE ARE ONLY THE
+// STUDIO'S FALLBACK.
+//
+// Those five imports are webpack MODULES: their contents are compiled into
+// the bundle at build time, from the ONE shared `public/` directory every
+// clip writes to. So two clips building at once is not a race that can be
+// narrowed — whichever wrote last is what both bundles contain. Pointing
+// `remotion bundle --public-dir` at a per-clip copy does NOT fix it: that
+// moves the copied `public/` tree and not one byte of what `import` already
+// inlined, which was measured end to end — a bundle built with a per-clip
+// dir compiled the WRONG clip's chat while `<out>/public/clip.json` on disk
+// reported the RIGHT one. A silent race turned into a deterministic
+// wrong-clip render that passes its own verification, which is worse.
+//
+// `--props=<this clip's json>` is read per RENDER, so nothing about one
+// clip's data can reach another's frames. With no props — the Studio, or a
+// hand-run `remotion render` — these fall back to `public/`, so previewing
+// still works exactly as before.
+const IN = getInputProps() as Record<string, any>;
+const CHAT = (IN.chat ?? chat) as any;
+const CHAT_WINDOWS = (IN.chatWindows ?? chatWindows) as any;
+const BADGE_MAP = (IN.badgeMap ?? badgeMap) as any;
+const CLIP = (IN.clip ?? clip) as {
+  durationInFrames: number; baitFrames: number; hook?: string; emoji?: string;
+};
+const STORIES = (IN.stories ?? stories) as any[];
 
 const V = {fps: 60, width: 1080, height: 1920} as const;
 
@@ -107,9 +135,9 @@ export const Root: React.FC = () => (
         an alpha overlay on V3 like any other, and it steps out of the way
         when a graphic lands — see chat_windows.json. */}
     <Composition id="Chat" component={ChatScroll}
-      durationInFrames={clip.durationInFrames} {...V}
-      defaultProps={{messages: chat as any, badgeMap: badgeMap as any,
-        windows: chatWindows as any}} />
+      durationInFrames={CLIP.durationInFrames} {...V}
+      defaultProps={{messages: CHAT, badgeMap: BADGE_MAP,
+        windows: CHAT_WINDOWS}} />
 
 
     <Composition id="Tweet" component={XTweet} durationInFrames={214} {...V}
@@ -171,7 +199,7 @@ export const Root: React.FC = () => (
         with no edit to this file. The headline comes from Riot's own photo
         caption — see that module for why that is a strong enough source to
         automate, where a single-outlet roster item was not. */}
-    {(stories as any[]).map((s) => (
+    {STORIES.map((s) => (
       <Composition key={s.id} id={s.id} component={XStory}
         durationInFrames={s.frames} {...V}
         defaultProps={{tilt: s.tilt, headline: s.headline,
@@ -181,8 +209,8 @@ export const Root: React.FC = () => (
     ))}
 
     <Composition id="Bait" component={XBait}
-      durationInFrames={clip.baitFrames} {...V}
-      defaultProps={{text: clip.hook ?? '', emoji: clip.emoji ?? '😳',
+      durationInFrames={CLIP.baitFrames} {...V}
+      defaultProps={{text: CLIP.hook ?? '', emoji: CLIP.emoji ?? '😳',
         top: 700, exitH: 60}} />
   </>
 );

@@ -109,9 +109,67 @@ input:focus,select:focus{outline:none;border-color:var(--accent)}
 .bar2{height:3px;background:var(--line);overflow:hidden}
 .bar2 i{display:block;height:100%;width:40%;background:var(--accent);
         animation:slide 1.4s ease-in-out infinite}
+.prog{margin:0;padding:7px 13px 0;font-size:11px;color:var(--accent-soft);
+      font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis;
+      white-space:nowrap}
 @keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
 .foot{color:#5d626b;font-size:12px;padding:34px 0 0;border-top:1px solid var(--line);
       margin-top:38px}
+
+/* A clip whose delivery gate said no. The verdict was always measured and
+   never shown, because the manifest was parsed in a shape it is not. */
+.clip.bad{border-color:#6b3a3a}
+.clip.bad .vt::before{content:"QC failed";position:absolute;z-index:2;top:10px;right:10px;
+  background:#ff6b6b;color:#2a0b0b;font-size:9.5px;font-weight:800;padding:3px 6px;
+  letter-spacing:.05em;text-transform:uppercase}
+
+/* ── the editor: the five fields a review ever changes */
+.link{background:none;border:0;color:var(--accent-soft);font-size:11.5px;font-weight:700;
+  padding:0;cursor:pointer;text-align:left}
+.link:hover{text-decoration:underline}
+.ed{display:flex;flex-direction:column;gap:7px;padding-top:4px;border-top:1px solid var(--line)}
+.f{display:flex;flex-direction:column;gap:3px}
+.f>span{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#7e848e;font-weight:700}
+.f input,.f select{background:var(--bg);color:var(--ink);border:1px solid var(--line);
+  padding:7px 8px;font:inherit;font-size:12px;width:100%}
+.f input:focus,.f select:focus{outline:none;border-color:var(--accent)}
+fieldset.bm{border:0;margin:0;padding:0}
+fieldset.bm legend{font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+  color:#7e848e;font-weight:700;padding:0 0 3px}
+fieldset.bm label.r{display:inline-flex;align-items:center;gap:4px;margin-right:10px;
+  font-size:11.5px;color:var(--ink);cursor:pointer}
+fieldset.bm label.r span{font-weight:600}
+fieldset.bm input[type=text]{margin-top:5px;width:100%;background:var(--bg);
+  color:var(--ink);border:1px solid var(--line);padding:6px 7px;font-size:12px;
+  font-family:inherit}
+.eact{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding-top:2px}
+.eact button{padding:7px 11px;font-size:11.5px;font-weight:700;border:0;cursor:pointer}
+.eact button:disabled{opacity:.5;cursor:default}
+.emsg{font-size:11px;color:var(--dim);flex:1;min-width:0}
+.whyscore{font-size:11px;color:var(--dim);line-height:1.5;padding-bottom:4px}
+.whyscore p{margin:0 0 4px}
+.whyscore b{color:var(--ink)}
+.whyscore ul{margin:0 0 6px;padding-left:16px}
+.whyscore li{margin:0}
+.whyscore .fl{color:var(--warn)}
+
+/* ── ask it to change the cut */
+.askf{display:flex;gap:6px}
+.askq{flex:1;min-width:0;background:var(--bg);color:var(--ink);
+  border:1px solid var(--line);padding:8px 9px;font:inherit;font-size:12px}
+.askq:focus{outline:none;border-color:var(--accent)}
+.askq:disabled{opacity:.6}
+.askb{background:var(--accent-soft);color:#06143f;border:0;padding:8px 12px;
+  font-size:12px;font-weight:700;cursor:pointer}
+.askb:disabled{opacity:.5;cursor:default}
+.askr{margin:0;font-size:11.5px;line-height:1.45;color:var(--accent-soft)}
+.askr.warn{color:var(--warn)}
+
+/* ── trouble, said out loud rather than swallowed */
+.oops{background:#2a1416;border:1px solid #6b3a3a;color:#ffb4b4;font-size:12.5px;
+  padding:10px 14px;margin:14px 0 0}
+#jobs{background:var(--surface);color:var(--ink);border:1px solid var(--line);
+  padding:6px 9px;font:inherit;font-size:12.5px;max-width:34ch}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
@@ -120,10 +178,13 @@ input:focus,select:focus{outline:none;border-color:var(--accent)}
 <header><div class="bar">
   <span class="logo"><i></i>Clip Engine</span>
   <span class="sp"></span>
+  <select id="jobs" aria-label="Which video to show" hidden></select>
   <button class="ghost" id="restart" hidden>New video</button>
 </div></header>
 
 <div class="wrap">
+
+  <p class="oops" id="oops" role="alert" aria-live="assertive" hidden></p>
 
   <section id="s-drop" class="drop">
     <h1>Drop a VOD. Get the clips <em>worth posting</em>.</h1>
@@ -134,18 +195,19 @@ input:focus,select:focus{outline:none;border-color:var(--accent)}
       <div class="row">
         <input id="url" type="text" inputmode="url" spellcheck="false"
                autocapitalize="off" autocomplete="off"
+               aria-label="Twitch VOD link, or the path to a file on this Mac"
                placeholder="twitch.tv/videos/… or /Users/you/Movies/stream.mp4">
         <button class="go" id="start" disabled>Get clips</button>
       </div>
       <div class="row">
-        <select id="rights">
+        <select id="rights" aria-label="Rights basis for this footage">
           <option value="">Rights basis — required</option>
           <option value="explicit">I have the streamer's permission</option>
           <option value="affiliate">Affiliate / partner agreement</option>
           <option value="client_owned">Client owns this footage</option>
         </select>
       </div>
-      <p class="meta" id="meta"></p>
+      <p class="meta" id="meta" role="status" aria-live="polite"></p>
     </div>
   </section>
 
@@ -165,5 +227,8 @@ input:focus,select:focus{outline:none;border-color:var(--accent)}
   </section>
 
 </div>
+<noscript><p class="oops">This page needs JavaScript — it polls the
+factory for progress and streams the clips back. Without it the markup
+loads and nothing in it works, which is worse than saying so.</p></noscript>
 <script src="/app.js"></script>
 </body></html>

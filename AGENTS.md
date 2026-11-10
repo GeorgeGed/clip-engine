@@ -1354,6 +1354,13 @@ accepted repeatedly, clip 6 at 9% is wrong. Across the ten buildable clips:
 |---|---|
 | 30 (41%), 42 (24%), 08 (21%), 04 (16%), 23 (16%) | 15 (14%), 12 (13%), 06 (9%), 43 (8%), 16 (6%) |
 
+**EVERY NUMBER IN THAT ROW IS MEASURED ON THE REGION, NOT THE CLIP, AND THE
+STEM MATCH WAS ASYMMETRIC.** Both were fixed later — see "THE CHAT WAS 53
+SECONDS STALE". Re-read on the cut with a symmetric match, clip 12 is 18%,
+clip 16 is 14.9% and clip 08 is 25.5%, so two of the three clips George
+forced chat onto sit at or near the floor. The row is kept as the record of
+what was believed when the floor was set.
+
 **Half the clips cannot carry the chat overlay.** That is a real constraint
 on the format, not a bug: the overlay only works where the room is talking
 about the thing he is talking about.
@@ -6520,7 +6527,7 @@ and cannot run two clips at once.
 | loudness | -14.00 vs -14.10 LUFS, **-1.30 dBTP** |
 | captions | 7/7 sampled frames agree |
 | bottom pane | **+0px at every sampled time** |
-| vertical | **+0px at every sampled time** |
+| ~~vertical~~ | ~~+0px at every sampled time~~ — **THERE WAS NO VERTICAL CHECK.** Both per-pane fits were `pane_cols`, i.e. lateral only. This row described a check that did not exist; `pane_rows` is now built and the gate names the axis |
 | **top pane** | **+10px — FAIL** |
 | **geometry** | **row profile 2.895 (tol 2.0) — FAIL, same cause** |
 
@@ -6537,24 +6544,12 @@ optimum:
 | facecam src x0 (inset 0) | 1508.50 | **1512.25** | **1512.45** |
 | visible width | 352.6 | **350.1** | **351.1** |
 
-**THE NATIVE PATH IS THE ONE THAT MATCHES THE ARITHMETIC.** It reproduces
-`resolve_layout.plan()` to a quarter of a source pixel. The RESOLVE RENDER
-departs from `plan()` by 3.75 source px left and 1.5px wider, reproducibly,
-at every sampled time and every inset (dx +3.75 / +3.75 / +4.00 / +3.75 /
-+4.50). The survey independently saw the same direction on clip 15 — fitted
-xleft 1495.40 against a predicted 1495.86 — but eight times smaller.
-
-So `plan()` does not fully describe what Resolve renders, and the gap is
-channel- or cam-dependent. About 1% of the pane width and visually
-negligible; **the tolerance is NOT being widened to hide it**, because a
-threshold moved to make a failure disappear is how the knife-edge defects in
-this file got shipped. It is recorded as an open, attributed difference.
-
-Unexplained and worth naming: a single quantised `ZoomX` would produce both
-symptoms at once (a smaller zoom is a wider visible region, and zoom scales
-about the CANVAS centre so it also shifts position), but `plan()` computes
-Pan after zoom and would compensate exactly, so that only works if Pan is
-quantised too. Not established.
+**~~THE RESOLVE RENDER DEPARTS FROM `plan()`.~~ WRONG, AND STRUCK.** The
+measurements above are all correct; the conclusion drawn from them was not.
+Both renderers reproduce `plan()` to a third of a source pixel — they were
+handed DIFFERENT RECTANGLES. The hypothesis recorded here (a quantised
+`ZoomX`, with the caveat that Pan would have to be quantised too) was never
+needed. See the next section, which is the correction.
 
 ### THE PICTURE IS 2716 FRAMES AND THE OVERLAYS ARE 2710
 
@@ -6602,3 +6597,1317 @@ window: **Resolve best offset +1, native +0.** So this is the known MarkIn
 artefact, not a composite bug, and the native path is the correct one — which
 is why `render_parity`'s caption check compares whether a caption is UP on a
 sampled frame rather than demanding frame-exact equality.
+
+## IT WAS NEVER RESOLVE: THE TWO RENDERERS READ THE CAM RECT FROM DIFFERENT PLACES
+
+George: *"Chase the offset."*
+
+The section above measured clip 12's facecam at **1508.50** in the Resolve
+render against **1512.25** in the native one, fitted both position and width,
+found the native path matching `resolve_layout.plan()` to a quarter of a
+source pixel, and concluded that Resolve departs from `plan()` by a
+channel-dependent amount, cause unknown. **Every measurement in it is right
+and the conclusion is wrong.**
+
+`clips/fns-12.json` carries a CLIP-LEVEL `cam` override:
+
+| | rect | `plan()` predicts x0 | measured |
+|---|---|---|---|
+| `channel.cam` | (1456, 818, 1920, 1080) | 1512.55, width 350.89 | **native 1512.25 / 350.1** |
+| `clip.cam` | (1450, 816, 1920, 1080) | 1508.21, width 353.57 | **Resolve 1508.50 / 352.6** |
+
+Each renderer matches `plan()` for the rect it was given, to within a third
+of a source pixel. **Neither was wrong about the arithmetic. They were
+handed different rectangles**, and the one that was wrong is the one written
+this round: `render_native.py` read `ch.cam` directly, where `make_clip`
+resolves it through `_cam(clip, ch, st)`.
+
+**`cam` IS THE ONLY `Channel` FIELD A `Clip` CAN SHADOW**, which is what
+makes the rule clean, and this file already records why it exists: *"THE
+FACECAM RECT IS NOT A CHANNEL CONSTANT — and assuming it was shipped a broken
+clip"*, measured on clip 6, which rendered as a corner of a browser sidebar
+with no face in it when clip 8's rect was reused. **23 of the 25 specs on
+disk override the channel**, so this was not a clip-12 quirk — it was every
+clip but two.
+
+And `_cam` does more than read the spec. With no override it runs
+`facecam.detect`, so going round it loses the detection as well as the
+override — on a channel whose spec has no rect, the native path would have
+silently used the channel default where Resolve detects per clip.
+
+### The shape of it, for the sixth time
+
+**Two numbers that are supposed to be the same number, derived twice.** The
+previous five are recorded above — `_cut.wav` cached, `punches.json` on a
+shared path, the punch plan measured from the overwritten delivery, `specs`
+overwriting a reviewed spec, and `bed()` rendering a different waveform than
+`cue_gain` solved against. This one is the same defect wearing a geometry
+costume, and it got as far as a *stated conclusion about a third-party
+application* before anyone checked the input.
+
+**The tell was in the report and was read past.** "Best fit +10px, residual
+1.7" is a LOW residual at a NON-ZERO shift — the gate's own docstring says
+that means *right content, wrong place*, which is the signature of a crop
+whose RECTANGLE is wrong, not of a renderer whose maths is wrong. The next
+question should have been "which rectangle", not "what does Resolve do
+differently".
+
+`tests/test_native_inputs.py` is the gate: for every Channel field a Clip can
+override, no geometry call may take it off the Channel. **3 failures against
+the pre-fix commit, 0 after**, and the first test fails loudly if the set of
+shadowed fields ever grows, so a second overridable field cannot inherit this
+file's silence.
+
+### What the gate reads now: 15 of 15, PARITY
+
+| | before | after |
+|---|---|---|
+| top pane, lateral | **+10px — FAIL** | **+0px** |
+| top pane, vertical | *(no such check)* | **+1px** |
+| bottom pane, lateral / vertical | +0px / — | +0px / +0px |
+| grade saturation | 0.655 | **0.310** |
+| grade white point | +0.66 | **+0.36** |
+| geometry | row profile 2.895 — FAIL | **row gradient 0.410 mean / 0.757 worst** |
+| duration | 0.00 frames | 0.00 frames |
+| loudness | -14.00 vs -14.10 LUFS | unchanged |
+
+## RESOLVE WRITES AN OVERLAY'S RGB AT VIDEO LEVELS — a third artefact, 13 code values
+
+With the rect fixed, the gate's row profile still read **2.040 against a 2.0
+tolerance** — and the temptation is to call that a cross-renderer floor and
+move the number. Decomposing it by band instead:
+
+| band | rows | mean \|d row\| | share of the total |
+|---|---|---|---|
+| facecam 0-806 | 806 | 1.354 | 22.9% |
+| content 806-1920 | 1114 | 3.305 | 77.1% |
+| **…of which the chat box 1090-1510** | **420** | **7.676** | **67.5%** |
+
+Two thirds of the residual in a fifth of the frame, and the twelve worst rows
+all inside the chat panel. Sampling a flat patch of its interior:
+
+| | Resolve | native | |
+|---|---|---|---|
+| read back as gray | **8.00** | **23.00** | mean \|d\| 15.00, **max 15** — a uniform offset |
+| implied stored Y' | **22.9** | **35.8** | |
+
+`rm_Chat.mov`'s own pixels are exactly **#18181B = (24,24,27) at alpha 255**,
+the Twitch panel colour from `theme.tsx`. Y' full-range is 24.2, so a bt709
+`tv` file should store **16 + 219·24.2/255 = 36.8**. The native path stores
+35.8. **Resolve stores 22.9 — it writes the overlay's RGB into the
+limited-range luma slot without the full->limited conversion**, crushing the
+panel by 13 code values.
+
+**THIS FILE HALF-KNEW IT AND FILED IT AS A CONSEQUENCE RATHER THAN A FAULT.**
+The chat-palette section records *"the limited-range encode darkens
+`#18181B`'s (24,24,27) uniformly, which RAISES the text contrast, so the lift
+floor is conservative"* — true, and the reason the username lift is safe
+either way, but it was recorded as a property of encoding rather than as
+Resolve mishandling levels. So **every clip delivered so far has its dark
+overlays crushed**, and the native path is the faithful one. That makes three
+Resolve artefacts the native renderer deliberately does not reproduce, after
+`MarkIn` rendering one frame early and the overlays compositing one frame
+early.
+
+### A LEVELS ARTEFACT WAS EATING A GEOMETRY INSTRUMENT'S WHOLE MARGIN
+
+That is the real lesson, and it is why the threshold did not move. A mean
+absolute difference of row LEVELS answers "do these two frames look the
+same", not "are the panes in the same place" — so a uniform offset over 420
+rows consumed the margin that a geometric displacement needed.
+
+**A gradient has no DC term.** `row_gradient` is the row profile's first
+difference: a uniform offset over any band cancels exactly, while a
+displacement moves every edge undiminished. Measured on the real pair plus
+mutations of the native render, all against the Resolve reference:
+
+| control | level mean | **gradient mean** | level sep. | **gradient sep.** |
+|---|---|---|---|---|
+| honest (cross-renderer) | 2.888 | **0.435** | — | — |
+| 10px VERTICAL shift | 6.272 | **1.872** | 2.17x | **4.30x** |
+| 10px lateral shift | 2.961 | 0.439 | 1.03x | 1.01x |
+| seam 0.42 -> 0.45 | 13.910 | **2.201** | 4.82x | **5.06x** |
+
+The gradient is better on both real failures and immune to the artefact.
+**Neither metric sees a lateral shift**, which is correct and is why
+`pane_cols` exists — a row profile averages across columns by construction.
+`GRAD_MAX = 1.2`: honest 0.757 worst over the full 45s, nearest failure
+1.872, and sqrt(0.757·1.872) = 1.19, so the threshold is the geometric MIDDLE
+of its plateau rather than an edge of it.
+
+**Dropping the level metric would have lost real coverage**, so it is
+replaced rather than deleted. A `levels` instrument measures the median
+signed row difference on the bands that carry NO overlay in this format — the
+facecam above the hook line, the content pane below the chat box:
+
+| control | facecam median | content median |
+|---|---|---|
+| **honest (cross-renderer)** | **+0.16** | **+0.00** |
+| content pane lifted 0.04 | +0.21 | **+8.02** |
+| mismatched facecam CDL | +1.24 | +0.00 |
+
+**On overlay-free bands the two renderers agree to a sixth of a code value**,
+which is the strongest single statement of parity in this whole exercise and
+is only visible once the artefact is isolated. `LEVEL_MAX = 3.5` against an
+honest ceiling of 1.32 and a failure at 8.02. The mismatched CDL is NOT
+separated here and does not need to be — instrument 2 catches it at 15.1x,
+and `tests/test_render_parity.py` asserts that orthogonality so a later
+tidy-up cannot drop one instrument and keep the other.
+
+### Two smaller things the same pass turned up
+
+**`pane_rows`, so the gate can name the AXIS.** Both per-pane fits were
+`pane_cols` — lateral only. The row profile does catch a vertical fault (the
+test's `wrong_shift` control is a vertical crop and instrument 1 rejects it)
+but cannot say which pane moved or by how much, so a report could name a
+lateral fault while the same cause moved content vertically too — which is
+exactly what clip 12's rect did, differing in y0 as well as x0. The findings
+are now `top pane x` / `top pane y` / `bottom pane x` / `bottom pane y`, and
+the vertical profile is at full output resolution so its shift needs no
+conversion.
+
+**THE COLOUR TAGS, AND THE FLAGS ALONE DO NOT SET THEM.** The native render
+came out `color_transfer=unknown`, `color_primaries=unknown` against a
+Resolve delivery tagged bt709 throughout. Adding `-color_primaries bt709
+-color_trc bt709` changed nothing, which is not a mistake in where they were
+passed: measured on a 64x64 `testsrc`, **this ffmpeg's libx264 wrapper writes
+`matrix_coefficients` into the VUI and silently drops `colour_primaries` and
+`transfer_characteristics`**, on mov and mp4 alike. `-bsf:v h264_metadata=
+colour_primaries=1:transfer_characteristics=1:matrix_coefficients=1` writes
+all three, costs no re-encode, and survives the loudness finish because that
+is `-c:v copy`. The flags stay alongside it: they are what swscale reads, and
+they state the intent even where the muxer ignores them.
+
+## RESOLVE WAS 7% OF THE BUILD — the native renderer ships, and the slow part is Remotion
+
+George: *"a job is already running — one at a time, because Resolve is a
+single GUI app - why is it taking so long? - also these clips should be made
+not in my local davinci but using code now we've got the formula down - fix"*
+
+**Measured before changing anything**, on clip 16 (30.96s), reconstructed
+from the mtimes of its own artefacts:
+
+| | | |
+|---|---|---|
+| overlay building (Remotion PNG sequences + sfx) | **184.9s** | **85%** |
+| DaVinci Resolve (project, timeline, render) | 15.6s | 7% |
+| delivery re-encode + QC | 17.4s | 8% |
+| | **218.0s** | for a 31-second clip |
+
+Per composition: `rm_Chat.mov` 1850 frames in 100.8s, `rm_Bait.mov` 1020 in
+55.4s, `rm_StoryVitality.mov` 240 in 19.5s — roughly 10-18 frames per second
+of wall clock, drawn one PNG at a time in headless Chrome.
+
+**So the two halves of the note have different answers.** Resolve is out of
+the render path, because he asked and because it is right. But it is 7%, and
+saying "done" would have left him clicking Make this clip and waiting three
+minutes exactly as before.
+
+### `--renderer native`, and it is the default
+
+`make_clip.py --renderer {native,resolve}`, passed through by
+`batch.py --renderer`. Four of the six stages had a Resolve half and a
+decide-what-happens half; the halves are now separate functions, so the
+native variants are thin and **the thinking is in one place for both**:
+
+| extracted | what it decides | was reachable only by |
+|---|---|---|
+| `_log_cut` | the narration of the cut | building a timeline |
+| `_base_shots` | V1 segments and shot grouping | reading items back off V1 |
+| `_punch_plan` | which moments get a punch, and `punches.json` | the Resolve punch stage |
+| `_overlay_schedule` | WHERE every overlay goes | the Resolve assemble stage |
+| `_sfx_bed` | the cue list and `sfx.wav` | the Resolve assemble stage |
+| `_gate` | the delivery QC | the Resolve render stage |
+| `chat_expected` | whether chat was intended | two call sites that disagreed |
+
+Verified: clip 12 builds end to end with no Resolve and no Remotion in
+**59s**, passes **8 of 8** delivery checks and **15 of 15** parity against
+the Resolve delivery. Clip 16 the same, in 32s.
+
+**BE STRAIGHT: PER CLIP IT IS SLOWER.** 44s against Resolve's 15.6s, because
+Resolve renders on the GPU. What it buys is everything else — no logged-in
+desktop, no GUI thread to wedge, no 4K-project crash class, no render queue,
+and an agent on a Mac with no Resolve installed can take a job end to end.
+`worker/agent.py`'s `NEEDS_RESOLVE` is now empty and the site no longer
+refuses a build when Resolve is closed.
+
+**AND IT IS NOT THE MASS-PRODUCTION UNLOCK YET, which the first draft of
+this section claimed.** Resolve was only ONE of two causes of serialisation.
+**Remotion renders every overlay through a SHARED `public/` directory**, so
+two clips still cannot build at once — and that is also the 85%. The
+one-at-a-time message in the site now says so.
+
+### The encoder is not the lever, and the measurements say why
+
+Swept on clip 12 (2716 frames), composite only:
+
+| | wall | size |
+|---|---|---|
+| filter graph alone, `-f null` | **21.8s** | — |
+| + x264 crf17 preset medium | 32.2s | 34.2 MB |
+| + x264 crf17 preset fast / faster / veryfast | 25.7 / 26.7 / 24.4s | ~33 MB |
+| `h264_videotoolbox` 16M | **19.6s** | 88.1 MB |
+
+The whole preset range moves it 8 seconds, because **the filter graph is 22
+of the 32** — crop, scale, vstack per segment is 10s of that on its own and
+the overlays another ~4s. The CDL is free (`lutrgb` compiles to a lookup
+table; it measured inside the noise).
+
+**`h264_videotoolbox` halves the render and is NOT used.** SSIM against the
+x264 master: 0.9949 at 16M (88 MB), 0.9925 at 8M (54 MB), **0.9871 at 5M
+(37.7 MB, already 42% larger than x264's 26.6 MB)**. It wants roughly 3x the
+bitrate to match, and the captions are hard-stroked glyph edges, which is
+exactly where a hardware encoder shows. Twenty seconds off a 220-second
+build is not worth a quality regression on a delivery master.
+
+### Four defects the port surfaced, all of them the same shape
+
+**1. THE PICTURE WAS 2716 FRAMES AND THE OVERLAYS 2710.** `_plan_only` set
+`st["total"] = round(out_dur * fps)`, but Resolve is handed
+`round(k.start*fps)` and `round(k.end*fps)` per keep, so a keep's span is
+the difference of two independently rounded numbers and the total drifts
+from the product. `stage_assemble` recounted it off V1 and LOGGED the
+disagreement — by which point the caption and chat movies were already on
+disk at the smaller number, so the last six frames carried picture with no
+captions and no chat. Computed once now, where the keeps are decided.
+
+**2. THE STORY SCHEDULE LIVED ON A SHARED PATH.** `_all_cards` recovers the
+card times from `vendor/public/stories.json` on a partial run — one file,
+rewritten by every clip. A partial rebuild of clip 16 found `[]` there
+because clip 18 had run since, and its story card silently vanished from the
+schedule. The worse direction had not happened yet: **clip A's story still
+sitting there when clip B rebuilds puts A's card — which NAMES REAL PLAYERS
+— onto B's clip.** That is the clip-6-chat-on-clip-12 bug with a news story
+attached. The vendor path stays, because `Root.tsx` bundles from it; the
+schedule is now ALSO written to the clip's own overlays directory and that
+is what the fallback reads. Clip 16's was regenerated rather than typed
+from this file: it re-derived `at: 23.58`, which is what the record says.
+
+**3. `chat_expected` WAS SKIPPING FOR SIX OF EIGHT CLIPS.** It was
+`bool(st["chat_windows"])`, and `chat_windows.json` moved into the clip's
+own directory only recently — so only clips 08 and 18 have one, and for the
+other six the delivery gate's chat check reported "not checked" as a pass.
+`chat_expected` is a question about INTENT, which the spec answers
+(`chat_mode: "off"` is the opt-out) and the overlay evidences; `deliver_qc`
+then measures whether it happened. One function, both call sites.
+
+**4. `render_native` READ `ch.cam` AND GLOBBED THE OVERLAYS.** Both are the
+same defect as the three above and both are now fed from the shared
+functions. The glob put every card at 0.0 because a glob has no times in it.
+
+### `tests/test_native_inputs.py`
+
+For every `Channel` field a `Clip` can override, no geometry call may take
+it off the Channel. Three failures against the pre-fix commit, zero after,
+and the first test fails loudly if the set of overridable fields ever grows,
+so a second one cannot inherit the file's silence.
+
+## THE SITE AUDIT: 55 findings, 54 survived, and the critical one was a comment
+
+Ten agents over five dimensions — the key gate, input handling, media
+serving, whether the page tells the truth about the work, and the served
+front-end JS — each with an adversarial pass told to refute its own
+dimension's findings. Read-only on disk by brief, which two agents exceeded:
+they queued two junk jobs and minted two rights-free channel files.
+
+**THE CRITICAL ONE IS ONE LINE, AND IT BREAKS THE PRODUCT'S PROMISE.**
+`web/server.py` creating a job:
+
+    # THE WHOLE CHAIN. The promise is 'drop a VOD, get\n            # clips'; stopping at `specs` delivered specs.\n            WORK.put((job_id, [s.key for s in ALL_STAGES], ()))
+
+An edit collapsed a comment and the call it introduced onto ONE line with
+literal `\n` in the text. **`WORK.put` was inside the comment.** Dropping a
+VOD inserted a row, wrote nine pending stages, set the state to "queued" and
+queued nothing — every status the UI showed was true of the database and
+false of the machine. It parses, it lints, it returns 201, and the product
+does not work. The round that introduced it recorded in this file that the
+chain "is one action now".
+
+**THE WORST ONE THE FINDER MISSED AND THE VERIFIER CAUGHT: EVERY SLOW
+DOWNLOAD TRUNCATED.** `timeout = 20` was added to the handler so a client
+dribbling headers could not park a thread — but it is a SOCKET timeout, so
+it is also on the socket while the response body is written, and a clip goes
+out in one `wfile.write` that blocks until the kernel has taken all 26 MB.
+Measured at `--limit-rate 300k`: **7,825,704 bytes of 26,584,815 — 29% — in
+25.2s, curl exit 18**, with a 200 and a correct `Content-Length`. Anything
+under roughly 1 MB/s lost its download, which through a tunnel is most of
+them, and the 139 MiB zip would need 7 MB/s sustained. The timeout belongs
+on READING a request; the body write now gets a budget scaled to its own
+size at a 20 kB/s floor. Re-measured: **86.7s, byte-identical, exit 0.**
+
+Also fixed this round, each verified by sending the attack:
+
+* **`is_local_vod` accepted any readable file.** It was `is_file()`, so
+  `/etc/passwd` queued as a VOD — and the site serves its own stage logs, so
+  a path that fails downstream can surface the file in the error it prints.
+  The suffix is not the test either, because a file named `.mp4` need not be
+  one; ffprobe reading a video stream out of it is the definition of the
+  thing being accepted, and that is the test.
+* **The Twitch URL allowlist used `re.match` with no end anchor**, so
+  `.../videos/123/../../evil` passed and reached yt-dlp as an argument.
+  `fullmatch`, with the query string the only thing allowed after the id.
+* **`HEAD` with a `Range` sent a body**, desynchronising keep-alive.
+
+**Still open, and they are real:** the live site key is recoverable from git
+history and was never rotated; the clips grid is driven by the screen
+verdict rather than the specs, so the five-field review loop is served by
+the API and unreachable from the page; the length badge on every card shows
+the candidate REGION's length, not the clip's (up to 54s wrong — visible on
+screen as a 1:04 badge over a 0:45 video); the focus/playback guard is gone
+from the served JS, so the grid destroys a playing `<video>` whenever any
+clip finishes; poll failures are swallowed so the UI holds stale data
+forever; and no job is reachable except the newest, so a second VOD
+permanently hides the first.
+
+## THE REVIEW LOOP WAS SERVED AND UNREACHABLE, AND THE GRID ATE WHAT YOU TYPED
+
+George: *"Fix the UI."* — the high findings from the audit above.
+
+**ALL OF IT WAS LOST IN A REWRITE, NOT NEVER WRITTEN.** `web/static/_old/`
+holds a 428-line front end; the one being served is 196. The focus and
+playback guard, the spec editor and the job picker are in the old file and
+in none of the new one. Worth saying plainly because it changes the lesson:
+the rules were known, written down and implemented, and a rewrite dropped
+them without anything noticing. A guard that lives only in a file nobody
+diffs is a note again.
+
+### THE GRID WAS REBUILT WHOLE, SO IT DESTROYED WHATEVER YOU WERE DOING
+
+`paintClips` held a signature of the whole list and ran `grid.innerHTML =
+''` whenever it changed — and the signature includes which clips are
+building. So **the moment any clip started or finished, every playing
+`<video>` on the page was destroyed and every half-typed field was wiped.**
+The one thing you do while waiting for a clip is watch another one.
+
+This file already records the rule, twice: *do not replace a subtree that
+holds focus or playback*, written when the job list tore a row out from
+under a click and again when the grid replaced a playing `<video>`
+mid-frame. The grid now keeps its cards in a `Map` and patches them field
+by field — `setText`, `setMedia`, and the action row only when its own state
+changes. There is no `innerHTML = ''` on the grid at all.
+
+Measured in the live page across four poll cycles with a video playing and
+a field focused:
+
+| | |
+|---|---|
+| video still playing | **yes**, and it is the same DOM node |
+| it advanced | **7.93s** over 8s of wall clock |
+| typed text | survived, still focused |
+| the open editor | still open, still showing in 23.3 |
+
+### THE FIVE FIELDS, REACHABLE AT LAST
+
+`POST /api/jobs/:id/spec/:n` has been routed, validated and merge-safe the
+whole time with **nothing in the page able to reach it** — the loop that
+every round of review actually runs through. Each card now opens an editor
+on `in_point`, `out_point`, `booms`, `hook`, `chat_mode` and a "why" line,
+with Save and Save & cut.
+
+**Verified against clip 12, which carries four rounds of George's notes.**
+Backed up, saved through the page, diffed, restored:
+
+* the channel block is identical, no key is lost;
+* `cam`, `cards`, `chat_mode`, `emoji`, `hook`, `in_point`, `index`, `job`,
+  `out_point`, `region` all unchanged;
+* only `notes` changed — the why appended, which is the design;
+* the file is byte-identical to its backup afterwards.
+
+**The poll does not overwrite a field being edited**: `fillEditor` refuses
+while the drawer holds the focus or is dirty, which is the same rule as the
+grid one layer down.
+
+Two things the server refused that it should not have, and one it accepted
+that it must not:
+
+* **`chat_mode: "off"` was not in `CHAT_MODES`.** It is the opt-out
+  `make_clip`'s own log tells the operator to set — *set chat_mode "off" on
+  this clip's spec if the room is talking about something else* — and saving
+  it from the page was rejected. The pipeline documented a setting the site
+  could not express.
+* **`float()` ACCEPTS "nan" AND "inf".** Either one passed `f < 0` (every
+  comparison with nan is False), round-tripped through `round()`, and
+  `json.dumps` writes a bare `NaN` token — **which is not JSON**, so a
+  reviewed spec would be saved in a state that `json.loads` refuses and
+  every later read of that clip fails. Refused now, for in/out and booms.
+
+### EVERY NUMBER ON A CARD WAS THE REGION'S, NOT THE CLIP'S
+
+**The length badge.** `read_clips` returned no duration at all, so the grid
+fell through to `c.secs` — the candidate WINDOW — and every badge was wrong,
+visibly so as a 1:04 label over a 0:45 video, up to 54s out. The render is
+measured on the file now, memoised on its own mtime and size because the
+grid polls every two seconds and ffprobe is a process. Verified on screen:
+badges 0:39 / 0:39 / 0:29 / 0:45 against videos 0:39 / 0:38 / 0:28 / 0:45.
+
+**Do NOT reach for the manifest's `seconds`** — that is how long the BUILD
+took (323 for a 45-second clip), the same trap one field over.
+
+**An unbuilt clip has no length yet**, so it shows `~` and the spec's own
+span — `(out_point ?? region) − in_point`, an upper bound because the
+dead-space pass has not run. A clip with no spec shows nothing rather than a
+number that means something else.
+
+**The thumbnail had the identical error in the picture instead of the
+number**: a frame at 28% of the REGION, which on a two-minute region is
+usually not in the clip at all. It is 28% of the CUT now, and the spec joins
+the freshness key so editing an in-point re-grabs.
+
+**The QC verdict was measured and never shown.** `read_clips` looked for a
+list of rows carrying `"index"`; the manifest is a DICT keyed by spec stem
+(`{"fns-12": {...}}`) with the index in the KEY. So `qc` came back empty for
+every clip and each render was offered for download with no verdict
+attached. A clip that failed its gate now says so on the card.
+
+### FOUR MORE, EACH ONE VERIFIED BY DOING IT
+
+| | |
+|---|---|
+| **Poll failures were swallowed** — `catch { return; }` — so a restarted or crashed server left the page showing what it last knew, forever. Stale data that looks live is worse than an error. Now a bar says so and clears on recovery; the cards stay up meanwhile. Verified by making `fetch` reject: *"Lost contact with the factory — Failed to fetch"*, 27 cards still there, cleared on the next good poll |
+| **A second VOD hid the first forever.** Boot opened `jobs[0]` and nothing else was reachable, though every older job, spec and clip was still served. A picker in the header, hidden while there is only one |
+| **A boot failure rendered the "Drop a VOD" screen**, so a server that could not answer looked exactly like a healthy empty install — and the honest response to each is the opposite. They are told apart now |
+| **"Make this clip" was not disabled synchronously**, so a double-click sent one POST per click, each spawning subprocesses that write the clip's spec. Verified: **three clicks, one POST** |
+
+And the smaller ones: `BUILDING` was purely local, so a batch build started
+from the CLI or another tab left every card offering to make a clip that was
+already being cut — it reads `progress.clip` now; `SAY` had no entry for
+`editorial`, so the rail printed the raw stage key at the user; `function
+open(id)` shadowed `window.open` for the whole page; inputs had no labels
+and the lookup announced its result to nobody; there was no `<noscript>`;
+and `X-Content-Type-Options: nosniff` with `Referrer-Policy: no-referrer`
+now go out on every response.
+
+**The footer asserted one reason for all of them and it is false for some.**
+It said *the audio is muted or the cut would strobe* for every left-out
+clip, including ones left out for neither. The first fix grouped the
+screen's own strings and was worse — `"32% muted"` and `"51% muted"` became
+separate categories, reporting three of each, which is the number dressed as
+a category. A clip carries SEVERAL reasons (`"43% muted; 19 cuts/min; only
+20s left"`), so what to count is reason KINDS across clips: *23 other
+moments were left out — 20 because the audio is muted, 19 because the cut
+would strobe, 6 because too little is left after tightening.*
+
+## 7m26s A CLIP, AND NOTHING ON SCREEN SAID IT WAS ALIVE
+
+George: *"the clips are basically just not cutting. There's just like an
+endless kind of loop ... they're taking way too long to cut ... I don't know
+if you're like potentially using DaVinci."*
+
+**The clips were cutting.** A build was running while he wrote that, and it
+delivered — `fns-32-it-s-not-as-bad-for-valyn-as-you-think.mp4`, nine of
+nine gates. It took **7m26s**, and the card showed a sliding bar and the
+word "Cutting…" for all of it. A progress bar that never moves IS an endless
+loop from the other side of the screen, and he was right to call it broken.
+
+**And it is not DaVinci.** The processes were `python` and `npx remotion`;
+Resolve was open but not in the path. The native renderer has been the
+default since last round.
+
+The manifest records build wall-clock per clip, which nobody had read:
+
+| | | | | | | | | |
+|---|---|---|---|---|---|---|---|---|
+| 32 | 18 | 04 | 06 | 12 | 08 | 16 | 07 | 15 |
+| 7m26 | 6m17 | 5m33 | 5m32 | 5m23 | 5m18 | 4m18 | 3m45 | 3m43 |
+
+### THE COMPOSITIONS WERE RENDERED ONE AT A TIME ON A TWELVE-CORE MACHINE
+
+`--concurrency=4`, in a `for` loop, three times per clip — four tabs working
+while eight cores idled, each invocation paying its own webpack bundle, its
+own 19 MB public-dir copy and its own Chrome launch. The compositions are
+independent: different output directories, the same read-only `public/`.
+Nothing made them serial except the loop.
+
+**Measured, clip 32, same spec, same output, all nine gates still green:**
+
+| | |
+|---|---|
+| before | **446s (7m26s)** |
+| after | **188s (3m08s)** |
+| | **−258s, 58%** |
+
+The overlay stage went 160s serial to **110s** with Bait and Chat
+overlapping.
+
+**~~The saving is bigger than the arithmetic, because the two invocations'
+bundling and Chrome launches overlap as well.~~ STRUCK — the overlapping
+BUNDLING is what hung it.** See the next section. The win survives; the
+reason given for part of it was the defect.
+
+**A LANE MUST NEVER GET FEWER TABS THAN IT HAD.** The first version divided
+a fixed tab budget across the lanes, which is tidy and wrong: at three
+compositions it hands each lane 3 tabs where it previously had 4, and the
+chat is 1850 frames against the hook's 1020 — it is the critical path, so
+slowing it to speed up the short one is a net loss. Two lanes at four tabs
+each, which covers every clip (all of them have a chat and a hook); a story
+card is rarer and follows.
+
+**What is left, with its number.** Overlays are still 110s of the 188s, and
+83–89% of the frames they draw are identical to the frame before (measured
+last round: 1532 of the chat's 1850, 905 of the hook's 1020).
+
+**AND THE REASON GIVEN FOR CLIPS NOT BUILDING IN PARALLEL IS WRONG.** This
+said `publicDir` "exists in the bundler API but **not as a CLI flag** in
+4.0.390 — so true bulk needs the Node API". Measured: neither `remotion
+bundle --help` nor `remotion render --help` mentions `--public-dir`, and it
+works anyway. Bundled with `--public-dir=<a temp dir holding one
+SENTINEL.json>`, the bundle's own `public/` came back holding **exactly
+that one file** instead of the project's 17. So it is a real flag the help
+omits — the same trap this file already records for the transparency flags
+(*"`npx remotion render --help` does not list them, so do not go looking
+for them there"*), and I walked into it by reading the help instead of
+testing the behaviour.
+
+~~So **per-clip public dirs are reachable from the CLI today**, which is the
+shared-state reason two clips could not build at once.~~ **HALF WRONG, AND
+STRUCK.** The flag is real; it does not solve the problem. `Root.tsx`
+`import`ed its per-clip data, and webpack inlines an import at BUNDLE time —
+so a per-clip public dir moves the copied tree and not one byte of the data.
+Measured: a bundle built with one compiled the WRONG clip's chat while
+`<out>/public/clip.json` reported the RIGHT one, which converts a race into
+a deterministic wrong-clip render that passes its own verification. The fix
+is `--props`; see "MULTIPLE CLIPS AT ONCE". Be precise about
+what that does and does not establish: the flag is proven, parallel CLIP
+builds are not built and not measured. The other shared paths would each
+need checking first — `/private/tmp/claude-501/remotion-seq/<comp>` is keyed
+by composition and not by clip, so two clips rendering `Chat` at once would
+write the same sequence directory.
+
+### THE PAGE KNEW A BUILD WAS RUNNING AND NOT WHICH CARD IT WAS
+
+`progress()` reads the last 8000 characters of the stage log for the
+current line, and found the `=== fns-11 ===` marker in that same window.
+Remotion writes **one line per frame**. Measured during a live build: the
+marker sat **24,422 characters from the end** with **1,216 `Rendered n/N`
+lines after it**, so `progress.clip` was absent, no card could claim the
+build, and the one card that was actually working showed nothing. The marker
+is found in the whole file now; only the current line comes from the tail.
+
+The card says what is happening in words — *"Drawing the overlays — frame
+1176 of 1180"*, *"Rendering the video"*, *"Finishing the sound"* — built
+from the log line the server already reported. Verified live on clip 11:
+exactly one card claims the build and carries its count.
+
+**And restarting the site kills a running build**, which this round found by
+doing it: the worker is a thread of the server process, so `launchctl
+kickstart` took the build with it and left the row saying `running`. Worth
+knowing before touching the service mid-job.
+
+### `classList.toggle(name, undefined)` IGNORES THE ARGUMENT AND TOGGLES
+
+Caught by LOOKING at the render rather than reading the code. The new QC
+badge is `toggle('bad', done && done.qc_ok === false)`, and on an unbuilt
+clip `done` is undefined — so the force parameter was `undefined`, which the
+DOM treats as *absent*, which means *flip it*. Every unbuilt card flipped on
+every 2-second poll and the grid filled with **"QC FAILED" on clips that had
+never been cut**. `!!(...)` is the fix. A screenshot found it in one glance;
+the code reads correctly.
+
+### THE SCORE IS A STATED OPINION AND THE PAGE NOW SAYS SO
+
+George: *"the virality score doesn't really make sense ... We need that
+clarified."* It is:
+
+    virality = (0.45·strength + 0.25·crowd + 0.15·reaction + 0.15·fit) x genre
+
+where **strength** is the Tier 3 model's read of the transcript, **crowd**
+is whether viewers already clipped that moment, **reaction** is whether he
+got loud, and **fit** is 0.6·duration + 0.4·subject specificity. `engine/
+virality.py` says in its own docstring that **nothing in it is validated
+against real view counts** — it is a set of weights to disagree with, not a
+learned model. Printing a bare two-digit number beside a thumbnail invites
+it to be read as a predicted view count, which it is not.
+
+The components and the flags have been computed and stored per clip since
+the file was written and were never shown. The editor now opens with the
+breakdown and any flag — *"103s is long for short-form — check the
+out-point"* was sitting in the data all along.
+
+### valyn, AND A CORRECTION I NEARLY MADE BACKWARDS
+
+George: *"Valen is referencing the professional Valorant player Valen, but
+for some reason you spelt it wrong."*
+
+Checked rather than argued. The handle is **`valyn`** — Jacob Batio, G2 —
+on VLR.gg, ProSettings, thespike and Upcomer, and no player called "Valen"
+exists in any of them. **His own roster file agrees**: `handle: valyn,
+aliases: [balin, ballin, valen, valin]`, collected by hand for the quote
+desk. So the `valen -> valyn` correction is right, and the delivered file is
+`fns-32-it-s-not-as-bad-for-valyn-as-you-think.mp4`.
+
+**And he really does say it.** Whisper hears the name five times in clip
+32's source; three are inside the cut and **two of those measure 0% digital
+zero** — genuinely spoken. The third, at 35.32s, is 62% silence and its
+caption was correctly dropped as a hallucination. The clip is about him and
+the name is earned.
+
+**THE NEAR-MISS IS WORTH MORE THAN THE ANSWER.** Searching the rosters
+turned up Harrison "psalm" Chang on The Guard, which looks exactly like
+proof that our unconditional `psalm -> s0m` rewrite renames one real player
+as another — and I was about to pull it. George: *"psalm is not a player
+anymore - it's s0m."* Same person, the handle he no longer uses. **A search
+that finds a HISTORICAL handle is not evidence that a correction is wrong**,
+and a confident web result is not a reason to revert a rule the client set
+from his own knowledge. Recorded in `config/handle_garbles.json` so the next
+pass does not repeat the search and reach the same wrong conclusion.
+
+### THE ONE CLIP THAT FAILED, AND WHY IT TOOK SO LONG TO SEE
+
+Clip 11 failed its build — `built: false`, no delivery, the log ending
+cleanly on `Rendered 1180/1180` with `rm_Bait.mov` written and
+`rm_Chat.mov` absent.
+
+**I RECORDED THIS AS "it did not reproduce" AND IT REPRODUCED WITHIN THE
+HOUR, with the identical signature.** See "THE CONCURRENT RENDER HUNG"
+below: it is the second composition deadlocking on the shared webpack
+cache, and `rm_Bait.mov` present with `rm_Chat.mov` absent is exactly what
+that looks like. The entry blamed a service restart, then said the evidence
+for that did not hold up, and still reached for "unreproduced" rather than
+"undiagnosed" — which are not the same claim. **One pass is not a
+reproduction attempt**, and a failure whose mechanism is unknown should be
+left open rather than closed as transient.
+
+What it exposed is worth more than the cause:
+
+* **`batch.py` recorded only the exit code.** The manifest's whole account
+  of the failure was `returned non-zero exit status 1` — the traceback went
+  to the parent's stderr, which under the site is the SERVICE log, not the
+  build log the page reads. `stderr=subprocess.STDOUT` now puts it where
+  someone will find it.
+* **The service log was drowning in normal behaviour.** Every `<video>`
+  that seeks abandons its range request, and the stdlib logged a full
+  traceback per abandoned request — `BrokenPipeError`, `ConnectionResetError`
+  — so `site.err.log` was nothing but those, and a real failure hid in them
+  for an entire diagnosis. **The cost of logging something normal as an
+  exception is that it hides the abnormal.** `_write_body` catches both and
+  closes the connection.
+* **A FAILED CUT LOOKED LIKE NOTHING HAPPENING.** The card left "Cutting…"
+  and went back to offering "Make this clip" — indistinguishable from a
+  build that was never started, which is most of what *"the clips are
+  basically just not cutting"* describes. The stage state has said `failed`
+  all along and nothing read it; the page says so now.
+
+**And restarting the service kills a running build.** The worker is a thread
+of the server process, so `launchctl kickstart` takes the build with it and
+leaves the row reading `running`. Do not restart the site mid-job.
+
+## ASK IT TO CHANGE THE CUT — "remove the booms", in words
+
+George: *"i want you to add a feature that allows me to cut a video, then i
+can ask the ai 'remove the booms' or cut the end of the video, etc, and then
+it will make the changes then and there and re-load the video."*
+
+**THE MODEL NEVER WRITES THE SPEC.** `engine/ask.py` turns the sentence into
+a PATCH over the same five reviewable fields the editor drawer exposes, and
+that patch goes through `server._clean` — the identical validator a typed
+edit goes through — before `write_spec` merges it. The worst a bad reply can
+do is be refused. Everything the house style owns — captions, exits, punch
+geometry, sound, palette — is in code and is not reachable from here, which
+is the same split `engine/clipspec.py` has always drawn.
+
+Measured on clip 12 before anything was wired up, nothing written:
+
+| asked | patch | the validator |
+|---|---|---|
+| remove the booms | `{"booms": []}` | accepted |
+| cut the end of the video | `{"out_point": 80.28}` | accepted, off a real word |
+| make the captions bigger | — | **refused** |
+| turn the chat off | `{"chat_mode": "off"}` | accepted |
+
+`[]` and `null` are DIFFERENT ANSWERS and the distinction already existed:
+`_punch_plan` tests `if clip.booms is not None`, so `[]` means *explicitly
+none* and `null` means *let the pipeline choose*. "Remove the booms" is the
+first instruction that needed to say the former.
+
+### THREE THINGS THE PROMPT EXISTS TO GET RIGHT
+
+**1. TWO CLOCKS, AND THEY ARE EASY TO MIX.** `in_point` and `out_point` are
+SOURCE seconds; `booms` are OUTPUT seconds. A model asked to "cut the last
+three seconds" will subtract three from a number measured on the other
+clock, and the answer looks right. Both are labelled, and every transcript
+line carries `[output | source]`. That needed `make_clip._cut_words_full`,
+with `_cut_words` kept as a projection of it — one remap, two shapes, rather
+than a second copy of the arithmetic.
+
+**2. NEVER INVENT A TIMESTAMP**, the oldest rule here. The transcript comes
+with each word's own times and the instruction is to PICK one, not compute
+one. `_snap_out_point` then moves it onto a real word boundary anyway, so a
+near miss is recoverable and a number from nowhere is not.
+
+**3. IT MUST BE ABLE TO SAY NO.** "Make the captions bigger" is not
+expressible in five fields, and a model that must return a patch will return
+a bad one. `refused` is a first-class answer, it does not write and does not
+rebuild, and it names what CAN be changed instead. The reply measured:
+*"I can't change caption size because it's a look setting outside my fields;
+I can adjust the in/out points, boom timing, chat mode, or the hook title
+instead."*
+
+The instruction and the model's reason are appended to the spec's `notes`,
+so the record says why a value moved — the same audit trail a human edit
+leaves.
+
+### A CLIP BEING RE-BUILT SHOWED NO PROGRESS AT ALL
+
+Found by watching the real thing rather than reading the code. `poll()` adds
+the clip the server says it is cutting to `BUILDING`, and then dropped every
+clip that already has a render:
+
+    (j.clips || []).forEach(c => BUILDING.delete(c.index));
+
+Right for a first build. **Exactly wrong for a re-build** — and a rebuild is
+this feature's entire normal case. Ask for a change to a finished clip and
+the card showed nothing, because the old render was sitting there the whole
+time, so the one state the feature produces was the one state the UI could
+not show. The clip currently being cut is now exempt.
+
+### A REBUILT CLIP IS A DIFFERENT VIDEO AT THE SAME URL
+
+`<video src="/api/jobs/1/clip/11">` does not change when the file behind it
+does, so asking for a change and getting the old cut back would be the
+feature failing silently — and looking exactly like it had worked. The src
+carries the render's own mtime (`?v=1794327760.48`) and is rewritten only
+when that changes; resetting it every repaint would restart playback twice
+a second, which is the defect one layer up.
+
+## THE CONCURRENT RENDER HUNG, AND 0.0% CPU IS THE SIGNATURE
+
+George: *"open in chrome once done."* It was not done. A `batch.py` had been
+running **48 minutes** on a 20-second clip, with `build.log` untouched for 46
+of them:
+
+    64491  48:34  0.0% S  python batch.py ...
+    64646  48:14  0.0% S  npm exec remotion render ... Chat ...
+    tail:  "2 compositions, 2 at a time, 4 tabs each: Chat, Bait"
+           "Copying public dir 19 MB"
+           "Getting compositions"
+           "  Bait: 1020 frames -> rm_Bait.mov"
+
+**The previous round's own speed fix did this.** Rendering the compositions
+concurrently was a measured 58% win and it introduced a deadlock, so the
+honest statement is that the win is real and was shipped with a defect in it.
+
+### The tell is in the log, and it is a missing duplicate
+
+Two processes, and the log carries **ONE** "Copying public dir" and **ONE**
+"Getting compositions". Each `remotion render` bundles for itself, into the
+same webpack cache under `node_modules` — the only step the two share a
+WRITE path on. One of them took the cache and the other blocked on it
+forever.
+
+**0.0% CPU is what separates a wedge from slowness.** A 1850-frame overlay
+render is genuinely slow (10–18 frames per second of wall clock) and looks
+identical in a log tail; it does not look identical in `ps`. This file
+already records the same discrimination for Resolve, in the other direction
+— *"`ps` showed Resolve at 90–105% CPU in state R — busy, not deadlocked"*.
+Check the CPU before deciding which failure you have.
+
+### Bundle once, then render from the bundle
+
+`remotion bundle src/index.ts --out-dir=<tmp>` exists, and `remotion render`
+takes that directory in place of the entry point. So the shared-write step
+happens once, serially, and the concurrent renders only READ.
+
+Verified against the exact pair that hung — Chat and Bait, concurrent, from
+one prebuilt bundle: **both exit 0 in 64s, ~1020 and ~1850 PNGs written, no
+hang.** And it is free: the bundle measures **1.39s**, against the 19 MB
+public-dir copy each render was paying separately.
+
+One ordering constraint, and it is the media-pool defect in a new costume:
+**the bundle must be built AFTER this clip's `public/` is written**, because
+`--public-dir` is baked in at bundle time. A bundle cached between clips
+would composite the PREVIOUS clip's chat. So it is built per clip and
+deleted in a `finally`.
+
+### A HUNG SUBPROCESS NEEDS A BUDGET, NOT A HOPE
+
+`REMOTION_TIMEOUT_S = 900`. The point is not the number — it only has to
+beat 48 minutes of silence — it is that the hang had no ceiling at all, so a
+deadlock cost an afternoon and reported nothing. Same conclusion this file
+reached for Resolve's `IsRenderingInProgress()` loop, which never returns
+False and sat fifty minutes at 0.0% CPU before it was bounded.
+
+### And it had already happened once, filed as transient
+
+The entry above recorded clip 11 failing with `rm_Bait.mov` written and
+`rm_Chat.mov` absent, and closed it as **"it did not reproduce"** on the
+strength of one passing re-run. That is the identical signature, it
+reproduced within the hour, and the entry is corrected in place.
+
+**"Unreproduced" and "undiagnosed" are not the same claim**, and one passing
+run is not a reproduction attempt. A failure whose mechanism is unknown
+stays open — especially one that leaves a clip silently missing an overlay,
+which is a defect class this file has recorded four separate times.
+
+## "REMOVE THE BOOMS" WROTE `booms: []` AND SHIPPED THE BOOM ANYWAY
+
+The ask feature worked on every visible surface and did not work. Asked to
+remove the booms on clip 11 it returned `{"booms": []}`, `server._clean`
+accepted it, `write_spec` merged it, `_punch_plan` logged *"spec overrides
+the pick"*, the clip rebuilt, and **ten of ten delivery gates passed.**
+
+Measured in the 40–120 Hz band, before and against the rebuild:
+
+| | before | after |
+|---|---|---|
+| 3.65s | 2.52x baseline | **2.52x** |
+| 13.45s | 3.51x baseline | **3.51x** |
+
+Byte-different files, identical booms. **Every log line agreed with the
+plan and the plan was not what shipped** — the same shape as `cues: 3` on a
+clip with no booms in it, and the reason the rule here is to measure the
+artefact.
+
+### `if keep:` — an empty list is falsy
+
+`_punch_plan` draws the line correctly:
+
+    if clip.booms is not None:      # [] means the human said NO booms
+        base, moments = rp.bold_moments(..., keep=clip.booms)
+
+and `bold_moments` erased it one call later with `if keep:`, so `keep=[]`
+fell straight through to the automatic pick. **`[]` and `None` are different
+answers** — `[]` is *no booms*, `None` is *nobody has said* — and a truthiness
+test collapses them into one. `if keep is not None:`.
+
+**This is the seventh time in this file that two places decided the same
+thing differently**, after `_cut.wav` cached, `punches.json` on a shared
+path, the punch plan measured from the overwritten delivery, `specs`
+overwriting a reviewed spec, `bed()` rendering a different waveform than
+`cue_gain` solved against, and `render_native` reading `ch.cam`. It is the
+first to reach a feature the client had asked for in the same session, and
+it is the cheapest one yet: one word.
+
+`tests/test_booms_empty.py` — **3 failures reverted to `if keep:`**, zero
+after, and it also asserts the two guards agree, so they cannot drift apart
+again. The other place `[]` could have been collapsed was checked rather
+than assumed: `server._clean` round-trips `[]` and `None` distinctly and
+refuses `nan`, `inf` and negatives.
+
+**AND THAT CHECK WAS TRUE AND NOT ENOUGH.** It is true of the LIST shape
+`ask.py` sends and false of the STRING shape the EDITOR sent: `spec.booms ?
+spec.booms.join(', ') : ''` is truthy for `[]`, `[].join()` is `''`, and
+`_clean` maps `''` to `None` — so any save of any field put the booms back.
+The validator was never the problem; the page never reached it with a list.
+Checking one caller and concluding the distinction holds is the same shape
+as the defect it was checking for.
+
+### WHAT THIS ALSO REMOVES, AND IT IS NOT A BUG
+
+`moments` drives BOTH the zoom punches and the boom cues — the standing rule
+is no sound without a visible event, and a boom is the sound of that zoom.
+So `booms: []` yields no booms AND no zooms. That is consistent with what
+the pipeline already does when nothing qualifies (clip 08 has 0 bold
+moments and so has neither), but it is more than the words "remove the
+booms" ask for, so it is said out loud rather than discovered. Keeping the
+zoom while dropping its sound would need a second field, and nobody has
+asked for one.
+
+## THE CHAT WAS 53 SECONDS STALE, AND THE ORIGIN WAS THE REGION
+
+George: *"double check the chat being correct at the same time as the actual
+clips when they're being cut, seems like the chat messages dont really line
+up perfectly to the context of the clips, fix"* — alongside *"why doesnt it
+let me clip multiple clips at once"*, *"the cuts themselves take a long
+time"* and *"we need to add more options to the actual clips themselves"*.
+
+**The leading hypothesis was wrong and worth recording as wrong.** A viewer
+watches a stream several seconds behind the broadcaster and then takes
+seconds to type, so a reacting message carries a LATER timestamp than the
+line — which predicts a constant lag and a constant correction. Measured
+across 32 chat caches, there are **two behavioural populations at equal and
+opposite lag**: read-alouds at a **−13.1s median, 19 of 19 negative**, and
+echoes at **+12.1s** from a set with ~60% chance co-occurrence. One constant
+cannot be right for both — at −16 it would show a message **29s before he
+reads it out**. The "positive lobe centroid" that looks like a signal obeys
+`centroid = 0.819 × midpoint + 1.55` (r = 0.9485) over 22 window choices: it
+reports the window you picked, with no plateau anywhere. **Dropped.** Keep
+the read-aloud population as a regression ruler for any future chat-timing
+change — 19 events, unanimous sign, 8.2s spread.
+
+### What was actually wrong: the pre-roll was measured from the REGION
+
+A region is a candidate window from acoustic clustering; a clip is a CUT
+inside it, and **nine of this job's twenty-five specs start more than twenty
+seconds in**. `stage_chat` anchored its pre-roll on `t0`, the region start,
+so a message sent one second before the REGION was placed one second before
+the CLIP.
+
+Measured on clip 47 (`in_point 52.50`, region 95.3, cut 147.66 VOD): the
+panel at frame 0 held messages from VOD **94-95s — 52.8 to 53.8 seconds
+stale**, presented as the room reacting to the opening line.
+
+And everything between the region start and the cut fell through to `remap`,
+returned None, and was counted as **"dropped into removed spans"** — so the
+log named the wrong cause for **1149 of 1467** messages across the job. On
+clip 29 only 5 of 101 were what the log said.
+
+Three fixes in one function, all anchored on `ip = kp[0].start` (the first
+keep, not `clip.in_point`, because `_clamp_in_point` can move it):
+
+| | |
+|---|---|
+| pre-roll | `out_t = ft - ip`, and the −40s cap measured from the CUT |
+| the counters | three, named: before the cap / inside a removed span / past the out-point, with an assert that they sum to the input |
+| the clip-file time | derived ONCE as `ft`, which also fixed three clip-11 messages lost on a float hair between the branch test and `remap`'s half-open interval |
+
+**Verified on the artefact, not the plan.** The rebuilt clip 47's panel at
+t=0.5s holds *"RANKED RANKED RANKED"* (−0.66s) and *"8 partnered teams and
+only 4 qualify or is that only for kickoff"* (−0.66s) — the second of which
+is on-topic for a clip about the open circuit, which is the entire point.
+Oldest message on screen: **39.66s before the cut**, against a 40s cap.
+
+`tests/test_chat_preroll.py` runs the real spec and the real cache through
+`_plan_only`; **3 of 7 checks fail against the pre-fix code**, including a
+message shown 74.7s stale.
+
+### Two more origins in the same function, and both were measuring the region
+
+* **`chat_is_safe` scored `[t0, t1)`**, the whole region. It now scores the
+  population that reaches the screen. Nothing branches on the verdict (one
+  log line), so no clip changes — but **every on-topic number published in
+  this file was computed on the region** and has to be re-read.
+* **`cr.windows` searched the region for bursts**, which is why clip 07's
+  log once read *"reactive mode produced NO windows — its bursts fall
+  outside this cut"*. It takes `cut=` now, while `t0` stays the REMAP
+  ORIGIN; those are different numbers whenever the in-point moved, and
+  conflating them is the whole bug.
+
+### The topicality number was ALSO low for a reason that was not editorial
+
+Two defects in `topicality`, both found by the adversarial pass:
+
+1. **The stem match was ASYMMETRIC.** `{k[:5]} & {w[:5]}` makes key `team`
+   match only "team" (`"teams"[:5]` is `"teams"`) and key `teams` match only
+   "teams" — so which spelling the subject line happened to use silently
+   halved what counted, **on the most common noun in this material.** The
+   prefix relation is symmetric and keeps the same looseness (both sides
+   still capped at five, every key over three, so the loosest match is a
+   four-character shared prefix).
+2. **Twitch's own sub notices were scored as viewers talking.** `tetrixszn
+   subscribed with Prime. They've subscribed for 5 months!` counted as ON
+   TOPIC on clips about tier-1 teams. The structural tell is that the TEXT
+   starts with the AUTHOR'S name, which needs no phrase list and cannot go
+   stale when Twitch rewords a notice. 11 of 336 on clip 47.
+
+**Every published on-topic value moves UP**, 0 to +8.5 points. The old
+column reproduces this file's table exactly, so the change is attributable:
+
+| clip | was | now | | clip | was | now |
+|---|---|---|---|---|---|---|
+| 30 | 40.7% | 41.5% | | 12 | 12.9% | **18.0%** |
+| 29 | 36.9% | 38.2% | | 15 | 14.3% | 14.3% |
+| 34 | 22.4% | **30.1%** | | 06 | 8.9% | 10.7% |
+| 08 | 21.3% | 25.5% | | 16 | **6.4%** | **14.9%** |
+| 04 | 16.1% | 16.1% | | 25 | 7.2% | 8.7% |
+| 23 | 15.6% | 16.8% | | 28 | 6.7% | 8.3% |
+
+**This vindicates George three times.** He forced chat on clips 12, 16 and
+07 against the gate, and two of those three now sit at or near the 15%
+floor. The gate was under-reading, and the floor was already advice; what
+this changes is that the number printed beside it is now worth reading.
+
+**What was NOT done, and why:** `extra_stop` was dropped — applying the
+proposed stop-list takes clip 8 to 6.4% and clip 6 to 8.9%, **inverting the
+only two calibration points**, because `team`/`player` are generic here
+precisely by being the subject nouns. Moving or re-fitting the floor was
+dropped — it has one consumer, a log line. A worst-stretch gate was dropped:
+it flags {6, 7, 11, 15, 16} at K=3-5 and George asked for chat on three of
+those, best separation 2.0x, membership not K-stable.
+
+## "MULTIPLE CLIPS AT ONCE" WAS TWO SILENT COLLISIONS, NOT A POLICY
+
+The 409 said *"one at a time, because Remotion's public/ directory is shared
+between clips"*. True, and fixable — and there was a second one nobody had
+named. **Both fail silently: a clean render of the wrong clip's material,
+exit 0, no warning, every gate green.** This repo has shipped that exact
+shape three times (clip 6's chat on clip 12, a story card from the shared
+`stories.json`, the cached `_cut.wav`).
+
+### 1. The PNG sequence directory was keyed by COMPOSITION NAME
+
+`/private/tmp/.../remotion-seq/<comp>`, and `comp` is only ever `Chat`,
+`Bait` or `Story<Org>`. **`rm_Bait.mov` is 1020 frames on all 13 built
+clips**, so two clips write the identical 1020 filenames into one directory
+— a total overwrite of a title card carrying the other clip's hook — and
+because the zero-pad width matches in every pairwise combination, the
+mixture **encodes cleanly**. `tempfile.mkdtemp` per call, in a `try/finally`
+(a bare mkdtemp leaks ~0.4 GB per failure on a disk at 93%).
+
+### 2. `--public-dir` WOULD NOT HAVE FIXED THE OTHER ONE
+
+`Root.tsx` read its chat, windows, duration and story list as **webpack
+`import`s** of `../public/*.json`. Those are inlined at BUNDLE time, so a
+per-clip public directory moves the copied tree and **not one byte of the
+data** — the adversarial pass built with one and the bundle compiled the
+WRONG clip's chat while `<out>/public/clip.json` on disk reported the RIGHT
+one. That turns a race into a deterministic wrong-clip render **that passes
+its own verification**, which is worse than the race.
+
+The fix is to stop importing: the data goes out as **`--props`**, read per
+render from a file only that clip writes. Verified three ways:
+
+* a props file asking for 37 frames produced **37**, against `public/
+  clip.json`'s 1020 — props reach the bundle;
+* **no props still falls back** to `public/` (Bait 1020, Chat 1434), so the
+  Studio is unaffected;
+* **two concurrent renders from ONE bundle with different props** both exit
+  0, both honour their own frame count, and frame 20 differs by sha256.
+
+The imports stay as the Studio's fallback and are read nowhere inside the
+component tree, which `tests/test_clip_isolation.py` asserts by stripping
+comments and searching the JSX. **9 of 9 checks fail against the pre-fix
+code.**
+
+### And the `_bundle()` docstring's "blocked on it forever" is STRUCK
+
+Concurrent bundling does not deadlock: **26 concurrent `remotion bundle`
+processes all exited 0 in under 2s with byte-identical output.** The shared
+webpack cache's real failure is a logged `PackFileCacheStrategy` rename
+ENOENT costing ~1.2s. The bundle-once change was still right — it is the
+only shared-WRITE step — but the mechanism recorded for it was an inference,
+and a bundle-only lock would have made things worse by widening the window
+in which clip B overwrites `public/chat.json` while clip A waits.
+
+### Lanes, measured — and a float knife edge in the measurement
+
+`batch.lanes_for()` counts free+inactive pages against a per-lane budget.
+**Measured by running it**: two lanes on clip 12 and clip 47 took
+free+inactive from 3.64 GB to a floor of **2.23 GB** — about **0.7 GB a
+lane** — with node peaking at 0.86 GB across both and ffmpeg at 0.22 GB.
+`LANE_GB = 1.0` with `RESERVE_GB = 0.8`.
+
+**The first version sat on a float knife edge.** `free // LANE_GB` with
+free 3.7 and LANE_GB 1.9 gives **1.0**, because 3.7/1.9 is 1.947 — so a
+machine with two lanes' worth of memory got one, for a reason that is
+floating-point representation and not memory. The comparison is explicit
+now, with the reserve named on both sides.
+
+Both clips built concurrently, both delivered, both passed their gates.
+
+### The queue, and the one thing still refused
+
+`web/server.py` gets a `CLIPQ` with one worker thread per lane, separate
+from the chain's worker — chain stages must run in order, two clips of one
+job are independent by construction. Clicking six clips **enqueues six**,
+which is the half of "clip multiple clips at once" that matters most for
+bulk. `BUILDING` and `QUEUED` are keyed by `(job_id, clip)`, each lane
+writes `jobs/<job>/web/build-NN.log`, and `progress()` returns one entry per
+lane so a card shows **its own** frame count.
+
+Still refused: starting a clip while the CHAIN's own build stage is running
+on that job, because that stage walks every spec itself — two writers on one
+clip's artifacts, which is the collision class this round exists to remove.
+
+**`job_json` had to learn about lanes too.** It reported activity only from
+`RUNNING`, which a lane does not touch — so a clip could be building with
+the page saying the job was idle and the card showing nothing. That is
+*exactly* the symptom George reported two rounds ago ("the clips are
+basically just not cutting"), and the fix for it would have reintroduced it.
+
+### Three read-modify-write files, now locked
+
+`engine/jsonstore.py`: an `flock` on a dedicated sibling lock file around
+read-merge-write, plus `os.replace` off a temp path. Both, because neither
+is sufficient — the lock makes the window atomic across processes (`batch.py`
+runs as a subprocess of the site, of the agent, and by hand), and the
+replace means a reader never sees a half-written file.
+
+* **`editorial.json`** was read at the top of `cmd_editorial` and written
+  after up to 27 model calls. The lock is around the MERGE only; holding it
+  across the model calls would serialise them behind an HTTP handler on a
+  180-second timeout.
+* **`manifest.json`** was rewritten whole from a snapshot per clip.
+* **`deliver_qc.black_frames`** wrote `/tmp/_ymax_{pane}_{abs(hash(str(path)))
+  % 99999}.txt`. `hash()` on a `str` is salted per interpreter, so two gates
+  running at once collide at ~2 in 99999 and one reads the other clip's YMAX
+  **on a check that is FATAL**. `tempfile.mkstemp`.
+
+**NOT used: `web/runlock.py`'s lock.** The server holds it for process life,
+so a child taking `LOCK_EX` blocks until its 180s timeout — every build
+click would hang. And its `take()` uses `LOCK_NB`, which declines rather
+than waits: right for "is another runner up", wrong for "wait your turn to
+append one entry".
+
+## THE DELIVERY GATE RAN TWICE ON EVERY CLIP
+
+`make_clip._gate` computed the report and threw it away; `batch._qc_for`
+re-ran the identical `deliver_qc.check` on the same mp4 **and** re-derived
+the cut through `_plan_only`. Measured: **11.4s per clip**, and the two
+reports are **byte-identical**.
+
+**BOTH GATES STAY.** Clip 08 shipped on a PASS from one call site while the
+other printed FAIL, so deleting one is not an option — but reusing the SAME
+report is strictly better than running two that can disagree. The record is
+keyed on the mp4's own **path, size and mtime**, so a stale `qc.json` cannot
+read as a pass; anything disagreeing re-runs the gate. `tests/
+test_gate_parity.py` proves all four refusals.
+
+**And resolve both paths before comparing them.** `make_clip` records an
+absolute path and a caller may hold a relative one for the same file; a
+string compare then rejects a valid report and silently costs the 11s this
+exists to save — a failure that looks like nothing at all.
+
+### `-count_frames` decodes the whole source to count it
+
+4.60s against **0.04s** for `-count_packets` on clip 47's 6893-frame source,
+on a probe that runs in every build and every gate. For H.264 in MP4 one
+packet is one frame — **checked rather than assumed: all 50 of this job's
+clip sources return the identical number**, so the cut cannot move.
+`_plan_only` now runs in 0.36s where it took about five seconds.
+
+### What was NOT taken on speed, with the reason
+
+| dropped | why |
+|---|---|
+| **30 fps overlays** | `_overlay_schedule.add()` reports `dur = n / ch.fps`, which `native_composite` turns into `enable='between(t, at, at+dur)'` — so halving the file halves every overlay's scheduled LIFE (`rm_Bait` 17.0 → 8.5s). The chat case is caught only by a 0.439-vs-0.50 margin; the hook and story cards by nothing. Prerequisite if ever wanted: read each overlay's own `r_frame_rate` and make the schedule, the collision guard and Resolve's `endFrame` use it |
+| **render-only-distinct-frames** | the prize is real — **96.2% of clip 29's chat frames are byte-identical** — but a frame set computed in Python re-derives in a second language what React already derives, at a boundary that already has two frame-count seams. The safe shape is the component EMITTING its keyframe list for `--frames` |
+| **proportional tab reallocation** | the 2.08x figure sums frames of two compositions whose per-frame costs differ 2.02x; the only controlled pair held tabs constant; and the same fixed config measured 6.71-17.71 fps across five runs, **a 2.64x spread wider than the claimed effect**. `CLIP_REMOTION_TABS` has been an env var since it was written and has never been swept — sweep it before touching the split |
+| **encoder work** | `preset veryfast` is 9.3s of a 300-800s build at SSIM 0.9932, and it changes the delivery master |
+
+## MORE OPTIONS: the three that existed, and the one that did not
+
+George: *"some of them will just need basic cuts with different colour
+subtitles and no chat, some will need no booms, some will need other
+advanced cuts"*.
+
+Three of those already shipped — `chat_mode: "off"`, `booms: []`, and the
+in/out points that make a basic cut. **Subtitle colour did not, and story
+cards could not be switched off at all.**
+
+### Why this is four fields and not a `Look` object
+
+The obvious move is a dataclass covering every style value. Checked first,
+and the check is the reason it was not done: `framings` has **five live call
+sites and none passes `cycle`**; `_shot_index` four and none passes
+`min_shot`; `PUNCH_INSET`/`PUNCH_HOLD` are typed **twice**, in
+`render_native` and `native_layout`, behind a silent `except`; and
+`tighten.removals`' own defaults (0.12/0.45) are **stale** against the
+shipped 0.08/0.20, so an unset field would quietly revert dead-air policy.
+
+Exposing a value read from two places gives Resolve one number and the
+native path another, **and `render_parity` would report that as the two
+RENDERERS disagreeing** — which is the "IT WAS NEVER RESOLVE" misdiagnosis
+run again. So: only fields with ONE call site, and the duplicates get
+collapsed before any more.
+
+The second rule: **expose a field only where a fatal check independently
+measures its consequence.** Cue level qualifies — true peak caught the boom
+at −0.41 once. Caption `y` does not: `engine.gates.check` **never runs on
+the production chain**, so caption safe-area and caption-vs-graphic overlap
+are not live, and a preset could put a story card under the captions with
+nothing to catch it.
+
+### `engine/caption_colour.py` — a named palette, and the floor refuses the obvious request
+
+The caption sits on a 9.5% hard black stroke, so **what a colour must
+survive is `#000000`**, whatever is behind the clip — which is why this is
+checkable at all: the contrast is a property of the style, not the footage.
+Measured with `build_chat._ratio`, the one WCAG implementation this project
+already has:
+
+| white | yellow | gold | cyan | green | orange | pink | red | vermilion | blue | violet | **brandblue** |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 21.00 | 17.02 | 14.08 | 11.62 | 11.24 | 8.95 | 7.35 | 6.26 | 6.06 | 5.99 | 5.31 | **4.09** |
+
+**"Use our brand blue" is the one that fails.** `#2E5CFF` reads 4.09:1,
+under the 4.5 floor — which is exactly why `C.blueLight` exists. So the
+palette refuses it **by name, with the lifted alternative**, and refuses the
+raw hex too, so the floor cannot be walked round by spelling the colour
+differently.
+
+**It is a NAMED palette, not a free colour field**, for two reasons: a free
+field invites `#2E5CFF`, and this file's record is that gold captions beside
+vermilion cards read as two videos stacked — a coherence failure no contrast
+ratio predicts. A name can carry that judgement; a hex string cannot.
+
+**Two silent failure modes closed.** `kinetic`'s `accent` defaulted to
+`titles.ACCENT`, which is **GOLD** — the v43 caption accent from before the
+palette changed — so any caller that forgot the argument got the exact
+hybrid the palette work existed to avoid. And **PIL's `fill=None` draws
+WHITE rather than raising**, so a missing colour would have shipped as
+"looks almost right". Both explicit now, both validated before they reach
+the draw loop.
+
+`/api/options` serves the palette **from the code that enforces it**, with
+each measured ratio, so the page cannot hold a second list that goes stale.
+
+### THE BOOMS TRI-STATE WAS UNREPRESENTABLE IN THE EDITOR
+
+**The defect found one round ago, one layer up, in the UI for the feature it
+was found in.** `resolve_punch.bold_moments` was fixed to tell `[]` from
+`None` after "remove the booms" shipped with the boom in it. Then:
+
+    booms: spec && spec.booms ? spec.booms.join(', ') : ''
+
+**`[]` is truthy in JavaScript**, `[].join()` is `''`, and `_clean` maps
+`''` to `None`. So **any save of any field** on a clip whose booms George had
+removed restored them, "Save & cut" rebuilt it with them in, and the spec's
+own notes kept asserting they were removed.
+
+Three radios — Automatic / None / These times — sending JSON types. And the
+same drawer had the mirror bug on chat: `if (mode) spec.chat_mode = mode`
+omitted the key when the select read "Decide automatically", so that option
+was **inoperative** and a set mode could never be cleared from the page.
+
+**Correction to this file:** it states that "`server._clean` round-trips
+`[]` and `None` distinctly". True for the list shape `ask.py` sends; false
+for the string shape the form sent. The validator was never the problem.
+
+`tests/test_spec_roundtrip.py` walks the real payload shape through `_clean`,
+`write_spec` and `load()`. **3 of 4 JS checks fail against the pre-fix
+lines**, and the round trip was then proved through the real page: set None,
+save, reload, and the radio reads None rather than Automatic.
+
+### `stories: "auto" | "off"`
+
+One branch. A card that **names real people** and cannot be switched off is
+the wrong default on a quote desk.
+
+### `engine/ask.py` learns the new vocabulary, and still says no
+
+Measured, through the real path:
+
+| asked | patch |
+|---|---|
+| "make the emphasised subtitles green" | `{"caption_emph": "green"}` |
+| "use our brand blue for the subtitles" | `{"caption_emph": "blue"}` — the legible lift, not the refused hex |
+| "no story cards on this one" | `{"stories": "off"}` |
+| "make the captions bigger" | **refused** — *"I can't change caption size. I can change the emphasised or ordinary caption colour if you want the captions to stand out more."* |
+
+Caption COLOUR is settable; caption SIZE is not, and the boundary is stated
+in the prompt rather than left to the model.
+
+## WHAT NEEDS GEORGE, not a measurement
+
+1. **What "different colour subtitles" means** — the ~13% emphasised words
+   (shipped) or the white body (also settable, almost certainly not wanted).
+   A body colour will disagree with `theme.tsx`'s card accent, and that is
+   the coherence failure no ratio predicts.
+2. **"Basic cuts with no chat" leaves the bottom 58% of frame a frozen
+   screenshot** — 6 of 7 sources measure a median frame-to-frame delta of
+   **0.0000**. Either hold the static document pane with its per-shot
+   reframing, or port L1 (a filter string in `render_ffmpeg`, absent from
+   `native_layout`) — noting the facecam becomes 264px of a 1080 frame, and
+   that `deliver_qc`'s fatal `black_top`/`black_bottom` crop two bands at
+   `seam`, which on a seamless frame measure two arbitrary slices of one
+   image.
+3. **The chat panel is a still frame for 37% of runtime** (337s of 924s with
+   no new message for ≥3s; clip 29 is 97% and `chat_visible` passes it at
+   83% fill). This file's own frozen-frame threshold is 3s. Adding
+   hold-drift would change a look he signed off AND contradict R5's
+   instant-arrival finding, so whether a motionless panel is a defect is his
+   call.
+4. **`reactive` chat has never produced a visible window in any delivered
+   clip.** `classify()` picks it for 14 of 25 candidates and every window
+   file on disk is one full-length window. Either hide it from the picker
+   until a gameplay VOD exercises it, or label it "falls back to always-on"
+   — **an option that silently becomes another option is worse than no
+   option.**
+5. **Two lanes is a RAM purchase.** 16 GB, swap 90% full, ~0.7 GB a lane
+   measured. Closing Chrome (3.06 GB) buys a third.
+6. **Rebuild one chat clip and watch it** before anything else about chat
+   timing is considered. If it still reads late with correct pre-roll, the
+   next step is a per-message rule in SOURCE time — never a global shift.
+   Note that chat offsets are **whole seconds** (`contentOffsetSeconds`,
+   integer in all 16,377 messages across 32 caches), so no sub-second chat
+   timing constant is ever meaningful on this channel.

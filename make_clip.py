@@ -40,11 +40,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import dataclasses
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -60,6 +62,7 @@ from engine.resolve_layout import Frame, plan, apply             # noqa: E402
 from engine.resolve_captions import cards, emphasis_keys, mark_emphasis  # noqa: E402
 from engine.cuts import framings, content_framings               # noqa: E402
 from engine.tighten import removals, keeps, remap_card, joins    # noqa: E402
+from engine import caption_colour                                # noqa: E402
 from engine import captions_video, twitch_chat                   # noqa: E402
 from engine import chat_reaction as cr                           # noqa: E402
 from engine.sfx import Cue, bed, cue_gain, cue_gain_peak, perceptual_lead                   # noqa: E402
@@ -78,8 +81,32 @@ CHROME_APP = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 # **14.3%** — the 0.35/0.12 pair left a fifth of the clip as pauses.
 MIN_DEAD = 0.20          # every pause at or over this goes
 BEAT = 0.08              # what is LEFT of each one; 0 makes words collide
-CAPTION_ACCENT = (92, 128, 255, 255)      # theme.tsx C.blueLight
+# THE HOUSE PAIR, from the ONE palette that measures them. This was the
+# literal `(92, 128, 255, 255)` with `theme.tsx C.blueLight` in a comment;
+# it is the same value, named, so `caption_colour` can refuse a colour that
+# would not survive the caption's own stroke and the website can offer the
+# ones that do.
+CAPTION_ACCENT = caption_colour.rgba(caption_colour.DEFAULT_EMPH)
+CAPTION_FILL = caption_colour.rgba(caption_colour.DEFAULT_FILL)
+
+
+def _captions(clip):
+    """This clip's caption colours, through the palette.
+
+    `_cam(clip, ch, st)` is the pattern: reading `ch.cam` directly instead
+    of through it is exactly how the native renderer got clip 12's facecam
+    10px wrong and how an afternoon went into blaming Resolve. So there is
+    one resolver here too, and nothing reads the constants past this point.
+    """
+    fill = caption_colour.rgba(clip.caption_fill or caption_colour.DEFAULT_FILL)
+    emph = caption_colour.rgba(clip.caption_emph or caption_colour.DEFAULT_EMPH)
+    return fill, emph
 MASTER_GAIN = 6.2        # what loudnorm adds; cues are solved through it
+# How far back the chat panel may be pre-filled from, in seconds BEFORE THE
+# CUT. The box shows about six lines, so this only has to cover the opening
+# few seconds of a clip; what it must not do is reach so far back that the
+# panel opens on a different conversation.
+PREROLL_MAX = float(os.environ.get("CLIP_CHAT_PREROLL", "40"))
 BAIT_SECONDS = 17.0      # the hook holds the stretch where a scroller decides
 # THE BOOM IS AN EVENT CUE, SO IT SITS AT THE SHUTTER'S LEVEL, NOT THE
 # THUNK'S — and both numbers here are measured in the master, because the
@@ -559,8 +586,14 @@ def _drop_hallucinated(cs, absent, min_share=HALLUCINATION_SHARE):
         (dropped if mute / span > min_share else kept).append((c, mute / span))
     return [c for c, _ in kept], dropped
 
-def _cut_words(clip, st):
-    """`[(cut_second, text)]` for the nucleus gate.
+def _cut_words_full(clip, st):
+    """`[(cut_second, source_start, source_end, text)]` for every kept word.
+
+    TWO CLOCKS, AND BOTH ARE NEEDED. `in_point`/`out_point` are SOURCE
+    seconds and `booms` are OUTPUT seconds, so anything that has to talk
+    about a moment in both — the ask box, an editor, a human reading a log —
+    needs the pair. `_cut_words` is the projection the nucleus gate wants;
+    this is the whole row, and there is one implementation of the remap.
 
     Read off the same `keeps` everything else is remapped through, and from
     disk when the captions stage did not run in THIS invocation — a partial
@@ -574,10 +607,16 @@ def _cut_words(clip, st):
     remap = _remap_fn(st["keeps"])
     out = []
     for w in words:
-        t = remap(w["start"])
+        a = float(w["start"])
+        t = remap(a)
         if t is not None:
-            out.append((t, w.get("text", "")))
+            out.append((t, a, float(w.get("end", a)), w.get("text", "")))
     return out
+
+
+def _cut_words(clip, st):
+    """`[(cut_second, text)]` for the nucleus gate."""
+    return [(t, text) for t, _a, _b, text in _cut_words_full(clip, st)]
 
 
 def _emphasis_anchors(clip, ch, st):
@@ -780,10 +819,12 @@ def _project(r, ch):
     return proj
 
 
-def stage_cut(clip, ch, st):
+def _log_cut(clip, ch, st, pl):
+    """Narrate the cut. EVERY LINE HERE IS ABOUT THE EDIT, not about
+    the thing that renders it, so both renderers print the same account
+    of what was decided and why — including the caveat that has been
+    overruled twice and is still printed every time."""
     src = clip.source(ROOT)
-    fps = ch.fps
-    pl = _plan_only(clip, ch, st)
     src_dur, ip, op = pl["src_dur"], pl["in_point"], pl["out_point"]
     snap, osnap, spans = pl["snap"], pl["out_snap"], pl["spans"]
     kp, out_dur = st["keeps"], st["out_dur"]
@@ -816,6 +857,19 @@ def stage_cut(clip, ch, st):
         f"({sum(s.length for s in spans):.1f}s)")
     log(f"  {src_dur:.1f}s -> {out_dur:.1f}s in {len(kp)} shots, "
         f"{(len(kp)-1)/(out_dur/60):.1f} cuts/min")
+    js = joins(spans, st.get("words", []))
+    if js:
+        log(f"  {len(js)} joins splice across unheard speech")
+
+
+def stage_cut(clip, ch, st):
+    src = clip.source(ROOT)
+    fps = ch.fps
+    pl = _plan_only(clip, ch, st)
+    src_dur, ip, op = pl["src_dur"], pl["in_point"], pl["out_point"]
+    snap, osnap, spans = pl["snap"], pl["out_snap"], pl["spans"]
+    kp, out_dur = st["keeps"], st["out_dur"]
+    _log_cut(clip, ch, st, pl)
     r = connect(); r.OpenPage("edit")
     proj = _project(r, ch)
     mp = proj.GetMediaPool()
@@ -874,11 +928,6 @@ def stage_cut(clip, ch, st):
     log(f"  V1 {len(tl.GetItemListInTrack('video',1))} / "
         f"V2 {len(tl.GetItemListInTrack('video',2))} shots, "
         f"{(tl.GetEndFrame()-start)/fps:.1f}s")
-    # Every join splices across speech nobody can hear, on a muted VOD. The
-    # caveat has been overruled twice and is still printed every time.
-    js = joins(spans, st.get("words", []))
-    if js:
-        log(f"  {len(js)} joins splice across unheard speech")
 
 
 # ----------------------------------------------------------- captions ----
@@ -915,10 +964,12 @@ def stage_captions(clip, ch, st):
             f"{', '.join(sorted(set(_hits))[:6])}")
     st["cards"] = out
     dst = st["overlays"] / "cap_kin.mov"
+    cap_fill, cap_emph = _captions(clip)
     captions_video.kinetic([{"start": c.start, "end": c.end, "text": c.text,
                              "words": c.words, "emph": c.emphasis}
                             for c in out],
-                           dst, dur=st["out_dur"], accent=CAPTION_ACCENT)
+                           dst, dur=st["out_dur"],
+                           fill=cap_fill, accent=cap_emph)
     st["story_cards"] = _story_cards(clip, ch, st)
     log(f"  {len(cs)} cards -> {len(out)} after the cut "
         f"({sum(1 for c in out if c.emphasis)} emphasised), "
@@ -987,6 +1038,12 @@ def _story_cards(clip, ch, st):
     normal case and must not be an error.
     """
     from engine import story
+    if clip.stories == "off":
+        log("  story cards off by the spec")
+        (VENDOR / "public/stories.json").write_text("[]")
+        _stories_path(st).write_text("[]")
+        _props(st["overlays"], stories=[])
+        return []
     meta = st["meta"]
     words = [w["text"] for w in st.get("words", [])] or \
         [w["text"] for u in json.loads(clip.words(ROOT).read_text())["utterances"]
@@ -996,6 +1053,8 @@ def _story_cards(clip, ch, st):
     if not orgs:
         log("  no org named in BOTH the claim and the transcript — no story card")
         (VENDOR / "public/stories.json").write_text("[]")
+        _stories_path(st).write_text("[]")
+        _props(st["overlays"], stories=[])
         return []
     rm = _remap_fn(st["keeps"])
     cards, entries, record = [], [], []
@@ -1038,11 +1097,36 @@ def _story_cards(clip, ch, st):
         record.append(s.record())
         log(f"  story card {cid} at {at:.2f}s — {s.headline!r}")
         log(f"     photo {s.photo.name} · {s.account} · {s.licence}")
+    # TWO WRITES, TWO JOBS. The vendor path is what Remotion bundles; the
+    # clip's own copy is what a partial run reads back, and it cannot be
+    # overwritten by the next clip.
     (VENDOR / "public/stories.json").write_text(json.dumps(entries, indent=1))
+    _stories_path(st).write_text(json.dumps(entries, indent=1))
+    _props(st["overlays"], stories=entries)
     if record:
         (ROOT / f"jobs/{clip.job}/photos/stories_{clip.index:02d}.json"
          ).write_text(json.dumps(record, indent=1))
     return cards
+
+
+def _stories_path(st):
+    """THE CLIP'S OWN copy of the story schedule.
+
+    `vendor/public/stories.json` has to exist, because `Root.tsx` imports it
+    and Remotion bundles from it — but it is ONE path shared by every clip,
+    so each build overwrites the last. The schedule was written only there,
+    with a comment saying the `at` field was for recovering it on a partial
+    run "the same reason `punches.json` carries its own" — and `punches.json`
+    had already been moved per-clip for exactly this, while this had not.
+
+    Measured: clip 16 has a story card at 23.58s, and a partial rebuild of it
+    found `[]` there because clip 18 had run since, so the card silently
+    vanished from the schedule. The worse direction is the one that did not
+    happen yet: clip A's story still sitting there when clip B rebuilds puts
+    A's card — which NAMES REAL PLAYERS — onto B's clip. That is the
+    clip-6-chat-on-clip-12 bug with a news story attached.
+    """
+    return st["overlays"] / "stories.json"
 
 
 def _all_cards(clip, st):
@@ -1051,8 +1135,9 @@ def _all_cards(clip, st):
     found = st.get("story_cards")
     if found is None:
         # Partial run: `stage_captions` did not execute, so recover the
-        # schedule from disk rather than silently dropping every card.
-        sj = VENDOR / "public/stories.json"
+        # schedule from THIS CLIP'S copy — never the shared vendor path,
+        # which holds whichever clip built last.
+        sj = _stories_path(st)
         try:
             found = [{"id": e["id"], "at": e["at"],
                       "dur": e.get("frames", STORY_FRAMES) / 60.0}
@@ -1113,11 +1198,23 @@ def stage_chat(clip, ch, st):
     # 4% on its subject and 29% about an unrelated roster transfer, putting
     # a second story on screen for the whole runtime while the audio was
     # clean. `chat_mode: "force"` in the spec overrides this deliberately.
+    # SCORE THE POPULATION THAT REACHES THE SCREEN, NOT THE REGION. The
+    # region is a candidate window from acoustic clustering; the clip is a
+    # cut inside it, and on nine of this job's specs the in-point is past
+    # 20s. So `t0 <= offset < t1` scored messages from stretches of stream
+    # the viewer never sees — and the number it produced is the one George
+    # has overruled three times.
+    ip = kp[0].start                    # the cut, in CLIP-FILE seconds
+    op = kp[-1].end
+    on_cut = [m for m in raw
+              if ip <= m["offset"] - t0 < op
+              and remap(m["offset"] - t0) is not None]
     meta = st["meta"]
     subject = f"{meta.get('subject','')} {meta.get('claim','')}"
-    inside = [m for m in raw if t0 <= m["offset"] < t1]
-    safe, why, topic = cr.chat_is_safe(inside, subject)
-    log(f"  topicality: {why} ({topic['n']} messages in the window)")
+    safe, why, topic = cr.chat_is_safe(on_cut, subject)
+    log(f"  topicality: {why} ({topic['n']} messages on the cut"
+        + (f", {topic['notices']} sub notices not scored"
+           if topic.get("notices") else "") + ")")
     if not safe and clip.chat_mode != "off":
         log("  ^ below the floor, but chat is ON — set chat_mode \"off\" on "
             "this clip's spec if the room is talking about something else")
@@ -1132,23 +1229,29 @@ def stage_chat(clip, ch, st):
         log("  chat off by the spec")
         st["chat_windows"] = []
         (PUBLIC / "chat_windows.json").write_text("[]")
+        # AND THE CLIP'S OWN COPY, which this branch never wrote. PUBLIC is
+        # shared, so without it `_sfx_bed` on a partial run reads whatever
+        # clip built last and puts another clip's chat cue on this one.
+        (st["overlays"] / "chat_windows.json").write_text("[]")
         (PUBLIC / "chat.json").write_text("[]")
-        (PUBLIC / "clip.json").write_text(json.dumps({
-            "durationInFrames": st["total"],
-            "baitFrames": min(st["total"], round(BAIT_SECONDS * ch.fps)),
-            "hook": clip.hook or "", "emoji": clip.emoji}))
-        if clip.hook:
-            _render_comp("Bait", st["overlays"], ch.fps)
-        for c in st.get("story_cards", []):
-            _render_comp(c["id"], st["overlays"], ch.fps)
+        meta_json = {"durationInFrames": st["total"],
+                     "baitFrames": min(st["total"],
+                                       round(BAIT_SECONDS * ch.fps)),
+                     "hook": clip.hook or "", "emoji": clip.emoji}
+        (PUBLIC / "clip.json").write_text(json.dumps(meta_json))
+        _props(st["overlays"], chat=[], chatWindows=[], clip=meta_json)
+        _render_comps((["Bait"] if clip.hook else [])
+                      + [c["id"] for c in st.get("story_cards", [])],
+                      st["overlays"], ch.fps)
         (st["overlays"] / "rm_Chat.mov").unlink(missing_ok=True)
         return
     # "force" means OVERRIDE THE GATE, not "a mode called force". Passing it
     # through would miss both branches of `windows()` and return an empty
     # window list — the chat would be switched on and then not appear.
     mode_req = None if clip.chat_mode == "force" else clip.chat_mode
+    cut = (t0 + ip, t0 + op)
     mode, wins, info = cr.windows(raw, t0, t1, remap=remap, mode=mode_req,
-                                  out_dur=st['out_dur'])
+                                  out_dur=st['out_dur'], cut=cut)
     log(f"  resting {info['resting_rate']:.0f}/min, clip {info['clip_rate']:.0f}/min "
         f"(x{info['clip_rate']/info['resting_rate']:.2f}), hype {info['hype_share']:.2f}")
     log(f"  MODE: {mode}  ({len(info['bursts'])} bursts, "
@@ -1184,13 +1287,13 @@ def stage_chat(clip, ch, st):
     if not wins:
         log(f"  {mode} mode produced NO windows — its bursts fall outside "
             f"this cut. Falling back to continuous.")
-        mode, wins, info = cr.windows(raw, t0, t1, remap=remap,
+        mode, wins, info = cr.windows(raw, t0, t1, remap=remap, cut=cut,
                                       mode="continuous", out_dur=st["out_dur"])
     elif covered < DARK_MIN:
         log(f"  {mode} mode covers only {covered:.0%} of the clip, under the "
             f"chat gate's own {DARK_MIN:.0%} floor — the box would flicker "
             f"rather than be present. Falling back to continuous.")
-        mode, wins, info = cr.windows(raw, t0, t1, remap=remap,
+        mode, wins, info = cr.windows(raw, t0, t1, remap=remap, cut=cut,
                                       mode="continuous", out_dur=st["out_dur"])
     for w in wins:
         log(f"     window {w['from']:6.2f}-{w['to']:6.2f}  ({w['to']-w['from']:.2f}s)")
@@ -1203,25 +1306,42 @@ def stage_chat(clip, ch, st):
     # the box opens already half full — a chat panel that starts empty and
     # fills up reads as a graphic booting, not as a stream you joined.
     import build_chat as bc
-    kept, dropped, pre = [], 0, 0
+    kept, pre = [], 0
+    before = removed = after = 0
     for m in raw:
-        src_t = m["offset"]
-        if src_t < t0:
-            out_t = src_t - t0
-            if out_t < -40:
+        # CLIP-FILE TIME, COMPUTED ONCE. `remap` works in clip-file seconds,
+        # not VOD seconds: the keeps span 0..file_duration while a message's
+        # offset is a VOD second. Passing the raw offset matched no keep and
+        # silently dropped every message inside the clip — 60 of 116 on the
+        # first run, with the 56 survivors all pre-roll. Deriving it twice
+        # also put three of clip 11's messages in the wrong branch on a
+        # float hair between this test and `remap`'s half-open interval.
+        ft = m["offset"] - t0
+        if ft < ip:
+            # THE PRE-ROLL IS MEASURED FROM THE CUT, NOT FROM THE REGION,
+            # and that was the defect a viewer could see. The region is a
+            # candidate window; `ip` is where the clip starts. Anchoring on
+            # `t0` showed a message sent a second before the REGION as if
+            # it had been sent a second before the CLIP — on clip 47, whose
+            # in-point is 52.50, frame 0 opened on five messages from VOD
+            # 94-95s against a clip starting at 147.80. Fifty-three seconds
+            # of stale chat, presented as the room reacting to this line.
+            #
+            # Everything between the region start and the cut used to fall
+            # through to `remap`, return None, and be counted as "dropped
+            # into removed spans" — so the log named the wrong cause too.
+            out_t = ft - ip
+            if out_t < -PREROLL_MAX:
+                before += 1
                 continue
             pre += 1
-        elif src_t >= t1:
+        elif ft >= op:
+            after += 1
             continue
         else:
-            # `remap` works in CLIP-FILE time, not VOD time: the keeps span
-            # 0..file_duration while a message's offset is a VOD second.
-            # Passing the raw offset matched no keep and silently dropped
-            # every message inside the clip — 60 of 116 on the first run,
-            # with the 56 survivors all pre-roll.
-            o = remap(src_t - t0)
+            o = remap(ft)
             if o is None:
-                dropped += 1
+                removed += 1
                 continue
             out_t = o
         kept.append({"t": round(out_t, 2), "author": m["author"],
@@ -1240,82 +1360,295 @@ def stage_chat(clip, ch, st):
     # read the per-clip copy.
     (PUBLIC / "chat_windows.json").write_text(json.dumps(wins, indent=1))
     (st["overlays"] / "chat_windows.json").write_text(json.dumps(wins, indent=1))
-    log(f"  {len(kept)} messages on the cut ({pre} pre-roll, {dropped} dropped "
-        f"into removed spans)")
+    _props(st["overlays"], chat=kept, chatWindows=wins)
+    # THREE CAUSES, NAMED SEPARATELY. One `dropped` counter attributed
+    # everything to removed spans, which was wrong for 1149 of 1467
+    # messages across this job — on clip 29 only 5 of 101 were what the log
+    # said. A count that names the wrong cause is worse than no count,
+    # because it sends the next diagnosis to the wrong place.
+    log(f"  {len(kept)} messages on the cut ({pre} pre-roll; dropped: "
+        f"{before} older than the {PREROLL_MAX:.0f}s pre-roll cap, "
+        f"{removed} inside a removed span, {after} past the out-point)")
+    assert len(kept) + before + removed + after == len(raw)
 
     # Remotion reads the duration and the hook from here rather than from a
     # constant in Root.tsx.
-    (PUBLIC / "clip.json").write_text(json.dumps({
-        "durationInFrames": st["total"],
-        "baitFrames": min(st["total"], round(BAIT_SECONDS * ch.fps)),
-        "hook": clip.hook or "", "emoji": clip.emoji}))
+    meta_json = {"durationInFrames": st["total"],
+                 "baitFrames": min(st["total"], round(BAIT_SECONDS * ch.fps)),
+                 "hook": clip.hook or "", "emoji": clip.emoji}
+    (PUBLIC / "clip.json").write_text(json.dumps(meta_json))
+    _props(st["overlays"], clip=meta_json)
     comps = ["Chat"] + (["Bait"] if clip.hook else []) \
         + [c["id"] for c in st.get("story_cards", [])]
-    for comp in comps:
-        _render_comp(comp, st["overlays"], ch.fps)
+    _render_comps(comps, st["overlays"], ch.fps)
 
 
-def _render_comp(comp, out_dir, fps):
+# HOW MANY CHROME TABS, AND HOW MANY COMPOSITIONS AT ONCE.
+#
+# The overlays are 85% of a clip's build time — measured at 184.9s of 218s on
+# clip 16 — and they were rendered ONE COMPOSITION AT A TIME at
+# `--concurrency=4` on a machine with 12 logical cores. So four tabs did the
+# work while eight cores idled, three times in a row, each invocation paying
+# its own bundle, its own 19 MB public-dir copy and its own Chrome launch.
+#
+# The compositions are independent: different output directories, the same
+# read-only `public/`. Nothing made them serial except the `for` loop.
+#
+# `TABS` is the total tab budget shared across the lanes, so three lanes do
+# not become twelve tabs. Both are overridable from the environment because
+# the right numbers are a property of the machine, not of the edit.
+# A LANE NEVER GETS FEWER TABS THAN IT USED TO. Dividing a fixed budget
+# across lanes looks tidy and would have handed the LONGEST composition 3
+# tabs where it previously had 4 — the chat is 1850 frames against the hook
+# title's 1020, so it is the critical path and slowing it down to speed up
+# the short one is a net loss. Two lanes covers the common case (every clip
+# has a chat and a hook); a story card is rarer and follows.
+REMOTION_LANES = int(os.environ.get("CLIP_REMOTION_LANES", "2"))
+REMOTION_TABS = int(os.environ.get("CLIP_REMOTION_TABS", "8"))
+REMOTION_MIN_TABS = 4
+# A HUNG RENDER LOOKS EXACTLY LIKE A SLOW ONE, and the slow case is real —
+# 1850 frames at 10-18 frames per second of wall clock. So this budget is
+# generous on purpose: it only has to beat 48 minutes of silence, which is
+# what the hang below actually cost. The same reasoning as the bounded wait
+# on Resolve's render: budget a real subprocess timeout.
+REMOTION_TIMEOUT_S = int(os.environ.get("CLIP_REMOTION_TIMEOUT", "900"))
+
+
+def _bundle() -> Path:
+    """Bundle ONCE; every composition then renders from that one bundle.
+
+    **TWO CONCURRENT `remotion render` CALLS EACH BUNDLED, AND ONE HUNG.**
+    Measured on clip 11, twice: 48 minutes in state S at 0.0% CPU with
+    `rm_Bait.mov` already written and `rm_Chat.mov` absent, the log
+    untouched for 46 of those minutes. 0.0% CPU is the signature — a slow
+    render is busy, a wedged one is not.
+
+    **BE PRECISE ABOUT WHAT WAS ESTABLISHED.** The log carried ONE "Copying
+    public dir" and ONE "Getting compositions" for the two processes, and
+    bundling is the only step they share a WRITE path on (the webpack cache
+    under `node_modules`), so "the second one blocked on it forever" was the
+    obvious reading. It is an INFERENCE and it does not reproduce: 26
+    concurrent `remotion bundle` processes all exited 0 in under 2s with
+    byte-identical output. What that cache really costs is a logged
+    `PackFileCacheStrategy` rename ENOENT worth ~1.2s. The hang's mechanism
+    is still unexplained, and "unreproduced" is not "undiagnosed" — this
+    file has made that mistake on this exact failure once already.
+
+    Pre-bundling is kept regardless, because it removes the only shared
+    WRITE and costs 1.4s against the 19 MB public-dir copy each render was
+    paying separately. What it is NOT is the fix for two clips building at
+    once: that was `--props`, because `Root.tsx` imported its per-clip data
+    and webpack inlines an import at bundle time.
+
+    The bundle must be built AFTER this clip's `public/` is written, because
+    `--public-dir` is baked in at bundle time. That is also why this is not
+    cached between clips.
+    """
+    out = Path(tempfile.mkdtemp(prefix="clip-bundle-"))
+    subprocess.run(["npx", "remotion", "bundle", "src/index.ts",
+                    f"--out-dir={out}", "--public-dir=public", "--log=error"],
+                   cwd=VENDOR, check=True, timeout=REMOTION_TIMEOUT_S)
+    return out
+
+
+def _props(out_dir, **kw) -> None:
+    """Merge into THIS CLIP'S Remotion props, atomically.
+
+    `Root.tsx` used to `import` its chat, windows, duration and story list
+    out of the ONE shared `vendor/.../public/` directory. Those imports are
+    webpack modules, so the data is compiled INTO the bundle — which makes
+    two clips building at once not a race to narrow but a guarantee that
+    whichever wrote last is what both bundles contain. `--public-dir` does
+    not help: it moves the copied tree, not what `import` already inlined.
+
+    So the data goes out as `--props` instead, read per render from a file
+    only this clip writes. Merged rather than replaced because the pieces
+    arrive from different stages, and written through a temp path because a
+    half-written props file is a render that fails on malformed JSON.
+    """
+    f = out_dir / "props.json"
+    d = json.loads(f.read_text()) if f.exists() else {}
+    d.update(kw)
+    tmp = f.with_name("props.json.tmp")
+    tmp.write_text(json.dumps(d))
+    tmp.replace(f)
+
+
+def _render_comps(comps, out_dir, fps):
+    """Render several compositions at once. Raises on the first failure."""
+    comps = list(comps)
+    if not comps:
+        return
+    # EVERY KEY `Root.tsx` READS MUST COME FROM THIS CLIP. A key missing
+    # from the props falls back to the bundle's own `import` of the SHARED
+    # public/ file, which after any other build describes a different clip —
+    # so a partial run that skipped a stage is exactly where another clip's
+    # story card, naming real players, would arrive on this one. Fill from
+    # the clip's own files rather than letting the fallback win.
+    props = out_dir / "props.json"
+    if props.exists():
+        have = json.loads(props.read_text())
+        fill = {}
+        for key, own in (("stories", "stories.json"),
+                         ("chatWindows", "chat_windows.json")):
+            if key not in have:
+                f = out_dir / own
+                fill[key] = json.loads(f.read_text()) if f.exists() else []
+        if fill:
+            _props(out_dir, **fill)
+        gone = [k for k in ("chat", "clip") if k not in have]
+        if gone:
+            log(f"  WARNING: props.json has no {', '.join(gone)} — those "
+                f"fall back to the shared public/ data. Re-run the chat "
+                f"stage for this clip.")
+    bundle = _bundle()
+    try:
+        if len(comps) == 1:
+            return _render_comp(comps[0], out_dir, fps, bundle, REMOTION_TABS)
+        lanes = min(REMOTION_LANES, len(comps))
+        tabs = max(REMOTION_MIN_TABS, REMOTION_TABS // lanes)
+        log(f"  {len(comps)} compositions, {lanes} at a time, "
+            f"{tabs} tabs each: {', '.join(comps)}")
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=lanes) as ex:
+            # list() forces every future, and the first exception re-raises
+            # here rather than being swallowed by the executor's shutdown.
+            list(ex.map(
+                lambda c: _render_comp(c, out_dir, fps, bundle, tabs), comps))
+    finally:
+        subprocess.run(["rm", "-rf", str(bundle)], check=False)
+
+
+def _render_comp(comp, out_dir, fps, bundle, tabs: int = 4):
     """Remotion cannot write alpha from the CLI here: prores 4444 yields
     yuv422p12le with no alpha plane. `--sequence --image-format=png` then our
-    own qtrle encode is the route that works."""
-    seq = Path("/private/tmp/claude-501/remotion-seq") / comp
-    if seq.exists():
-        subprocess.run(["rm", "-rf", str(seq)], check=True)
-    seq.mkdir(parents=True)
-    subprocess.run(["npx", "remotion", "render", "src/index.ts", comp, str(seq),
-                    "--sequence", "--image-format=png", "--concurrency=4",
-                    f"--browser-executable={CHROME_APP}", "--log=error"],
-                   cwd=VENDOR, check=True)
-    n = len(list(seq.glob("*.png")))
-    dst = out_dir / f"rm_{comp}.mov"
-    # Remotion zero-pads to the SEQUENCE's width, so the pattern depends on
-    # the frame count and cannot be hardcoded to %d.
-    subprocess.run(["ffmpeg", "-y", "-v", "error", "-framerate", str(fps),
-                    "-i", str(seq / f"element-%0{len(str(n-1))}d.png"),
-                    "-c:v", "qtrle", "-pix_fmt", "argb", str(dst)], check=True)
-    subprocess.run(["rm", "-rf", str(seq)], check=True)
+    own qtrle encode is the route that works.
+
+    `bundle` is a prebuilt bundle directory, which `render` accepts in place
+    of the entry point. It is not `src/index.ts` for the reason in `_bundle`:
+    letting each render bundle for itself is what hung clip 11 twice.
+
+    THE SEQUENCE DIRECTORY IS PER CALL, NOT PER COMPOSITION. It used to be
+    `/private/tmp/.../remotion-seq/<comp>`, keyed by the composition name —
+    and `comp` is only ever `Chat`, `Bait` or `Story<Org>`. `rm_Bait.mov` is
+    1020 frames on every clip of this job, so two clips building at once
+    wrote the same 1020 filenames into the same directory: a total overwrite
+    of a title card carrying the other clip's hook, and because the pad
+    width matches in every pairwise combination the mixture encodes cleanly
+    with no error. That is the clip-6-chat-on-clip-12 defect in a new place,
+    and it is the first thing that has to go before two clips may build at
+    once.
+
+    `try/finally` rather than a bare mkdtemp: a failed render leaves ~0.4 GB
+    of PNGs behind, on a disk already at 93%.
+    """
+    seq = Path(tempfile.mkdtemp(prefix=f"rmseq-{comp}-"))
+    try:
+        cmd = ["npx", "remotion", "render", str(bundle), comp, str(seq),
+               "--sequence", "--image-format=png", f"--concurrency={tabs}",
+               f"--browser-executable={CHROME_APP}", "--log=error"]
+        props = out_dir / "props.json"
+        if props.exists():
+            cmd.append(f"--props={props}")
+        else:
+            # Only reachable on a clip built before props existed, or a
+            # hand-run render. Say so: without it Root.tsx falls back to the
+            # SHARED public/ files, which by now describe another clip.
+            log(f"  WARNING: no props.json for {comp}; falling back to the "
+                f"shared public/ data, which may belong to another clip")
+        subprocess.run(cmd, cwd=VENDOR, check=True,
+                       timeout=REMOTION_TIMEOUT_S)
+        n = len(list(seq.glob("*.png")))
+        dst = out_dir / f"rm_{comp}.mov"
+        # Remotion zero-pads to the SEQUENCE's width, so the pattern depends
+        # on the frame count and cannot be hardcoded to %d.
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-framerate", str(fps),
+                        "-i", str(seq / f"element-%0{len(str(n-1))}d.png"),
+                        "-c:v", "qtrle", "-pix_fmt", "argb", str(dst)],
+                       check=True)
+    finally:
+        subprocess.run(["rm", "-rf", str(seq)], check=False)
     log(f"  {comp}: {n} frames -> {dst.name}")
 
 
 # ----------------------------------------------------------- assemble ----
-def stage_assemble(clip, ch, st):
-    r = connect(); r.OpenPage("edit")
-    proj = _project(r, ch)
-    mp = proj.GetMediaPool()
-    tl = proj.GetCurrentTimeline()
-    fps = ch.fps
-    start = tl.GetStartFrame()
-    # THE PICTURE IS WHAT V1 HOLDS, and the overlays are cut to it. Sizing
-    # them from `round(out_dur * fps)` instead let them hang 2 frames past
-    # V1, and a frame with an overlay and no picture under it renders black.
-    v1 = sorted(tl.GetItemListInTrack("video", 1) or [], key=lambda i: i.GetStart())
-    total = v1[-1].GetEnd() - v1[0].GetStart()
-    if total != st["total"]:
-        log(f"  picture is {total} frames, not round(out_dur*fps)="
-            f"{st['total']} — overlays cut to the picture")
-    st["total"] = total
-    # render() appends a job every call and never clears one; a stale job
-    # whose output exists is what wedged the API on an overwrite dialog.
-    for j in (proj.GetRenderJobList() or []):
-        proj.DeleteRenderJob(j["JobId"])
-    stale = []
-    for t in range(3, tl.GetTrackCount("video") + 1):
-        stale += tl.GetItemListInTrack("video", t) or []
-    stale += tl.GetItemListInTrack("audio", 2) or []
-    if stale:
-        tl.DeleteClips(stale)
+def _overlay_schedule(clip, ch, st, total: int) -> list[dict]:
+    """WHERE EVERY OVERLAY GOES, for whichever renderer is placing them.
 
-    # Two sounds, one meaning each: `paper` when the chat panel settles in,
-    # `shutter` when a photo card lands.
+    **ONE IMPLEMENTATION.** This was the tail of `stage_assemble`, reachable
+    only by building a Resolve timeline, so the native renderer grew its own
+    copy — and that copy put every card at 0.0 instead of on the line it
+    supports, because a glob has no times in it. A story card is anchored to
+    the sentence it answers; `rm_StoryVitality` belongs at 23.58s on clip 16
+    and nowhere else. Two schedules derived twice is this repo's most-
+    repeated defect, and here it would have silently moved the evidence.
+
+    Track numbers are Resolve's and the native compositor uses the same
+    ordering: V1 content | V2 facecam | V3 chat | V4 cards | V5 titles |
+    V6 captions, with the sfx bed on A2. A graphic lands ON TOP of the chat,
+    and the captions on top of everything.
+
+    `total` is the PICTURE length in frames. Every entry is clamped to its
+    own file's frame count, because a clip Resolve (or ffmpeg) trims short
+    loses the end of its EXIT, which is the jolt the exit exists to remove.
+    """
+    fps = ch.fps
+    out: list[dict] = []
+
+    def add(name, at, dur, track, media=1):
+        f = st["overlays"] / name
+        if not f.exists():
+            return
+        n = round(dur * fps)
+        have = _frames_of(f)
+        if have and have < n:
+            n = have
+        out.append({"name": name, "path": f, "at": round(at, 4),
+                    "frames": n, "dur": n / fps, "track": track,
+                    "media": media})
+
+    add("rm_Chat.mov", 0.0, total / fps, 3)
+    for c in _all_cards(clip, st):
+        add(f"rm_{c['id']}.mov", c["at"], c.get("dur", STORY_FRAMES / fps), 4)
+    if clip.hook:
+        add("rm_Bait.mov", 0.8, min(BAIT_SECONDS, total / fps - 0.8), 5)
+    add("cap_kin.mov", 0.0, total / fps, 6)
+    add("sfx.wav", 0.0, total / fps, 2, media=2)
+    return out
+
+
+def _frames_of(f) -> int | None:
+    out = subprocess.run(
+        ["ffprobe", "-v", "error", "-count_frames", "-select_streams", "v:0",
+         "-show_entries", "stream=nb_read_frames", "-of", "csv=p=0", str(f)],
+        capture_output=True, text=True).stdout.strip()
+    return int(out) if out.isdigit() else None
+
+
+def _sfx_bed(clip, ch, st, total: int) -> None:
+    """Build the sound bed. NOTHING HERE IS RESOLVE'S, so both renderers run
+    it — the cues are decided by what is on screen and when, which is a
+    property of the edit and not of the thing that composites it."""
+    fps = ch.fps
     cues = []
+    # `is None`, NOT FALSY — `[]` AND `None` ARE DIFFERENT ANSWERS here, the
+    # same distinction as `booms`. `[]` is "this clip has no chat, decided",
+    # which `chat_mode: "off"` writes; `None` is "the chat stage did not run
+    # in this invocation", which a partial build produces. A falsy test
+    # collapsed them, so a chat-off clip fell through to the SHARED
+    # `PUBLIC/chat_windows.json` and took whichever clip built last — put a
+    # chat entrance cue on a clip with no chat panel to enter.
     wins = st.get("chat_windows")
-    if not wins and (st["overlays"] / "chat_windows.json").exists():
-        wins = json.loads((st["overlays"] / "chat_windows.json").read_text())
-    if not wins and (PUBLIC / "chat_windows.json").exists():
-        # the chat stage ran in an earlier invocation; its windows are the
-        # truth about when the box arrives, so read them rather than
-        # silently shipping no cue (which is what the first run did)
+    own = st["overlays"] / "chat_windows.json"
+    if wins is None and own.exists():
+        wins = json.loads(own.read_text())
+    if wins is None and (PUBLIC / "chat_windows.json").exists():
+        # The chat stage ran in an earlier invocation and this clip wrote no
+        # copy of its own — only possible for a build predating the per-clip
+        # file. Say so, because the shared path is another clip's by the
+        # time anything reads it.
+        log("  WARNING: no chat_windows.json for this clip; reading the "
+            "SHARED copy, which may belong to another clip")
         wins = json.loads((PUBLIC / "chat_windows.json").read_text())
     for w in (wins or []):
         # NO CUE ON A WINDOW THAT STARTS WITH THE CLIP. George, twice on this
@@ -1344,8 +1677,7 @@ def stage_assemble(clip, ch, st):
 
     # THE BOOM GOES ON THE ZOOM. By RMS, not peak — its crest is 7.7 dB
     # against the shutter's 22.0, so matching peaks would put it far louder
-    # in the ear. -26 dBFS RMS sits it above the ticks (-40) and below the
-    # speech, and it is verified in the BED after mixing, never from the
+    # in the ear. It is verified in the BED after mixing, never from the
     # generator.
     boom = cue_gain("vine_boom", BOOM_RMS, MASTER_GAIN)
     # Read them off disk when the punch stage did not run in THIS
@@ -1361,9 +1693,9 @@ def stage_assemble(clip, ch, st):
                         f"the facecam punches in at {t:.2f}s"))
     # FIRE EACH CUE EARLY BY ITS OWN PERCEPTUAL LEAD. See
     # `sfx.perceptual_lead`: a cue is heard where its ENERGY arrives, not
-    # where its file starts, and the Vine Boom reaches 10% of its energy at
-    # 108 ms. Clicks measure 0.4-5.6 ms and are unaffected, so this is one
-    # rule rather than a table.
+    # where its file starts, and the Vine Boom's energy centroid is 237 ms.
+    # Clicks measure 1.5-32 ms and are unaffected, so this is one rule
+    # rather than a table.
     cues = [dataclasses.replace(
                 c, at=round(max(0.0, c.at - perceptual_lead(c.name)), 3))
             for c in cues]
@@ -1372,13 +1704,39 @@ def stage_assemble(clip, ch, st):
         for n in sorted({c.name for c in cues})))
     log(f"  sfx: {bed(cues, total / fps, out=st['overlays'] / 'sfx.wav')}")
 
-    names = ["cap_kin.mov", "sfx.wav", "rm_Chat.mov"]
-    if clip.hook:
-        names.append("rm_Bait.mov")
-    names += [f"rm_{c['id']}.mov" for c in _all_cards(clip, st)]
-    have = [n for n in names if (st["overlays"] / n).exists()]
-    r.GetMediaStorage().AddItemListToMediaPool(
-        [str(st["overlays"] / n) for n in have])
+
+def stage_assemble(clip, ch, st):
+    r = connect(); r.OpenPage("edit")
+    proj = _project(r, ch)
+    mp = proj.GetMediaPool()
+    tl = proj.GetCurrentTimeline()
+    fps = ch.fps
+    start = tl.GetStartFrame()
+    # THE PICTURE IS WHAT V1 HOLDS, and the overlays are cut to it. Sizing
+    # them from `round(out_dur * fps)` instead let them hang 2 frames past
+    # V1, and a frame with an overlay and no picture under it renders black.
+    v1 = sorted(tl.GetItemListInTrack("video", 1) or [], key=lambda i: i.GetStart())
+    total = v1[-1].GetEnd() - v1[0].GetStart()
+    if total != st["total"]:
+        log(f"  picture is {total} frames, not round(out_dur*fps)="
+            f"{st['total']} — overlays cut to the picture")
+    st["total"] = total
+    # render() appends a job every call and never clears one; a stale job
+    # whose output exists is what wedged the API on an overwrite dialog.
+    for j in (proj.GetRenderJobList() or []):
+        proj.DeleteRenderJob(j["JobId"])
+    stale = []
+    for t in range(3, tl.GetTrackCount("video") + 1):
+        stale += tl.GetItemListInTrack("video", t) or []
+    stale += tl.GetItemListInTrack("audio", 2) or []
+    if stale:
+        tl.DeleteClips(stale)
+
+    _sfx_bed(clip, ch, st, total)
+
+    sched = _overlay_schedule(clip, ch, st, total)
+    have = [e["name"] for e in sched]
+    r.GetMediaStorage().AddItemListToMediaPool([str(e["path"]) for e in sched])
     # MATCH THE POOL BY FILE PATH, NEVER BY NAME.
     #
     # Every clip writes its overlays as `rm_Chat.mov`, `cap_kin.mov`,
@@ -1393,8 +1751,9 @@ def stage_assemble(clip, ch, st):
     # stream, on the wrong lines, ending at 38.3s because that is how long
     # clip 6 is. George saw it as "the chat kind of dies at the end".
     # The pool held FIVE `rm_Chat.mov` entries at the time, and seven
-    # `cap_kin.mov`.
-    want = {str((st["overlays"] / n).resolve()): n for n in have}
+    # `cap_kin.mov`. This is the one hazard the native renderer does NOT
+    # inherit — ffmpeg is handed paths, so it cannot collide by name.
+    want = {str(e["path"].resolve()): e["name"] for e in sched}
     pool = {}
     for c in mp.GetRootFolder().GetClipList():
         fp = c.GetClipProperty("File Path")
@@ -1405,38 +1764,11 @@ def stage_assemble(clip, ch, st):
         raise RuntimeError(f"not in the media pool by path: {missing}")
     log(f"  overlays resolved by path: {sorted(pool)}")
 
-    def frames_of(name):
-        out = subprocess.run(
-            ["ffprobe", "-v", "error", "-count_frames", "-select_streams", "v:0",
-             "-show_entries", "stream=nb_read_frames", "-of", "csv=p=0",
-             str(st["overlays"] / name)], capture_output=True, text=True).stdout.strip()
-        return int(out) if out.isdigit() else None
-
-    ents = []
-
-    def add(name, at, dur, track, media=1):
-        it = pool.get(name)
-        if it is None:
-            return
-        n = round(dur * fps)
-        # A clip Resolve trims short loses the END OF ITS EXIT, which is the
-        # jolt the exit exists to remove. Take the length from the FILE.
-        f = frames_of(name)
-        if f and f < n:
-            n = f
-        ents.append({"mediaPoolItem": it, "startFrame": 0, "endFrame": n,
-                     "recordFrame": start + round(at * fps),
-                     "trackIndex": track, "mediaType": media})
-
-    # V1 content | V2 facecam | V3 chat | V4 cards | V5 titles | V6 captions
-    add("rm_Chat.mov", 0.0, total / fps, 3)
-    for c in _all_cards(clip, st):
-        add(f"rm_{c['id']}.mov", c["at"],
-            c.get("dur", STORY_FRAMES / fps), 4)
-    if clip.hook:
-        add("rm_Bait.mov", 0.8, min(BAIT_SECONDS, total / fps - 0.8), 5)
-    add("cap_kin.mov", 0.0, total / fps, 6)
-    add("sfx.wav", 0.0, total / fps, 2, media=2)
+    ents = [{"mediaPoolItem": pool[e["name"]], "startFrame": 0,
+             "endFrame": e["frames"],
+             "recordFrame": start + round(e["at"] * fps),
+             "trackIndex": e["track"], "mediaType": e["media"]}
+            for e in sched]
     placed = mp.AppendToTimeline(ents)
     log(f"  appended {len(placed or [])} of {len(ents)}: " +
         " ".join(f"V{t}:{len(tl.GetItemListInTrack('video', t) or [])}"
@@ -1444,24 +1776,48 @@ def stage_assemble(clip, ch, st):
 
 
 # -------------------------------------------------------------- punch ----
-def stage_punch(clip, ch, st):
-    import resolve_punch as rp
-    r = connect(); r.OpenPage("edit")
-    proj = _project(r, ch)
-    tl = proj.GetCurrentTimeline(); mp = proj.GetMediaPool()
-    start = tl.GetStartFrame()
-    v1 = sorted(tl.GetItemListInTrack("video", 1) or [], key=lambda i: i.GetStart())
-    v2 = sorted(tl.GetItemListInTrack("video", 2) or [], key=lambda i: i.GetStart())
-    item = v1[0].GetMediaPoolItem()
-    # The base shots come off V1, never V2: a second run would otherwise take
-    # the already-split pieces as its base shots and punch the punches.
-    segs = [((it.GetStart() - start) / ch.fps,
-             (it.GetEnd() - it.GetStart()) / ch.fps,
-             it.GetLeftOffset() / ch.fps) for it in v1]
-    # the SAME grouping the cut used, recomputed from the placed items so the
-    # two stages cannot drift
+def _base_shots(ch, st):
+    """The V1 segments and their shot grouping, FROM THE KEEPS.
+
+    These used to be read back off Resolve's V1 items, with a comment saying
+    the base shots must never come off V2 because a second run would take the
+    already-split pieces as its bases and punch the punches. The keeps are
+    the thing V1 was built from, so taking them from here is the same values
+    and immune to that hazard by construction — and it is the only way the
+    native renderer can have a punch plan at all, because it builds no
+    timeline to read back.
+
+    Returns (segs, sidx, nshots) where each seg is
+    (output offset, duration, source start) in seconds, and the frame
+    arithmetic matches what `stage_cut` hands Resolve: start and end rounded
+    INDEPENDENTLY, never the length.
+    """
+    fps = ch.fps
+    segs, f = [], 0
+    for k in st["keeps"]:
+        n = round(k.end * fps) - round(k.start * fps)
+        segs.append((f / fps, n / fps, k.start))
+        f += n
     sidx = _shot_index([d for _o, d, _s in segs])
-    nshots = sidx[-1] + 1 if sidx else 1
+    return segs, sidx, (sidx[-1] + 1 if sidx else 1)
+
+
+def _punch_plan(clip, ch, st):
+    """Which moments get a punch, and where each piece starts.
+
+    **ONE IMPLEMENTATION, called by both renderers.** Everything here is a
+    property of the speech and of the clip's own thesis words — the nucleus
+    gate, the boom budget, the attack refinement — and none of it is
+    Resolve's. It lived inside the Resolve stage, so the native path would
+    have had to re-derive it, which is the defect this file records five
+    times over.
+
+    Writes `punches.json` and sets `st["punch_starts"]`, because a partial
+    run is the normal way this pipeline is driven and a value that lives only
+    in memory is silently lost — `cues: 0` is not loud enough to notice.
+    """
+    import resolve_punch as rp
+    segs, sidx, nshots = _base_shots(ch, st)
     # Measure the CLEAN CUT, never the last delivery — see AGENTS.md.
     anchors = _emphasis_anchors(clip, ch, st)
     # off disk when the cut stage did not run in THIS invocation — a
@@ -1507,6 +1863,37 @@ def stage_punch(clip, ch, st):
     # wants and still inside the boom's own 15 ms attack.
     pieces = rp.split(segs, moments, shot_of=sidx,
                       phrase_starts=[t for t, _d in moments])
+    # THE BOOM GOES ON THE MOMENT, NOT ON THE PIECE. They were the same
+    # value until a punch was allowed to open early to find room; now a
+    # piece can start up to PUNCH_BACKOFF before the word, and a cue there
+    # would be exactly the "too late"/"too early" complaint in reverse.
+    _starts = []
+    for o0, d, _s, _i, pp in pieces:
+        if not pp:
+            continue
+        near = [t for t, _x in moments if o0 - 0.02 <= t <= o0 + d]
+        _starts.append(round(min(near) if near else o0, 3))
+    st["punch_starts"] = _starts
+    (st["overlays"] / "punches.json").write_text(json.dumps(
+        {"punches": [t for t, _d in moments], "zoom": round(1/(1-rp.PUNCH_INSET), 3),
+         "applied": [round(o0, 2) for o0, _d, _s, _i, pp in pieces if pp]}, indent=1))
+    log(f"  {len(segs)} splices in {nshots} shots -> {len(pieces)} pieces "
+        f"({sum(1 for *_x, pp in pieces if pp)} punched at "
+        f"{1/(1-rp.PUNCH_INSET):.3f}x)")
+    return pieces, sidx, nshots
+
+
+def stage_punch(clip, ch, st):
+    """Apply the punch plan to Resolve's V2. The PLAN is `_punch_plan`."""
+    import resolve_punch as rp
+    r = connect(); r.OpenPage("edit")
+    proj = _project(r, ch)
+    tl = proj.GetCurrentTimeline(); mp = proj.GetMediaPool()
+    start = tl.GetStartFrame()
+    v1 = sorted(tl.GetItemListInTrack("video", 1) or [], key=lambda i: i.GetStart())
+    v2 = sorted(tl.GetItemListInTrack("video", 2) or [], key=lambda i: i.GetStart())
+    item = v1[0].GetMediaPoolItem()
+    pieces, sidx, nshots = _punch_plan(clip, ch, st)
     tl.DeleteClips(v2)
     canvas = Frame(1080, 1920, 1920, 1080)
     rects = framings(nshots, _cam(clip, ch, st))
@@ -1525,23 +1912,7 @@ def stage_punch(clip, ch, st):
         apply(it, plan(canvas, rect, (0, 0, 1080, seam_y)))
         if ch.grade:
             it.SetCDL(ch.grade)
-    # THE BOOM GOES ON THE MOMENT, NOT ON THE PIECE. They were the same
-    # value until a punch was allowed to open early to find room; now a
-    # piece can start up to PUNCH_BACKOFF before the word, and a cue there
-    # would be exactly the "too late"/"too early" complaint in reverse.
-    _starts = []
-    for o0, d, _s, _i, p in pieces:
-        if not p:
-            continue
-        near = [t for t, _x in moments if o0 - 0.02 <= t <= o0 + d]
-        _starts.append(round(min(near) if near else o0, 3))
-    st["punch_starts"] = _starts
-    (st["overlays"] / "punches.json").write_text(json.dumps(
-        {"punches": [t for t, _d in moments], "zoom": round(1/(1-rp.PUNCH_INSET), 3),
-         "applied": [round(o0, 2) for o0, _d, _s, _i, p in pieces if p]}, indent=1))
-    log(f"  V2 {len(segs)} splices in {nshots} shots -> {len(pieces)} pieces "
-        f"({sum(1 for *_x, p in pieces if p)} punched at "
-        f"{1/(1-rp.PUNCH_INSET):.3f}x)")
+    log(f"  V2 rebuilt: {len(pieces)} pieces placed")
 
 
 # ------------------------------------------------------------- render ----
@@ -1671,13 +2042,48 @@ def stage_render(clip, ch, st):
                     "-preset", "medium", "-pix_fmt", "yuv420p", "-c:a", "copy",
                     "-movflags", "+faststart", str(out)], check=True)
     eq.unlink(missing_ok=True); mid.unlink(missing_ok=True)
-    st["out"] = out
-    # THE DELIVERY GATE, on the artifact. `qc.check` judges a render
-    # generically; this judges a clip the way we build them, and every check
-    # in it exists because something got past and reached George.
+    _gate(clip, ch, st, out)
+
+
+def chat_expected(clip, overlays) -> bool:
+    """Did we INTEND the chat on screen for this clip?
+
+    `chat_expected` is a question about intent; `deliver_qc` then measures
+    whether it happened. Conflating the two is how this check kept failing to
+    fire. It was `bool(st["chat_windows"])`, which has three problems:
+
+      * the windows live only in memory on a partial run, and a partial run
+        is the normal way this pipeline is driven;
+      * `chat_windows.json` moved into the clip's own directory only
+        recently, so SIX of the eight clips that have a chat overlay have no
+        windows file at all and silently re-gate as "chat: not expected" —
+        a check that reports "not checked" as a pass;
+      * windows describe WHEN the box is up, and they are baked into the
+        movie anyway. They are not what decides whether we meant to show it.
+
+    The spec is the authoritative intent and the overlay is the evidence we
+    acted on it. `chat_mode: "off"` is the explicit opt-out, and it wins —
+    otherwise a stale `rm_Chat.mov` from an earlier build would make the gate
+    demand chat on a clip that is meant to have none.
+    """
+    if getattr(clip, "chat_mode", None) == "off":
+        return False
+    return (Path(overlays) / "rm_Chat.mov").exists()
+
+
+def _gate(clip, ch, st, out):
+    """THE DELIVERY GATE, on the artifact — whichever renderer made it.
+
+    `qc.check` judges a render generically; this judges a clip the way we
+    build them, and every check in it exists because something got past and
+    reached George. It is shared so the two renderers cannot be held to
+    different standards: a gate that asks a different question of each is how
+    clip 08 shipped with a chat overlay that was never visible.
+    """
     from engine import deliver_qc
     from engine.resolve_captions import cards as _cards
     from engine.tighten import remap_card as _remap
+    st["out"] = out
     absent = qc.dead_audio(clip.source(ROOT), min_run=0.1)["runs"]
     cs, _dropped = _drop_hallucinated(_cards(st.get("words") or []), absent) \
         if st.get("words") else ([], [])
@@ -1687,16 +2093,154 @@ def stage_render(clip, ch, st):
         if r:
             placed.append({"start": r[0], "end": r[1], "text": c.text})
     rep = deliver_qc.check(out, cards=placed or None, absent=[] if placed else None,
-                           chat_expected=bool(st.get("chat_windows")),
+                           chat_expected=chat_expected(clip, st["overlays"]),
                            seam=ch.seam)
     log(rep.text())
     st["qc"] = rep
+    # WRITE IT DOWN, because `batch.py` was running the identical gate again.
+    # `_qc_for` re-measured the same mp4 and re-derived the cut through
+    # `_plan_only`, which decodes every frame of the source — about 35s per
+    # clip, roughly sixteen minutes across this job, for a verdict that had
+    # just been computed. The report is now the artifact.
+    #
+    # KEYED TO THE FILE, NOT JUST PRESENT. A stale `qc.json` read as a pass
+    # is the same defect as `-v error` silencing `volumedetect`: a check
+    # that measures nothing. `batch.py` compares the path and the mtime it
+    # records and re-runs the gate if either disagrees, so the only thing
+    # this can do is save time.
+    try:
+        (st["overlays"] / "qc.json").write_text(json.dumps({
+            "mp4": str(out),
+            "mtime": out.stat().st_mtime,
+            "size": out.stat().st_size,
+            "ok": rep.ok,
+            "findings": [{"check": f.check, "ok": f.ok, "detail": f.detail,
+                          "fatal": getattr(f, "fatal", True)}
+                         for f in rep.findings],
+        }, indent=1))
+    except OSError as exc:                                     # noqa: BLE001
+        log(f"  (could not record qc.json: {exc})")
+
+
+# =================================================================== #
+#  THE NATIVE RENDERER — the same edit, with no Resolve in the path.  #
+# =================================================================== #
+#
+# Resolve stays the FORMAT WORKBENCH: when a new look is being designed the
+# timeline can be opened, scrubbed and nudged, and that is worth a GUI. This
+# is the PRODUCTION LINE, for clips whose format is already settled.
+#
+# MEASURED, on clip 16 (30.96s) end to end:
+#
+#     overlay building (Remotion + sfx)   184.9s   85%
+#     DaVinci Resolve                      15.6s    7%
+#     delivery re-encode + QC              17.4s    8%
+#
+# So be straight about what this buys and what it does not. Dropping Resolve
+# takes 7% off ONE clip's wall clock. What it actually buys is everything
+# else: no logged-in desktop, no GUI thread to wedge at 90% CPU behind a
+# modal dialog, no 4K-landscape-project class of crash, no render queue to
+# clear, and an agent on a Mac with no Resolve installed can take a job end
+# to end.
+#
+# BE STRAIGHT ABOUT WHAT IT DOES NOT BUY YET. It is tempting to call this the
+# mass-production unlock — one GUI app was why the batch had to be serial,
+# and ffmpeg does not care how many clips are building. But Resolve was only
+# ONE of the two causes: Remotion renders every overlay through a SHARED
+# `public/` directory, so two clips still cannot build at once. That is also
+# the 85%, so it is the same problem twice and it is the next one.
+#
+# And per clip this is SLOWER, measured: 44s against Resolve's 15.6s, because
+# Resolve renders on the GPU. Swept on clip 12, the x264 preset barely moves
+# it (medium 32.2s, veryfast 24.4s for the composite) because the FILTER
+# GRAPH is ~22s of it, not the encoder. `h264_videotoolbox` halves the whole
+# render to 22.5s — and is not used: it needs about 3x the bitrate to match
+# x264, measuring SSIM 0.987 against x264 at a file already 42% larger
+# (37.7MB vs 26.6MB), and the captions are hard-stroked glyph edges, which is
+# exactly where that shows. Twenty seconds off a 220-second build is not
+# worth a quality regression on a delivery master.
+#
+# Verified by `engine.render_parity`, which compares the two renderers on
+# what they DECIDE rather than on pixels: clip 12 reads 15 of 15.
+
+def stage_cut_native(clip, ch, st):
+    """Plan the cut. There is no timeline to build, so this is `_plan_only`
+    plus the log lines the Resolve stage printed, and nothing else."""
+    pl = _plan_only(clip, ch, st)
+    _log_cut(clip, ch, st, pl)
+    _segs, sidx, nshots = _base_shots(ch, st)
+    log(f"  {len(st['keeps'])} audio splices "
+        f"({len(st['keeps'])/(st['out_dur']/60):.1f}/min) grouped into "
+        f"{nshots} shots ({nshots/(st['out_dur']/60):.1f} picture cuts/min)")
+    log(f"  picture {st['total']} frames ({st['total']/ch.fps:.2f}s), "
+        f"facecam {tuple(_cam(clip, ch, st))}")
+
+
+def stage_punch_native(clip, ch, st):
+    """The punch plan only. `render_native.segments` reads `punches.json`
+    and splits the picture there, so there is nothing to place."""
+    _punch_plan(clip, ch, st)
+
+
+def stage_assemble_native(clip, ch, st):
+    """The sound bed. The overlays are composited by the renderer itself,
+    from the same `_overlay_schedule` the Resolve path places."""
+    _sfx_bed(clip, ch, st, st["total"])
+
+
+def stage_render_native(clip, ch, st):
+    from engine import render_native as rn
+    tag = clip.slug
+    master = ROOT / f"renders/{tag}_nat.mp4"
+    t0 = time.time()
+    res = rn.render(clip, ch, master, log=log, st=st)
+    log(f"  native render {time.time()-t0:.0f}s "
+        f"({res['picture_frames']} frames, {res['segments']} segments)")
+    out = ROOT / f"renders/{tag}.mp4"
+    # A REMUX, NOT A RE-ENCODE. The Resolve path needs a final encode because
+    # its EQ pass and its loudness pass are separate files; here the EQ is
+    # already in the composite's audio graph and `_finish_audio` has written
+    # the AAC with `-c:v copy`, so the only thing left is to move the moov
+    # atom to the front for progressive playback. `-c copy` also preserves
+    # the h264 VUI, which carries the colour tags that `h264_metadata` wrote
+    # — a re-encode here would drop them again on this ffmpeg build.
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(master),
+                    "-c", "copy", "-movflags", "+faststart", str(out)],
+                   check=True)
+    master.unlink(missing_ok=True)
+    _gate(clip, ch, st, out)
+
+
+RENDERERS = ("native", "resolve")
+
+
+def _stage_fn(name: str, renderer: str):
+    """The renderer overrides four of the six stages; two are shared.
+
+    `captions` and `chat` build alpha movies and know nothing about what will
+    composite them. `cut`, `punch`, `assemble` and `render` each had a
+    Resolve half and a decide-what-happens half, and the halves are now
+    separate functions — so the native variants are thin, and the thinking is
+    in one place for both.
+    """
+    if renderer == "native":
+        fn = globals().get(f"stage_{name}_native")
+        if fn is not None:
+            return fn
+    return globals()[f"stage_{name}"]
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("spec")
     ap.add_argument("--only", default=",".join(STAGES))
+    # NATIVE IS THE DEFAULT. Resolve stays reachable because it is the format
+    # workbench — a new look is designed in a timeline you can scrub — but a
+    # clip whose format is settled does not need a logged-in desktop, and the
+    # whole batch no longer has to queue behind one GUI app for the RENDER.
+    ap.add_argument("--renderer", default="native", choices=RENDERERS,
+                    help="native: ffmpeg, headless, parallel-safe. "
+                         "resolve: the GUI timeline, for format work.")
     a = ap.parse_args()
     clip, ch = load(a.spec)
     want = [s for s in a.only.split(",") if s]
@@ -1716,6 +2260,10 @@ def main():
     # run in order and share `st`, so a partial run has to rebuild what it
     # depends on — cheap, because the expensive parts are Resolve and
     # Remotion, not these.
+    st["renderer"] = a.renderer
+    log(f"    renderer: {a.renderer}"
+        + ("" if a.renderer == "native" else
+           "   (the GUI path — Resolve must be open and on the Edit page)"))
     for s in STAGES:
         if s not in want:
             if s == "cut" and any(x in want for x in
@@ -1725,7 +2273,7 @@ def main():
                 _plan_only(clip, ch, st)
             continue
         log(f"[{s}]")
-        globals()[f"stage_{s}"](clip, ch, st)
+        _stage_fn(s, a.renderer)(clip, ch, st)
     log("done.")
 
 
@@ -1741,9 +2289,15 @@ def _plan_only(clip, ch, st):
     be the same number, derived twice.
     """
     src = clip.source(ROOT)
+    # PACKETS, NOT DECODED FRAMES. `-count_frames` decodes the whole source
+    # to count it: measured 4.60s against 0.04s on clip 47's 6893-frame
+    # source, and this runs on every build and every gate. For H.264 in MP4
+    # one packet is one frame, and that was checked rather than assumed —
+    # all 41 of this job's clip sources return the identical number, so the
+    # cut cannot move.
     probe = subprocess.run(
-        ["ffprobe", "-v", "error", "-count_frames", "-select_streams", "v:0",
-         "-show_entries", "stream=nb_read_frames", "-of", "csv=p=0", str(src)],
+        ["ffprobe", "-v", "error", "-count_packets", "-select_streams", "v:0",
+         "-show_entries", "stream=nb_read_packets", "-of", "csv=p=0", str(src)],
         capture_output=True, text=True).stdout.strip()
     src_dur = int(probe) / ch.fps
     # Dead air is BOTH kinds: digital zero (the Twitch mutes) and ordinary
@@ -1767,7 +2321,18 @@ def _plan_only(clip, ch, st):
     kp = _clamp_out_point(_clamp_in_point(keeps(spans, src_dur), ip), op)
     st["keeps"] = kp
     st["out_dur"] = sum(k.length for k in kp)
-    st["total"] = round(st["out_dur"] * ch.fps)
+    # THE PICTURE IS THE SUM OF EACH KEEP'S OWN ROUNDED SPAN, not
+    # `round(out_dur * fps)`. Resolve is handed `round(k.start*fps)` and
+    # `round(k.end*fps)` per keep (see stage_cut), so a keep's length on the
+    # timeline is the difference of two independently rounded numbers and the
+    # total drifts from the product. On clip 12 those are 2716 and 2710, and
+    # because the overlays were sized from the smaller one the last SIX
+    # FRAMES carried picture with no captions and no chat. `stage_assemble`
+    # already recounted it off V1 and logged the disagreement — by which
+    # point the overlay movies were on disk at the wrong length. Compute it
+    # once, here, where the keeps are decided.
+    st["total"] = sum(round(k.end * ch.fps) - round(k.start * ch.fps)
+                      for k in kp)
     st["base_wav"].parent.mkdir(parents=True, exist_ok=True)
     return {"src": src, "src_dur": src_dur, "in_point": ip, "out_point": op,
             "snap": snap, "out_snap": osnap, "spans": spans, "words": words,

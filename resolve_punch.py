@@ -382,7 +382,17 @@ def bold_moments(path=SRC, *, min_db=MIN_DB, min_sep=MIN_SEP,
             if not why:
                 live.append((t, d))
         cand = live
-    if keep:
+    if keep is not None:
+        # `keep is not None`, NOT `if keep` — `[]` AND `None` ARE DIFFERENT
+        # ANSWERS and a falsy test collapses them. `[]` means the human said
+        # no booms at all; `None` means nobody has said. `_punch_plan` has
+        # always drawn that line correctly (`if clip.booms is not None`) and
+        # this function erased it one call later, so "remove the booms" wrote
+        # `booms: []` to the spec, logged an override, and shipped the boom
+        # anyway — measured identical at 3.51x the low-band baseline before
+        # and after. Two places deciding the same thing differently, which is
+        # this file's most-repeated defect.
+        #
         # A WATCHED HUMAN'S CALL, snapped to the measured candidates so the
         # moment keeps its own attack refinement and its dB. A time with no
         # candidate near it is taken literally and reported as such, because

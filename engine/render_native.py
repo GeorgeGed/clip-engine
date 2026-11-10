@@ -51,30 +51,50 @@ from engine import native_composite as nc          # noqa: E402
 from engine import native_grade as ng              # noqa: E402
 from engine import native_layout as nl             # noqa: E402
 
-# Which overlay file sits on which Resolve track, so the composite order is
-# the survey's finding and not a guess. V3 chat, V4 cards, V5 titles, V6
-# captions — a graphic lands ON TOP of the chat, and the captions on top of
-# everything.
-TRACKS = {
-    "rm_Chat.mov": nc.TRACK_CHAT,
-    "rm_Bait.mov": nc.TRACK_TITLES,
-    "cap_kin.mov": nc.TRACK_CAPTIONS,
-}
-BAIT_AT = 0.8          # make_clip places the hook line here
 
 
-def plan(clip, ch) -> dict:
-    """The cut, from make_clip's own planner. Never re-derived here."""
+def plan(clip, ch, st=None) -> dict:
+    """The cut AND the facecam rect, from make_clip's own planner.
+
+    THE CAM RECT COMES FROM `make_clip._cam`, NEVER FROM `ch.cam`. `cam` is
+    the one Channel field a Clip may override, because a streamer moves their
+    own layout between scenes — this file records clip 6 rendering as a corner
+    of a browser sidebar with no face in it when clip 8's rect was reused. And
+    `_cam` does more than read the spec: with no override it runs
+    `facecam.detect`, so bypassing it loses the detection entirely.
+
+    The first version of this module read `ch.cam` directly, and on clip 12
+    (spec 1450,816 against the channel's 1456,818) that put the facecam 3.75
+    source px left and 1.5px wider, failing the parity gate's geometry check.
+    Both renderers were doing the arithmetic correctly and had been handed
+    DIFFERENT RECTANGLES — which is this repo's most-repeated defect wearing a
+    geometry costume, and it was briefly recorded as an unexplained Resolve
+    convention instead.
+    """
     import make_clip as mc
     overlays = ROOT / f"jobs/{clip.job}/overlays_{clip.index:02d}"
-    st = {"overlays": overlays,
-          "base_wav": overlays / "_cut.wav",
-          "meta": {"subject": ""}}
-    pl = mc._plan_only(clip, ch, st)
+    if st is None:
+        st = {"overlays": overlays,
+              "base_wav": overlays / "_cut.wav",
+              "meta": {"subject": ""}}
+    if st.get("keeps"):
+        # The caller has already planned — `make_clip` does, before it calls
+        # us. Re-planning would run `qc.dead_audio` over a 90s source twice
+        # more in the same process for an identical answer.
+        pl = {"src": clip.source(ROOT)}
+    else:
+        pl = mc._plan_only(clip, ch, st)
+    cam = tuple(mc._cam(clip, ch, st))
     keeps = st["keeps"]
     shot_of = mc._shot_index([k.length for k in keeps])
-    return {"src": pl["src"], "keeps": keeps, "shot_of": shot_of,
-            "out_dur": st["out_dur"], "total": st["total"],
+    # WHERE EVERY OVERLAY GOES comes from `make_clip._overlay_schedule`, the
+    # same function the Resolve path places from. The first version of this
+    # module globbed `rm_*.mov` and put every card at 0.0, because a glob has
+    # no times in it — which would have moved `rm_StoryVitality` off the
+    # sentence it answers and onto the top of the clip.
+    sched = mc._overlay_schedule(clip, ch, st, st["total"])
+    return {"src": pl["src"], "keeps": keeps, "shot_of": shot_of, "cam": cam,
+            "out_dur": st["out_dur"], "total": st["total"], "schedule": sched,
             "overlays": overlays, "n_shots": max(shot_of) + 1 if shot_of else 0}
 
 
@@ -163,23 +183,22 @@ def segments(p: dict, ch, punches: list[float] | None = None):
 
 
 def overlay_list(p: dict) -> list[nc.Overlay]:
-    """Every alpha movie that exists for this clip, on its own track.
+    """The video overlays, from the shared schedule.
 
-    MATCHED BY RESOLVED PATH, never by name. Every clip writes `rm_Chat.mov`
+    Track numbers are Resolve's and mean the same here: V3 chat, V4 cards,
+    V5 titles, V6 captions — a graphic lands ON TOP of the chat and the
+    captions on top of everything.
+
+    EACH IS ADDRESSED BY ITS RESOLVED PATH. Every clip writes `rm_Chat.mov`
     and `cap_kin.mov` into its own directory, and matching by file NAME is
     how clip 12 shipped with CLIP 6'S CHAT on it — five `rm_Chat.mov` in one
-    media pool and the dict kept whichever was added last.
+    Resolve media pool and the dict kept whichever was added last. ffmpeg is
+    handed paths, so it cannot collide by name at all; this is the one
+    hazard the native path does not inherit.
     """
-    out = []
-    for name, track in TRACKS.items():
-        f = (p["overlays"] / name).resolve()
-        if f.exists():
-            out.append(nc.Overlay(path=f, at=BAIT_AT if "Bait" in name else 0.0,
-                                  track=track))
-    for f in sorted(p["overlays"].glob("rm_*.mov")):
-        if f.name not in TRACKS:
-            out.append(nc.Overlay(path=f.resolve(), at=0.0,
-                                  track=nc.TRACK_CARDS))
+    out = [nc.Overlay(path=e["path"].resolve(), at=e["at"], dur=e["dur"],
+                      track=e["track"])
+           for e in p["schedule"] if e["media"] == 1]
     return nc.order(out)
 
 
@@ -203,19 +222,22 @@ def punch_times(pj: Path) -> list[float]:
 
 
 def render(clip, ch, out: str | Path, *, punches: list[float] | None = None,
-           crf: int = 17, log=print) -> dict:
+           crf: int = 17, log=print, st=None) -> dict:
     """Build the master. Returns what was decided, for the record."""
     out = Path(out)
-    p = plan(clip, ch)
+    p = plan(clip, ch, st)
     if punches is None:
         punches = punch_times(p["overlays"] / "punches.json")
     segs = segments(p, ch, punches)
     log(f"  cut: {len(p['keeps'])} keeps -> {len(segs)} segments, "
         f"{p['n_shots']} shots, {p['out_dur']:.2f}s, {len(punches)} punch(es)")
+    log(f"  facecam rect {p['cam']}"
+        + ("" if tuple(p["cam"]) == tuple(ch.cam)
+           else f"  (overrides the channel's {tuple(ch.cam)})"))
 
     grade = ng.chain(ch.grade)                      # facecam only
     cg = cut_graph(p["keeps"], fps=ch.fps, src="0:v", out="rn_cut")
-    base = ";".join([cg, nl.two_pane(ch, segs, cam=tuple(ch.cam),
+    base = ";".join([cg, nl.two_pane(ch, segs, cam=p["cam"],
                                      src="rn_cut", out="base",
                                      top_filters=grade)])
     ovs = overlay_list(p)

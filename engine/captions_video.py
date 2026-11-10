@@ -90,8 +90,9 @@ IMPACT = "/System/Library/Fonts/Supplemental/Impact.ttf"
 
 
 def kinetic(cards, out: Path, *, dur: float, size=88, y=0.44, canvas=CANVAS, fps=60,
-            settle=0.085, lift=10, grow=0.045, accent=ACCENT, tilt_emph=1.2,
-            font_path=IMPACT, emph_scale=1.27, track=-1):
+            settle=0.085, lift=10, grow=0.045, accent=None, tilt_emph=1.2,
+            font_path=IMPACT, emph_scale=1.27, track=-1,
+            fill=WHITE, stroke=(0, 0, 0, 255)):
     """The C style, damped.
 
     George: "number three probably has the best subtitle style, if it was a
@@ -99,7 +100,30 @@ def kinetic(cards, out: Path, *, dur: float, size=88, y=0.44, canvas=CANVAS, fps
     scale travel cut from 0.24 to 0.055, the lift from 26px to 12, the tilt
     from 4.5 degrees to 1.4, and a critically-damped ease instead of a
     spring that overshoots. It still arrives; it no longer bounces.
+
+    `fill` is the body colour, `accent` the emphasised cards', `stroke` the
+    outline every card is drawn with. All three used to be literals in the
+    draw loop.
+
+    **TWO SILENT FAILURE MODES CLOSED HERE, and both were defaults.**
+    `accent` defaulted to `titles.ACCENT`, which is GOLD — the v43 caption
+    accent, from before the palette changed — so any caller that forgot the
+    argument got gold captions beside blue cards, which is exactly the
+    "two videos stacked on each other" this project renamed a whole file to
+    avoid. It is `None` now and resolves to the house blue, with one
+    definition shared with `make_clip.CAPTION_ACCENT`.
+
+    And PIL's `ImageDraw.text(fill=None)` draws **white** rather than
+    raising, so a missing or mistyped colour would have shipped as "looks
+    almost right" instead of failing. Both are now explicit and validated by
+    `engine.caption_colour` before they reach here.
     """
+    from .caption_colour import DEFAULT_EMPH, rgba                # noqa: PLC0415
+    if accent is None:
+        accent = rgba(DEFAULT_EMPH)
+    if fill is None or stroke is None:
+        raise ValueError("kinetic: fill and stroke must be explicit — PIL "
+                         "draws white on fill=None instead of raising")
     import math
 
     import numpy as np
@@ -120,12 +144,12 @@ def kinetic(cards, out: Path, *, dur: float, size=88, y=0.44, canvas=CANVAS, fps
         for f in range(max(0, a), min(n, b)):
             by_frame.setdefault(f, (c, (f - a) / fps))
 
-    def draw_tracked(d, xy, s, fnt, fill, sw):
+    def draw_tracked(d, xy, s, fnt, col, sw):
         """C set letterSpacing -1; PIL has no tracking, so step per glyph."""
         x, yy = xy
         for ch in s:
-            d.text((x, yy), ch, font=fnt, fill=fill, stroke_width=sw,
-                   stroke_fill=(0, 0, 0, 255))
+            d.text((x, yy), ch, font=fnt, fill=col, stroke_width=sw,
+                   stroke_fill=stroke)
             x += d.textlength(ch, font=fnt) + track
 
     def tracked_w(d, s, fnt):
@@ -148,7 +172,7 @@ def kinetic(cards, out: Path, *, dur: float, size=88, y=0.44, canvas=CANVAS, fps
         k = 1.0 - math.exp(-age / max(1e-4, settle * 0.38))
         k = min(1.0, k)
         fnt = big if c.get("emph") else font
-        col = accent if c.get("emph") else (255, 255, 255, 255)
+        col = accent if c.get("emph") else fill
 
         layer = Image.new("RGBA", canvas, (0, 0, 0, 0))
         d = ImageDraw.Draw(layer)
