@@ -42,3 +42,19 @@ web/factory.db
 jobs/*/web/
 web/.runner.lock
 web/.site-key
+
+# ─────────────────────────────────────────────────────────────────────────
+# NOT IN THE REPOSITORY, AND ON PURPOSE.
+#
+# Rendered video is build OUTPUT — regenerable from a spec plus the source
+# VOD — and it was 5 GB of the 5.1 GB pack. Fourteen blobs in the old
+# history were over 100 MB, which GitHub rejects outright, so the history
+# was rewritten to drop them. The files themselves are untouched on disk.
+#
+# `jobs/_service/` held the launchd logs, and the site key was printed into
+# site.out.log at startup across restarts — the defect this file's own
+# record describes. A service log is not source and must never be tracked.
+*.mp4
+*.mov
+deliver/
+jobs/_service/
