@@ -1,0 +1,23 @@
+name = "clip-engine-webapp"
+main = "src/index.ts"
+compatibility_date = "2026-11-01"
+
+[observability]
+enabled = true
+
+[vars]
+# Public base URL of this Worker, without a trailing slash. Used as callback_base
+# for the pipeline and in notification links.
+PUBLIC_URL = "https://clip-engine-webapp.YOUR-SUBDOMAIN.workers.dev"
+# Modal web endpoint that starts a job. Can be overridden with a secret of the same name.
+MODAL_START_URL = "https://YOUR-MODAL-WORKSPACE--clip-engine-start.modal.run"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "clip-engine"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "CLIPS"
+bucket_name = "clip-engine-clips"

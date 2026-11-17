@@ -6,7 +6,7 @@
   1920,
   1080
  ],
- "seam": 0.42,
+ "seam": 0.4,
  "chrome": 92,
  "fps": 60,
  "grade": {
@@ -19,5 +19,9 @@
  "arc": null,
  "vod_id": "2905408276",
  "permission": "explicit",
- "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen \u2014 confirm before a wide release."
+ "permission_note": "Operator's own permission for FNS VOD material, carried over from the quote desk. Twitch chat messages are real viewers' words on screen — confirm before a wide release.",
+ "twitch": [
+  "gofns"
+ ],
+ "handle": "FNS"
 }

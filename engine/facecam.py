@@ -158,3 +158,107 @@ if __name__ == "__main__":
     for p in sys.argv[1:]:
         f = detect(p)
         print(f"{p.split('/')[-1][:34]:36s} {f}")
+
+
+# THE TIGHT FACE CROP, as a ratio of the detected face height. Measured off
+# clip 08's hand-set rect (1559, 838, 1821, 1024) around a 67px face centred
+# at (1695, 940): the crop is 3.9 faces wide, 2.78 tall, and sits 0.13 faces
+# above the face centre so there is headroom rather than chin room.
+FACE_W, FACE_H, FACE_LIFT = 3.9, 2.78, 0.13
+FACE_SAMPLES = 40
+FACE_MIN_HIT = 0.3
+FACE_STILL_PX = 2.0
+
+
+def _border(profile, lo, hi):
+    """The strongest straight edge in profile[lo:hi], or None if nothing there
+    stands out — an overlay's border is a hard line the full width of the
+    crop, a room is not."""
+    lo, hi = max(int(lo), 0), min(int(hi), len(profile))
+    if hi - lo < 3:
+        return None
+    seg = profile[lo:hi]
+    k = int(np.argmax(seg))
+    # Measured: overlay borders 93-159 grey levels per pixel of edge, the
+    # strongest thing in the room (a shelf, a mic arm) 25.
+    if seg[k] < 50:
+        return None
+    return lo + k
+
+
+def face_rect(path, *, samples=FACE_SAMPLES) -> tuple[int, int, int, int] | None:
+    """The house facecam crop, found by a FACE DETECTOR rather than motion.
+
+    `detect` reads motion, and a page that plays video moves too: on FNS VOD
+    2926995155 the gameplay in his browser out-moved the webcam and the
+    detector returned the whole frame. A face does not have that problem.
+
+    THE CROP STAYS INSIDE THE WEBCAM OVERLAY. Sized off the face alone, the
+    crop on clip 2 of that VOD reached 13px above the overlay and put a strip
+    of roster board across the top of the pane. The overlay's top and left
+    borders are hard lines that never move, so they show up in the MEDIAN of
+    the sampled frames while the room and the person blur out; the crop is
+    pulled inside them and narrowed to keep its aspect.
+    """
+    import cv2                                           # noqa: PLC0415
+    casc = cv2.CascadeClassifier(cv2.data.haarcascades
+                                 + "haarcascade_frontalface_default.xml")
+    cap = cv2.VideoCapture(str(path))
+    n = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) or 1920
+    H = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) or 1080
+    hits, grays = [], []
+    for i in np.linspace(n * 0.05, n * 0.95, samples).astype(int):
+        cap.set(cv2.CAP_PROP_POS_FRAMES, int(i))
+        ok, fr = cap.read()
+        if not ok:
+            continue
+        g = cv2.cvtColor(fr, cv2.COLOR_BGR2GRAY)
+        if len(grays) < 15:
+            grays.append(g)
+        fs = casc.detectMultiScale(g, 1.1, 6, minSize=(40, 40))
+        hits += [(x + w / 2, y + h / 2, h) for x, y, w, h in fs]
+    cap.release()
+    a = np.array(hits) if hits else np.zeros((0, 3))
+    # A LIVE FACE MOVES; A POSTER DOES NOT. On clip 08 the haar cascade
+    # fires on two objects in his room in 40 of 40 frames, more often than
+    # on his face (29 of 40), so the busiest cluster is a wall. Their
+    # positions are identical to the pixel across the clip; a face drifts.
+    best = None
+    for p in a:
+        near = a[(abs(a[:, 0] - p[0]) < p[2]) & (abs(a[:, 1] - p[1]) < p[2])]
+        if len(near) < samples * FACE_MIN_HIT:
+            continue
+        if near[:, 0].std() + near[:, 1].std() < FACE_STILL_PX:
+            continue
+        if best is None or len(near) > len(best):
+            best = near
+    if best is None:
+        return None
+    cx, cy, fh = np.median(best, axis=0)
+    # Wider than the top pane (1080x768 = 1.406), or the native renderer's
+    # axis guard refuses it: the overflow has to be horizontal.
+    aspect = 1.42
+    bh = FACE_H * fh
+    bw = max(FACE_W * fh, bh * aspect)
+    x0 = min(max(cx - bw / 2, 0), W - bw)
+    y0 = min(max(cy - FACE_LIFT * fh - bh / 2, 0), H - bh)
+    med = np.median(np.stack(grays), axis=0).astype(np.float32)
+    gy = np.abs(np.diff(med, axis=0))
+    gx = np.abs(np.diff(med, axis=1))
+    top = _border(gy[:, int(x0):int(x0 + bw)].mean(axis=1), y0 - 60, cy - 0.9 * fh)
+    left = _border(gx[int(y0):int(y0 + bh), :].mean(axis=0), x0 - 60, cx - 1.2 * fh)
+    ymin = top + 2 if top is not None else 0
+    xmin = left + 2 if left is not None else 0
+    if y0 < ymin:
+        y0 = ymin
+        bh = min(bh, H - y0)
+        bw = bh * aspect
+    if x0 < xmin:
+        x0 = xmin
+    if x0 + bw > W:
+        bw = W - x0
+        bh = bw / aspect
+    x0 = min(max(cx - bw / 2, xmin), W - bw)
+    y0 = min(max(cy - FACE_LIFT * fh - bh / 2, ymin), H - bh)
+    return (int(round(x0)), int(round(y0)), int(x0 + bw), int(y0 + bh))

@@ -93,11 +93,50 @@ TIKTOK_SANS = (Path(__file__).resolve().parent.parent / "fonts"
 EMOJI_SWIFT = Path(__file__).resolve().parent / "emoji_png.swift"
 
 
-def _title_image(text: str, *, emoji: str | None = None, size=80, max_w=880,
-                 stroke_frac=0.05):
+NOTO_EMOJI = ("/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
+              "/usr/share/fonts/noto/NotoColorEmoji.ttf")
+
+
+def _emoji_png(emoji: str):
+    """One emoji as an RGBA image, cropped to its ink.
+
+    On a Mac, AppKit draws it through `emoji_png.swift` — Apple's glyph, the
+    one an iPhone shows, which PIL cannot draw on this build. Elsewhere (the
+    Linux render workers) PIL draws Noto Color Emoji, a CBDT bitmap font that
+    only exists at 109px; the caller scales it like the Apple one.
+    """
+    import shutil
+    import sys
+    import tempfile
+    from PIL import Image, ImageFont
+    if sys.platform == "darwin" and shutil.which("swift"):
+        png = Path(tempfile.mkdtemp()) / "emoji.png"
+        subprocess.run(["swift", str(EMOJI_SWIFT), emoji, str(png), "160"],
+                       check=True, capture_output=True)
+        big = Image.open(png).convert("RGBA")
+    else:
+        import os
+        font = next((p for p in (os.environ.get("CLIP_EMOJI_FONT"), *NOTO_EMOJI)
+                     if p and Path(p).exists()), None)
+        if not font:
+            raise FileNotFoundError("no colour emoji font: install fonts-noto-color-emoji "
+                                    "or set CLIP_EMOJI_FONT")
+        f = ImageFont.truetype(font, 109)
+        big = Image.new("RGBA", (220, 220), (0, 0, 0, 0))
+        from PIL import ImageDraw
+        ImageDraw.Draw(big).text((20, 20), emoji, font=f, embedded_color=True)
+        big = big.resize((int(big.width * 160 / 109), int(big.height * 160 / 109)),
+                         Image.LANCZOS)
+    box = big.getbbox()
+    return big.crop(box) if box else None
+
+
+def _title_image(text: str, *, emoji: str | None = None, keyword: str | None = None,
+                 size=80, max_w=880, stroke_frac=0.05, key_fill=(222, 255, 157, 255)):
     """The opening title in TikTok's own text style: TikTok Sans SemiBold,
     white with a thin black outline, no box, the emoji alone on the line
-    underneath. Wraps to as many lines as `max_w` needs."""
+    underneath. Wraps to as many lines as `max_w` needs. `keyword`, one
+    word of the title, is drawn in `key_fill` (the captions' lime)."""
     from PIL import Image, ImageDraw, ImageFont
     fnt = ImageFont.truetype(str(TIKTOK_SANS), size)
     fnt.set_variation_by_name(b"SemiBold")
@@ -115,24 +154,24 @@ def _title_image(text: str, *, emoji: str | None = None, size=80, max_w=880,
     lh = asc + desc + 2 * sw
     em = None
     if emoji:
-        # PIL draws Apple Color Emoji as nothing on this build, so AppKit
-        # draws it — the glyph a phone shows — via `emoji_png.swift`.
-        import tempfile
-        png = Path(tempfile.mkdtemp()) / "emoji.png"
-        subprocess.run(["swift", str(EMOJI_SWIFT), emoji, str(png), "160"],
-                       check=True, capture_output=True)
-        big = Image.open(png).convert("RGBA")
-        big = big.crop(big.getbbox())
-        em = big.resize((int(big.width * size / 160), int(big.height * size / 160)),
-                        Image.LANCZOS)
+        big = _emoji_png(emoji)
+        if big is not None:
+            em = big.resize((int(big.width * size / 160), int(big.height * size / 160)),
+                            Image.LANCZOS)
     bw = int(max(fnt.getlength(x) for x in lines)) + 2 * sw + 4
     bh = lh * len(lines) + (em.height + int(size * 0.1) if em else 0)
     im = Image.new("RGBA", (bw, bh), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
-    for k, x in enumerate(lines):
-        d.text(((bw - fnt.getlength(x)) / 2, sw + k * lh), x, font=fnt,
-               fill=(255, 255, 255, 255), stroke_width=sw,
-               stroke_fill=(0, 0, 0, 255))
+    key = (keyword or "").strip(".,!?:;\"'").lower()
+    space = fnt.getlength(" ")
+    for k, line in enumerate(lines):
+        x = (bw - fnt.getlength(line)) / 2
+        for word in line.split(" "):
+            hit = key and word.strip(".,!?:;\"'").lower() == key
+            d.text((x, sw + k * lh), word, font=fnt,
+                   fill=key_fill if hit else (255, 255, 255, 255),
+                   stroke_width=sw, stroke_fill=(0, 0, 0, 255))
+            x += fnt.getlength(word) + space
     if em:
         im.paste(em, ((bw - em.width) // 2, lh * len(lines) + int(size * 0.1)), em)
     return im
@@ -141,7 +180,7 @@ def _title_image(text: str, *, emoji: str | None = None, size=80, max_w=880,
 def pop(cards, out: Path, *, dur: float, size=92, y=0.44, canvas=CANVAS, fps=60,
         fill=None, accent=None, stroke=(0, 0, 0, 255), stroke_frac=0.10,
         title: str | None = None, title_s: float = 1.0,
-        title_emoji: str | None = None):
+        title_emoji: str | None = None, title_keyword: str | None = None):
     """jiyu val's caption style, measured off his Shorts at 60fps.
 
     Baloo 2 ExtraBold at normal letter spacing, lowercase as spoken, a pastel
@@ -192,7 +231,7 @@ def pop(cards, out: Path, *, dur: float, size=92, y=0.44, canvas=CANVAS, fps=60,
         # THE TITLE TAKES THE CAPTION SLOT for the opening `title_s`, with
         # the same pop. Index -1 so no card can collide with it; the caller
         # has already moved the cards off this span.
-        imgs[-1] = _title_image(title, emoji=title_emoji)
+        imgs[-1] = _title_image(title, emoji=title_emoji, keyword=title_keyword)
         for f in range(min(n, int(round(title_s * fps)))):
             by_frame[f] = (-1, f / fps)
     for i, c in enumerate(cards):

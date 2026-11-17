@@ -751,6 +751,11 @@ def _cam(clip, ch, st):
         st["cam"] = tuple(clip.cam)
         log(f"  facecam {st['cam']} (from the spec)")
         return st["cam"]
+    face = facecam.face_rect(clip.source(ROOT))
+    if face:
+        st["cam"] = face
+        log(f"  facecam {face} from the face detector")
+        return face
     f = facecam.detect(clip.source(ROOT))
     if f is None:
         st["cam"] = ch.cam
@@ -977,7 +982,7 @@ def stage_captions(clip, ch, st):
             log(f"  title {clip.title!r} in the caption slot to {TITLE_S:.1f}s")
         captions_video.pop(shown, dst, dur=st["out_dur"], fill=cap_fill,
                            accent=cap_emph, title=clip.title, title_s=TITLE_S,
-                           title_emoji=clip.emoji)
+                           title_emoji=clip.emoji, title_keyword=clip.title_keyword)
     else:
         if clip.title:
             raise ValueError("title needs caption_style \"pop\"")
@@ -2273,7 +2278,7 @@ def _big_cam_plan(clip, ch, st):
     if cur:
         chunks.append(cur)
     chunks = [c for c in chunks if c[1] - c[0] >= BIG_MIN and c[0] >= BIG_HEAD]
-    y, sr = sf.read(str(st["overlays"] / "_cut.wav"), dtype="float32")
+    y, sr = sf.read(str(_cut_audio(clip, ch, st)), dtype="float32")
     y = y.mean(axis=1) if y.ndim > 1 else y
     anchors = _emphasis_anchors(clip, ch, st)
 
