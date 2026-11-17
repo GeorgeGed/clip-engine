@@ -24,7 +24,6 @@ anything is rendered and leaves the editorial call to a human.
 
 Usage:  ./.venv/bin/python build_chat.py
 """
-import colorsys
 import json
 import re
 import sys
@@ -116,42 +115,10 @@ IN_AT = 0.08                 # the one entrance, which the `paper` cue marks
 # is one rule in the project for this and not two. Most moves are invisible
 # (#FF0000 -> #FF1010, #2E8B57 -> #30915B); the four that matter become
 # #6E6EFF, #808080, #DD4F4F and #A55DE9.
-PANEL_BG = (0x18, 0x18, 0x1B)
-CONTRAST_FLOOR = 4.5
 
 
-def _rel_l(rgb):
-    def ch(v):
-        v /= 255.0
-        return v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4
-    r, g, b = (ch(float(v)) for v in rgb)
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b
-
-
-def _ratio(a, b):
-    la, lb = _rel_l(a), _rel_l(b)
-    return (max(la, lb) + 0.05) / (min(la, lb) + 0.05)
-
-
-def readable(hex_colour, bg=PANEL_BG, floor=CONTRAST_FLOOR):
-    """`hex_colour` with its lightness raised until it clears `floor` on `bg`."""
-    s = hex_colour.lstrip("#")
-    rgb = [int(s[i:i + 2], 16) / 255 for i in (0, 2, 4)]
-    if _ratio([v * 255 for v in rgb], bg) >= floor:
-        return hex_colour.upper()
-    h, l, sat = colorsys.rgb_to_hls(*rgb)
-    if sat < 0.02:
-        sat = 0.0                      # a grey has no hue to preserve
-    lo, hi = l, 1.0
-    for _ in range(40):
-        mid = (lo + hi) / 2
-        out = [v * 255 for v in colorsys.hls_to_rgb(h, mid, sat)]
-        if _ratio(out, bg) < floor:
-            lo = mid
-        else:
-            hi = mid
-    out = [v * 255 for v in colorsys.hls_to_rgb(h, hi, sat)]
-    return "#%02X%02X%02X" % tuple(int(round(v)) for v in out)
+from engine.contrast import (CONTRAST_FLOOR, PANEL_BG, ratio as _ratio,  # noqa: E402,F401
+                             readable, rel_luminance as _rel_l)
 
 
 # The words the clip is actually about, for the relevance read.

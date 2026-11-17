@@ -162,6 +162,19 @@ describe("jobs", () => {
     expect(list.jobs.map((j) => j.id)).toContain(job.id);
   });
 
+  it("stores Modal's call id and shows the run timeline on the job page", async () => {
+    const cookie = await login();
+    respond = (url) => (url === "https://modal.test/start" ? Response.json({ ok: true, call_id: "fc-01TESTCALL" }) : Response.json({ ok: true }));
+    const { job } = await createJob(cookie);
+    await pipeline("progress", { job_id: job.id, stage: "download", message: "Downloading 2:52:28 of video" });
+    const detail = (await (await call(`/api/jobs/${job.id}`, { headers: { cookie } })).json()) as any;
+    expect(detail.job.modal_call_id).toBe("fc-01TESTCALL");
+    const page = await (await call(`/jobs/${job.id}`, { headers: { cookie } })).text();
+    expect(page).toContain("Run timeline");
+    expect(page).toContain("fc-01TESTCALL");
+    expect(page).toContain("Download VOD");
+  });
+
   it("marks the job failed when Modal rejects it, and retry re-dispatches", async () => {
     const cookie = await login();
     respond = () => new Response("boom", { status: 500 });

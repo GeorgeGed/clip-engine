@@ -25,6 +25,7 @@ export interface Job {
   created_at: string;
   updated_at: string;
   finished_at: string | null;
+  modal_call_id?: string | null;
   clip_count?: number;
   covers?: string | null;
 }
