@@ -12,7 +12,7 @@ who ran the setup has no remaining access.
 | Web app | Cloudflare Worker + D1 database (`webapp/`) | The client pastes VOD links, watches progress, and plays or downloads clips. Password login. |
 | Clip storage | Cloudflare R2 bucket | Every rendered clip, its phone-size preview and its thumbnail |
 | Pipeline | Modal app (`modal_app.py`) | Downloads the VOD, transcribes it on a GPU, ranks moments with Claude, writes titles, renders clips in parallel, uploads them to R2, and reports to the Worker |
-| Notifications | Optional webhook | The Worker POSTs to it when a VOD's clips are ready or the job fails |
+| Notifications | Optional Hark webhook | The Worker pushes to the client's iPhone when a VOD is submitted, when Modal starts on it, when the clips are ready, and on failure |
 
 ```
 phone/browser -> Worker (D1, R2) --POST /start--> Modal: run_job
@@ -43,7 +43,8 @@ prompt.
    secret. You will revoke it at the end. The deployed app keeps running without it.
 5. **An Anthropic API key** from console.anthropic.com. The pipeline keeps it.
 6. **A password for the web app**, chosen by the client.
-7. *(Optional)* **The notification webhook URL** for the mobile push service.
+7. *(Optional)* **The Hark webhook URL** (`https://hark.fyi/hooks/whk_…`) for push
+   notifications, with the Hark app signed in on the client's iPhone.
 8. **The channels they have permission to clip.** For each: the Twitch login (the
    name in `twitch.tv/<login>`), how they hold the rights (`own` for their own
    channel, `explicit` for written permission, `license` or `partner`), and a
