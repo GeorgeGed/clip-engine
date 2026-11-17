@@ -134,6 +134,12 @@ class Clip:
     # A per-word zoom that followed his voice was tried first and rejected:
     # "I don't want that shit".
     big_cam: str | list | None = None
+    # Hand-picked chat: [vod_offset, author, output_t]. Each names one real
+    # message by its VOD second and author (offsets are whole seconds, so
+    # several messages share one) and the output second it lands at, so the
+    # box carries the run of chat that is about what he is saying instead
+    # of whatever arrived during the cut. None keeps the timed chat.
+    chat_pick: list | None = None
     # ---- THE OPTIONS, and why these and not a Look object ----------------
     #
     # George: *"we need to add more options to the actual clips themselves,

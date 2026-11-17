@@ -57,10 +57,10 @@ import {C, TEXT, RADIUS} from './theme';
 // off their own alpha, each covers **100% of this footprint at alpha > 250**,
 // so a card lands on the chat and lifts off it.
 
-const BOX = {x: 64, y: 1090, w: 580, h: 420};
-const TILT = -2.4;
+const BOX = {x: 500, y: 930, w: 580, h: 520};
+const TILT = 0;
 const PAD = 22;
-const SIZE = 36;
+const SIZE = 32;
 const LINE = 1.3;
 const GAP = 22;
 const BADGE = 26;
@@ -116,14 +116,14 @@ export const ChatScroll: React.FC<{
 
   // the box's own arrival: it rises, scales up and settles into its tilt.
   // Opacity is NOT part of it beyond the first quarter — see presenceAt.
-  const lift = (1 - p) * 34;
-  const scale = 0.90 + 0.10 * p;
+  const lift = 0;
+  const scale = 1;
 
   return (
     <AbsoluteFill style={{opacity: Math.min(1, p * 4)}}>
       <div style={{
         position: 'absolute', left: BOX.x, top: BOX.y,
-        width: BOX.w, height: BOX.h,
+        width: BOX.w, maxHeight: BOX.h,
         // Twitch's own dark chat column. Not a restyle of it.
         background: C.twitchBg,
         // Square, like Twitch's own column and like every other card in the
@@ -133,7 +133,7 @@ export const ChatScroll: React.FC<{
         borderRadius: RADIUS,
         overflow: 'hidden',
         display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
-        padding: `0 ${PAD}px ${PAD}px`,
+        padding: `${PAD}px ${PAD}px ${PAD}px`,
         // Twitch's own UI face is Inter, so `TEXT` is already the right one.
         fontFamily: TEXT, fontSize: SIZE, lineHeight: LINE,
         // A pasted link is one unbreakable token, and at 580px wide it ran

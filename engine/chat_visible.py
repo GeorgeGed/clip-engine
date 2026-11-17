@@ -31,7 +31,7 @@ import subprocess
 from pathlib import Path
 
 # From vendor/remotion-clip08/src/Chat.tsx — read, not guessed.
-BOX = (64, 1090, 580, 420)
+BOX = (500, 930, 580, 520)
 DARK_MIN = 0.50          # clip 07 without chat: 0.19; with it: 0.83
 COLOUR_MIN = 400         # saturated pixels per frame inside the panel
 

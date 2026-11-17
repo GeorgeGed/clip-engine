@@ -40,7 +40,7 @@
   ],
   "emoji": "\ud83d\ude33",
   "cards": [],
-  "chat_mode": "off",
+  "chat_mode": null,
   "notes": "Ship, trimmed from the front. The subject line carries the defect in its own wording \u2014 \"Reaction to a team missing the partnership cycle AND what it means for player job security\" \u2014 and the news half is unusable regardless. Measured on the clip file rather than the mute map: 4.44s of the first 9.09s",
   "booms": [],
   "punch_boom": false,
@@ -50,6 +50,68 @@
   "caption_style": "pop",
   "caption_fill": "cream",
   "caption_emph": "lime",
-  "title": "FNS on job security"
+  "title": "FNS on job security",
+  "chat_pick": [
+   [
+    5876,
+    "Navire_x",
+    -5.0
+   ],
+   [
+    5883,
+    "floodzone7",
+    -3.5
+   ],
+   [
+    5909,
+    "a_1_bhay",
+    -2.0
+   ],
+   [
+    5947,
+    "juneeval",
+    1.3
+   ],
+   [
+    5989,
+    "youraveragerandomm",
+    12.3
+   ],
+   [
+    6046,
+    "emaraldthe5th",
+    15.0
+   ],
+   [
+    6031,
+    "tvkxsh1",
+    17.8
+   ],
+   [
+    6061,
+    "julyo",
+    26.0
+   ],
+   [
+    6077,
+    "youraveragerandomm",
+    28.6
+   ],
+   [
+    6054,
+    "antaviuswavius",
+    35.0
+   ],
+   [
+    6066,
+    "juneeval",
+    37.6
+   ],
+   [
+    6083,
+    "strwbrry_kun",
+    41.0
+   ]
+  ]
  }
 }

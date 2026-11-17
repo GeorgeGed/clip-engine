@@ -1312,6 +1312,13 @@ def stage_chat(clip, ch, st):
         log(f"     window {w['from']:6.2f}-{w['to']:6.2f}  ({w['to']-w['from']:.2f}s)")
     if not wins:
         log("  STILL no windows after the fallback — chat will not appear.")
+    # The box sits top-right of the lower pane, which a big-facecam stretch
+    # pushes down to the seam at BIG_SEAM — so the chat steps out for those.
+    for a, b in _big_cam_plan(clip, ch, st):
+        wins = [dict(w, **span) for w in wins
+                for span in ({"from": w["from"], "to": min(w["to"], a)},
+                             {"from": max(w["from"], b), "to": w["to"]})
+                if span["to"] - span["from"] > 0.5]
     st["chat_windows"] = wins
     st["chat_mode"] = mode
 
@@ -1383,6 +1390,21 @@ def stage_chat(clip, ch, st):
         f"{before} older than the {PREROLL_MAX:.0f}s pre-roll cap, "
         f"{removed} inside a removed span, {after} past the out-point)")
     assert len(kept) + before + removed + after == len(raw)
+    if clip.chat_pick:
+        by_key = {(float(m["offset"]), m["author"]): m for m in raw}
+        kept = []
+        for off, who, at in clip.chat_pick:
+            m = by_key[(float(off), who)]
+            kept.append({"t": float(at), "author": m["author"],
+                         "colour": m["colour"], "display": bc.readable(m["colour"]),
+                         "badges": m["badges"][:2],
+                         "frags": [{"text": f["text"], "emote": f["emote"]}
+                                   for f in m["frags"]]})
+            log(f"     pick {off:8.1f} -> {at:6.2f}s  {m['author']}: "
+                + "".join(f["text"] for f in m["frags"])[:60])
+        kept.sort(key=lambda m: m["t"])
+        (PUBLIC / "chat.json").write_text(json.dumps(kept, indent=1))
+        _props(st["overlays"], chat=kept, chatWindows=wins)
 
     # Remotion reads the duration and the hook from here rather than from a
     # constant in Root.tsx.
