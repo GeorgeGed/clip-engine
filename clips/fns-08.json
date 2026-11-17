@@ -7,7 +7,7 @@
    1920,
    1080
   ],
-  "seam": 0.42,
+  "seam": 0.4,
   "chrome": 92,
   "fps": 60,
   "grade": {
@@ -31,16 +31,25 @@
    5978.8,
    6045.89
   ],
-  "hook": "FNS ON VALORANT'S JOB SECURITY PROBLEM",
+  "hook": null,
   "cam": [
-   1450,
-   816,
-   1920,
-   1080
+   1559,
+   838,
+   1821,
+   1024
   ],
   "emoji": "\ud83d\ude33",
   "cards": [],
-  "chat_mode": null,
-  "notes": "Ship, trimmed from the front. The subject line carries the defect in its own wording \u2014 \"Reaction to a team missing the partnership cycle AND what it means for player job security\" \u2014 and the news half is unusable regardless. Measured on the clip file rather than the mute map: 4.44s of the first 9.09s"
+  "chat_mode": "off",
+  "notes": "Ship, trimmed from the front. The subject line carries the defect in its own wording \u2014 \"Reaction to a team missing the partnership cycle AND what it means for player job security\" \u2014 and the news half is unusable regardless. Measured on the clip file rather than the mute map: 4.44s of the first 9.09s",
+  "booms": [],
+  "punch_boom": false,
+  "intro_sfx": null,
+  "caption_case": "spoken",
+  "big_cam": "auto",
+  "caption_style": "pop",
+  "caption_fill": "cream",
+  "caption_emph": "lime",
+  "title": "FNS on job security"
  }
 }

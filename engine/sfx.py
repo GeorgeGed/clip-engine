@@ -499,6 +499,45 @@ def vine_boom():
 PALETTE["vine_boom"] = vine_boom
 
 
+def tsuzumi(dur=0.7, f_start=385.0, f_end=290.0, glide_s=0.14, rise=0.0,
+            ring=1.6, seed=43):
+    """The kabuki tsuzumi "pung", the anime stinger that opens a lot of
+    VALORANT reels. Synthesised rather than sampled, so the rights basis
+    stays `synthesised`.
+
+    Tuned against a recording of the real drum (measured, not shipped): a
+    single hit whose pitch starts near 285 Hz and slides DOWN to about 215 Hz
+    over 0.2s, a strong partial near 2.85x the fundamental (750-800 Hz), and
+    a fast decay of -30 dB in about 0.19s. `rise` > 0 adds the player's
+    squeeze, an initial upward bend before the fall, which the same recording
+    also has on one hit (277 -> 343 -> 246 Hz).
+
+    The defaults sit about five semitones above that recording (385 -> 290
+    Hz) and ring 1.6x longer (`ring`), because the reel version Jatin
+    wanted is "a higher pitched version of this and ... a little longer".
+
+    The first two versions were rejected. One opened with a slap, so it was
+    two sounds; the other used membrane partials and a slow decay, so it rang
+    like a tom rather than going "pung".
+    """
+    n = int(dur * SR); t = np.arange(n) / SR
+    f = f_end + (f_start - f_end) * np.exp(-t / glide_s)
+    if rise:
+        f = f * (1.0 + rise * (t / 0.05) * np.exp(1 - t / 0.05))
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    y = (np.sin(ph) * np.exp(-t / (0.075 * ring))
+         + 0.55 * np.sin(2.85 * ph) * np.exp(-t / (0.045 * ring))
+         + 0.12 * np.sin(1.5 * ph) * np.exp(-t / (0.05 * ring))).astype(np.float32)
+    a = int(0.0015 * SR)
+    y[:a] *= np.linspace(0, 1, a, dtype=np.float32)
+    hit = _noise(n, seed) * _env(n, attack=0.0004, decay=0.004)
+    y += 0.18 * _lp(hit, 2200.0)
+    return (y / np.max(np.abs(y))).astype(np.float32)
+
+
+PALETTE["tsuzumi"] = tsuzumi
+
+
 # A CUE IS NOT HEARD WHERE ITS FILE STARTS.
 #
 # George, third note on the same booms: *"the booms are still very slightly

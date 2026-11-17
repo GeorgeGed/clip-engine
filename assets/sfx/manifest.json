@@ -102,5 +102,13 @@
   "centroid_hz": 11460,
   "rights_basis": "synthesised",
   "source": "engine/sfx.py \u2014 generated, no third-party audio"
+ },
+ "tsuzumi": {
+  "file": "tsuzumi.wav",
+  "seconds": 0.7,
+  "peak": 1.0,
+  "centroid_hz": 484,
+  "rights_basis": "synthesised",
+  "source": "engine/sfx.py \u2014 generated, no third-party audio"
  }
 }

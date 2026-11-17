@@ -65,6 +65,10 @@ PALETTE: dict[str, str] = {
     "orange":    "#FF8A3D",
     "violet":    "#A855F7",
     "yellow":    "#FFE94E",
+    # jiyu val's three pastels, sampled off his Shorts' caption fills
+    "cream":     "#FFF0A1",
+    "lime":      "#DEFF9D",
+    "aqua":      "#94FFFE",
 }
 
 # Named and refused, with the reason, so the answer is "not that one, this

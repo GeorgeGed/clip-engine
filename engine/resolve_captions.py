@@ -76,7 +76,8 @@ def mask_profanity(word: str) -> str:
 
 
 def cards(words: list[dict], *, max_words: int = MAX_WORDS,
-          max_card_s: float = MAX_CARD_S, gap_break_s: float = GAP_BREAK_S) -> list[Card]:
+          max_card_s: float = MAX_CARD_S, gap_break_s: float = GAP_BREAK_S,
+          upper: bool = True) -> list[Card]:
     """Group word timings into 1-3 word cards.
 
     Cards are held until the next card starts, so text does not flicker between
@@ -90,7 +91,8 @@ def cards(words: list[dict], *, max_words: int = MAX_WORDS,
     def flush():
         if not cur:
             return
-        txt = " ".join(mask_profanity(w["text"]).upper() for w in cur).strip()
+        txt = " ".join(mask_profanity(w["text"]).strip() for w in cur).strip()
+        txt = txt.upper() if upper else txt
         if txt:
             out.append(Card(float(cur[0]["start"]), float(cur[-1]["end"]), txt,
                             [w["text"] for w in cur]))
