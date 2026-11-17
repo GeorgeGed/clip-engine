@@ -90,11 +90,26 @@ Distinct from R1's hook title, which is on for 1.5s then fades by 2.0s.
 Two lines, ALL CAPS, cap height ~140px, one coloured keyword per line, on at
 0.00, holds to 1.5s, 0.5s dissolve out.
 
-## 9. Speed ramps and punch-ins
+## 9. Speed ramps and punch-ins — CORRECTED by R5
 
-Not observed in any reference — all four are talking-head formats. Carried from
-the methodology for gameplay: dead time 1.6–2.2x with 8-frame ramps, one
-slow-mo per clip at 0.35x on the payoff.
+**The earlier note here said punch-ins were "not observed in any reference".
+That held for R1–R4 and is wrong as a general rule.** R5 (tarik, the closest
+channel to George's VALORANT material) punches in on the facecam in all 8 of
+8 Shorts measured, about 4–9 times a minute. See "R5 and R6" at the end.
+
+What R5 does is a **hard cut to a tighter crop**: the facecam jumps to
+1.14–1.4x in one frame, with no animation and no sound, usually on a reaction
+or a one-word caption, often with the lower pane changing at the same frame.
+The first one lands 3–10s in, not at 0.00. R6 (ohnepixel) instead does an
+occasional **smooth push** of about 1.18x over about 0.25s, and half his
+Shorts have none.
+
+The punches removed from clip 8 were animated zooms on a talking head. That is
+neither of these, so the removal stands, but the reason was wrong.
+
+Speed ramps are still not observed in any reference. Carried from the
+methodology for gameplay: dead time 1.6–2.2x with 8-frame ramps, one slow-mo
+per clip at 0.35x on the payoff.
 
 ## 10. Audio
 
@@ -341,3 +356,92 @@ Two things in there contradict what is written above and are worth acting on:
 Clip 8 cannot reach 72 documents from a source whose pane is pixel-static
 for 61 of 67 seconds. The reachable version of this is punching around
 inside the one document, with blurred-backdrop insets for the detail views.
+
+---
+
+## R5 and R6 — tarik and ohnepixel, measured 2026-11-16
+
+The 8 most-viewed Shorts from each channel (`@tarik/shorts`, `@ohnepixel/shorts`),
+downloaded at 1080x1920 60fps and measured, not eyeballed, except where a row
+says so. Scripts and raw numbers are outside the repo; the numbers below are
+the record.
+
+| | **R5 tarik** | **R6 ohnepixel** |
+|---|---|---|
+| Shorts measured | 8 (61K–2.1M views) | 8 (150K–16.8M views) |
+| Duration, median (range) | 40s (15–86) | 38s (15–90) |
+| Loudness, median | **about −19 LUFS** (−16.0 to −19.9) | **about −10.7 LUFS** (−6.7 to −14.5) |
+| True peak | −1.7 to −5.2 dBTP | **+0.1 to +0.6 dBTP, clipping in all 8** |
+| Scene changes/min (scdet), median | about 5 (1.1–11.8) | about 2 (three Shorts had none) |
+| Speech rate, median | about 128 wpm | about 184 wpm |
+| Facecam punch-ins ≥1.10x | 1.5–8.9/min, in **8 of 8** | 0–8/min, in 4 of 8 |
+| Layout | facecam top, content below | facecam top, content below; seam a little higher, about 0.35–0.40 |
+
+**Scene changes are a floor, not the count.** `scdet` on the whole frame misses
+a change in only one pane, so tarik's real cut rate is higher than 5/min.
+
+**Loudness spans 9 LU between two channels with the same layout.** This
+repeats the point at the top of this file: there is no single correct level.
+tarik sits with R4 (quiet), ohnepixel above R1 (loud, and clipping, which we
+should not copy). Clip 8 at −14.0 sits between them.
+
+### Captions
+
+| | R5 tarik | R6 ohnepixel |
+|---|---|---|
+| Words per card | up to 4, phrase cards | 1–3 |
+| Case | ALL CAPS | lowercase |
+| Fill / outline | white, heavy black outline, drop shadow | white, thin dark outline and shadow, the occasional word in yellow |
+| Second speaker | **green** fill — colour says who is talking | — |
+| Position | on or just below the seam | centred in the lower pane |
+| Entrance | instant, no pop or bounce | instant, no pop or bounce |
+
+**Fonts, identified by eye from full-size frames, so treat them as best
+guesses:** tarik looks like **Komika Axis** (free); **Bangers** (Google Fonts)
+is the close substitute. ohnepixel looks like **Montserrat ExtraBold/Black**.
+None of these is in `fonts/`.
+
+**ohnepixel runs a persistent title banner on the seam for the whole Short**:
+one line, white, one yellow keyword, a trailing emoji ("Bro is **losing** his
+mind 😭", "The **#1** knife tradeup 😳"). This is skill 7 again, with a
+third reference behind it. Some of his Shorts open instead on a white rounded
+box with black text (the TikTok/CapCut default style, TikTok Sans), which is
+then dropped.
+
+### Chat
+
+tarik runs Twitch chat as the lower pane in some Shorts ("how do these guys
+get into radiant lobbies?!", "will fns get cancelled?"), with large text and
+badges. That is what `stage_chat` builds, so the chat overlay now has a
+reference behind it, not only George's request.
+
+### Openings
+
+Neither channel has an animated entrance in the first 1.6s of any of the 16
+(checked at 10fps on every Short, 30fps where a zoom was flagged). Both open
+on speech, with the caption or banner already up. One tarik Short ("this was
+mistake...") opens already punched in and cuts out to the wide frame at 0.9s.
+George's ding-and-scale-in opening (skill 12) is his call, not something these
+channels do.
+
+### Sound effects
+
+Every Short was cross-correlated against the 16 cues in `assets/sfx`. **One
+strong match:** a vine boom on the punchline of ohnepixel's "Hide and seek in
+CS2" (37.1s, NCC 0.87). Two more of his Shorts have weak vine-boom matches
+(0.58–0.60), which are unconfirmed. Nothing else matched clearly; `thunk`
+correlates with speech plosives and its hits are noise.
+
+Spectrograms around the strongest punch-ins show **no whoosh or hit under
+them**, only voice and game audio. Both channels keep the stream audio
+and put the effect in the picture. That agrees with skill 11.
+
+### What this changes
+
+1. Skill 9 is corrected above: hard punch-ins are a reference technique (R5),
+   animated zooms on a talking head are not.
+2. The engine's punch plan already scales 1.136x, which is the low end of
+   tarik's 1.14–1.4x range. It found nothing to anchor to on clip 8.
+3. Clip 8 splices its audio about 20 times a minute. Both channels show 2–5
+   scene changes a minute and keep the speech intact. That supports the
+   "dead air is not dead" finding in AGENTS.md.

@@ -112,6 +112,28 @@ class Clip:
     # refinement; one with no candidate near it is taken literally and the
     # build log says so.
     booms: list[float] | None = None
+    # Whether a punch carries the vine boom. R5 (tarik) punches 4-9 times a
+    # minute with no sound under any of them; see docs/SKILLS.md, "R5 and R6".
+    punch_boom: bool = True
+    # A palette cue fired at 0.00 over the opening punch-in, e.g. "tsuzumi".
+    intro_sfx: str | None = None
+    # "upper" is the house style; "spoken" keeps whisper's own casing, the
+    # way R6 (ohnepixel) captions.
+    caption_case: str = "upper"
+    # "kinetic" is the house Impact style; "pop" is jiyu val's (Baloo 2,
+    # pastel fill, heavy outline, pop entrance). See captions_video.pop.
+    caption_style: str = "kinetic"
+    # An opening title shown in the caption slot, mid-screen, for the first
+    # `TITLE_S` seconds before the captions take over. "pop" style only.
+    title: str | None = None
+    # Stretches where the facecam pane takes over more of the frame (the seam
+    # drops to `render_native.BIG_SEAM` and his face grows inside it), held
+    # for whole phrases and switched on a hard cut. "auto" picks his loudest
+    # phrases and the ones carrying the clip's thesis words; a list of
+    # [start, end] OUTPUT seconds is taken as given; None never switches.
+    # A per-word zoom that followed his voice was tried first and rejected:
+    # "I don't want that shit".
+    big_cam: str | list | None = None
     # ---- THE OPTIONS, and why these and not a Look object ----------------
     #
     # George: *"we need to add more options to the actual clips themselves,

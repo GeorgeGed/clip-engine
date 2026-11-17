@@ -108,6 +108,7 @@ MASTER_GAIN = 6.2        # what loudnorm adds; cues are solved through it
 # panel opens on a different conversation.
 PREROLL_MAX = float(os.environ.get("CLIP_CHAT_PREROLL", "40"))
 BAIT_SECONDS = 17.0      # the hook holds the stretch where a scroller decides
+TITLE_S = 1.0            # how long a spec `title` holds the caption slot
 # THE BOOM IS AN EVENT CUE, SO IT SITS AT THE SHUTTER'S LEVEL, NOT THE
 # THUNK'S — and both numbers here are measured in the master, because the
 # prediction was wrong by 1.8 dB.
@@ -936,7 +937,7 @@ def stage_captions(clip, ch, st):
     words = [w for u in tr["utterances"] for w in u["words"]]
     st["words"] = words
     meta = st["meta"]
-    cs = cards(words)
+    cs = cards(words, upper=clip.caption_case == "upper")
     absent = qc.dead_audio(clip.source(ROOT), min_run=0.1)["runs"]
     cs, dropped = _drop_hallucinated(cs, absent)
     if dropped:
@@ -965,11 +966,23 @@ def stage_captions(clip, ch, st):
     st["cards"] = out
     dst = st["overlays"] / "cap_kin.mov"
     cap_fill, cap_emph = _captions(clip)
-    captions_video.kinetic([{"start": c.start, "end": c.end, "text": c.text,
-                             "words": c.words, "emph": c.emphasis}
-                            for c in out],
-                           dst, dur=st["out_dur"],
-                           fill=cap_fill, accent=cap_emph)
+    shown = [{"start": c.start, "end": c.end, "text": c.text,
+              "words": c.words, "emph": c.emphasis} for c in out]
+    if clip.caption_style == "pop":
+        if clip.title:
+            # The title owns the caption slot until TITLE_S: a card that ends
+            # inside it is dropped, one that straddles it starts at TITLE_S.
+            shown = [dict(c, start=max(c["start"], TITLE_S)) for c in shown
+                     if c["end"] > TITLE_S]
+            log(f"  title {clip.title!r} in the caption slot to {TITLE_S:.1f}s")
+        captions_video.pop(shown, dst, dur=st["out_dur"], fill=cap_fill,
+                           accent=cap_emph, title=clip.title, title_s=TITLE_S,
+                           title_emoji=clip.emoji)
+    else:
+        if clip.title:
+            raise ValueError("title needs caption_style \"pop\"")
+        captions_video.kinetic(shown, dst, dur=st["out_dur"],
+                               fill=cap_fill, accent=cap_emph)
     st["story_cards"] = _story_cards(clip, ch, st)
     log(f"  {len(cs)} cards -> {len(out)} after the cut "
         f"({sum(1 for c in out if c.emphasis)} emphasised), "
@@ -1671,6 +1684,10 @@ def _sfx_bed(clip, ch, st, total: int) -> None:
         else:
             log(f"  no entrance cue: the chat is up from {w['from']:.2f}s, "
                 f"so it marks the clip starting rather than the box arriving")
+    if clip.intro_sfx:
+        cues.append(Cue(0.0, clip.intro_sfx,
+                        cue_gain_peak(clip.intro_sfx, -4.0, MASTER_GAIN),
+                        "the clip opens on the punch-in"))
     shut = cue_gain_peak("shutter", -9.5, MASTER_GAIN)
     for c in _all_cards(clip, st):
         cues.append(Cue(c["at"] + 0.04, "shutter", shut, f"{c['id']} lands"))
@@ -1688,7 +1705,7 @@ def _sfx_bed(clip, ch, st, total: int) -> None:
     if starts is None:
         pj = st["overlays"] / "punches.json"
         starts = json.loads(pj.read_text()).get("applied", []) if pj.exists() else []
-    for t in starts:
+    for t in (starts if clip.punch_boom else []):
         cues.append(Cue(round(t, 3), "vine_boom", boom,
                         f"the facecam punches in at {t:.2f}s"))
     # FIRE EACH CUE EARLY BY ITS OWN PERCEPTUAL LEAD. See
@@ -2188,12 +2205,80 @@ def stage_assemble_native(clip, ch, st):
     _sfx_bed(clip, ch, st, st["total"])
 
 
+BIG_MIN, BIG_MAX = 3.0, 7.0     # a big stretch is a phrase or two, not a word
+BIG_PICKS = 3
+BIG_SHARE = 0.40                 # most of the clip stays in the normal layout
+BIG_GAP = 0.35                   # a pause this long ends a phrase
+BIG_HEAD = 3.0                   # the opening belongs to the hook
+
+
+def _big_cam_plan(clip, ch, st):
+    """Where the facecam pane grows: OUTPUT-second stretches, each whole
+    phrases, so the layout changes between thoughts and never mid-word.
+
+    Phrases are the cut's words split on a pause of BIG_GAP or more, then
+    merged into chunks of BIG_MIN-BIG_MAX seconds. A chunk scores its mean
+    speech level plus 3 dB for each emphasised thesis card in it, so a
+    stretch wins by being loud OR by carrying the clip's point. The head is
+    left alone while the hook title is up.
+    """
+    if not clip.big_cam:
+        return []
+    if clip.big_cam != "auto":
+        return [tuple(map(float, x)) for x in clip.big_cam]
+    import numpy as np
+    import soundfile as sf
+    words = sorted(_cut_words_full(clip, st))
+    phrases, cur = [], None
+    for t, a, b, _txt in words:
+        end = t + max(b - a, 0.05)
+        if cur and t - cur[1] < BIG_GAP:
+            cur[1] = max(cur[1], end)
+        else:
+            if cur:
+                phrases.append(cur)
+            cur = [t, end]
+    if cur:
+        phrases.append(cur)
+    chunks, cur = [], None
+    for a, b in phrases:
+        if cur and b - cur[0] <= BIG_MAX:
+            cur[1] = b
+        else:
+            if cur:
+                chunks.append(cur)
+            cur = [a, b]
+    if cur:
+        chunks.append(cur)
+    chunks = [c for c in chunks if c[1] - c[0] >= BIG_MIN and c[0] >= BIG_HEAD]
+    y, sr = sf.read(str(st["overlays"] / "_cut.wav"), dtype="float32")
+    y = y.mean(axis=1) if y.ndim > 1 else y
+    anchors = _emphasis_anchors(clip, ch, st)
+
+    def score(c):
+        seg = y[int(c[0] * sr):int(c[1] * sr)]
+        db = 20 * np.log10(np.sqrt(np.mean(seg ** 2)) + 1e-9)
+        return db + 3.0 * sum(1 for t in anchors if c[0] <= t < c[1])
+    budget = BIG_SHARE * (st.get("out_dur") or sum(k.length for k in st["keeps"]))
+    picks = []
+    for c in sorted(chunks, key=score, reverse=True):
+        if len(picks) == BIG_PICKS or sum(b - a for a, b in picks) + c[1] - c[0] > budget:
+            continue
+        if all(c[1] + BIG_MIN <= a or c[0] >= b + BIG_MIN for a, b in picks):
+            picks.append((round(c[0] - 0.05, 3), round(c[1] + 0.1, 3)))
+    for a, b in sorted(picks):
+        said = " ".join(x for t, _a, _b, x in words if a <= t < b).strip()
+        log(f"     big {a:6.2f}-{b:6.2f}  {said[:70]!r}")
+    return sorted(picks)
+
+
 def stage_render_native(clip, ch, st):
     from engine import render_native as rn
     tag = clip.slug
     master = ROOT / f"renders/{tag}_nat.mp4"
     t0 = time.time()
-    res = rn.render(clip, ch, master, log=log, st=st)
+    res = rn.render(clip, ch, master, log=log, st=st,
+                    big=_big_cam_plan(clip, ch, st))
     log(f"  native render {time.time()-t0:.0f}s "
         f"({res['picture_frames']} frames, {res['segments']} segments)")
     out = ROOT / f"renders/{tag}.mp4"

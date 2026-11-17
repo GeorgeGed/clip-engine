@@ -468,7 +468,7 @@ def split(segments, punches, shot_of=None, phrase_starts=None):
         shot = shot_of[idx]
         room = MAX_PER_SHOT - used.get(shot, 0)
         inside = [(t, db) for t, db in punches if o0 <= t < o1]
-        inside.sort(key=lambda p: -p[1])
+        inside.sort(key=lambda p: float("-inf") if p[1] is None else -p[1])
         marks = []
         for t, _db in inside[:max(0, room)]:
             a = max(o0, open_at(t))

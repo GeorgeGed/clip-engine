@@ -87,6 +87,145 @@ def track(cards, out: Path, *, style: dict, dur: float, canvas=CANVAS, fps=60) -
 # typeface, same tight tracking, same heavy stroke; only the scale and the
 # spring change.
 IMPACT = "/System/Library/Fonts/Supplemental/Impact.ttf"
+BALOO = Path(__file__).resolve().parent.parent / "fonts" / "Baloo2[wght].ttf"
+TIKTOK_SANS = (Path(__file__).resolve().parent.parent / "fonts"
+               / "TikTokSans[opsz,slnt,wdth,wght].ttf")
+EMOJI_SWIFT = Path(__file__).resolve().parent / "emoji_png.swift"
+
+
+def _title_image(text: str, *, emoji: str | None = None, size=80, max_w=880,
+                 stroke_frac=0.05):
+    """The opening title in TikTok's own text style: TikTok Sans SemiBold,
+    white with a thin black outline, no box, the emoji alone on the line
+    underneath. Wraps to as many lines as `max_w` needs."""
+    from PIL import Image, ImageDraw, ImageFont
+    fnt = ImageFont.truetype(str(TIKTOK_SANS), size)
+    fnt.set_variation_by_name(b"SemiBold")
+    sw = max(2, int(size * stroke_frac))
+    lines, cur = [], ""
+    for word in text.split():
+        trial = f"{cur} {word}".strip()
+        if cur and fnt.getlength(trial) > max_w:
+            lines.append(cur)
+            cur = word
+        else:
+            cur = trial
+    lines.append(cur)
+    asc, desc = fnt.getmetrics()
+    lh = asc + desc + 2 * sw
+    em = None
+    if emoji:
+        # PIL draws Apple Color Emoji as nothing on this build, so AppKit
+        # draws it — the glyph a phone shows — via `emoji_png.swift`.
+        import tempfile
+        png = Path(tempfile.mkdtemp()) / "emoji.png"
+        subprocess.run(["swift", str(EMOJI_SWIFT), emoji, str(png), "160"],
+                       check=True, capture_output=True)
+        big = Image.open(png).convert("RGBA")
+        big = big.crop(big.getbbox())
+        em = big.resize((int(big.width * size / 160), int(big.height * size / 160)),
+                        Image.LANCZOS)
+    bw = int(max(fnt.getlength(x) for x in lines)) + 2 * sw + 4
+    bh = lh * len(lines) + (em.height + int(size * 0.1) if em else 0)
+    im = Image.new("RGBA", (bw, bh), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    for k, x in enumerate(lines):
+        d.text(((bw - fnt.getlength(x)) / 2, sw + k * lh), x, font=fnt,
+               fill=(255, 255, 255, 255), stroke_width=sw,
+               stroke_fill=(0, 0, 0, 255))
+    if em:
+        im.paste(em, ((bw - em.width) // 2, lh * len(lines) + int(size * 0.1)), em)
+    return im
+
+
+def pop(cards, out: Path, *, dur: float, size=92, y=0.44, canvas=CANVAS, fps=60,
+        fill=None, accent=None, stroke=(0, 0, 0, 255), stroke_frac=0.10,
+        title: str | None = None, title_s: float = 1.0,
+        title_emoji: str | None = None):
+    """jiyu val's caption style, measured off his Shorts at 60fps.
+
+    Baloo 2 ExtraBold at normal letter spacing, lowercase as spoken, a pastel
+    fill on a heavy black outline, and a POP entrance: the card appears at
+    60% size, overshoots to 106% by 0.05s and settles at 100% by 0.10s. No
+    fade, no lift, no tilt; an emphasised card changes colour only.
+
+    Each card is drawn once and only rescaled per frame, so the outline
+    keeps its weight relative to the glyphs as it pops.
+    """
+    import numpy as np
+    from PIL import Image, ImageDraw, ImageFont
+    if fill is None or accent is None:
+        raise ValueError("pop: fill and accent must be explicit")
+    w, h = canvas
+    n = int(round(dur * fps))
+
+    def face(px):
+        f = ImageFont.truetype(str(BALOO), px)
+        f.set_variation_by_name(b"ExtraBold")
+        return f
+
+    def card_image(c):
+        px = size
+        while True:
+            fnt = face(px)
+            sw = max(4, int(px * stroke_frac))
+            l, t, r, b = fnt.getbbox(c["text"], stroke_width=sw)
+            if r - l <= w - 80 or px <= 48:
+                break
+            px = int(px * (w - 80) / (r - l))
+        im = Image.new("RGBA", (r - l + 4, b - t + 4), (0, 0, 0, 0))
+        ImageDraw.Draw(im).text((2 - l, 2 - t), c["text"], font=fnt,
+                                fill=accent if c.get("emph") else fill,
+                                stroke_width=sw, stroke_fill=stroke)
+        return im
+
+    def scale_at(age):
+        if age < 0.05:
+            q = age / 0.05
+            return 0.60 + 0.46 * (1 - (1 - q) ** 2)
+        if age < 0.10:
+            return 1.06 - 0.06 * (age - 0.05) / 0.05
+        return 1.0
+
+    by_frame, imgs = {}, {}
+    if title:
+        # THE TITLE TAKES THE CAPTION SLOT for the opening `title_s`, with
+        # the same pop. Index -1 so no card can collide with it; the caller
+        # has already moved the cards off this span.
+        imgs[-1] = _title_image(title, emoji=title_emoji)
+        for f in range(min(n, int(round(title_s * fps)))):
+            by_frame[f] = (-1, f / fps)
+    for i, c in enumerate(cards):
+        a, b = int(c["start"] * fps), int(c["end"] * fps)
+        for f in range(max(0, a), min(n, b)):
+            by_frame.setdefault(f, (i, (f - a) / fps))
+    proc = subprocess.Popen(
+        ["ffmpeg", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgba",
+         "-s", f"{w}x{h}", "-r", str(fps), "-i", "-",
+         "-c:v", "qtrle", "-pix_fmt", "argb", str(out)],
+        stdin=subprocess.PIPE)
+    blank = np.zeros((h, w, 4), np.uint8).tobytes()
+    cy = int(y * h)
+    for f in range(n):
+        hit = by_frame.get(f)
+        if hit is None:
+            proc.stdin.write(blank)
+            continue
+        i, age = hit
+        if i not in imgs:
+            imgs[i] = card_image(cards[i])
+        im = imgs[i]
+        s = scale_at(age)
+        if abs(s - 1.0) > 1e-3:
+            im = im.resize((max(1, int(im.width * s)), max(1, int(im.height * s))),
+                           Image.LANCZOS)
+        layer = Image.new("RGBA", canvas, (0, 0, 0, 0))
+        layer.paste(im, ((w - im.width) // 2, cy - im.height // 2), im)
+        proc.stdin.write(np.asarray(layer, dtype=np.uint8).tobytes())
+    proc.stdin.close()
+    if proc.wait() != 0:
+        raise RuntimeError(f"ffmpeg failed writing {out}")
+    return out
 
 
 def kinetic(cards, out: Path, *, dur: float, size=88, y=0.44, canvas=CANVAS, fps=60,

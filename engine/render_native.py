@@ -221,7 +221,30 @@ def punch_times(pj: Path) -> list[float]:
     return [x.get("at", 0.0) if isinstance(x, dict) else float(x) for x in d]
 
 
+BIG_SEAM = 0.58          # the facecam's share of the frame in a big stretch
+BIG_FACE = 1.20          # how much larger his face is than in the normal layout
+
+
+def big_cam_rect(cam, seam: float, big_seam: float = BIG_SEAM,
+                 grow: float = BIG_FACE, src_h: int = nl.SRC_H) -> tuple:
+    """The facecam source rect for the big layout, derived from the clip's
+    normal one: same horizontal centre and top edge, cropped so his face is
+    `grow` times its normal on-screen height in a pane of the big aspect."""
+    x0, y0, x1, y1 = cam
+    top_s, _b, _e = nl.pane_split(seam)
+    top_b, _b, _e = nl.pane_split(big_seam)
+    h = (y1 - y0) * (top_b / top_s) / grow
+    w = h * nl.CANVAS_W / top_b
+    cx = (x0 + x1) / 2
+    bx0 = int(round(cx - w / 2))
+    by0 = int(round(min(y0, src_h - h)))
+    # Width rounded UP, so the rect stays wider than the pane and the
+    # overflow is horizontal; see THE AXIS GUARD in native_layout.
+    return (bx0, by0, bx0 + int(w) + 2, int(round(by0 + h)))
+
+
 def render(clip, ch, out: str | Path, *, punches: list[float] | None = None,
+           big: list[tuple[float, float]] | None = None,
            crf: int = 17, log=print, st=None) -> dict:
     """Build the master. Returns what was decided, for the record."""
     out = Path(out)
@@ -237,9 +260,32 @@ def render(clip, ch, out: str | Path, *, punches: list[float] | None = None,
 
     grade = ng.chain(ch.grade)                      # facecam only
     cg = cut_graph(p["keeps"], fps=ch.fps, src="0:v", out="rn_cut")
-    base = ";".join([cg, nl.two_pane(ch, segs, cam=p["cam"],
-                                     src="rn_cut", out="base",
-                                     top_filters=grade)])
+    if not big:
+        base = ";".join([cg, nl.two_pane(ch, segs, cam=p["cam"],
+                                         src="rn_cut", out="base",
+                                         top_filters=grade)])
+    else:
+        # TWO LAYOUTS FROM ONE CUT, and the big one is laid over the normal
+        # one only inside its stretches. Both come from the same keeps and
+        # the same shots, so the switch is a hard cut with nothing else
+        # moving. The second graph's internal labels are renamed because
+        # `two_pane` names its pads by shot index.
+        import dataclasses
+        import re
+        bcam = big_cam_rect(p["cam"], ch.seam)
+        small = nl.two_pane(ch, segs, cam=p["cam"], src="rn_cutS",
+                            out="baseS", top_filters=grade)
+        large = nl.two_pane(dataclasses.replace(ch, seam=BIG_SEAM), segs,
+                            cam=bcam, src="rn_cutB", out="baseB",
+                            top_filters=grade)
+        large = re.sub(r"\[([vabtcf])(\d+)\]", r"[B\1\2]", large)
+        on = "+".join(f"between(t,{a:.3f},{b:.3f})" for a, b in big)
+        base = ";".join([cg, "[rn_cut]split[rn_cutS][rn_cutB]", small, large,
+                         f"[baseS][baseB]overlay=0:0:enable='{on}'[base]"])
+        log(f"  big facecam (seam {BIG_SEAM}, rect {bcam}) in "
+            f"{len(big)} stretch(es): "
+            + ", ".join(f"{a:.2f}-{b:.2f}" for a, b in big))
+
     ovs = overlay_list(p)
     log(f"  overlays: " + ", ".join(f"{o.path.name}(V{o.track})" for o in ovs))
     nc.check_schedule(ovs, fps=ch.fps)
