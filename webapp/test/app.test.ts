@@ -148,10 +148,10 @@ describe("jobs", () => {
     expect(job.id).toMatch(/^[a-z2-7]{10}$/);
     expect(job.status).toBe("queued");
     expect(job.clips_wanted).toBe(10);
-    expect(outbound).toHaveLength(1);
-    expect(outbound[0].url).toBe("https://modal.test/start");
-    expect(new Headers(outbound[0].init.headers).get("authorization")).toBe("Bearer test-pipeline-token");
-    expect(JSON.parse(outbound[0].init.body as string)).toEqual({
+    const modal = outbound.filter((o) => o.url === "https://modal.test/start");
+    expect(modal).toHaveLength(1);
+    expect(new Headers(modal[0].init.headers).get("authorization")).toBe("Bearer test-pipeline-token");
+    expect(JSON.parse(modal[0].init.body as string)).toEqual({
       job_id: job.id,
       vod_url: "https://www.twitch.tv/videos/42",
       clips: 10,
@@ -176,7 +176,7 @@ describe("jobs", () => {
     const retried = (await retry.json()) as any;
     expect(retried.status).toBe("queued");
     expect(retried.error).toBeNull();
-    expect(outbound).toHaveLength(2);
+    expect(outbound.filter((o) => o.url === "https://modal.test/start")).toHaveLength(2);
 
     const again = await call(`/api/jobs/${job.id}/retry`, { method: "POST", headers: { cookie } });
     expect(again.status).toBe(409);
@@ -269,6 +269,31 @@ describe("pipeline callbacks", () => {
     expect((await pipeline("clip", { ...clip, n: "x" })).status).toBe(400);
   });
 
+  it("notifies when a VOD is submitted and when the pipeline starts running", async () => {
+    const cookie = await login();
+    const { job } = await createJob(cookie);
+    const hook = () => outbound.filter((o) => o.url === "https://notify.test/hook").map((o) => JSON.parse(o.init.body as string));
+    expect(hook()).toEqual([
+      {
+        title: "VOD submitted",
+        body: "Twitch VOD 2905408276: 5 clips requested. Sending it to Modal now.",
+        url: `https://clips.example.com/jobs/${job.id}`,
+      },
+    ]);
+    outbound = [];
+    await pipeline("progress", { job_id: job.id, stage: "download", message: "Downloading 2:52:28 of video", vod_title: "FNS scrims" });
+    expect(hook()).toEqual([
+      {
+        title: "Clips in progress",
+        body: "Modal started working on FNS scrims. Downloading 2:52:28 of video.",
+        url: `https://clips.example.com/jobs/${job.id}`,
+      },
+    ]);
+    outbound = [];
+    await pipeline("progress", { job_id: job.id, stage: "transcribe", message: "Transcribing" });
+    expect(hook()).toEqual([]);
+  });
+
   it("done finalizes the job and calls the notification webhook", async () => {
     const cookie = await login();
     const { job } = await createJob(cookie);
@@ -280,13 +305,11 @@ describe("pipeline callbacks", () => {
     expect(outbound).toHaveLength(1);
     expect(outbound[0].url).toBe("https://notify.test/hook");
     expect(JSON.parse(outbound[0].init.body as string)).toEqual({
-      event: "job.done",
-      job_id: job.id,
-      vod_url: VOD,
-      vod_title: "VOD title",
-      clips: 1,
+      title: "Clips ready",
+      body: "1 clip is uploaded and ready to download for VOD title.",
       url: `https://clips.example.com/jobs/${job.id}`,
     });
+    expect(new Headers(outbound[0].init.headers).get("idempotency-key")).toMatch(new RegExp(`^${job.id}:done:`));
     const detail = (await (await call(`/api/jobs/${job.id}`, { headers: { cookie } })).json()) as any;
     expect(detail.job.status).toBe("done");
     expect(detail.job.progress).toBe(1);
@@ -307,7 +330,7 @@ describe("pipeline callbacks", () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const res = await pipeline("done", { job_id: job.id, status: "failed", error: "VOD is sub-only" });
     expect(res.status).toBe(200);
-    expect(JSON.parse(outbound[0].init.body as string)).toMatchObject({ event: "job.failed", error: "VOD is sub-only" });
+    expect(JSON.parse(outbound[0].init.body as string)).toMatchObject({ title: "Clip job failed", body: "Twitch VOD 2905408276 failed: VOD is sub-only" });
     expect(errSpy).toHaveBeenCalled();
     const detail = (await (await call(`/api/jobs/${job.id}`, { headers: { cookie } })).json()) as any;
     expect(detail.job).toMatchObject({ status: "failed", error: "VOD is sub-only" });

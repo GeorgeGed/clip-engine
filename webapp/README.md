@@ -31,7 +31,7 @@ test/           vitest suite running inside the Workers runtime
 | `PIPELINE_TOKEN` | secret | yes | Shared bearer token between the Worker and Modal, used in both directions. |
 | `MODAL_START_URL` | var (or secret) | yes | The Modal web endpoint that starts a job. |
 | `PUBLIC_URL` | var | yes | The app's base URL without a trailing slash, e.g. `https://clip-engine-webapp.acme.workers.dev`. Sent to Modal as `callback_base` and used in notification links. Falls back to the request's origin if unset. |
-| `NOTIFY_WEBHOOK_URL` | secret | no | If set, receives a POST when a job finishes or fails. |
+| `NOTIFY_WEBHOOK_URL` | secret | no | A [Hark](https://hark.fyi) webhook (or anything accepting the same JSON). If set, it gets a push when a VOD is submitted, when Modal starts on it, when all clips are ready, and on failure. |
 | `DB` | D1 binding | yes | Jobs, clips and the activity log. |
 | `CLIPS` | R2 binding | yes | Rendered clips, previews and thumbnails, written by the pipeline. |
 
@@ -160,15 +160,25 @@ Download always serves `video_key`.
 
 Sets the final status, `finished_at` and (for `done`) progress 1. If
 `NOTIFY_WEBHOOK_URL` is set and the status actually changed (a repeated
-callback does not notify twice), it POSTs in the background:
+callback does not notify twice), it sends a notification.
+
+## Notifications
+
+With `NOTIFY_WEBHOOK_URL` set, the Worker POSTs Hark-format JSON in the
+background, with an `Idempotency-Key` header of `<job_id>:<event>:<time>`:
 
 ```json
-{"event": "job.done", "job_id": "a3nkthur7u", "vod_url": "https://www.twitch.tv/videos/2905408276",
- "vod_title": "…", "clips": 3, "url": "<PUBLIC_URL>/jobs/a3nkthur7u"}
+{"title": "Clips ready", "body": "10 clips are uploaded and ready to download for <VOD title>.", "url": "<PUBLIC_URL>/jobs/a3nkthur7u"}
 ```
 
-`event` is `job.failed` on failure, with an `error` field added. Webhook
-failures are logged and never fail the callback.
+| When | `title` |
+|---|---|
+| A VOD link is submitted | VOD submitted |
+| Modal's first progress callback moves the job from queued to running | Clips in progress |
+| `done` with status `done` (every clip is already in R2) | Clips ready |
+| Modal could not be started, or `done` with status `failed` | Clip job failed |
+
+Webhook failures are logged and never fail the request or callback.
 
 ## Local development
 

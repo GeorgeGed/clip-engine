@@ -26,6 +26,7 @@ export interface Job {
   updated_at: string;
   finished_at: string | null;
   clip_count?: number;
+  covers?: string | null;
 }
 
 export interface Clip {

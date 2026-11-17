@@ -133,7 +133,7 @@ cd webapp
 npx wrangler secret put APP_PASSWORD        # step 0.6
 npx wrangler secret put SESSION_SECRET      # openssl rand -hex 32
 npx wrangler secret put PIPELINE_TOKEN      # the SAME value as in step 4
-npx wrangler secret put NOTIFY_WEBHOOK_URL  # optional, step 0.7
+npx wrangler secret put NOTIFY_WEBHOOK_URL  # optional, step 0.7 (the Hark webhook URL)
 npx wrangler deploy                          # prints https://clip-engine.<subdomain>.workers.dev
 ```
 

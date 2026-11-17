@@ -40,7 +40,9 @@ function addEvent(env: Env, jobId: string, stage: string | null, message: string
 
 async function listJobs(env: Env): Promise<Job[]> {
   const { results } = await env.DB.prepare(
-    "SELECT j.*, (SELECT COUNT(*) FROM clips c WHERE c.job_id = j.id) AS clip_count FROM jobs j ORDER BY j.created_at DESC LIMIT 100",
+    `SELECT j.*, (SELECT COUNT(*) FROM clips c WHERE c.job_id = j.id) AS clip_count,
+       (SELECT group_concat(thumb_key, '|') FROM (SELECT thumb_key FROM clips c WHERE c.job_id = j.id AND c.thumb_key IS NOT NULL ORDER BY c.n LIMIT 3)) AS covers
+     FROM jobs j ORDER BY j.created_at DESC LIMIT 100`,
   ).all<Job>();
   return results;
 }
@@ -69,7 +71,44 @@ async function failJob(env: Env, id: string, error: string): Promise<void> {
   ]);
 }
 
-async function dispatch(env: Env, request: Request, job: Job): Promise<Job> {
+function vodName(job: Pick<Job, "vod_title" | "vod_url">): string {
+  const t = job.vod_title?.trim();
+  return t ? (t.length > 140 ? t.slice(0, 139) + "…" : t) : `Twitch VOD ${job.vod_url.split("/").pop()}`;
+}
+
+async function notify(env: Env, key: string, payload: { title: string; body: string; url: string }): Promise<void> {
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const res = await fetch(env.NOTIFY_WEBHOOK_URL!, {
+        method: "POST",
+        headers: { "content-type": "application/json", "idempotency-key": key },
+        body: JSON.stringify({ ...payload, body: payload.body.slice(0, 2000) }),
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (!res.ok) console.error(`Notification webhook returned HTTP ${res.status}`);
+      return;
+    } catch (e) {
+      console.error(`Notification webhook failed (attempt ${attempt}):`, e);
+    }
+  }
+}
+
+function announce(
+  env: Env,
+  ctx: ExecutionContext,
+  request: Request,
+  job: Pick<Job, "id" | "vod_title" | "vod_url">,
+  event: "submitted" | "running" | "done" | "failed",
+  title: string,
+  body: string,
+): void {
+  if (!env.NOTIFY_WEBHOOK_URL) return;
+  ctx.waitUntil(
+    notify(env, `${job.id}:${event}:${now()}`, { title, body, url: `${publicUrl(env, request)}/jobs/${job.id}` }),
+  );
+}
+
+async function dispatch(env: Env, ctx: ExecutionContext, request: Request, job: Job): Promise<Job> {
   let error: string | null = null;
   if (!env.MODAL_START_URL) {
     error = "MODAL_START_URL is not configured";
@@ -91,12 +130,14 @@ async function dispatch(env: Env, request: Request, job: Job): Promise<Job> {
       error = `Pipeline start failed: ${e instanceof Error ? e.message : String(e)}`;
     }
   }
-  if (error) await failJob(env, job.id, error);
-  else await addEvent(env, job.id, "queued", "Sent to pipeline").run();
+  if (error) {
+    await failJob(env, job.id, error);
+    announce(env, ctx, request, job, "failed", "Clip job failed", `${vodName(job)} could not start: ${error}`);
+  } else await addEvent(env, job.id, "queued", "Sent to pipeline").run();
   return (await getJob(env, job.id))!;
 }
 
-async function createJob(request: Request, env: Env): Promise<Response> {
+async function createJob(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   const isForm = (request.headers.get("content-type") ?? "").includes("application/x-www-form-urlencoded");
   let input: Record<string, unknown> | null;
   if (isForm) {
@@ -122,11 +163,13 @@ async function createJob(request: Request, env: Env): Promise<Response> {
     ).bind(id, vodUrl, clips, t, t),
     addEvent(env, id, "queued", `Job created for ${vodUrl} (${clips} clips)`),
   ]);
-  const job = await dispatch(env, request, (await getJob(env, id))!);
+  const created = (await getJob(env, id))!;
+  announce(env, ctx, request, created, "submitted", "VOD submitted", `${vodName(created)}: ${clips} clip${clips === 1 ? "" : "s"} requested. Sending it to Modal now.`);
+  const job = await dispatch(env, ctx, request, created);
   return isForm ? redirect(`/jobs/${id}`) : json({ ...job, clip_count: 0 }, 201);
 }
 
-async function retryJob(request: Request, env: Env, id: string): Promise<Response> {
+async function retryJob(request: Request, env: Env, ctx: ExecutionContext, id: string): Promise<Response> {
   const job = await getJob(env, id);
   if (!job) return json({ error: "Job not found" }, 404);
   if (job.status !== "failed") return json({ error: "Only failed jobs can be retried" }, 409);
@@ -136,7 +179,7 @@ async function retryJob(request: Request, env: Env, id: string): Promise<Respons
     ).bind(now(), id),
     addEvent(env, id, "queued", "Retry requested"),
   ]);
-  return json(await dispatch(env, request, (await getJob(env, id))!));
+  return json(await dispatch(env, ctx, request, (await getJob(env, id))!));
 }
 
 async function deleteJob(env: Env, id: string): Promise<Response> {
@@ -155,7 +198,12 @@ async function deleteJob(env: Env, id: string): Promise<Response> {
   return json({ deleted: id });
 }
 
-async function pipelineProgress(env: Env, body: Record<string, unknown>): Promise<Response> {
+async function pipelineProgress(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext,
+  body: Record<string, unknown>,
+): Promise<Response> {
   const id = str(body.job_id);
   const job = id && (await getJob(env, id));
   if (!job) return json({ error: "Unknown job_id" }, 404);
@@ -192,6 +240,10 @@ async function pipelineProgress(env: Env, body: Record<string, unknown>): Promis
   ];
   if (stage || message) statements.push(addEvent(env, id, stage, message));
   await env.DB.batch(statements);
+  if (job.status === "queued" && (status === null || status === "running")) {
+    const named = { ...job, vod_title: str(body.vod_title) ?? job.vod_title };
+    announce(env, ctx, request, named, "running", "Clips in progress", `Modal started working on ${vodName(named)}.${message ? ` ${message}.` : ""}`);
+  }
   return json({ ok: true });
 }
 
@@ -231,20 +283,6 @@ async function pipelineClip(env: Env, body: Record<string, unknown>): Promise<Re
   return json({ ok: true });
 }
 
-async function notify(env: Env, payload: Record<string, unknown>): Promise<void> {
-  try {
-    const res = await fetch(env.NOTIFY_WEBHOOK_URL!, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(10_000),
-    });
-    if (!res.ok) console.error(`Notification webhook returned HTTP ${res.status}`);
-  } catch (e) {
-    console.error("Notification webhook failed:", e);
-  }
-}
-
 async function pipelineDone(
   request: Request,
   env: Env,
@@ -269,18 +307,10 @@ async function pipelineDone(
     addEvent(env, id, status, message ?? error),
   ]);
 
-  if (env.NOTIFY_WEBHOOK_URL && job.status !== status) {
-    ctx.waitUntil(
-      notify(env, {
-        event: `job.${status}`,
-        job_id: id,
-        vod_url: job.vod_url,
-        vod_title: job.vod_title,
-        clips: count,
-        url: `${publicUrl(env, request)}/jobs/${id}`,
-        ...(error ? { error } : {}),
-      }),
-    );
+  if (job.status !== status) {
+    if (status === "done")
+      announce(env, ctx, request, job, "done", "Clips ready", `${count} clip${count === 1 ? " is" : "s are"} uploaded and ready to download for ${vodName(job)}.`);
+    else announce(env, ctx, request, job, "failed", "Clip job failed", `${vodName(job)} failed: ${error}`);
   }
   return json({ ok: true });
 }
@@ -294,7 +324,7 @@ async function handlePipeline(request: Request, env: Env, ctx: ExecutionContext,
   if (!body) return json({ error: "Expected a JSON body" }, 400);
   switch (path) {
     case "/api/pipeline/progress":
-      return pipelineProgress(env, body);
+      return pipelineProgress(request, env, ctx, body);
     case "/api/pipeline/clip":
       return pipelineClip(env, body);
     case "/api/pipeline/done":
@@ -353,18 +383,20 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
   const page = /^\/jobs\/([a-z2-7]+)$/.exec(path);
   if (page && method === "GET") {
     const detail = await jobDetail(env, page[1]);
-    return detail ? html(jobPage(detail.job, detail.clips, detail.events)) : html(notFoundPage(), 404);
+    return detail
+      ? html(jobPage(detail.job, detail.clips, detail.events, await listJobs(env)))
+      : html(notFoundPage(), 404);
   }
 
   if (path === "/api/jobs") {
     if (method === "GET") return json({ jobs: await listJobs(env) });
-    if (method === "POST") return createJob(request, env);
+    if (method === "POST") return createJob(request, env, ctx);
     return json({ error: "Method not allowed" }, 405);
   }
   const api = /^\/api\/jobs\/([a-z2-7]+)(\/retry)?$/.exec(path);
   if (api) {
     const [, id, retry] = api;
-    if (retry) return method === "POST" ? retryJob(request, env, id) : json({ error: "Method not allowed" }, 405);
+    if (retry) return method === "POST" ? retryJob(request, env, ctx, id) : json({ error: "Method not allowed" }, 405);
     if (method === "GET") {
       const detail = await jobDetail(env, id);
       return detail ? json(detail) : json({ error: "Job not found" }, 404);
