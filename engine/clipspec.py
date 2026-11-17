@@ -126,6 +126,8 @@ class Clip:
     # An opening title shown in the caption slot, mid-screen, for the first
     # `TITLE_S` seconds before the captions take over. "pop" style only.
     title: str | None = None
+    # one word of the title drawn in the emphasis colour
+    title_keyword: str | None = None
     # Stretches where the facecam pane takes over more of the frame (the seam
     # drops to `render_native.BIG_SEAM` and his face grows inside it), held
     # for whole phrases and switched on a hard cut. "auto" picks his loudest

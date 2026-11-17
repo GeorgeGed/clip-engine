@@ -48,9 +48,15 @@ def transcribe(
     offset: float = 0.0,
 ) -> dict:
     """Transcribe with word timestamps. `offset` shifts times into VOD time."""
+    import os
     from faster_whisper import WhisperModel
 
-    model = WhisperModel(model_size, device="cpu", compute_type=compute_type)
+    # CLIP_WHISPER_DEVICE=cuda on a GPU worker; float16 is the GPU's native
+    # type, int8 the CPU's.
+    device = os.environ.get("CLIP_WHISPER_DEVICE", "cpu")
+    if device == "cuda" and compute_type == COMPUTE_DEFAULT:
+        compute_type = "float16"
+    model = WhisperModel(model_size, device=device, compute_type=compute_type)
     segments, info = model.transcribe(
         str(audio_path),
         word_timestamps=True,
