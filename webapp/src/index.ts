@@ -38,6 +38,17 @@ function addEvent(env: Env, jobId: string, stage: string | null, message: string
   );
 }
 
+function modalAppUrl(env: Env): string | null {
+  try {
+    const workspace = new URL(env.MODAL_START_URL ?? "").hostname.split("--")[0];
+    return workspace && env.MODAL_START_URL!.includes(".modal.run")
+      ? `https://modal.com/apps/${workspace}/main/deployed/clip-engine`
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 async function listJobs(env: Env): Promise<Job[]> {
   const { results } = await env.DB.prepare(
     `SELECT j.*, (SELECT COUNT(*) FROM clips c WHERE c.job_id = j.id) AS clip_count,
@@ -126,6 +137,10 @@ async function dispatch(env: Env, ctx: ExecutionContext, request: Request, job: 
         signal: AbortSignal.timeout(20_000),
       });
       if (!res.ok) error = `Pipeline start failed: HTTP ${res.status} ${(await res.text()).slice(0, 300)}`.trim();
+      else {
+        const callId = str(((await res.json().catch(() => null)) as Record<string, unknown> | null)?.call_id);
+        await env.DB.prepare("UPDATE jobs SET modal_call_id = ? WHERE id = ?").bind(callId, job.id).run();
+      }
     } catch (e) {
       error = `Pipeline start failed: ${e instanceof Error ? e.message : String(e)}`;
     }
@@ -384,7 +399,7 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
   if (page && method === "GET") {
     const detail = await jobDetail(env, page[1]);
     return detail
-      ? html(jobPage(detail.job, detail.clips, detail.events, await listJobs(env)))
+      ? html(jobPage(detail.job, detail.clips, detail.events, await listJobs(env), modalAppUrl(env)))
       : html(notFoundPage(), 404);
   }
 

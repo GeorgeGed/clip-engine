@@ -45,14 +45,15 @@ image = (
         f"curl -sSL {FFMPEG} | tar xJ -C /opt",
         "ln -sf /opt/ffmpeg-*-amd64-static/ffmpeg /usr/local/bin/ffmpeg",
         "ln -sf /opt/ffmpeg-*-amd64-static/ffprobe /usr/local/bin/ffprobe")
-    .pip_install("faster-whisper==1.2.1", "numpy", "soundfile", "pillow",
-                 "opencv-python-headless", "anthropic", "boto3", "requests", "yt-dlp",
-                 "pyyaml", "jsonschema", "rapidfuzz", "fastapi[standard]")
+    .pip_install("faster-whisper==1.2.1", "av==14.0.1", "numpy==2.5.4", "soundfile==0.14.0",
+                 "pillow==11.3.0", "opencv-python-headless==4.13.0.92", "anthropic==2.9.0",
+                 "boto3", "requests", "yt-dlp", "pyyaml==6.0.3", "jsonschema==4.23.0",
+                 "rapidfuzz==3.14.6", "fastapi[standard]")
     .env({"CLIP_EMOJI_FONT": "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
           "HF_HOME": f"{DATA}/hf", "PYTHONPATH": REPO})
     .add_local_dir(Path(__file__).parent, REPO, copy=True, ignore=[
         ".git", "**/__pycache__", "jobs", "renders", "deliver", "webapp", "web",
-        "vendor/remotion-clip08/node_modules", "**/*.mp4", "**/*.mov", "**/*.wav"])
+        "vendor/remotion-clip08/node_modules", "**/*.mp4", "**/*.mov"])
 )
 
 app = modal.App("clip-engine", image=image)
@@ -106,7 +107,7 @@ def transcribe(job_name: str) -> None:
 
 @app.function(cpu=8, memory=16384, volumes=VOL, secrets=[secret], timeout=3600,
               retries=modal.Retries(max_retries=1))
-def build_clip(job_name: str, n: int, job_id: str, callback_base: str) -> dict:
+def build_clip(n: int, job_name: str, job_id: str, callback_base: str) -> dict:
     _setup()
     data.reload()
     import json
@@ -130,8 +131,20 @@ def build_clip(job_name: str, n: int, job_id: str, callback_base: str) -> dict:
             "emoji": clip.get("emoji"), "keyword": clip.get("title_keyword"),
             "subject": c["subject"], "score": c["strength"], "duration": core.duration(out),
             "vod_start": c["in_point"], **keys}
+    for path in (out, prev, thumb):
+        Path(path).unlink(missing_ok=True)
+    data.commit()
     _post(callback_base, "clip", body)
     return body
+
+
+def _free_vod(job: Path) -> None:
+    """Drop the VOD video once every clip is in R2; transcript and rankings stay for retries."""
+    import shutil
+    for name in ("source.mp4", "source.dl.mp4"):
+        (job / name).unlink(missing_ok=True)
+    shutil.rmtree(job / "clips_1080", ignore_errors=True)
+    data.commit()
 
 
 @app.function(cpu=4, memory=8192, volumes=VOL, secrets=[secret], timeout=8 * 3600)
@@ -182,6 +195,9 @@ def run_job(job_id: str, vod_url: str, clips: int, callback_base: str) -> None:
             progress("render", f"{ok} of {len(ranked)} clips ready", 0.65 + 0.35 * n / len(ranked))
         if not ok:
             raise RuntimeError("every clip failed to build: " + "; ".join(failed)[:800])
+        if not failed:
+            data.reload()
+            _free_vod(job)
         _post(callback_base, "done", {"job_id": job_id, "status": "done",
                                       "error": ("; ".join(failed)[:800] or None)})
     except Exception as e:

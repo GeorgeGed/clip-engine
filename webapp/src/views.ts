@@ -179,6 +179,25 @@ a.card:hover{box-shadow:0 6px 24px rgba(0,0,0,.06);border-color:var(--faint)}
 .steps li.now:before{background:repeating-linear-gradient(135deg,var(--ink) 0 3px,var(--line2) 3px 6px);background-size:8.5px 8.5px;animation:march .6s linear infinite}
 @keyframes march{to{background-position:8.5px 0}}
 .stage-msg{margin:12px 0 0;font-size:14px;color:var(--muted)}
+.run{margin-top:28px;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(240px,1fr);gap:24px;background:var(--bg);border:1px solid var(--line2);border-radius:var(--r);padding:20px 22px}
+.run h3{font-size:16px;font-weight:500;margin:0 0 14px}
+.tl{list-style:none;margin:0;padding:0}
+.tl li{display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:12px;align-items:start;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.tl li:last-child{border-bottom:0}
+.tl i{width:10px;height:10px;border-radius:50%;margin-top:5px;background:var(--ink)}
+.tl li.now i{background:var(--run);box-shadow:0 0 0 4px rgba(47,111,219,.15);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 7px rgba(47,111,219,.05)}}
+.tl li.failed i{background:var(--bad)}
+.tl li.failed b{color:var(--bad)}
+.tl b{font-weight:500}
+.tl small{display:block;color:var(--muted);font-size:13px;margin-top:2px;word-break:break-word}
+.tl .d{font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
+.tl li.now .d{color:var(--text);font-weight:500}
+.kv{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px 16px;font-size:14px;align-content:start}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;min-width:0;word-break:break-all;font-variant-numeric:tabular-nums}
+.kv code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace}
+.kv a{text-decoration:underline}
 .failbox{margin-top:24px;background:var(--bg);border:1px solid rgba(214,69,69,.35);border-radius:var(--r);padding:18px 20px}
 .failbox h3{margin:0 0 8px;font-size:16px;font-weight:500;color:var(--bad)}
 .errtext{font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text);white-space:pre-wrap;word-break:break-word;margin:0 0 14px;max-height:200px;overflow:auto}
@@ -252,6 +271,7 @@ body.locked{overflow:hidden}
 
 @media(max-width:1180px){.stats{grid-template-columns:1fr 1fr}.board{grid-template-columns:repeat(2,minmax(0,1fr))}.jstats{grid-template-columns:1fr 1fr}.jhead{grid-column:1/-1}}
 @media(max-width:860px){
+.run{grid-template-columns:minmax(0,1fr);padding:16px}
 .shell{display:block}
 .side{display:none}
 .mtop{display:flex;align-items:center;gap:10px;padding:14px 16px;padding-top:max(14px,env(safe-area-inset-top));background:var(--bg);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
@@ -534,7 +554,7 @@ function clipCard(job: Job, clip: Clip): string {
 </article>`;
 }
 
-function jobSummary(job: Job, clips: Clip[]): string {
+function jobSummary(job: Job, clips: Clip[], events: JobEvent[], modalUrl: string | null): string {
   const p = pct(job);
   const runtime = clips.reduce((t, c) => t + (c.duration ?? 0), 0);
   return `<div class="jstats">
@@ -556,7 +576,71 @@ ${
   job.status === "failed"
     ? `<div class="failbox"><h3>This job failed${job.stage && job.stage !== "failed" ? ` during ${esc(job.stage)}` : ""}</h3><pre class="errtext">${esc(job.error || job.message || "Unknown error")}</pre><button class="btn dark sm" type="button" data-action="retry">${icon("retry")}Retry</button></div>`
     : ""
-}`;
+}
+${runPanel(job, events, modalUrl)}`;
+}
+
+const STAGE_LABEL: Record<string, string> = {
+  queued: "Queued",
+  start: "Starting",
+  download: "Download VOD",
+  transcribe: "Transcribe",
+  rank: "Find & rank clips",
+  title: "Write titles",
+  render: "Render & upload",
+  done: "Finished",
+  failed: "Failed",
+};
+
+function dur(ms: number): string {
+  const s = Math.max(0, Math.round(ms / 1000));
+  if (s < 60) return s + "s";
+  const m = Math.floor(s / 60);
+  if (m < 60) return m + "m " + String(s % 60).padStart(2, "0") + "s";
+  return Math.floor(m / 60) + "h " + String(m % 60).padStart(2, "0") + "m";
+}
+
+function runPanel(job: Job, events: JobEvent[], modalUrl: string | null): string {
+  const retry = events.findLastIndex((e) => e.stage === "queued" && e.message === "Retry requested");
+  const earlier = retry > 0 ? events.slice(0, retry).filter((e) => e.stage === "failed").length : 0;
+  const attempt = retry > 0 ? events.slice(retry) : events;
+  const rows: { stage: string; at: string; message: string | null }[] = [];
+  for (const e of attempt) {
+    const last = rows.at(-1);
+    const stage = e.stage ?? last?.stage ?? "queued";
+    if (last && last.stage === stage) last.message = e.message ?? last.message;
+    else rows.push({ stage, at: e.at, message: e.message });
+  }
+  const live = active(job);
+  const items = rows
+    .map((row, i) => {
+      const next = rows[i + 1];
+      const state = row.stage === "failed" ? "failed" : !next && live ? "now" : "";
+      const d = next
+        ? dur(Date.parse(next.at) - Date.parse(row.at))
+        : live
+          ? `<span data-since="${esc(row.at)}">${dur(Date.now() - Date.parse(row.at))}</span>`
+          : "";
+      return `<li class="${state}"><i></i><div><b>${esc(STAGE_LABEL[row.stage] ?? row.stage)}</b>${row.message ? `<small>${esc(row.message.length > 180 ? row.message.slice(0, 179) + "…" : row.message)}</small>` : ""}</div><span class="d">${d}</span></li>`;
+    })
+    .join("");
+  const started = attempt[0]?.at ?? job.created_at;
+  const total = job.finished_at
+    ? dur(Date.parse(job.finished_at) - Date.parse(started))
+    : `<span data-since="${esc(started)}">${dur(Date.now() - Date.parse(started))}</span>`;
+  const stamp = (t: string) => `<time datetime="${esc(t)}">${esc(t.slice(0, 16).replace("T", " "))}</time>`;
+  return `<div class="run">
+  <div><h3>Run timeline</h3><ol class="tl">${items}</ol>${earlier ? `<p class="stage-msg">${earlier} earlier attempt${earlier === 1 ? "" : "s"} failed. The full history is in the activity log below.</p>` : ""}</div>
+  <div><h3>Run details</h3><dl class="kv">
+    <dt>Run ID</dt><dd><code>${esc(job.id)}</code></dd>
+    ${earlier ? `<dt>Attempt</dt><dd>${earlier + 1}</dd>` : ""}
+    <dt>Modal call</dt><dd>${job.modal_call_id ? `<code>${esc(job.modal_call_id)}</code>` : "–"}${modalUrl ? `<br><a href="${esc(modalUrl)}" target="_blank" rel="noopener">Open in Modal</a>` : ""}</dd>
+    <dt>Started</dt><dd>${stamp(started)}</dd>
+    <dt>${job.finished_at ? "Finished" : "Status"}</dt><dd>${job.finished_at ? stamp(job.finished_at) : esc(STATUS_LABEL[job.status] ?? job.status)}</dd>
+    <dt>${job.finished_at ? "Total time" : "Elapsed"}</dt><dd>${total}</dd>
+    <dt>Clips</dt><dd>${job.clip_count ?? 0} of ${job.clips_wanted}</dd>
+  </dl></div>
+</div>`;
 }
 
 function eventLog(events: JobEvent[]): string {
@@ -577,11 +661,17 @@ function clipsHead(job: Job, clips: Clip[]): string {
   return `<div class="section-head"><h2>Clips</h2><span class="chip">${clips.length}</span></div>`;
 }
 
-export function jobPage(job: Job, clips: Clip[], events: JobEvent[], recent: Job[] = []): string {
+export function jobPage(
+  job: Job,
+  clips: Clip[],
+  events: JobEvent[],
+  recent: Job[] = [],
+  modalUrl: string | null = null,
+): string {
   return layout(
     `${vodLabel(job)} · Clip Engine`,
     `<div class="topbar"><nav class="crumbs"><a href="/">Dashboard</a>${icon("chevron")}<b>${esc(vodLabel(job))}</b></nav><a class="tlink" href="${esc(job.vod_url)}" target="_blank" rel="noopener">${icon("external")}<span class="lbl">Twitch</span></a><button class="tlink danger" type="button" data-action="delete">${icon("trash")}<span class="lbl">Delete</span></button></div>
-<section class="band"><div id="summary" data-id="${esc(job.id)}"${active(job) ? " data-active" : ""}>${jobSummary(job, clips)}</div></section>
+<section class="band"><div id="summary" data-id="${esc(job.id)}"${active(job) ? " data-active" : ""}>${jobSummary(job, clips, events, modalUrl)}</div></section>
 <main class="page">
 <div id="clips-head">${clipsHead(job, clips)}</div>
 <div id="clips" class="clips">${clips.map((c) => clipCard(job, c)).join("\n")}</div>
@@ -591,6 +681,8 @@ export function jobPage(job: Job, clips: Clip[], events: JobEvent[], recent: Job
 <template id="slide-tpl"><section class="slide"><video playsinline loop preload="metadata"></video><span class="paused">${icon("play")}</span><div class="shade"><h3></h3><p class="meta"></p><div class="acts"><a class="btn primary" data-dl download>${icon("download")}Download</a><a class="btn" data-tw target="_blank" rel="noopener">${icon("external")}On Twitch</a></div></div><div class="prog"><span></span></div></section></template>`,
     `
 var summary=document.getElementById('summary'),id=summary.dataset.id;
+function dur(ms){var s=Math.max(0,Math.round(ms/1000));if(s<60)return s+'s';var m=Math.floor(s/60);if(m<60)return m+'m '+String(s%60).padStart(2,'0')+'s';return Math.floor(m/60)+'h '+String(m%60).padStart(2,'0')+'m';}
+setInterval(function(){document.querySelectorAll('[data-since]').forEach(function(n){n.textContent=dur(Date.now()-Date.parse(n.dataset.since));});},1000);
 document.addEventListener('click',async function(e){var b=e.target.closest('[data-action]');if(!b)return;var a=b.dataset.action;
 if(a==='delete'&&!confirm('Delete this job and all its clips?'))return;b.disabled=true;
 var r=await fetch('/api/jobs/'+id+(a==='retry'?'/retry':''),{method:a==='retry'?'POST':'DELETE'});

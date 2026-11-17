@@ -1330,7 +1330,7 @@ def stage_chat(clip, ch, st):
     # the messages, mapped onto the cut. Pre-roll ones get negative times so
     # the box opens already half full — a chat panel that starts empty and
     # fills up reads as a graphic booting, not as a stream you joined.
-    import build_chat as bc
+    from engine.contrast import readable
     kept, pre = [], 0
     before = removed = after = 0
     for m in raw:
@@ -1370,7 +1370,7 @@ def stage_chat(clip, ch, st):
                 continue
             out_t = o
         kept.append({"t": round(out_t, 2), "author": m["author"],
-                     "colour": m["colour"], "display": bc.readable(m["colour"]),
+                     "colour": m["colour"], "display": readable(m["colour"]),
                      "badges": m["badges"][:2],
                      "frags": [{"text": f["text"], "emote": f["emote"]}
                                for f in m["frags"]]})
@@ -1401,7 +1401,7 @@ def stage_chat(clip, ch, st):
         for off, who, at in clip.chat_pick:
             m = by_key[(float(off), who)]
             kept.append({"t": float(at), "author": m["author"],
-                         "colour": m["colour"], "display": bc.readable(m["colour"]),
+                         "colour": m["colour"], "display": readable(m["colour"]),
                          "badges": m["badges"][:2],
                          "frags": [{"text": f["text"], "emote": f["emote"]}
                                    for f in m["frags"]]})

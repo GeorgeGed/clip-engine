@@ -15,7 +15,7 @@ hard black outline, so what a colour has to survive is `#000000`, whatever
 is behind the clip. That is why this is checkable at all: the contrast is a
 property of the style, not of the footage.
 
-Measured here with `build_chat._ratio`, the same WCAG implementation the
+Measured here with `engine.contrast.ratio`, the same WCAG implementation the
 username lift already uses — one implementation, not two:
 
     name        hex        vs black   vs white
@@ -118,8 +118,8 @@ def ratio(rgb) -> float:
     """WCAG contrast against the caption stroke, via the ONE implementation
     this project already has. A second one is how two places come to
     disagree about a number."""
-    import build_chat as bc                                   # noqa: PLC0415
-    return bc._ratio(tuple(rgb)[:3], STROKE[:3])
+    from engine.contrast import ratio as wcag                 # noqa: PLC0415
+    return wcag(tuple(rgb)[:3], STROKE[:3])
 
 
 def check() -> list[str]:
