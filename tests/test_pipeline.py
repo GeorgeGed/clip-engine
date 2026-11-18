@@ -60,6 +60,11 @@ def test_specs_take_the_best_title(tmp_path):
     # chat on, its mode left to engine.chat_reaction; drawn natively on Modal
     assert d["clip"]["chat_mode"] is None and d["clip"]["stories"] == "off"
     assert d["clip"]["caption_font"] == "baloo"
+    assert (d["clip"]["caption_fill"], d["clip"]["caption_emph"]) == ("cream", "lime")
     assert d["channel"]["vod_id"] == "123" and "twitch" not in d["channel"]
     from engine.clipspec import load
     load(p)
+    ranked[0]["genre"] = "frag"
+    (p,) = core.specs(tmp_path, ranked, ch, "123", tl, caption_fill="white", caption_emph="red")
+    assert json.loads(p.read_text())["clip"]["chat_mode"] == "off"
+    assert load(p)[0].caption_fill == "white" and load(p)[0].caption_emph == "red"

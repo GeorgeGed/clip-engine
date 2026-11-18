@@ -52,15 +52,16 @@ def transcribe(
     from faster_whisper import BatchedInferencePipeline, WhisperModel
 
     # CLIP_WHISPER_DEVICE=cuda on a GPU worker; float16 is the GPU's native
-    # type, int8 the CPU's. On the GPU the batched pipeline decodes 16 VAD
-    # chunks at once: sequential decoding of a 3h13m VOD took 29 min on an L4.
+    # type, int8 the CPU's. CLIP_WHISPER_BATCHED=1 decodes 16 VAD chunks at
+    # once on the GPU (sequential took 29 min for a 3h13m VOD on an L4); it is
+    # opt-in until its transcripts have been compared with sequential ones.
     device = os.environ.get("CLIP_WHISPER_DEVICE", "cpu")
     if device == "cuda" and compute_type == COMPUTE_DEFAULT:
         compute_type = "float16"
     model = WhisperModel(model_size, device=device, compute_type=compute_type)
     opts = dict(word_timestamps=True, vad_filter=True,
                 vad_parameters={"min_silence_duration_ms": 300}, language=language)
-    if device == "cuda":
+    if device == "cuda" and os.environ.get("CLIP_WHISPER_BATCHED"):
         segments, info = BatchedInferencePipeline(model).transcribe(
             str(audio_path), batch_size=16, **opts)
     else:

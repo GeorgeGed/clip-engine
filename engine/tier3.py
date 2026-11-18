@@ -80,6 +80,19 @@ MIN_LINES
 A take needs setup, claim AND consequence. If the region cannot carry all \
 three, it is not a clip — return genre "none".
 
+REACTION MOMENTS
+When the chat note says chat is hyping a PLAY, the moment is gameplay: an \
+ace, a clutch, a flick, a round won or thrown, on his screen or the one he \
+is watching. These are wanted clips even when the streamer says little, so \
+MIN_LINES does not apply to them. Return genre "frag":
+- in_point: the start of his first line about the round or fight that \
+produced the reaction (the setup, often a call-out or "watch this"), at most \
+about 25s before the spike;
+- out_point: the end of his reaction line, once he has finished reacting;
+- claim: his reaction, quoted; setup: what was happening, from his words;
+- strength: how hard chat and he reacted, not how much was said.
+The one-narrative rule still holds: one play per clip.
+
 WHAT IS WORTH CLIPPING
 Controversy, a named judgement about a player or org, roster and transfer news, \
 a reveal, a strong reaction, a real exchange with chat. Not: logistics, \

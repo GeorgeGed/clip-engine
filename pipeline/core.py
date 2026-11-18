@@ -142,7 +142,9 @@ def _with_chat(regs: list[dict], spikes: list[dict]) -> list[dict]:
 
 # A chat-backed clip ranks as if this much stronger at full chat score, so a
 # moment the room exploded over makes the cut against an equal monologue.
-CHAT_BOOST = 0.15
+# 0.15 -> 0.30 on George's ask for chat to count for more: on job 3njkcnn5wd
+# it takes the top 10 from 6 chat-backed clips to 9.
+CHAT_BOOST = 0.30
 
 # THE MODEL BUDGET. Every region is one Claude call, about 2.5 US cents each.
 # The 9h24m s0mcs VOD had 209 voice regions, and judging all of them spent the
@@ -340,10 +342,13 @@ CHANNEL_KEYS = ("name", "cam", "seam", "chrome", "fps", "grade", "arc",
 
 
 def specs(job: Path, ranked: list[dict], ch: dict, vod_id: str, tl: dict,
-          *, caption_font: str | None = None) -> list[Path]:
+          *, caption_font: str | None = None, caption_fill: str | None = None,
+          caption_emph: str | None = None) -> list[Path]:
     """One make_clip spec per clip. The facecam is left to make_clip, which
-    finds it per clip with the face detector. `caption_font` is the job's
-    pick from the web app (an engine.caption_fonts key)."""
+    finds it per clip with the face detector. `caption_font` and the two
+    caption colours are the job's picks from the web app (an
+    engine.caption_fonts key and engine.caption_colour palette names); a
+    colour left out keeps the house STYLE's."""
     from engine import caption_fonts
     sd = job / "specs"
     sd.mkdir(exist_ok=True)
@@ -360,6 +365,12 @@ def specs(job: Path, ranked: list[dict], ch: dict, vod_id: str, tl: dict,
                 "title": best.get("title") or None, "title_keyword": best.get("keyword") or None,
                 "notes": f"Tier 3 {c['strength']:.2f}: {c['subject']}", **STYLE,
                 "caption_font": caption_fonts.key(caption_font)}
+        # A gameplay clip keeps the play clear: the chat panel sat over the
+        # middle of the action on the first chat-hype frag clips.
+        if c.get("genre") == "frag":
+            clip["chat_mode"] = "off"
+        clip["caption_fill"] = caption_fill or clip["caption_fill"]
+        clip["caption_emph"] = caption_emph or clip["caption_emph"]
         p = sd / f"{n:02d}.json"
         p.write_text(json.dumps({"channel": channel, "clip": clip}, indent=1, ensure_ascii=False) + "\n")
         out.append(p)

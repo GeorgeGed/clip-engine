@@ -1,5 +1,6 @@
 import type { Clip, Job, JobEvent } from "./env";
 import { CAPTION_FONTS, DEFAULT_CAPTION_FONT, captionFontLabel } from "./fonts";
+import { CAPTION_COLOURS, DEFAULT_CAPTION_EMPH, DEFAULT_CAPTION_FILL, captionColourLabel } from "./captionColours";
 import { clock, twitchTimestamp } from "./util";
 
 export function esc(value: unknown): string {
@@ -105,9 +106,10 @@ button{font:inherit;color:inherit}
 .count input{width:30px;border:0;background:transparent;font:inherit;font-size:15px;font-weight:550;text-align:center;color:var(--text);outline:0;-moz-appearance:textfield}
 .font{display:flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px 6px 3px 0}
 .font span{font-size:13px;color:var(--muted);padding:0 6px 0 10px}
-.font-preview{margin:-18px 0 22px;display:flex;align-items:center;gap:12px}
-.font-preview img{width:360px;max-width:60vw;height:auto;border-radius:10px;border:1px solid var(--line)}
-.font-preview figcaption{font-size:13px;color:var(--muted)}
+.font-preview{margin:-18px 0 22px;display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.cap{position:relative;width:360px;max-width:100%;aspect-ratio:720/150;border-radius:10px;border:1px solid var(--line);background:#1c2026;overflow:hidden}
+.cap i{position:absolute;inset:0;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
+.cap .stroke{background:#000}
 .font select{border:0;background:transparent;font:inherit;font-size:15px;font-weight:550;color:var(--text);outline:0;height:40px;cursor:pointer}
 .count input::-webkit-inner-spin-button,.count input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .error{color:var(--bad);font-size:13px;margin:-20px 0 18px}
@@ -501,17 +503,24 @@ export function homePage(jobs: Job[]): string {
     <label class="font"><span>Captions</span><select id="caption_font" name="caption_font" aria-label="Caption font">${CAPTION_FONTS.map((f) => `<option value="${f.key}"${f.key === DEFAULT_CAPTION_FONT ? " selected" : ""}>${esc(f.label)}</option>`).join("")}</select></label>
     <button class="btn dark" type="submit">${icon("plus")}Make clips</button>
   </form>
-  <figure class="font-preview"><img id="font-preview" src="/font-preview/${DEFAULT_CAPTION_FONT}.png" width="360" height="75" alt="Caption font preview"><figcaption>How the captions will look</figcaption></figure>
+  <div class="font-preview">
+    <div id="cap-preview" class="cap" role="img" aria-label="How the captions will look"><i class="stroke"></i><i class="body"></i><i class="emph"></i></div>
+    <label class="font"><span>Text</span><select id="caption_fill" name="caption_fill" form="new-job" aria-label="Caption text colour">${CAPTION_COLOURS.map((c) => `<option value="${c.key}"${c.key === DEFAULT_CAPTION_FILL ? " selected" : ""}>${esc(c.label)}</option>`).join("")}</select></label>
+    <label class="font"><span>Highlight</span><select id="caption_emph" name="caption_emph" form="new-job" aria-label="Caption highlight colour">${CAPTION_COLOURS.map((c) => `<option value="${c.key}"${c.key === DEFAULT_CAPTION_EMPH ? " selected" : ""}>${esc(c.label)}</option>`).join("")}</select></label>
+  </div>
   <p id="form-error" class="error"></p>
   <div id="stats" class="stats">${homeStats(jobs)}</div>
 </section>
 <main class="page"><div id="jobs" class="board">${jobList(jobs)}</div></main>`,
     `
 var form=document.getElementById('new-job'),q=document.getElementById('q');
-form.caption_font.addEventListener('change',function(){document.getElementById('font-preview').src='/font-preview/'+form.caption_font.value+'.png';});
+var HEX=${JSON.stringify(Object.fromEntries(CAPTION_COLOURS.map((c) => [c.key, c.hex])))},fill=document.getElementById('caption_fill'),emph=document.getElementById('caption_emph');
+function preview(){document.querySelectorAll('#cap-preview i').forEach(function(l){var u='url(/font-preview/'+form.caption_font.value+'/'+l.className+'.png)';l.style.webkitMaskImage=u;l.style.maskImage=u;});
+document.querySelector('#cap-preview .body').style.background=HEX[fill.value];document.querySelector('#cap-preview .emph').style.background=HEX[emph.value];}
+[form.caption_font,fill,emph].forEach(function(s){s.addEventListener('change',preview);});preview();
 form.querySelectorAll('[data-step]').forEach(function(b){b.addEventListener('click',function(){var n=Number(form.clips.value)||10;form.clips.value=Math.min(30,Math.max(1,n+Number(b.dataset.step)));});});
 form.addEventListener('submit',async function(e){e.preventDefault();var btn=form.querySelector('[type=submit]'),err=document.getElementById('form-error');btn.disabled=true;err.textContent='';
-try{var r=await fetch('/api/jobs',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({vod_url:form.vod_url.value,clips:Number(form.clips.value),caption_font:form.caption_font.value})});var d=await r.json();if(!r.ok)throw new Error(d.error||'Request failed');location.href='/jobs/'+d.id;}catch(x){err.textContent=x.message;btn.disabled=false;}});
+try{var r=await fetch('/api/jobs',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({vod_url:form.vod_url.value,clips:Number(form.clips.value),caption_font:form.caption_font.value,caption_fill:fill.value,caption_emph:emph.value})});var d=await r.json();if(!r.ok)throw new Error(d.error||'Request failed');location.href='/jobs/'+d.id;}catch(x){err.textContent=x.message;btn.disabled=false;}});
 function filter(){var v=q.value.trim().toLowerCase();document.querySelectorAll('#jobs .card').forEach(function(c){c.hidden=!!v&&c.dataset.search.indexOf(v)<0;});}
 q.addEventListener('input',filter);
 poll(function(){return !!document.querySelector('#jobs [data-active]');},function(doc){['jobs','stats'].forEach(function(id){var n=doc.getElementById(id);if(n)document.getElementById(id).innerHTML=n.innerHTML;});filter();});
@@ -649,7 +658,7 @@ function runPanel(job: Job, events: JobEvent[], modalUrl: string | null): string
     <dt>${job.finished_at ? "Finished" : "Status"}</dt><dd>${job.finished_at ? stamp(job.finished_at) : esc(STATUS_LABEL[job.status] ?? job.status)}</dd>
     <dt>${job.finished_at ? "Total time" : "Elapsed"}</dt><dd>${total}</dd>
     <dt>Clips</dt><dd>${job.clip_count ?? 0} of ${job.clips_wanted}</dd>
-    <dt>Captions</dt><dd>${esc(captionFontLabel(job.caption_font))}</dd>
+    <dt>Captions</dt><dd>${esc(captionFontLabel(job.caption_font))}, ${esc(captionColourLabel(job.caption_fill, DEFAULT_CAPTION_FILL))} with ${esc(captionColourLabel(job.caption_emph, DEFAULT_CAPTION_EMPH))} highlight</dd>
   </dl></div>
 </div>`;
 }

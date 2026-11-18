@@ -169,7 +169,8 @@ def _free_vod(job: Path) -> None:
 
 @app.function(cpu=4, memory=8192, volumes=VOL, secrets=[secret], timeout=8 * 3600)
 def run_job(job_id: str, vod_url: str, clips: int, callback_base: str,
-            caption_font: str | None = None) -> None:
+            caption_font: str | None = None, caption_fill: str | None = None,
+            caption_emph: str | None = None) -> None:
     _setup()
     from pipeline import core
 
@@ -208,7 +209,8 @@ def run_job(job_id: str, vod_url: str, clips: int, callback_base: str,
         progress("title", f"Writing titles for {len(ranked)} clips", 0.6)
         tl = core.titles(job, ranked, handle=ch.get("handle", ch["name"].upper()))
         vod = re.sub(r"\D", "", str(meta["id"]))
-        core.specs(job, ranked, ch, vod, tl, caption_font=caption_font)
+        core.specs(job, ranked, ch, vod, tl, caption_font=caption_font,
+                   caption_fill=caption_fill, caption_emph=caption_emph)
         data.commit()
         progress("render", f"Rendering {len(ranked)} clips", 0.65)
         ok, failed = 0, []
@@ -238,7 +240,8 @@ def run_job(job_id: str, vod_url: str, clips: int, callback_base: str,
 @app.function(secrets=[secret])
 @modal.fastapi_endpoint(method="POST")
 def start(body: dict, authorization: str | None = Header(default=None)):
-    """POST {job_id, vod_url, clips, callback_base, caption_font?} with Bearer PIPELINE_TOKEN."""
+    """POST {job_id, vod_url, clips, callback_base, caption_font?, caption_fill?,
+    caption_emph?} with Bearer PIPELINE_TOKEN."""
     import hmac
     token = os.environ["PIPELINE_TOKEN"]
     given = (authorization or "").removeprefix("Bearer ").strip()
@@ -247,7 +250,10 @@ def start(body: dict, authorization: str | None = Header(default=None)):
     url = str(body.get("vod_url", ""))
     if not re.match(r"^https?://(www\.|m\.)?twitch\.tv/videos/\d+", url):
         raise HTTPException(status_code=400, detail="not a Twitch VOD link")
+    from engine.caption_colour import PALETTE
     from engine.caption_fonts import key
+    fill, emph = (body.get(k) if body.get(k) in PALETTE else None
+                  for k in ("caption_fill", "caption_emph"))
     call = run_job.spawn(str(body["job_id"]), url, int(body.get("clips") or 10),
-                         str(body["callback_base"]), key(body.get("caption_font")))
+                         str(body["callback_base"]), key(body.get("caption_font")), fill, emph)
     return {"ok": True, "call_id": call.object_id}
