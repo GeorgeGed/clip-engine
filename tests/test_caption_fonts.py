@@ -23,7 +23,7 @@ def test_web_app_lists_the_same_fonts():
 
 def test_web_app_has_a_preview_for_every_font():
     ts = (ROOT / "webapp/src/fontPreviews.ts").read_text()
-    assert re.findall(r'^  (\w+): "', ts, re.M) == list(cf.FONTS)
+    assert re.findall(r'^  (\w+): \{ stroke: "', ts, re.M) == list(cf.FONTS)
 
 
 def test_unknown_font_falls_back_to_the_default():

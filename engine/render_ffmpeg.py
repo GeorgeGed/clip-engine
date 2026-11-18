@@ -350,24 +350,36 @@ def _finish_audio(video: Path, edit: dict, out_path: Path) -> Path:
             f":measured_LRA={m['input_lra']}:measured_thresh={m['input_thresh']}"
             f":offset={m['target_offset']}:linear=true:print_format=summary"
         )
-    def encode(af: str) -> float | None:
+    def encode(af: str) -> tuple[float, float] | None:
         _run([
             "ffmpeg", "-y", "-v", "error", "-i", str(video),
             "-af", af, "-c:v", "copy",
             "-c:a", edit["render"].get("audio_codec", "aac"), "-b:a", "192k",
             "-ar", "48000", "-movflags", "+faststart", str(out_path),
         ])
-        got = subprocess.run(["ffmpeg", "-i", str(out_path), "-vn", "-af", "ebur128", "-f", "null", "-"],
-                             capture_output=True, text=True).stderr
+        got = subprocess.run(["ffmpeg", "-i", str(out_path), "-vn", "-af", "ebur128=peak=true",
+                              "-f", "null", "-"], capture_output=True, text=True).stderr
         i = _re.findall(r"I:\s+(-?[\d.]+) LUFS", got)
-        return float(i[-1]) if i else None
+        p = _re.findall(r"Peak:\s+(-?[\d.]+) dBFS", got)
+        return (float(i[-1]), float(p[-1])) if i and p else None
 
-    # Linear mode cannot raise the gain past the true-peak ceiling, so a
-    # peaky clip lands short: clip 4 of job 3njkcnn5wd came out at -14.90
-    # and deliver_qc rejected it. Dynamic mode reaches the target instead.
+    # LINEAR LOUDNORM CANNOT ALWAYS GET THERE. When the gain it needs would
+    # push the peaks past TP it quietly turns dynamic, and on AAC that lands
+    # both short and over: clip 4 of job 3njkcnn5wd came out at -14.90 LUFS,
+    # and a yelling gameplay clip at -14.7 LUFS and +0.8 dBTP. Both are QC
+    # rejects. So measure the delivery, and when it misses, apply the gain
+    # directly into a brickwall limiter set 1.5 dB under the ceiling (AAC
+    # decode overshoots by about that much), then correct the residue once.
     got = encode(af)
-    if blob and got is not None and abs(got - lufs) > 0.4:
-        encode(af.replace(":linear=true", ":linear=false"))
+    if blob and got and (abs(got[0] - lufs) > 0.4 or got[1] > tp):
+        limit = 10 ** ((tp - 1.5) / 20)
+        gain = lufs - float(m["input_i"])
+        for _ in range(3):
+            got = encode(f"volume={gain:.2f}dB,alimiter=limit={limit:.4f}:level=false"
+                         f":attack=1:release=50")
+            if not got or abs(got[0] - lufs) <= 0.3:
+                break
+            gain += 1.5 * (lufs - got[0])   # the limiter takes back part of each step
     return out_path
 
 

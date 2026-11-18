@@ -156,6 +156,8 @@ describe("jobs", () => {
       vod_url: "https://www.twitch.tv/videos/42",
       clips: 10,
       caption_font: "baloo",
+      caption_fill: "cream",
+      caption_emph: "lime",
       callback_base: "https://clips.example.com",
     });
 
@@ -171,7 +173,25 @@ describe("jobs", () => {
     const modal = outbound.filter((o) => o.url === "https://modal.test/start");
     expect(JSON.parse(modal[modal.length - 1].init.body as string).caption_font).toBe("anton");
     const page = await (await call(`/jobs/${job.id}`, { headers: { cookie } })).text();
-    expect(page).toContain("<dt>Captions</dt><dd>Anton</dd>");
+    expect(page).toContain("<dt>Captions</dt><dd>Anton, Cream with Lime highlight</dd>");
+  });
+
+  it("sends the picked caption colours to Modal and shows them on the job page", async () => {
+    const cookie = await login();
+    const { res, job } = await createJob(cookie, { vod_url: VOD, caption_fill: "white", caption_emph: "red" });
+    expect(res.status).toBe(201);
+    const modal = outbound.filter((o) => o.url === "https://modal.test/start");
+    const body = JSON.parse(modal[modal.length - 1].init.body as string);
+    expect([body.caption_fill, body.caption_emph]).toEqual(["white", "red"]);
+    const page = await (await call(`/jobs/${job.id}`, { headers: { cookie } })).text();
+    expect(page).toContain("<dt>Captions</dt><dd>Baloo 2 ExtraBold, White with Red highlight</dd>");
+  });
+
+  it("rejects an unknown caption colour without dispatching", async () => {
+    const cookie = await login();
+    const before = outbound.length;
+    expect((await createJob(cookie, { vod_url: VOD, caption_emph: "brandblue" })).res.status).toBe(400);
+    expect(outbound.length).toBe(before);
   });
 
   it("rejects an unknown caption font without dispatching", async () => {
@@ -181,15 +201,18 @@ describe("jobs", () => {
     expect(outbound.length).toBe(before);
   });
 
-  it("serves a preview image for each caption font", async () => {
+  it("serves the preview layers for each caption font", async () => {
     const cookie = await login();
-    const res = await call("/font-preview/bebas.png", { headers: { cookie } });
+    for (const layer of ["body", "emph"])
+      expect((await call(`/font-preview/bebas/${layer}.png`, { headers: { cookie } })).status).toBe(200);
+    const res = await call("/font-preview/bebas/stroke.png", { headers: { cookie } });
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toBe("image/png");
     const bytes = new Uint8Array(await res.arrayBuffer());
     expect([...bytes.slice(1, 4)].map((b) => String.fromCharCode(b)).join("")).toBe("PNG");
-    expect((await call("/font-preview/nope.png", { headers: { cookie } })).status).toBe(404);
-    expect((await call("/font-preview/bebas.png")).status).toBe(302);
+    expect((await call("/font-preview/nope/stroke.png", { headers: { cookie } })).status).toBe(404);
+    expect((await call("/font-preview/bebas/glow.png", { headers: { cookie } })).status).toBe(404);
+    expect((await call("/font-preview/bebas/stroke.png")).status).toBe(302);
   });
 
   it("offers every caption font in the new-job form", async () => {
@@ -198,6 +221,8 @@ describe("jobs", () => {
     expect(page).toContain('<select id="caption_font" name="caption_font"');
     expect(page).toContain('<option value="baloo" selected>Baloo 2 ExtraBold</option>');
     expect(page).toContain('<option value="bebas">Bebas Neue</option>');
+    expect(page).toContain('<select id="caption_fill" name="caption_fill" form="new-job"');
+    expect(page).toContain('<option value="lime" selected>Lime</option>');
   });
 
   it("stores Modal's call id and shows the run timeline on the job page", async () => {

@@ -250,7 +250,7 @@ def pop(cards, out: Path, *, dur: float, size=92, y=0.44, canvas=CANVAS, fps=60,
         # THE TITLE TAKES THE CAPTION SLOT for the opening `title_s`, with
         # the same pop. Index -1 so no card can collide with it; the caller
         # has already moved the cards off this span.
-        imgs[-1] = _title_image(title, emoji=title_emoji, keyword=title_keyword)
+        imgs[-1] = _title_image(title, emoji=title_emoji, keyword=title_keyword, key_fill=accent)
         for f in range(min(n, int(round(title_s * fps)))):
             by_frame[f] = (-1, f / fps)
     for i, c in enumerate(cards):

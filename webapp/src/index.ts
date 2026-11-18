@@ -3,6 +3,7 @@ import type { Clip, Env, Job, JobEvent, JobStatus } from "./env";
 import { serveFile } from "./files";
 import { CAPTION_FONTS, DEFAULT_CAPTION_FONT, captionFontLabel } from "./fonts";
 import { FONT_PREVIEWS } from "./fontPreviews";
+import { DEFAULT_CAPTION_EMPH, DEFAULT_CAPTION_FILL, captionColourLabel, isCaptionColour, CAPTION_COLOURS } from "./captionColours";
 import { homePage, jobPage, loginPage, notFoundPage } from "./views";
 import { json, newJobId, now, parseTwitchVod, publicUrl, safeEqual } from "./util";
 
@@ -135,6 +136,8 @@ async function dispatch(env: Env, ctx: ExecutionContext, request: Request, job: 
           vod_url: job.vod_url,
           clips: job.clips_wanted,
           caption_font: job.caption_font ?? DEFAULT_CAPTION_FONT,
+          caption_fill: job.caption_fill ?? DEFAULT_CAPTION_FILL,
+          caption_emph: job.caption_emph ?? DEFAULT_CAPTION_EMPH,
           callback_base: publicUrl(env, request),
         }),
         signal: AbortSignal.timeout(20_000),
@@ -160,7 +163,10 @@ async function createJob(request: Request, env: Env, ctx: ExecutionContext): Pro
   let input: Record<string, unknown> | null;
   if (isForm) {
     const form = await request.formData();
-    input = { vod_url: form.get("vod_url"), clips: form.get("clips"), caption_font: form.get("caption_font") };
+    input = {
+      vod_url: form.get("vod_url"), clips: form.get("clips"), caption_font: form.get("caption_font"),
+      caption_fill: form.get("caption_fill"), caption_emph: form.get("caption_emph"),
+    };
   } else {
     input = await readJson(request);
   }
@@ -175,14 +181,18 @@ async function createJob(request: Request, env: Env, ctx: ExecutionContext): Pro
   const font = input.caption_font ?? DEFAULT_CAPTION_FONT;
   if (typeof font !== "string" || !CAPTION_FONTS.some((f) => f.key === font))
     return json({ error: `Unknown caption font. Pick one of: ${CAPTION_FONTS.map((f) => f.key).join(", ")}` }, 400);
+  const fill = input.caption_fill ?? DEFAULT_CAPTION_FILL;
+  const emph = input.caption_emph ?? DEFAULT_CAPTION_EMPH;
+  if (!isCaptionColour(fill) || !isCaptionColour(emph))
+    return json({ error: `Unknown caption colour. Pick one of: ${CAPTION_COLOURS.map((c) => c.key).join(", ")}` }, 400);
 
   const id = newJobId();
   const t = now();
   await env.DB.batch([
     env.DB.prepare(
-      "INSERT INTO jobs (id, vod_url, clips_wanted, caption_font, status, stage, message, created_at, updated_at) VALUES (?, ?, ?, ?, 'queued', 'queued', 'Waiting for the pipeline', ?, ?)",
-    ).bind(id, vodUrl, clips, font, t, t),
-    addEvent(env, id, "queued", `Job created for ${vodUrl} (${clips} clips, ${captionFontLabel(font)} captions)`),
+      "INSERT INTO jobs (id, vod_url, clips_wanted, caption_font, caption_fill, caption_emph, status, stage, message, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'queued', 'queued', 'Waiting for the pipeline', ?, ?)",
+    ).bind(id, vodUrl, clips, font, fill, emph, t, t),
+    addEvent(env, id, "queued", `Job created for ${vodUrl} (${clips} clips, ${captionFontLabel(font)} captions in ${captionColourLabel(fill, DEFAULT_CAPTION_FILL)} and ${captionColourLabel(emph, DEFAULT_CAPTION_EMPH)})`),
   ]);
   const created = (await getJob(env, id))!;
   announce(env, ctx, request, created, "submitted", "VOD submitted", `${vodName(created)}: ${clips} clip${clips === 1 ? "" : "s"} requested. Sending it to Modal now.`);
@@ -391,9 +401,9 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
   if (path === "/logout" && method === "POST") return redirect("/login", { "set-cookie": clearSessionCookie() });
   if (path === "/" && method === "GET") return html(homePage(await listJobs(env)));
 
-  const preview = /^\/font-preview\/(\w+)\.png$/.exec(path);
+  const preview = /^\/font-preview\/(\w+)\/(stroke|body|emph)\.png$/.exec(path);
   if (preview && method === "GET") {
-    const b64 = FONT_PREVIEWS[preview[1]];
+    const b64 = FONT_PREVIEWS[preview[1]]?.[preview[2] as "stroke" | "body" | "emph"];
     if (!b64) return new Response("Not found", { status: 404 });
     return new Response(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), {
       headers: { "content-type": "image/png", "cache-control": "private, max-age=86400" },

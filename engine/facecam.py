@@ -167,7 +167,8 @@ if __name__ == "__main__":
 FACE_W, FACE_H, FACE_LIFT = 3.9, 2.78, 0.13
 FACE_SAMPLES = 40
 FACE_MIN_HIT = 0.3
-FACE_STILL = 0.06
+FACE_STILL = 0.10
+FACE_WILD = 1.0
 
 
 def _border(profile, lo, hi):
@@ -200,6 +201,13 @@ def _live_face(hits, samples):
     noise alone, so it scraped past while his face drifted 10px. Measured
     as a share of face height, objects in his room drift 0.016-0.026 and
     his face 0.135-0.24, so 0.06 sits between them with room either side.
+
+    0.06 WAS NOT ENOUGH. On clip 1 of job 3njkcnn5wd (VOD 2885323336, 0:04:15)
+    a shelf toy drifted 0.079 with 41 hits against his face's 0.136 with 40,
+    so the toy won by one hit and the whole clip showed his shelf. Hence
+    0.10, and ties go to the bigger face (toy 67px, face 77px). Players on a
+    watchparty broadcast drift 2.5-2.9 face heights, so anything over
+    FACE_WILD is the stream content, not the webcam.
     """
     a = np.array(hits) if len(hits) else np.zeros((0, 3))
     best = None
@@ -207,10 +215,11 @@ def _live_face(hits, samples):
         near = a[(abs(a[:, 0] - p[0]) < p[2]) & (abs(a[:, 1] - p[1]) < p[2])]
         if len(near) < samples * FACE_MIN_HIT:
             continue
+        h = np.median(near[:, 2])
         drift = near[:, 0].std() + near[:, 1].std()
-        if drift < FACE_STILL * np.median(near[:, 2]):
+        if not FACE_STILL * h <= drift <= FACE_WILD * h:
             continue
-        if best is None or len(near) > len(best):
+        if best is None or len(near) * h > len(best) * np.median(best[:, 2]):
             best = near
     return best
 

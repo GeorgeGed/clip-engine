@@ -27,6 +27,8 @@ export interface Job {
   finished_at: string | null;
   modal_call_id?: string | null;
   caption_font?: string | null;
+  caption_fill?: string | null;
+  caption_emph?: string | null;
   clip_count?: number;
   covers?: string | null;
 }

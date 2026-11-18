@@ -316,11 +316,22 @@ def render(clip, ch, out: str | Path, *, punches: list[float] | None = None,
     picture = round(segs[-1].end * ch.fps)
     sfx = p["overlays"] / "sfx.wav"
     raw = out.with_name(out.stem + "_raw.mov")
+    # THE DELIVERED SPEECH IS THE SOURCE'S OWN AUDIO: stereo, 48 kHz, no EQ.
+    # It used to be `_cut.wav`, the 16 kHz mono analysis copy, under the house
+    # voice EQ (-7 dB at 9.5k, +4 dB at 3k). With nothing above 8 kHz and the
+    # top end cut again, George heard it as "scuffed" on headphones, and in an
+    # A/B on clip 1 of job 3njkcnn5wd the untouched, levelled source won.
+    # `_cut.wav` stays as it is for the punch and level analysis.
+    hq = p["overlays"] / "_cut_hq.wav"
+    trims = "".join(f"[0:a]atrim=start={k.start:.4f}:end={k.end:.4f},asetpts=PTS-STARTPTS[a{i}];"
+                    for i, k in enumerate(p["keeps"]))
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(p["src"]), "-filter_complex",
+                    f"{trims}{''.join(f'[a{i}]' for i in range(len(p['keeps'])))}"
+                    f"concat=n={len(p['keeps'])}:v=0:a=1[o]",
+                    "-map", "[o]", "-ac", "2", "-ar", "48000", str(hq)], check=True)
     res = nc.composite(
         base_source=p["src"], base_graph=base, base_label="[base]",
-        overlays=ovs, sfx=sfx, out=raw,
-        speech_source=p["overlays"] / "_cut.wav",
-        speech_for_eq=p["overlays"] / "_cut.wav",
+        overlays=ovs, sfx=sfx, out=raw, speech_source=hq,
         fps=ch.fps, dur=picture / ch.fps, crf=crf)
     # The loudness finish is `render_ffmpeg._finish_audio` — two-pass
     # loudnorm with true-peak limiting and `-c:v copy`, so no second video
