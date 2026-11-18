@@ -1,4 +1,5 @@
 import type { Clip, Job, JobEvent } from "./env";
+import { CAPTION_FONTS, DEFAULT_CAPTION_FONT, captionFontLabel } from "./fonts";
 import { clock, twitchTimestamp } from "./util";
 
 export function esc(value: unknown): string {
@@ -102,6 +103,12 @@ button{font:inherit;color:inherit}
 .count button{width:34px;height:40px;border:0;border-radius:9px;background:transparent;font-size:18px;color:var(--text);cursor:pointer}
 .count button:hover{background:var(--soft)}
 .count input{width:30px;border:0;background:transparent;font:inherit;font-size:15px;font-weight:550;text-align:center;color:var(--text);outline:0;-moz-appearance:textfield}
+.font{display:flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px 6px 3px 0}
+.font span{font-size:13px;color:var(--muted);padding:0 6px 0 10px}
+.font-preview{margin:-18px 0 22px;display:flex;align-items:center;gap:12px}
+.font-preview img{width:360px;max-width:60vw;height:auto;border-radius:10px;border:1px solid var(--line)}
+.font-preview figcaption{font-size:13px;color:var(--muted)}
+.font select{border:0;background:transparent;font:inherit;font-size:15px;font-weight:550;color:var(--text);outline:0;height:40px;cursor:pointer}
 .count input::-webkit-inner-spin-button,.count input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .error{color:var(--bad);font-size:13px;margin:-20px 0 18px}
 .error:empty{display:none}
@@ -491,17 +498,20 @@ export function homePage(jobs: Job[]): string {
   <form id="new-job" class="composer" method="post" action="/api/jobs">
     <label class="url">${icon("link")}<input id="vod_url" name="vod_url" type="url" inputmode="url" placeholder="Paste a Twitch VOD link, like twitch.tv/videos/…" aria-label="Twitch VOD link" autocomplete="off" required></label>
     <div class="count"><span>Clips</span><button type="button" data-step="-1" aria-label="Fewer">−</button><input id="clips" name="clips" type="number" inputmode="numeric" min="1" max="30" value="10" aria-label="Number of clips" required><button type="button" data-step="1" aria-label="More">+</button></div>
+    <label class="font"><span>Captions</span><select id="caption_font" name="caption_font" aria-label="Caption font">${CAPTION_FONTS.map((f) => `<option value="${f.key}"${f.key === DEFAULT_CAPTION_FONT ? " selected" : ""}>${esc(f.label)}</option>`).join("")}</select></label>
     <button class="btn dark" type="submit">${icon("plus")}Make clips</button>
   </form>
+  <figure class="font-preview"><img id="font-preview" src="/font-preview/${DEFAULT_CAPTION_FONT}.png" width="360" height="75" alt="Caption font preview"><figcaption>How the captions will look</figcaption></figure>
   <p id="form-error" class="error"></p>
   <div id="stats" class="stats">${homeStats(jobs)}</div>
 </section>
 <main class="page"><div id="jobs" class="board">${jobList(jobs)}</div></main>`,
     `
 var form=document.getElementById('new-job'),q=document.getElementById('q');
+form.caption_font.addEventListener('change',function(){document.getElementById('font-preview').src='/font-preview/'+form.caption_font.value+'.png';});
 form.querySelectorAll('[data-step]').forEach(function(b){b.addEventListener('click',function(){var n=Number(form.clips.value)||10;form.clips.value=Math.min(30,Math.max(1,n+Number(b.dataset.step)));});});
 form.addEventListener('submit',async function(e){e.preventDefault();var btn=form.querySelector('[type=submit]'),err=document.getElementById('form-error');btn.disabled=true;err.textContent='';
-try{var r=await fetch('/api/jobs',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({vod_url:form.vod_url.value,clips:Number(form.clips.value)})});var d=await r.json();if(!r.ok)throw new Error(d.error||'Request failed');location.href='/jobs/'+d.id;}catch(x){err.textContent=x.message;btn.disabled=false;}});
+try{var r=await fetch('/api/jobs',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({vod_url:form.vod_url.value,clips:Number(form.clips.value),caption_font:form.caption_font.value})});var d=await r.json();if(!r.ok)throw new Error(d.error||'Request failed');location.href='/jobs/'+d.id;}catch(x){err.textContent=x.message;btn.disabled=false;}});
 function filter(){var v=q.value.trim().toLowerCase();document.querySelectorAll('#jobs .card').forEach(function(c){c.hidden=!!v&&c.dataset.search.indexOf(v)<0;});}
 q.addEventListener('input',filter);
 poll(function(){return !!document.querySelector('#jobs [data-active]');},function(doc){['jobs','stats'].forEach(function(id){var n=doc.getElementById(id);if(n)document.getElementById(id).innerHTML=n.innerHTML;});filter();});
@@ -639,6 +649,7 @@ function runPanel(job: Job, events: JobEvent[], modalUrl: string | null): string
     <dt>${job.finished_at ? "Finished" : "Status"}</dt><dd>${job.finished_at ? stamp(job.finished_at) : esc(STATUS_LABEL[job.status] ?? job.status)}</dd>
     <dt>${job.finished_at ? "Total time" : "Elapsed"}</dt><dd>${total}</dd>
     <dt>Clips</dt><dd>${job.clip_count ?? 0} of ${job.clips_wanted}</dd>
+    <dt>Captions</dt><dd>${esc(captionFontLabel(job.caption_font))}</dd>
   </dl></div>
 </div>`;
 }

@@ -14,9 +14,15 @@ def test_allowlisted_channel_is_found():
     assert ch["name"] == "fns" and ch["permission"] in core.RIGHTS_OK
 
 
-def test_unknown_channel_is_refused():
-    with pytest.raises(PermissionError, match="not on the allowlist"):
-        core.channel_for({"uploader_id": "someone_else"})
+def test_unknown_channel_uses_house_defaults():
+    ch = core.channel_for({"uploader_id": "Someone_Else", "uploader": "Someone Else"})
+    assert ch["name"] == "someone_else" and ch["handle"] == "Someone Else"
+    assert ch["permission"] == "operator" and ch["seam"] == 0.4 and ch["cam"]
+
+
+def test_vod_without_uploader_is_refused():
+    with pytest.raises(ValueError):
+        core.channel_for({})
 
 
 def _job(tmp_path):
@@ -51,7 +57,9 @@ def test_specs_take_the_best_title(tmp_path):
     d = json.loads(p.read_text())
     assert d["clip"]["title"] == "Best one" and d["clip"]["title_keyword"] == "Best"
     assert d["clip"]["out_point"] == 5.0 and d["clip"]["region"] == [100.0, 106.0]
-    assert d["clip"]["chat_mode"] == "off" and d["clip"]["stories"] == "off"
+    # chat on, its mode left to engine.chat_reaction; drawn natively on Modal
+    assert d["clip"]["chat_mode"] is None and d["clip"]["stories"] == "off"
+    assert d["clip"]["caption_font"] == "baloo"
     assert d["channel"]["vod_id"] == "123" and "twitch" not in d["channel"]
     from engine.clipspec import load
     load(p)

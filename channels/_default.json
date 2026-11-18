@@ -1,0 +1,16 @@
+{
+ "name": "_default",
+ "cam": [1456, 818, 1920, 1080],
+ "seam": 0.4,
+ "chrome": 92,
+ "fps": 60,
+ "grade": {
+  "NodeIndex": "1",
+  "Slope": "1.06 1.06 1.07",
+  "Offset": "-0.012 -0.012 -0.010",
+  "Power": "1.06 1.06 1.06",
+  "Saturation": "1.18"
+ },
+ "arc": null,
+ "twitch": []
+}

@@ -181,6 +181,8 @@ class Clip:
     # (#2E5CFF, 4.09:1) is REFUSED by name with the lifted alternative.
     caption_fill: str | None = None
     caption_emph: str | None = None
+    # an engine.caption_fonts key, picked per job in the web app. "pop" only.
+    caption_font: str | None = None
     # Whether `engine.story` may find a photo card for an org this clip
     # names. "auto" is the behaviour that shipped; "off" is the switch that
     # was missing. A card that names real people and cannot be turned off is

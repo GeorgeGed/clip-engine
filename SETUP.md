@@ -80,12 +80,14 @@ npx wrangler d1 migrations apply clip-engine --remote
 
 Now create the R2 API token from step 0.3, scoped to the `clip-engine-clips` bucket.
 
-## 3. Channel allowlist
+## 3. Channel files
 
-The pipeline refuses any VOD whose channel has no file in `channels/`. That is how
-the rights rule is enforced: never clip a source without a rights basis. For each
-channel from step 0.8, create or edit `channels/<name>.json`. Use `channels/fns.json`
-as the template. The fields that matter:
+Any public Twitch VOD can be submitted. A channel with no file in `channels/` uses
+`channels/_default.json` (the house layout) with permission `operator`, meaning the
+person who submits the link is responsible for having the right to clip it. A channel
+file is only needed to give a streamer their own handle, facecam fallback or grade.
+For each channel from step 0.8, create or edit `channels/<name>.json`. Use
+`channels/fns.json` as the template. The fields that matter:
 
 ```json
 {

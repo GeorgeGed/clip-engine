@@ -982,7 +982,8 @@ def stage_captions(clip, ch, st):
             log(f"  title {clip.title!r} in the caption slot to {TITLE_S:.1f}s")
         captions_video.pop(shown, dst, dur=st["out_dur"], fill=cap_fill,
                            accent=cap_emph, title=clip.title, title_s=TITLE_S,
-                           title_emoji=clip.emoji, title_keyword=clip.title_keyword)
+                           title_emoji=clip.emoji, title_keyword=clip.title_keyword,
+                           font=clip.caption_font)
     else:
         if clip.title:
             raise ValueError("title needs caption_style \"pop\"")
@@ -1418,8 +1419,16 @@ def stage_chat(clip, ch, st):
                  "hook": clip.hook or "", "emoji": clip.emoji}
     (PUBLIC / "clip.json").write_text(json.dumps(meta_json))
     _props(st["overlays"], clip=meta_json)
-    comps = ["Chat"] + (["Bait"] if clip.hook else []) \
-        + [c["id"] for c in st.get("story_cards", [])]
+    comps = (["Bait"] if clip.hook else []) + [c["id"] for c in st.get("story_cards", [])]
+    if os.environ.get("CLIP_NATIVE_CHAT") or not shutil.which("npx"):
+        # THE SAME PANEL WITHOUT NODE: Modal has no Remotion, and hosted
+        # clips shipped with chat off until this existed. See chat_native.
+        from engine import chat_native
+        chat_native.render(kept, wins, st["overlays"] / "rm_Chat.mov", frames=st["total"],
+                           fps=ch.fps, emote_cache=ROOT / f"jobs/{clip.job}/emotes")
+        log(f"  chat panel drawn natively -> rm_Chat.mov")
+    else:
+        comps = ["Chat"] + comps
     _render_comps(comps, st["overlays"], ch.fps)
 
 
@@ -1650,6 +1659,9 @@ def _overlay_schedule(clip, ch, st, total: int) -> list[dict]:
     add("rm_Chat.mov", 0.0, total / fps, 3)
     for c in _all_cards(clip, st):
         add(f"rm_{c['id']}.mov", c["at"], c.get("dur", STORY_FRAMES / fps), 4)
+    pj = st["overlays"] / "popups.json"
+    for i, p in enumerate(json.loads(pj.read_text()) if pj.exists() else []):
+        add(f"pop_{i}.mov", p["at"], p["dur"], 4)
     if clip.hook:
         add("rm_Bait.mov", 0.8, min(BAIT_SECONDS, total / fps - 0.8), 5)
     add("cap_kin.mov", 0.0, total / fps, 6)
@@ -1777,6 +1789,7 @@ def stage_assemble(clip, ch, st):
         tl.DeleteClips(stale)
 
     _sfx_bed(clip, ch, st, total)
+    _popups(clip, ch, st)
 
     sched = _overlay_schedule(clip, ch, st, total)
     have = [e["name"] for e in sched]
@@ -2227,9 +2240,35 @@ def stage_punch_native(clip, ch, st):
 
 
 def stage_assemble_native(clip, ch, st):
-    """The sound bed. The overlays are composited by the renderer itself,
-    from the same `_overlay_schedule` the Resolve path places."""
+    """The sound bed and the pop-ups. The overlays are composited by the
+    renderer itself, from the same `_overlay_schedule` the Resolve path places."""
     _sfx_bed(clip, ch, st, st["total"])
+    _popups(clip, ch, st)
+
+
+def _popups(clip, ch, st):
+    """Render this clip's pop-up cards (engine/popups) and record WHEN they
+    go in overlays/popups.json, in output seconds, for `_overlay_schedule`.
+
+    Rewritten on every build, empty included, so a pop-up from an earlier
+    cut can never survive into this one."""
+    from engine import overlays as ov
+    from engine import popups as pp
+    d = st["overlays"]
+    for f in d.glob("pop_*"):
+        f.unlink()
+    src = ROOT / f"jobs/{clip.job}/popups/{clip.index:02d}.json"
+    found = json.loads(src.read_text()) if src.exists() else []
+    placed = pp.schedule(found, _remap_fn(st["keeps"]), st["total"] / ch.fps)
+    font = ROOT / "fonts" / "TikTokSans[opsz,slnt,wdth,wght].ttf"
+    out = []
+    for i, p in enumerate(placed):
+        png = pp.card(src.parent / p["image"], p["name"], p["kind"], d / f"pop_{i}.png",
+                      font=font)
+        ov.exhibit_reveal(png, d / f"pop_{i}.mov", dur=pp.DUR, y=pp.TOP)
+        out.append({"name": p["name"], "at": p["at"], "dur": pp.DUR, "source": p["source"]})
+        log(f"  pop-up {p['name']} at {p['at']:.2f}s")
+    (d / "popups.json").write_text(json.dumps(out, indent=1))
 
 
 BIG_MIN, BIG_MAX = 3.0, 7.0     # a big stretch is a phrase or two, not a word

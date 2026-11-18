@@ -91,6 +91,19 @@ BALOO = Path(__file__).resolve().parent.parent / "fonts" / "Baloo2[wght].ttf"
 TIKTOK_SANS = (Path(__file__).resolve().parent.parent / "fonts"
                / "TikTokSans[opsz,slnt,wdth,wght].ttf")
 EMOJI_SWIFT = Path(__file__).resolve().parent / "emoji_png.swift"
+TITLE_SIZE, TITLE_MAX_W, TITLE_MIN_SIZE = 80, 880, 64
+
+
+def _title_font(size: int):
+    from PIL import ImageFont
+    fnt = ImageFont.truetype(str(TIKTOK_SANS), size)
+    fnt.set_variation_by_name(b"SemiBold")
+    return fnt
+
+
+def title_fits(text: str) -> bool:
+    """True when the opening title sits on one line at full size."""
+    return _title_font(TITLE_SIZE).getlength(text) <= TITLE_MAX_W
 
 
 NOTO_EMOJI = ("/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
@@ -132,14 +145,17 @@ def _emoji_png(emoji: str):
 
 
 def _title_image(text: str, *, emoji: str | None = None, keyword: str | None = None,
-                 size=80, max_w=880, stroke_frac=0.05, key_fill=(222, 255, 157, 255)):
+                 size=TITLE_SIZE, max_w=TITLE_MAX_W, stroke_frac=0.05,
+                 key_fill=(222, 255, 157, 255)):
     """The opening title in TikTok's own text style: TikTok Sans SemiBold,
     white with a thin black outline, no box, the emoji alone on the line
     underneath. Wraps to as many lines as `max_w` needs. `keyword`, one
     word of the title, is drawn in `key_fill` (the captions' lime)."""
-    from PIL import Image, ImageDraw, ImageFont
-    fnt = ImageFont.truetype(str(TIKTOK_SANS), size)
-    fnt.set_variation_by_name(b"SemiBold")
+    from PIL import Image, ImageDraw
+    fnt = _title_font(size)
+    while fnt.getlength(text) > max_w and size > TITLE_MIN_SIZE:
+        size -= 2
+        fnt = _title_font(size)
     sw = max(2, int(size * stroke_frac))
     lines, cur = [], ""
     for word in text.split():
@@ -180,7 +196,8 @@ def _title_image(text: str, *, emoji: str | None = None, keyword: str | None = N
 def pop(cards, out: Path, *, dur: float, size=92, y=0.44, canvas=CANVAS, fps=60,
         fill=None, accent=None, stroke=(0, 0, 0, 255), stroke_frac=0.10,
         title: str | None = None, title_s: float = 1.0,
-        title_emoji: str | None = None, title_keyword: str | None = None):
+        title_emoji: str | None = None, title_keyword: str | None = None,
+        font: str | None = None):
     """jiyu val's caption style, measured off his Shorts at 60fps.
 
     Baloo 2 ExtraBold at normal letter spacing, lowercase as spoken, a pastel
@@ -190,7 +207,11 @@ def pop(cards, out: Path, *, dur: float, size=92, y=0.44, canvas=CANVAS, fps=60,
 
     Each card is drawn once and only rescaled per frame, so the outline
     keeps its weight relative to the glyphs as it pops.
+
+    `font` is an `engine.caption_fonts` key, the web app's dropdown pick;
+    None is Baloo 2 ExtraBold, the look above.
     """
+    from . import caption_fonts
     import numpy as np
     from PIL import Image, ImageDraw, ImageFont
     if fill is None or accent is None:
@@ -199,9 +220,7 @@ def pop(cards, out: Path, *, dur: float, size=92, y=0.44, canvas=CANVAS, fps=60,
     n = int(round(dur * fps))
 
     def face(px):
-        f = ImageFont.truetype(str(BALOO), px)
-        f.set_variation_by_name(b"ExtraBold")
-        return f
+        return caption_fonts.face(font, px)
 
     def card_image(c):
         px = size

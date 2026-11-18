@@ -208,7 +208,8 @@ def _snap(t: float | None, starts: list[float], tol: float = 1.5) -> tuple[float
 
 
 def judge(utterances: list[dict], region: tuple[float, float], *,
-          model: str = MODEL_DEFAULT, client=None, pad: float = 60.0) -> list[Verdict]:
+          model: str = MODEL_DEFAULT, client=None, pad: float = 60.0,
+          chat: str = "") -> list[Verdict]:
     """`pad` widens the transcript shown to the model beyond the flagged region.
 
     Regions come from acoustic clustering and do not respect where a topic
@@ -216,6 +217,10 @@ def judge(utterances: list[dict], region: tuple[float, float], *,
     the coaching reveal in half, and the model correctly trimmed before it —
     producing a defensible clip of the wrong moment. The region is a POINTER,
     not a boundary.
+
+    `chat` is `chat_spikes.describe`'s line when Twitch chat spiked in or
+    near the region: the room's reaction is evidence the transcript cannot
+    show, especially for a joke that lands on tone.
     """
     import anthropic
 
@@ -236,7 +241,11 @@ def judge(utterances: list[dict], region: tuple[float, float], *,
                    f"boundary is acoustic and may cut a topic in half. Transcript below "
                    f"runs {inside[0]['start']:.1f}s to {inside[-1]['start']:.1f}s. Start "
                    f"and end the clip wherever the material actually begins and ends, "
-                   f"inside or outside the flagged window.\n\n{lines}"}],
+                   f"inside or outside the flagged window."
+                   + (f"\n\n{chat} A chat spike is a strong sign of a clip, often "
+                      f"a funny one, but the clip still has to stand on its own "
+                      f"without chat." if chat else "")
+                   + f"\n\n{lines}"}],
     )
     raw = "".join(b.text for b in msg.content if b.type == "text").strip()
     raw = re.sub(r"^```(?:json)?|```$", "", raw, flags=re.M).strip()

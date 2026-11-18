@@ -155,11 +155,49 @@ describe("jobs", () => {
       job_id: job.id,
       vod_url: "https://www.twitch.tv/videos/42",
       clips: 10,
+      caption_font: "baloo",
       callback_base: "https://clips.example.com",
     });
 
     const list = (await (await call("/api/jobs", { headers: { cookie } })).json()) as { jobs: any[] };
     expect(list.jobs.map((j) => j.id)).toContain(job.id);
+  });
+
+  it("sends the picked caption font to Modal and shows it on the job page", async () => {
+    const cookie = await login();
+    const { res, job } = await createJob(cookie, { vod_url: VOD, caption_font: "anton" });
+    expect(res.status).toBe(201);
+    expect(job.caption_font).toBe("anton");
+    const modal = outbound.filter((o) => o.url === "https://modal.test/start");
+    expect(JSON.parse(modal[modal.length - 1].init.body as string).caption_font).toBe("anton");
+    const page = await (await call(`/jobs/${job.id}`, { headers: { cookie } })).text();
+    expect(page).toContain("<dt>Captions</dt><dd>Anton</dd>");
+  });
+
+  it("rejects an unknown caption font without dispatching", async () => {
+    const cookie = await login();
+    const before = outbound.length;
+    expect((await createJob(cookie, { vod_url: VOD, caption_font: "comic-sans" })).res.status).toBe(400);
+    expect(outbound.length).toBe(before);
+  });
+
+  it("serves a preview image for each caption font", async () => {
+    const cookie = await login();
+    const res = await call("/font-preview/bebas.png", { headers: { cookie } });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toBe("image/png");
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    expect([...bytes.slice(1, 4)].map((b) => String.fromCharCode(b)).join("")).toBe("PNG");
+    expect((await call("/font-preview/nope.png", { headers: { cookie } })).status).toBe(404);
+    expect((await call("/font-preview/bebas.png")).status).toBe(302);
+  });
+
+  it("offers every caption font in the new-job form", async () => {
+    const cookie = await login();
+    const page = await (await call("/", { headers: { cookie } })).text();
+    expect(page).toContain('<select id="caption_font" name="caption_font"');
+    expect(page).toContain('<option value="baloo" selected>Baloo 2 ExtraBold</option>');
+    expect(page).toContain('<option value="bebas">Bebas Neue</option>');
   });
 
   it("stores Modal's call id and shows the run timeline on the job page", async () => {
