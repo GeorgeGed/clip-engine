@@ -369,17 +369,29 @@ def _finish_audio(video: Path, edit: dict, out_path: Path) -> Path:
     # and a yelling gameplay clip at -14.7 LUFS and +0.8 dBTP. Both are QC
     # rejects. So measure the delivery, and when it misses, apply the gain
     # directly into a brickwall limiter set 1.5 dB under the ceiling (AAC
-    # decode overshoots by about that much), then correct the residue once.
+    # decode overshoots by about that much), then correct the residue.
+    #
+    # alimiter is not a brickwall on clipped source. Clip 2 of job vqjkroyvl2
+    # (a hot, already-clipped yell) came out of a limiter set to -2.5 dBFS at
+    # +0.53 dBTP: it limits samples, and squared-off waves overshoot between
+    # them. So limit at 4x the rate, and when the delivery still measures over
+    # the ceiling, pull the limit down by the overshoot and go again.
     got = encode(af)
     if blob and got and (abs(got[0] - lufs) > 0.4 or got[1] > tp):
         limit = 10 ** ((tp - 1.5) / 20)
         gain = lufs - float(m["input_i"])
-        for _ in range(3):
-            got = encode(f"volume={gain:.2f}dB,alimiter=limit={limit:.4f}:level=false"
-                         f":attack=1:release=50")
-            if not got or abs(got[0] - lufs) <= 0.3:
+        for _ in range(5):
+            got = encode(f"aresample=192000,volume={gain:.2f}dB,alimiter=limit={limit:.4f}"
+                         f":level=false:attack=1:release=50,aresample=48000")
+            if not got:
                 break
-            gain += 1.5 * (lufs - got[0])   # the limiter takes back part of each step
+            loud_ok, peak_ok = abs(got[0] - lufs) <= 0.3, got[1] <= tp
+            if loud_ok and peak_ok:
+                break
+            if not peak_ok:
+                limit *= 10 ** ((tp - got[1] - 0.2) / 20)
+            if not loud_ok:
+                gain += 1.5 * (lufs - got[0])   # the limiter takes back part of each step
     return out_path
 
 
