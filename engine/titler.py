@@ -28,7 +28,7 @@ from dataclasses import dataclass, asdict
 
 from engine.tier3 import MODEL_DEFAULT, _api_key
 
-MAX_CHARS = 38
+MAX_CHARS = 24
 
 SYSTEM = """You write the on-screen title for a vertical VALORANT esports Short cut
 from a streamer's VOD. The title appears over the clip for its first second or
@@ -42,7 +42,8 @@ You get the clip's transcript. Return ONE json object, no prose, no fence:
  "why":"<one sentence under 160 characters: why the best one wins>"}
 
 RULES FOR EVERY TITLE
-- At most %(max)d characters, emoji excluded. Shorter is better; 4-7 words is the sweet spot.
+- At most %(max)d characters, emoji excluded, so it fits on ONE line on screen.
+  Shorter is better; 3-5 words is the sweet spot.
 - Sentence case, like a person typed it. Not ALL CAPS. No full stop at the end.
 - TRUE. Every claim must be something the clip itself says. Exaggerate the
   framing, never the facts. No made-up quotes, numbers, results or people.
@@ -90,29 +91,41 @@ def suggest(words: dict, *, handle: str, subject: str = "", claim: str = "",
     client = client or anthropic.Anthropic(
         api_key=_api_key(), max_retries=8,
         default_headers={"Accept-Encoding": "gzip"})
-    msg = client.messages.create(
-        model=model, max_tokens=8000, system=SYSTEM % {"max": MAX_CHARS},
-        messages=[{"role": "user", "content":
-                   f"Streamer handle: {handle}\nThe ranker summarised it as: {subject}\n"
-                   f"Its claim: {claim}\n\nTranscript:\n\n{body}"}])
-    raw = "".join(b.text for b in msg.content if b.type == "text").strip()
-    start = raw.find("{")
-    if start < 0 or msg.stop_reason == "max_tokens":
-        raise ValueError(f"no complete json (stop_reason={msg.stop_reason}): {raw[:140]}")
-    d, _end = json.JSONDecoder().raw_decode(raw[start:])
-    opts = []
-    for o in d.get("options", []):
-        title = _clean(o.get("title", ""))
-        if not title:
-            continue
-        kw = o.get("keyword", "")
-        opts.append(Option(title, kw if kw and kw.lower() in title.lower() else "",
-                           o.get("emoji", ""), o.get("angle", "")))
-    best = int(d.get("best", 0))
-    return {"options": [asdict(o) for o in opts],
-            "best": best if 0 <= best < len(opts) else 0,
-            "why": str(d.get("why", "")).strip(),
-            "usage": {"input": msg.usage.input_tokens, "output": msg.usage.output_tokens}}
+    from engine.captions_video import title_fits                # noqa: PLC0415
+    prompt = (f"Streamer handle: {handle}\nThe ranker summarised it as: {subject}\n"
+              f"Its claim: {claim}\n\nTranscript:\n\n{body}")
+    usage = {"input": 0, "output": 0}
+    for attempt in range(2):
+        msg = client.messages.create(
+            model=model, max_tokens=8000, system=SYSTEM % {"max": MAX_CHARS},
+            messages=[{"role": "user", "content": prompt}])
+        usage["input"] += msg.usage.input_tokens
+        usage["output"] += msg.usage.output_tokens
+        raw = "".join(b.text for b in msg.content if b.type == "text").strip()
+        start = raw.find("{")
+        if start < 0 or msg.stop_reason == "max_tokens":
+            raise ValueError(f"no complete json (stop_reason={msg.stop_reason}): {raw[:140]}")
+        d, _end = json.JSONDecoder().raw_decode(raw[start:])
+        opts = []
+        for o in d.get("options", []):
+            title = _clean(o.get("title", ""))
+            if not title:
+                continue
+            kw = o.get("keyword", "")
+            opts.append(Option(title, kw if kw and kw.lower() in title.lower() else "",
+                               o.get("emoji", ""), o.get("angle", "")))
+        best = int(d.get("best", 0))
+        best = best if 0 <= best < len(opts) else 0
+        fit = [i for i, o in enumerate(opts) if title_fits(o.title)]
+        if fit:
+            if best not in fit:
+                best = fit[0]
+            break
+        prompt += ("\n\nEvery title you gave was too long to fit on one line: "
+                   + "; ".join(o.title for o in opts)
+                   + f". Write five new ones, each at most {MAX_CHARS} characters.")
+    return {"options": [asdict(o) for o in opts], "best": best,
+            "why": str(d.get("why", "")).strip(), "usage": usage}
 
 
 def suggest_many(clips: list[dict], *, handle: str, workers: int = 6) -> dict[str, dict]:

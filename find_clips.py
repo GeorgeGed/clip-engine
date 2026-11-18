@@ -46,6 +46,7 @@ def main() -> None:
         return
     ranked = core.cut_sections(job, a.build, a.url)
     core.clip_words(job, ranked)
+    core.popups(job, ranked, ch, log=lambda s: print(s, flush=True))
     tl = core.titles(job, ranked, handle=ch.get("handle", ch["name"].upper()))
     vod = re.sub(r"\D", "", str(meta["id"]))
     for spec in core.specs(job, ranked, ch, vod, tl):

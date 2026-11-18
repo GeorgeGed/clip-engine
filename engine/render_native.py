@@ -98,7 +98,8 @@ def plan(clip, ch, st=None) -> dict:
             "overlays": overlays, "n_shots": max(shot_of) + 1 if shot_of else 0}
 
 
-def cut_graph(keeps, *, fps: float, src: str = "0:v", out: str = "cut") -> str:
+def cut_graph(keeps, *, fps: float, src: str = "0:v", out: str = "cut",
+              tag: str = "rn") -> str:
     """Trim the keeps out of the source and concat them into the cut picture.
 
     `native_layout.two_pane` takes the CUT picture and requires its shots to
@@ -121,13 +122,13 @@ def cut_graph(keeps, *, fps: float, src: str = "0:v", out: str = "cut") -> str:
         # parity gate's duration tolerance is ONE frame.
         a, b = round(k.start * fps), round(k.end * fps)
         parts.append(f"[{src}]trim=start_frame={a}:end_frame={b},"
-                     f"setpts=PTS-STARTPTS[rn_k{i}]")
-        labels.append(f"[rn_k{i}]")
+                     f"setpts=PTS-STARTPTS[{tag}_k{i}]")
+        labels.append(f"[{tag}_k{i}]")
     if len(keeps) == 1:
-        return parts[0].replace("[rn_k0]", f"[{out}]")
+        return parts[0].replace(f"[{tag}_k0]", f"[{out}]")
     split = f"[{src}]split={len(keeps)}" + "".join(
-        f"[rn_s{i}]" for i in range(len(keeps)))
-    parts = [p.replace(f"[{src}]", f"[rn_s{i}]", 1)
+        f"[{tag}_s{i}]" for i in range(len(keeps)))
+    parts = [p.replace(f"[{src}]", f"[{tag}_s{i}]", 1)
              for i, p in enumerate(parts)]
     cat = "".join(labels) + f"concat=n={len(keeps)}:v=1:a=0[{out}]"
     return ";".join([split, *parts, cat])
@@ -260,10 +261,22 @@ def render(clip, ch, out: str | Path, *, punches: list[float] | None = None,
 
     grade = ng.chain(ch.grade)                      # facecam only
     cg = cut_graph(p["keeps"], fps=ch.fps, src="0:v", out="rn_cut")
+    bcam = big_cam_rect(p["cam"], ch.seam) if big else None
+    # The facecam pane drawn from a 4x super-resolved copy of every rect it
+    # can show; see engine.upscale. None keeps the plain lanczos path.
+    from engine import upscale
+    reg = upscale.region(p["cam"], *([bcam] if bcam else []))
+    sr = upscale.upscale(p["src"], reg, p["overlays"] / "cam_sr.mp4", log=log)
+    top_src = None
+    if sr:
+        cg = ";".join([cg, f"movie=filename='{sr}'[rn_camsrc]",
+                       cut_graph(p["keeps"], fps=ch.fps, src="rn_camsrc",
+                                 out="rn_cam", tag="rn_c")])
+        top_src = ("rn_cam", reg, upscale.SCALE)
     if not big:
         base = ";".join([cg, nl.two_pane(ch, segs, cam=p["cam"],
                                          src="rn_cut", out="base",
-                                         top_filters=grade)])
+                                         top_filters=grade, top_src=top_src)])
     else:
         # TWO LAYOUTS FROM ONE CUT, and the big one is laid over the normal
         # one only inside its stretches. Both come from the same keeps and
@@ -272,15 +285,18 @@ def render(clip, ch, out: str | Path, *, punches: list[float] | None = None,
         # `two_pane` names its pads by shot index.
         import dataclasses
         import re
-        bcam = big_cam_rect(p["cam"], ch.seam)
         small = nl.two_pane(ch, segs, cam=p["cam"], src="rn_cutS",
-                            out="baseS", top_filters=grade)
+                            out="baseS", top_filters=grade,
+                            top_src=top_src and ("rn_camS", *top_src[1:]))
         large = nl.two_pane(dataclasses.replace(ch, seam=BIG_SEAM), segs,
                             cam=bcam, src="rn_cutB", out="baseB",
-                            top_filters=grade)
-        large = re.sub(r"\[([vabtcf])(\d+)\]", r"[B\1\2]", large)
+                            top_filters=grade,
+                            top_src=top_src and ("rn_camB", *top_src[1:]))
+        large = re.sub(r"\[([vabtcfu])(\d+)\]", r"[B\1\2]", large)
         on = "+".join(f"between(t,{a:.3f},{b:.3f})" for a, b in big)
-        base = ";".join([cg, "[rn_cut]split[rn_cutS][rn_cutB]", small, large,
+        base = ";".join([cg, "[rn_cut]split[rn_cutS][rn_cutB]",
+                         *(["[rn_cam]split[rn_camS][rn_camB]"] if top_src else []),
+                         small, large,
                          f"[baseS][baseB]overlay=0:0:enable='{on}'[base]"])
         log(f"  big facecam (seam {BIG_SEAM}, rect {bcam}) in "
             f"{len(big)} stretch(es): "

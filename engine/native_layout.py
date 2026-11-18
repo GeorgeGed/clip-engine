@@ -338,8 +338,14 @@ def two_pane(channel, shots, *, cam=None, src: str = "0:v", out: str = "v",
              top_filters: str = "", bottom_filters: str = "",
              scale_flags: str = SCALE_FLAGS, src_w: int = SRC_W,
              src_h: int = SRC_H, canvas_w: int = CANVAS_W,
-             canvas_h: int = CANVAS_H) -> str:
+             canvas_h: int = CANVAS_H, top_src=None) -> str:
     """The filter graph that makes `src` into the 1080x1920 two-pane layout.
+
+    `top_src` is `(label, (x0, y0, x1, y1), k)`: a picture that is that source
+    region scaled by the integer `k` (`engine.upscale`), cut
+    the same way as `src`. The top pane then crops the SAME rectangle out of
+    it, every coordinate times k, so the geometry is unchanged and only the
+    pixels it is drawn from are better.
 
     `top_filters` / `bottom_filters` are inserted after each pane's scale — the
     insertion point for the facecam's ASC CDL, which Resolve applies to V2 only
@@ -366,6 +372,11 @@ def two_pane(channel, shots, *, cam=None, src: str = "0:v", out: str = "v",
         L.append(f"{head}[v0]")
     else:
         L.append(f"{head},split={n}[" + "][".join(f"v{i}" for i in range(n)) + "]")
+    if top_src:
+        lbl, (ox, oy, ox1, oy1), k = top_src
+        uh = f"[{lbl}]format=yuv444p"
+        L.append(f"{uh}[u0]" if n == 1 else
+                 f"{uh},split={n}[" + "][".join(f"u{i}" for i in range(n)) + "]")
 
     for i, s in enumerate(g.shots):
         # EVERY shot is trimmed, the single-shot case included. Skipping it
@@ -377,9 +388,20 @@ def two_pane(channel, shots, *, cam=None, src: str = "0:v", out: str = "v",
         # shot's `end` bounds the picture — and both branches obey it.
         # end_frame is EXCLUSIVE; setpts rebases each segment to 0 so concat
         # sees them head to tail.
-        L.append(f"[v{i}]trim=start_frame={s.first}:end_frame={s.last},"
-                 f"setpts=PTS-STARTPTS,split=2[a{i}][b{i}]")
-        L.append(f"[a{i}]{s.top.arg()},"
+        trim = f"trim=start_frame={s.first}:end_frame={s.last},setpts=PTS-STARTPTS"
+        if top_src:
+            t = s.top
+            if t.x < ox or t.y < oy or t.x + t.w > ox1 or t.y + t.h > oy1:
+                raise ValueError(f"shot {i} facecam crop {t.w}x{t.h} at "
+                                 f"({t.x},{t.y}) leaves the upscaled region "
+                                 f"{(ox, oy, ox1, oy1)}")
+            top = Crop(t.w * k, t.h * k, (t.x - ox) * k, (t.y - oy) * k, t.exact)
+            L.append(f"[v{i}]{trim}[b{i}]")
+            L.append(f"[u{i}]{trim}[a{i}]")
+        else:
+            top = s.top
+            L.append(f"[v{i}]{trim},split=2[a{i}][b{i}]")
+        L.append(f"[a{i}]{top.arg()},"
                  f"scale={canvas_w}:{g.top_h}:flags={scale_flags},"
                  f"setsar=1{tf}[t{i}]")
         L.append(f"[b{i}]{s.bottom.arg()},"

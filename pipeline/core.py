@@ -16,10 +16,10 @@ VOD submitted twice reuses everything already done for it.
         ranked.json       the top N that get built (make_clip reads it)
         clips_1080/NN_*.mp4, words/NN.json, titles.json, specs/NN.json
 
-THE RIGHTS GATE COMES FIRST. A VOD is only processed when its channel has a
-file in `channels/` naming its Twitch login and a `permission` basis. That is
-the engine's oldest rule — never ship a source without a rights basis — and a
-service that takes any link would otherwise clip whoever was pasted in.
+ANY CHANNEL IS ACCEPTED. A channel with a file in `channels/` gets its own
+layout and handle, and that file must record a `permission` basis. Any other
+channel runs on `channels/_default.json` with permission "operator": the
+person submitting the link takes responsibility for having the right to clip it.
 """
 
 from __future__ import annotations
@@ -46,9 +46,10 @@ def vod_meta(url: str) -> dict:
 
 
 def channel_for(meta: dict) -> dict:
-    """The channel file whose `twitch` login matches this VOD's uploader.
+    """The channel file whose `twitch` login matches this VOD's uploader, or
+    the house defaults for a channel with no file of its own.
 
-    Raises PermissionError when there is none, or it records no rights basis."""
+    Raises PermissionError when a channel file records no rights basis."""
     login = (meta.get("uploader_id") or "").lower()
     for f in sorted((ROOT / "channels").glob("*.json")):
         ch = json.loads(f.read_text())
@@ -57,9 +58,13 @@ def channel_for(meta: dict) -> dict:
                 raise PermissionError(f"channel {ch['name']} has no rights basis "
                                       f"(permission={ch.get('permission')!r})")
             return ch
-    raise PermissionError(f"twitch channel {login!r} is not on the allowlist: add a "
-                          f"channels/<name>.json with \"twitch\": [\"{login}\"] and its "
-                          f"permission basis")
+    if not login:
+        raise ValueError("this VOD has no uploader login")
+    ch = json.loads((ROOT / "channels" / "_default.json").read_text())
+    return ch | {"name": login, "twitch": [login], "handle": meta.get("uploader") or login,
+                 "permission": "operator",
+                 "permission_note": "No channel file: submitted through the web app on "
+                                    "the operator's responsibility."}
 
 
 def job_dir(ch: dict, meta: dict) -> Path:
@@ -111,6 +116,49 @@ def regions(job: Path) -> list[dict]:
     return json.loads(p.read_text())
 
 
+def chat(job: Path, *, log=print) -> list[dict]:
+    """Chat-spike regions from the VOD's replay (engine/chat_spikes), cached."""
+    from engine import chat_spikes
+    meta = json.loads((job / "vod.json").read_text())
+    vod = re.sub(r"\D", "", str(meta["id"]))
+    return chat_spikes.regions(job, vod, float(meta.get("duration") or 0), log=log)
+
+
+def _with_chat(regs: list[dict], spikes: list[dict]) -> list[dict]:
+    """Voice regions with the chat spike they contain attached as a hint, then
+    every spike no voice region covers as a region of its own."""
+    out = [dict(r) for r in regs]
+    for s in spikes:
+        t = s["chat"]["t"]
+        hit = next((r for r in out if r["start"] - 30 <= t <= r["end"] + 30), None)
+        if hit is not None:
+            if hit.get("chat", {}).get("score", 0) < s["chat"]["score"]:
+                hit["chat"], hit["hint"] = s["chat"], s["hint"]
+        else:
+            out.append({"start": s["start"], "end": s["end"], "peak": 0.0, "mean": 0.0,
+                        "chat": s["chat"], "hint": s["hint"]})
+    return out
+
+
+# A chat-backed clip ranks as if this much stronger at full chat score, so a
+# moment the room exploded over makes the cut against an equal monologue.
+CHAT_BOOST = 0.15
+
+# THE MODEL BUDGET. Every region is one Claude call, about 2.5 US cents each.
+# The 9h24m s0mcs VOD had 209 voice regions, and judging all of them spent the
+# whole $5 of API credit before ranking finished. It had found 165 clips by
+# then, for a job that ships 10. So only the strongest MAX_REGIONS are judged:
+# the regions chat spiked in first, strongest spike first, then the rest in
+# the voice detector's own order (strongest first). At most ~$1 a VOD.
+MAX_REGIONS = 40
+RANK_WORKERS = 6   # parallel Claude calls; one at a time took 15 min on 40 regions
+
+
+def _budget(regs: list[dict], n: int = MAX_REGIONS) -> list[dict]:
+    chat = sorted((r for r in regs if r.get("chat")), key=lambda r: -r["chat"]["score"])
+    return (chat + [r for r in regs if not r.get("chat")])[:n]
+
+
 def transcribe(job: Path, *, model: str) -> None:
     p = job / "transcript.json"
     if p.exists():
@@ -132,29 +180,39 @@ def rank(job: Path, *, log=print) -> list[dict]:
     """Tier 3 over every region, then the kept clips strongest first, with
     overlapping verdicts deduplicated."""
     from engine.tier3 import judge
-    regs = regions(job)
+    regs = _with_chat(regions(job), chat(job, log=log))
+    log(f"  judging {min(len(regs), MAX_REGIONS)} of {len(regs)} regions")
+    regs = _budget(regs)
     utt = json.loads((job / "transcript.json").read_text())["utterances"]
     client = _client()
     out = job / "tier3.json"
     done = json.loads(out.read_text()) if out.exists() else []
     seen = {tuple(d["region"]) for d in done}
-    for i, r in enumerate(regs, 1):
-        if (r["start"], r["end"]) in seen:
-            continue
+
+    def one(r: dict) -> list[dict]:
         try:
-            vs = [v.as_dict() for v in judge(utt, (r["start"], r["end"]), client=client, pad=60)]
+            return [v.as_dict() for v in judge(utt, (r["start"], r["end"]), client=client, pad=60,
+                                               chat=r.get("hint", ""))]
         except Exception as e:  # one bad region must not lose the rest
-            vs = [{"has_clip": False, "genre": "none", "why": f"error: {type(e).__name__}: {e}"}]
-        for v in vs:
-            done.append({"region": [r["start"], r["end"]], "audio_rank": i,
-                         "audio_peak": r["peak"], "audio_mean": r["mean"], **v})
-        out.write_text(json.dumps(done, indent=1))
-        got = [v for v in vs if v.get("has_clip")]
-        log(f"  {i:>3}/{len(regs)} {ts(r['start'])} -> "
-            + (" | ".join(f"{ts(v['in_point'])} {v['out_point'] - v['in_point']:.0f}s"
-                          for v in got) or "none"))
+            return [{"has_clip": False, "genre": "none", "why": f"error: {type(e).__name__}: {e}"}]
+
+    todo = [(i, r) for i, r in enumerate(regs, 1) if (r["start"], r["end"]) not in seen]
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(RANK_WORKERS) as ex:
+        results = ex.map(lambda ir: one(ir[1]), todo)
+        for (i, r), vs in zip(todo, results):
+            for v in vs:
+                done.append({"region": [r["start"], r["end"]], "audio_rank": i,
+                             "audio_peak": r["peak"], "audio_mean": r["mean"],
+                             "chat_score": r.get("chat", {}).get("score", 0.0), **v})
+            out.write_text(json.dumps(done, indent=1))
+            got = [v for v in vs if v.get("has_clip")]
+            log(f"  {i:>3}/{len(regs)} {ts(r['start'])} -> "
+                + (" | ".join(f"{ts(v['in_point'])} {v['out_point'] - v['in_point']:.0f}s"
+                              for v in got) or "none"))
     clips, taken = [], []
-    for d in sorted((d for d in done if d.get("has_clip")), key=lambda d: -d["strength"]):
+    for d in sorted((d for d in done if d.get("has_clip")),
+                    key=lambda d: -(d["strength"] + CHAT_BOOST * d.get("chat_score", 0.0))):
         span = (d["in_point"], d["out_point"])
         if any(min(span[1], b) - max(span[0], s) > 3.0 for s, b in taken):
             continue
@@ -176,7 +234,11 @@ def cut_sections(job: Path, n_top: int, url: str) -> list[dict]:
 
     From source.mp4 when the whole VOD is here (a re-encode, so the cut is
     frame-accurate and every packet is a frame, which make_clip counts on);
-    otherwise a yt-dlp section download per clip."""
+    otherwise a yt-dlp section download per clip.
+
+    The cut is always 1920x1080: every crop in the engine is in those source
+    pixels, so a lower rendition kept for local iteration (a 480p VOD is 1.7
+    GB against 10.2 GB) is scaled up here rather than breaking the layout."""
     clips = json.loads((job / "clips.json").read_text())[:n_top]
     (job / "ranked.json").write_text(json.dumps(clips, indent=1))
     out = job / "clips_1080"
@@ -191,7 +253,8 @@ def cut_sections(job: Path, n_top: int, url: str) -> list[dict]:
         a, b = c["in_point"], c["out_point"] + TAIL
         if src.exists():
             subprocess.run(["ffmpeg", "-y", "-v", "error", "-ss", f"{a:.3f}", "-i", str(src),
-                            "-t", f"{b - a:.3f}", "-r", "60", "-c:v", "libx264", "-preset", "fast",
+                            "-t", f"{b - a:.3f}", "-r", "60",
+                            "-vf", "scale=1920:1080:flags=lanczos", "-c:v", "libx264", "-preset", "fast",
                             "-crf", "16", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k",
                             str(tmp)], check=True)
         else:
@@ -226,6 +289,34 @@ def clip_words(job: Path, ranked: list[dict]) -> None:
         p.write_text(json.dumps({"language": "en", "offset": a, "utterances": us}, indent=1))
 
 
+def popups(job: Path, ranked: list[dict], ch: dict, *, log=print) -> None:
+    """popups/NN.json: the players and teams each clip names, with a picture
+    of each (engine/popups). Read by make_clip, which places them."""
+    from engine import popups as pp
+    d = job / "popups"
+    d.mkdir(exist_ok=True)
+    client = None
+    for n in range(1, len(ranked) + 1):
+        p = d / f"{n:02d}.json"
+        if p.exists():
+            continue
+        try:
+            client = client or _client()
+            words = json.loads((job / "words" / f"{n:02d}.json").read_text())
+            found = pp.find(words, client=client, streamer=ch.get("handle", ch["name"]),
+                            game=ch.get("game", "VALORANT"))
+            keep = []
+            for e in found:
+                m = pp.image(e["page"], d / "img", wiki=ch.get("wiki", "valorant"))
+                if m:
+                    keep.append({**e, "image": f"img/{m['path']}", "source": m["source"]})
+        except Exception as e:  # a pop-up is a garnish; never lose the clip over it
+            log(f"  pop-ups for clip {n}: {type(e).__name__}: {e}")
+            continue
+        p.write_text(json.dumps(keep, indent=1))
+        log(f"  clip {n}: " + (", ".join(e["name"] for e in keep) or "no names"))
+
+
 def titles(job: Path, ranked: list[dict], handle: str) -> dict:
     p = job / "titles.json"
     have = json.loads(p.read_text()) if p.exists() else {}
@@ -240,7 +331,7 @@ def titles(job: Path, ranked: list[dict], handle: str) -> dict:
 
 
 # The house look: what clip 08 settled on after review.
-STYLE = {"hook": None, "cards": [], "chat_mode": "off", "stories": "off", "booms": [],
+STYLE = {"hook": None, "cards": [], "chat_mode": None, "stories": "off", "booms": [],
          "punch_boom": False, "intro_sfx": None, "caption_case": "spoken",
          "big_cam": "auto", "caption_style": "pop", "caption_fill": "cream",
          "caption_emph": "lime"}
@@ -248,9 +339,12 @@ CHANNEL_KEYS = ("name", "cam", "seam", "chrome", "fps", "grade", "arc",
                 "permission", "permission_note")
 
 
-def specs(job: Path, ranked: list[dict], ch: dict, vod_id: str, tl: dict) -> list[Path]:
+def specs(job: Path, ranked: list[dict], ch: dict, vod_id: str, tl: dict,
+          *, caption_font: str | None = None) -> list[Path]:
     """One make_clip spec per clip. The facecam is left to make_clip, which
-    finds it per clip with the face detector."""
+    finds it per clip with the face detector. `caption_font` is the job's
+    pick from the web app (an engine.caption_fonts key)."""
+    from engine import caption_fonts
     sd = job / "specs"
     sd.mkdir(exist_ok=True)
     channel = {k: ch.get(k) for k in CHANNEL_KEYS} | {"vod_id": vod_id}
@@ -264,7 +358,8 @@ def specs(job: Path, ranked: list[dict], ch: dict, vod_id: str, tl: dict) -> lis
                 "region": [c["in_point"], c["out_point"] + TAIL], "cam": None,
                 "emoji": best.get("emoji") or "\U0001F633",
                 "title": best.get("title") or None, "title_keyword": best.get("keyword") or None,
-                "notes": f"Tier 3 {c['strength']:.2f}: {c['subject']}", **STYLE}
+                "notes": f"Tier 3 {c['strength']:.2f}: {c['subject']}", **STYLE,
+                "caption_font": caption_fonts.key(caption_font)}
         p = sd / f"{n:02d}.json"
         p.write_text(json.dumps({"channel": channel, "clip": clip}, indent=1, ensure_ascii=False) + "\n")
         out.append(p)

@@ -48,8 +48,11 @@ image = (
     .pip_install("faster-whisper==1.2.1", "av==14.0.1", "numpy==2.5.4", "soundfile==0.14.0",
                  "pillow==11.3.0", "opencv-python-headless==4.13.0.92", "anthropic==2.9.0",
                  "boto3", "requests", "yt-dlp", "pyyaml==6.0.3", "jsonschema==4.23.0",
-                 "rapidfuzz==3.14.6", "fastapi[standard]")
+                 "rapidfuzz==3.14.6", "fastapi[standard]",
+                 # engine/upscale's super-resolution pass on the facecam
+                 "torch==2.8.0")
     .env({"CLIP_EMOJI_FONT": "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
+          "CLIP_NATIVE_CHAT": "1",
           "HF_HOME": f"{DATA}/hf", "PYTHONPATH": REPO})
     .add_local_dir(Path(__file__).parent, REPO, copy=True, ignore=[
         ".git", "**/__pycache__", "jobs", "renders", "deliver", "webapp", "web",
@@ -105,7 +108,12 @@ def transcribe(job_name: str) -> None:
     data.commit()
 
 
-@app.function(cpu=8, memory=16384, volumes=VOL, secrets=[secret], timeout=3600,
+# A GPU for engine/upscale: 4x super-resolution of the facecam region runs
+# at ~15 frames/s on an M-series Mac and far faster on an L4, where on 8 CPU
+# cores it would add minutes to every clip.
+# Any of these GPUs will do: on job 3njkcnn5wd only 2-3 L4s came up at once,
+# so 10 clips rendered mostly one after another.
+@app.function(gpu=["L4", "A10G", "L40S"], cpu=8, memory=16384, volumes=VOL, secrets=[secret], timeout=3600,
               retries=modal.Retries(max_retries=1))
 def build_clip(n: int, job_name: str, job_id: str, callback_base: str) -> dict:
     _setup()
@@ -116,7 +124,13 @@ def build_clip(n: int, job_name: str, job_id: str, callback_base: str) -> dict:
     spec = job / "specs" / f"{n:02d}.json"
     clip = json.loads(spec.read_text())["clip"]
     c = json.loads((job / "ranked.json").read_text())[n - 1]
-    out = core.build(spec, log_path=job / "specs" / f"{n:02d}.log")
+    try:
+        out = core.build(spec, log_path=job / "specs" / f"{n:02d}.log")
+    except RuntimeError as e:
+        # A build or QC failure is deterministic: a retry renders the same
+        # file again and fails the same way. Retries are for lost containers.
+        data.commit()
+        return {"error": str(e)}
     prev, thumb = core.preview_and_thumb(out)
     data.commit()
     base = f"jobs/{job_id}/{n:02d}-{core._slug(clip.get('title') or c['subject'], 50)}"
@@ -139,16 +153,23 @@ def build_clip(n: int, job_name: str, job_id: str, callback_base: str) -> dict:
 
 
 def _free_vod(job: Path) -> None:
-    """Drop the VOD video once every clip is in R2; transcript and rankings stay for retries."""
+    """Drop the VOD's video and audio when a job ends, however it ends.
+
+    A 9h VOD is 34 GB of source.mp4 alone, so keeping it for a retry is not
+    worth it: a retry re-downloads (minutes) and still reuses the transcript,
+    regions and rankings, which stay."""
     import shutil
-    for name in ("source.mp4", "source.dl.mp4"):
-        (job / name).unlink(missing_ok=True)
+    data.reload()
+    for p in [job / "source.mp4", job / "source.dl.mp4", job / "audio16k.wav",
+              *job.glob("audio.*")]:
+        p.unlink(missing_ok=True)
     shutil.rmtree(job / "clips_1080", ignore_errors=True)
     data.commit()
 
 
 @app.function(cpu=4, memory=8192, volumes=VOL, secrets=[secret], timeout=8 * 3600)
-def run_job(job_id: str, vod_url: str, clips: int, callback_base: str) -> None:
+def run_job(job_id: str, vod_url: str, clips: int, callback_base: str,
+            caption_font: str | None = None) -> None:
     _setup()
     from pipeline import core
 
@@ -158,6 +179,7 @@ def run_job(job_id: str, vod_url: str, clips: int, callback_base: str) -> None:
                                           "stage": stage, "message": message,
                                           "progress": p, **kw})
 
+    job = None
     try:
         progress("start", "Reading the VOD", 0.01)
         meta = core.vod_meta(vod_url)
@@ -169,7 +191,12 @@ def run_job(job_id: str, vod_url: str, clips: int, callback_base: str) -> None:
         regs = core.regions(job)
         data.commit()
         progress("transcribe", f"Transcribing ({len(regs)} moments to check)", 0.25)
+        import threading
+        chat = threading.Thread(target=core.chat, args=(job,), daemon=True)
+        chat.start()
         transcribe.remote(job.name)
+        chat.join()
+        data.commit()
         data.reload()
         progress("rank", "Finding and ranking clips", 0.45)
         found = core.rank(job)
@@ -177,10 +204,11 @@ def run_job(job_id: str, vod_url: str, clips: int, callback_base: str) -> None:
             raise RuntimeError("no clips found in this VOD")
         ranked = core.cut_sections(job, min(clips, len(found)), vod_url)
         core.clip_words(job, ranked)
+        core.popups(job, ranked, ch)
         progress("title", f"Writing titles for {len(ranked)} clips", 0.6)
         tl = core.titles(job, ranked, handle=ch.get("handle", ch["name"].upper()))
         vod = re.sub(r"\D", "", str(meta["id"]))
-        core.specs(job, ranked, ch, vod, tl)
+        core.specs(job, ranked, ch, vod, tl, caption_font=caption_font)
         data.commit()
         progress("render", f"Rendering {len(ranked)} clips", 0.65)
         ok, failed = 0, []
@@ -188,16 +216,13 @@ def run_job(job_id: str, vod_url: str, clips: int, callback_base: str) -> None:
                                                kwargs={"job_name": job.name, "job_id": job_id,
                                                        "callback_base": callback_base},
                                                return_exceptions=True), 1):
-            if isinstance(res, Exception):
-                failed.append(f"clip {n}: {str(res)[-200:]}")
+            if isinstance(res, Exception) or "error" in res:
+                failed.append(f"clip {n}: {str(res.get('error') if isinstance(res, dict) else res)[-200:]}")
             else:
                 ok += 1
             progress("render", f"{ok} of {len(ranked)} clips ready", 0.65 + 0.35 * n / len(ranked))
         if not ok:
             raise RuntimeError("every clip failed to build: " + "; ".join(failed)[:800])
-        if not failed:
-            data.reload()
-            _free_vod(job)
         _post(callback_base, "done", {"job_id": job_id, "status": "done",
                                       "error": ("; ".join(failed)[:800] or None)})
     except Exception as e:
@@ -205,12 +230,15 @@ def run_job(job_id: str, vod_url: str, clips: int, callback_base: str) -> None:
         _post(callback_base, "done", {"job_id": job_id, "status": "failed",
                                       "error": f"{type(e).__name__}: {e}"[:800]})
         raise
+    finally:
+        if job is not None:
+            _free_vod(job)
 
 
 @app.function(secrets=[secret])
 @modal.fastapi_endpoint(method="POST")
 def start(body: dict, authorization: str | None = Header(default=None)):
-    """POST {job_id, vod_url, clips, callback_base} with Bearer PIPELINE_TOKEN."""
+    """POST {job_id, vod_url, clips, callback_base, caption_font?} with Bearer PIPELINE_TOKEN."""
     import hmac
     token = os.environ["PIPELINE_TOKEN"]
     given = (authorization or "").removeprefix("Bearer ").strip()
@@ -219,6 +247,7 @@ def start(body: dict, authorization: str | None = Header(default=None)):
     url = str(body.get("vod_url", ""))
     if not re.match(r"^https?://(www\.|m\.)?twitch\.tv/videos/\d+", url):
         raise HTTPException(status_code=400, detail="not a Twitch VOD link")
+    from engine.caption_fonts import key
     call = run_job.spawn(str(body["job_id"]), url, int(body.get("clips") or 10),
-                         str(body["callback_base"]))
+                         str(body["callback_base"]), key(body.get("caption_font")))
     return {"ok": True, "call_id": call.object_id}

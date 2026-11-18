@@ -167,7 +167,7 @@ if __name__ == "__main__":
 FACE_W, FACE_H, FACE_LIFT = 3.9, 2.78, 0.13
 FACE_SAMPLES = 40
 FACE_MIN_HIT = 0.3
-FACE_STILL_PX = 2.0
+FACE_STILL = 0.06
 
 
 def _border(profile, lo, hi):
@@ -184,6 +184,35 @@ def _border(profile, lo, hi):
     if seg[k] < 50:
         return None
     return lo + k
+
+
+def _live_face(hits, samples):
+    """The hits of the one cluster that is a live face, or None.
+
+    A LIVE FACE MOVES; A POSTER DOES NOT. On clip 08 the haar cascade
+    fires on two objects in his room in 40 of 40 frames, more often than
+    on his face (29 of 40), so the busiest cluster is a wall. Their
+    positions are identical to the pixel across the clip; a face drifts.
+
+    STILLNESS IS RELATIVE TO THE FACE'S SIZE. A fixed 2px floor shipped a
+    crop of a plush toy on clip 9 of the first live run (VOD 2926995155,
+    2:05:03): the cascade's box on it wobbles 1.9-2.0px from re-encode
+    noise alone, so it scraped past while his face drifted 10px. Measured
+    as a share of face height, objects in his room drift 0.016-0.026 and
+    his face 0.135-0.24, so 0.06 sits between them with room either side.
+    """
+    a = np.array(hits) if len(hits) else np.zeros((0, 3))
+    best = None
+    for p in a:
+        near = a[(abs(a[:, 0] - p[0]) < p[2]) & (abs(a[:, 1] - p[1]) < p[2])]
+        if len(near) < samples * FACE_MIN_HIT:
+            continue
+        drift = near[:, 0].std() + near[:, 1].std()
+        if drift < FACE_STILL * np.median(near[:, 2]):
+            continue
+        if best is None or len(near) > len(best):
+            best = near
+    return best
 
 
 def face_rect(path, *, samples=FACE_SAMPLES) -> tuple[int, int, int, int] | None:
@@ -219,20 +248,7 @@ def face_rect(path, *, samples=FACE_SAMPLES) -> tuple[int, int, int, int] | None
         fs = casc.detectMultiScale(g, 1.1, 6, minSize=(40, 40))
         hits += [(x + w / 2, y + h / 2, h) for x, y, w, h in fs]
     cap.release()
-    a = np.array(hits) if hits else np.zeros((0, 3))
-    # A LIVE FACE MOVES; A POSTER DOES NOT. On clip 08 the haar cascade
-    # fires on two objects in his room in 40 of 40 frames, more often than
-    # on his face (29 of 40), so the busiest cluster is a wall. Their
-    # positions are identical to the pixel across the clip; a face drifts.
-    best = None
-    for p in a:
-        near = a[(abs(a[:, 0] - p[0]) < p[2]) & (abs(a[:, 1] - p[1]) < p[2])]
-        if len(near) < samples * FACE_MIN_HIT:
-            continue
-        if near[:, 0].std() + near[:, 1].std() < FACE_STILL_PX:
-            continue
-        if best is None or len(near) > len(best):
-            best = near
+    best = _live_face(hits, samples)
     if best is None:
         return None
     cx, cy, fh = np.median(best, axis=0)

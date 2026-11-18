@@ -1,6 +1,8 @@
 import { clearSessionCookie, hasSession, sessionCookie } from "./auth";
 import type { Clip, Env, Job, JobEvent, JobStatus } from "./env";
 import { serveFile } from "./files";
+import { CAPTION_FONTS, DEFAULT_CAPTION_FONT, captionFontLabel } from "./fonts";
+import { FONT_PREVIEWS } from "./fontPreviews";
 import { homePage, jobPage, loginPage, notFoundPage } from "./views";
 import { json, newJobId, now, parseTwitchVod, publicUrl, safeEqual } from "./util";
 
@@ -132,6 +134,7 @@ async function dispatch(env: Env, ctx: ExecutionContext, request: Request, job: 
           job_id: job.id,
           vod_url: job.vod_url,
           clips: job.clips_wanted,
+          caption_font: job.caption_font ?? DEFAULT_CAPTION_FONT,
           callback_base: publicUrl(env, request),
         }),
         signal: AbortSignal.timeout(20_000),
@@ -157,7 +160,7 @@ async function createJob(request: Request, env: Env, ctx: ExecutionContext): Pro
   let input: Record<string, unknown> | null;
   if (isForm) {
     const form = await request.formData();
-    input = { vod_url: form.get("vod_url"), clips: form.get("clips") };
+    input = { vod_url: form.get("vod_url"), clips: form.get("clips"), caption_font: form.get("caption_font") };
   } else {
     input = await readJson(request);
   }
@@ -169,14 +172,17 @@ async function createJob(request: Request, env: Env, ctx: ExecutionContext): Pro
   const clips = typeof clipsRaw === "string" && clipsRaw.trim() !== "" ? Number(clipsRaw) : clipsRaw;
   if (typeof clips !== "number" || !Number.isInteger(clips) || clips < 1 || clips > 30)
     return json({ error: "Number of clips must be a whole number from 1 to 30" }, 400);
+  const font = input.caption_font ?? DEFAULT_CAPTION_FONT;
+  if (typeof font !== "string" || !CAPTION_FONTS.some((f) => f.key === font))
+    return json({ error: `Unknown caption font. Pick one of: ${CAPTION_FONTS.map((f) => f.key).join(", ")}` }, 400);
 
   const id = newJobId();
   const t = now();
   await env.DB.batch([
     env.DB.prepare(
-      "INSERT INTO jobs (id, vod_url, clips_wanted, status, stage, message, created_at, updated_at) VALUES (?, ?, ?, 'queued', 'queued', 'Waiting for the pipeline', ?, ?)",
-    ).bind(id, vodUrl, clips, t, t),
-    addEvent(env, id, "queued", `Job created for ${vodUrl} (${clips} clips)`),
+      "INSERT INTO jobs (id, vod_url, clips_wanted, caption_font, status, stage, message, created_at, updated_at) VALUES (?, ?, ?, ?, 'queued', 'queued', 'Waiting for the pipeline', ?, ?)",
+    ).bind(id, vodUrl, clips, font, t, t),
+    addEvent(env, id, "queued", `Job created for ${vodUrl} (${clips} clips, ${captionFontLabel(font)} captions)`),
   ]);
   const created = (await getJob(env, id))!;
   announce(env, ctx, request, created, "submitted", "VOD submitted", `${vodName(created)}: ${clips} clip${clips === 1 ? "" : "s"} requested. Sending it to Modal now.`);
@@ -384,6 +390,15 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
 
   if (path === "/logout" && method === "POST") return redirect("/login", { "set-cookie": clearSessionCookie() });
   if (path === "/" && method === "GET") return html(homePage(await listJobs(env)));
+
+  const preview = /^\/font-preview\/(\w+)\.png$/.exec(path);
+  if (preview && method === "GET") {
+    const b64 = FONT_PREVIEWS[preview[1]];
+    if (!b64) return new Response("Not found", { status: 404 });
+    return new Response(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), {
+      headers: { "content-type": "image/png", "cache-control": "private, max-age=86400" },
+    });
+  }
 
   if (path.startsWith("/files/") && (method === "GET" || method === "HEAD")) {
     let key: string;

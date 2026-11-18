@@ -350,12 +350,24 @@ def _finish_audio(video: Path, edit: dict, out_path: Path) -> Path:
             f":measured_LRA={m['input_lra']}:measured_thresh={m['input_thresh']}"
             f":offset={m['target_offset']}:linear=true:print_format=summary"
         )
-    _run([
-        "ffmpeg", "-y", "-v", "error", "-i", str(video),
-        "-af", af, "-c:v", "copy",
-        "-c:a", edit["render"].get("audio_codec", "aac"), "-b:a", "192k",
-        "-ar", "48000", "-movflags", "+faststart", str(out_path),
-    ])
+    def encode(af: str) -> float | None:
+        _run([
+            "ffmpeg", "-y", "-v", "error", "-i", str(video),
+            "-af", af, "-c:v", "copy",
+            "-c:a", edit["render"].get("audio_codec", "aac"), "-b:a", "192k",
+            "-ar", "48000", "-movflags", "+faststart", str(out_path),
+        ])
+        got = subprocess.run(["ffmpeg", "-i", str(out_path), "-vn", "-af", "ebur128", "-f", "null", "-"],
+                             capture_output=True, text=True).stderr
+        i = _re.findall(r"I:\s+(-?[\d.]+) LUFS", got)
+        return float(i[-1]) if i else None
+
+    # Linear mode cannot raise the gain past the true-peak ceiling, so a
+    # peaky clip lands short: clip 4 of job 3njkcnn5wd came out at -14.90
+    # and deliver_qc rejected it. Dynamic mode reaches the target instead.
+    got = encode(af)
+    if blob and got is not None and abs(got - lufs) > 0.4:
+        encode(af.replace(":linear=true", ":linear=false"))
     return out_path
 
 
