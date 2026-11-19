@@ -34,3 +34,17 @@ def test_too_few_hits_is_not_a_face():
 
 def test_no_hits():
     assert _live_face([], 40) is None
+
+
+def _live(rng, n, cx, cy, h, jitter, live):
+    return [(x, y, hh, live) for x, y, hh in _cluster(rng, n, cx, cy, h, jitter)]
+
+
+def test_over_a_vod_the_most_frequent_live_face_wins():
+    # A watchparty player is bigger and livelier than the webcam but on
+    # screen less often; over a whole VOD the webcam is the face seen most.
+    rng = np.random.default_rng(3)
+    cam = _live(rng, 110, 1710, 385, 90, 8.0, 0.9)
+    player = _live(rng, 50, 860, 400, 160, 60.0, 2.5)
+    assert abs(np.median(_live_face(cam + player, 120, 0.03, 1.0, 0.25, by_count=True)[:, 0]) - 1710) < 20
+    assert abs(np.median(_live_face(cam + player, 120, 0.03, 1.0, 0.25)[:, 0]) - 860) < 60
