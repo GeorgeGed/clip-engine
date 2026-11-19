@@ -113,7 +113,9 @@ def transcribe(job_name: str) -> None:
 # cores it would add minutes to every clip.
 # Any of these GPUs will do: on job 3njkcnn5wd only 2-3 L4s came up at once,
 # so 10 clips rendered mostly one after another.
-@app.function(gpu=["L4", "A10G", "L40S"], cpu=8, memory=16384, volumes=VOL, secrets=[secret], timeout=3600,
+# A clip normally builds in a few minutes. The timeout is what a lost or
+# runaway build costs before `run_job` gives up on it; see RENDER_BUDGET.
+@app.function(gpu=["L4", "A10G", "L40S"], cpu=8, memory=16384, volumes=VOL, secrets=[secret], timeout=1200,
               retries=modal.Retries(max_retries=1))
 def build_clip(n: int, job_name: str, job_id: str, callback_base: str) -> dict:
     _setup()
@@ -130,7 +132,7 @@ def build_clip(n: int, job_name: str, job_id: str, callback_base: str) -> dict:
         # A build or QC failure is deterministic: a retry renders the same
         # file again and fails the same way. Retries are for lost containers.
         data.commit()
-        return {"error": str(e)}
+        return {"n": n, "error": str(e)}
     prev, thumb = core.preview_and_thumb(out)
     data.commit()
     base = f"jobs/{job_id}/{n:02d}-{core._slug(clip.get('title') or c['subject'], 50)}"
@@ -150,6 +152,9 @@ def build_clip(n: int, job_name: str, job_id: str, callback_base: str) -> dict:
     data.commit()
     _post(callback_base, "clip", body)
     return body
+
+
+RENDER_BUDGET = 45 * 60
 
 
 def _free_vod(job: Path) -> None:
@@ -214,16 +219,36 @@ def run_job(job_id: str, vod_url: str, clips: int, callback_base: str,
                    caption_fill=caption_fill, caption_emph=caption_emph)
         data.commit()
         progress("render", f"Rendering {len(ranked)} clips", 0.65)
+        # ONE CLIP MUST NOT HOLD THE JOB. Job jnvouw6f23 sat at "3 of 10" with
+        # 8 clips already uploaded: `map` yields in clip order, so it blocked
+        # on clip 5, which was stuck in its build, and every clip behind it
+        # went uncounted. Each clip is its own call, collected as it finishes,
+        # and whatever is still running at RENDER_BUDGET is cancelled so the
+        # job finishes with what it has.
+        import time
+        calls = {n: build_clip.spawn(n, job.name, job_id, callback_base)
+                 for n in range(1, len(ranked) + 1)}
+        deadline = time.time() + RENDER_BUDGET
         ok, failed = 0, []
-        for n, res in enumerate(build_clip.map(range(1, len(ranked) + 1),
-                                               kwargs={"job_name": job.name, "job_id": job_id,
-                                                       "callback_base": callback_base},
-                                               return_exceptions=True), 1):
-            if isinstance(res, Exception) or "error" in res:
-                failed.append(f"clip {n}: {str(res.get('error') if isinstance(res, dict) else res)[-200:]}")
-            else:
-                ok += 1
-            progress("render", f"{ok} of {len(ranked)} clips ready", 0.65 + 0.35 * n / len(ranked))
+        while calls and time.time() < deadline:
+            for n, fc in list(calls.items()):
+                try:
+                    res = fc.get(timeout=0)
+                except (TimeoutError, modal.exception.TimeoutError):
+                    continue
+                except Exception as e:                    # noqa: BLE001
+                    res = e
+                del calls[n]
+                if isinstance(res, Exception) or "error" in res:
+                    failed.append(f"clip {n}: {str(res.get('error') if isinstance(res, dict) else res)[-200:]}")
+                else:
+                    ok += 1
+                done = len(ranked) - len(calls)
+                progress("render", f"{ok} of {len(ranked)} clips ready", 0.65 + 0.35 * done / len(ranked))
+            time.sleep(2)
+        for n, fc in calls.items():
+            fc.cancel(terminate_containers=True)
+            failed.append(f"clip {n}: still building after {RENDER_BUDGET // 60} min, cancelled")
         if not ok:
             raise RuntimeError("every clip failed to build: " + "; ".join(failed)[:800])
         _post(callback_base, "done", {"job_id": job_id, "status": "done",

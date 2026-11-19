@@ -40,6 +40,11 @@ DENOISE = 0.5
 # Grown on every side so a punch-in or the big-facecam rect never reaches
 # past what was super-resolved, and kept even so the yuv420 encode is exact.
 MARGIN = 16
+# Over this many source px wide, the pane (1080 wide) needs under 2x, which
+# lanczos does fine, and 4x would be enormous: on job jnvouw6f23 a full-screen
+# webcam scene gave a 1034x737 region, 4136x2948 out, 34 MB a frame through a
+# pipe for 3400 frames, and clip 5 never finished.
+MAX_W = 540
 
 
 def _weights(name: str) -> Path:
@@ -122,6 +127,10 @@ def upscale(src, rect, out, *, batch: int = 8, log=print) -> Path | None:
     rebuild with the same facecam reuses it and a moved rect never does."""
     if os.environ.get("CLIP_PREVIEW"):
         log("  upscale: skipped (CLIP_PREVIEW, a local preview build)")
+        return None
+    if rect[2] - rect[0] > MAX_W:
+        log(f"  upscale: skipped, the region is {rect[2] - rect[0]}px wide "
+            f"(over {MAX_W}), so lanczos is enough")
         return None
     out = Path(out)
     key = {"src": str(src), "size": Path(src).stat().st_size,
