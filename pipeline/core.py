@@ -175,6 +175,10 @@ def save_kills(job: Path, kills: list[float]) -> list[dict]:
 # viewer sees the fight start, and holds this long past the last one.
 KILL_LEAD = 2.0
 KILL_TAIL = 2.5
+# A 4k or an ace holds longer and the facecam grows for his reaction after
+# the last kill: the one zoom Jatin kept on gameplay clips.
+STRONG_TAIL = 4.0
+REACTION_DELAY = 0.3
 # Where a multi-kill ranks against Tier 3's talk clips (0-1). A 4k or an ace is
 # rarer and better than nearly anything said on stream, so it ranks above.
 KILL_STRENGTH = {3: 0.80, 4: 0.92}
@@ -190,9 +194,9 @@ def _kill_clips(job: Path) -> list[dict]:
     for s in json.loads(p.read_text())["streaks"]:
         n = s["kills"]
         label = "ACE" if n >= 5 else f"{n}K"
-        out.append({"has_clip": True, "genre": "frag", "kills": n,
+        out.append({"has_clip": True, "genre": "frag", "kills": n, "last_kill": s["end"],
                     "in_point": round(max(0.0, s["start"] - KILL_LEAD), 2),
-                    "out_point": round(s["end"] + KILL_TAIL, 2),
+                    "out_point": round(s["end"] + (STRONG_TAIL if n >= STRONG_KILLS else KILL_TAIL), 2),
                     "subject": f"{label}: {n} kills in {s['end'] - s['start']:.0f} seconds",
                     "claim": "", "setup": "", "consequence": "",
                     "strength": ACE_STRENGTH if n >= 5 else KILL_STRENGTH[n],
@@ -450,6 +454,9 @@ def specs(job: Path, ranked: list[dict], ch: dict, vod_id: str, tl: dict,
             clip["chat_mode"] = "off"
             # ...and no subtitles and no zoom-ins: Jatin wants the play itself.
             clip.update(captions=False, reframe=False, big_cam=None)
+            if c.get("kills", 0) >= STRONG_KILLS:
+                clip["big_cam"] = [[round(c["last_kill"] - c["in_point"] + REACTION_DELAY, 2),
+                                    clip["out_point"]]]
         clip["caption_fill"] = caption_fill or clip["caption_fill"]
         clip["caption_emph"] = caption_emph or clip["caption_emph"]
         p = sd / f"{n:02d}.json"
