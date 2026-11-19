@@ -14,6 +14,7 @@ VOD submitted twice reuses everything already done for it.
         tier3.json        one verdict per region
         clips.json        kept clips, strongest first
         ranked.json       the top N that get built (make_clip reads it)
+        cam.json          the streamer's webcam over the whole VOD
         clips_1080/NN_*.mp4, words/NN.json, titles.json, specs/NN.json
 
 ANY CHANNEL IS ACCEPTED. A channel with a file in `channels/` gets its own
@@ -65,6 +66,23 @@ def channel_for(meta: dict) -> dict:
                  "permission": "operator",
                  "permission_note": "No channel file: submitted through the web app on "
                                     "the operator's responsibility."}
+
+
+def vod_cam(job: Path, ch: dict) -> dict:
+    """`ch` with its `cam` replaced by the webcam measured on this VOD.
+
+    `cam` is only what a clip falls back to when its own frames give no face
+    (make_clip._cam), but a channel with no file of its own inherits FNS's
+    corner from _default.json, which on any other streamer is a crop of the
+    game. Measured once per VOD and cached, it is this streamer's webcam."""
+    from engine import facecam
+
+    out = job / "cam.json"
+    if not out.exists():
+        rect = facecam.vod_rect(job / "source.mp4")
+        out.write_text(json.dumps({"cam": list(rect) if rect else None}))
+    cam = json.loads(out.read_text())["cam"]
+    return ch | {"cam": cam} if cam else ch
 
 
 def job_dir(ch: dict, meta: dict) -> Path:

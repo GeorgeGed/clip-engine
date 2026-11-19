@@ -192,7 +192,8 @@ def _border(profile, lo, hi):
     return lo + k
 
 
-def _live_face(hits, samples, still=FACE_STILL, wild=FACE_WILD, min_hit=FACE_MIN_HIT):
+def _live_face(hits, samples, still=FACE_STILL, wild=FACE_WILD, min_hit=FACE_MIN_HIT,
+               by_count=False):
     """The hits of the one cluster that is a live face, or None.
 
     A LIVE FACE MOVES; A POSTER DOES NOT. On clip 08 the haar cascade
@@ -242,12 +243,14 @@ def _live_face(hits, samples, still=FACE_STILL, wild=FACE_WILD, min_hit=FACE_MIN
         live = np.median(near[:, 3]) if a.shape[1] > 3 else 1.0
         if not (a.shape[1] <= 3 or LIVE_DELTA <= live <= LIVE_MAX):
             continue
-        if len(near) * h * live > top:
-            best, top = near, len(near) * h * live
+        score = len(near) + h / 1e4 if by_count else len(near) * h * live
+        if score > top:
+            best, top = near, score
     return best
 
 
-def face_rect(path, *, samples=FACE_SAMPLES) -> tuple[int, int, int, int] | None:
+def face_rect(path, *, samples=FACE_SAMPLES, min_hit=YUNET_MIN_HIT,
+              by_count=False) -> tuple[int, int, int, int] | None:
     """The house facecam crop, found by a FACE DETECTOR rather than motion.
 
     `detect` reads motion, and a page that plays video moves too: on FNS VOD
@@ -272,6 +275,9 @@ def face_rect(path, *, samples=FACE_SAMPLES) -> tuple[int, int, int, int] | None
     YUNET_MIN_HIT. YuNet's box is taller than haar's for the same face, and
     the crop ratios below were measured off haar: on 12 FNS clips the old
     crop was a median 0.855 of the YuNet-sized one, hence YUNET_TO_HAAR.
+
+    `min_hit` is lowered and `by_count` set for a whole VOD (`vod_rect`),
+    where the webcam can sit in a different place in each scene.
     """
     import cv2                                           # noqa: PLC0415
     cap = cv2.VideoCapture(str(path))
@@ -299,7 +305,7 @@ def face_rect(path, *, samples=FACE_SAMPLES) -> tuple[int, int, int, int] | None
                 box = d[max(int(y), 0):int(y + h), max(int(x), 0):int(x + w)]
                 into.append((x + w / 2, y + h / 2, h, float(box.mean()) if box.size else 0.0))
     cap.release()
-    best = _live_face(yhits, samples, YUNET_STILL, YUNET_WILD, YUNET_MIN_HIT)
+    best = _live_face(yhits, samples, YUNET_STILL, YUNET_WILD, min_hit, by_count)
     scale = YUNET_TO_HAAR
     if best is None:
         best, scale = _live_face(hhits, samples), 1.0
@@ -333,3 +339,27 @@ def face_rect(path, *, samples=FACE_SAMPLES) -> tuple[int, int, int, int] | None
     x0 = min(max(cx - bw / 2, xmin), W - bw)
     y0 = min(max(cy - FACE_LIFT * fh - bh / 2, ymin), H - bh)
     return (int(round(x0)), int(round(y0)), int(x0 + bw), int(y0 + bh))
+
+
+VOD_SAMPLES = 120
+VOD_MIN_HIT = 0.25
+
+
+def vod_rect(path) -> tuple[int, int, int, int] | None:
+    """The streamer's webcam over the WHOLE VOD: the fallback for a clip whose
+    own frames give no face.
+
+    That fallback used to be the channel file's `cam`, and a channel with no
+    file gets `_default.json`, which is FNS's bottom-right corner. On s0mcs
+    (VOD 2920544899) the webcam is top-left, so every clip that missed fell
+    back to a crop of gameplay. Measured once per VOD from the source, the
+    fallback is this streamer's webcam rather than someone else's.
+
+    A streamer moves the webcam between scenes (s0mcs: y 276 in game, y 571 on
+    the agent select screen), so the cluster only has to appear in a quarter
+    of the samples. That low bar lets watchparty players in (they are on
+    screen 30-50% of the time on FNS's 2885323336), and they move more than
+    a webcam, so the usual size-and-liveness score picks them. Over a VOD the
+    pick is by COUNT instead: the webcam is the face that is there most often.
+    """
+    return face_rect(path, samples=VOD_SAMPLES, min_hit=VOD_MIN_HIT, by_count=True)

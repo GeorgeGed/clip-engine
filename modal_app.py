@@ -189,6 +189,7 @@ def run_job(job_id: str, vod_url: str, clips: int, callback_base: str,
         progress("download", f"Downloading {core.ts(meta['duration'] or 0)} of video", 0.03,
                  vod_title=meta.get("title"), channel=meta.get("uploader"))
         core.fetch(vod_url, job, video=True)
+        ch = core.vod_cam(job, ch)
         regs = core.regions(job)
         data.commit()
         progress("transcribe", f"Transcribing ({len(regs)} moments to check)", 0.25)
