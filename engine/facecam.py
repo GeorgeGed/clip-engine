@@ -363,3 +363,26 @@ def vod_rect(path) -> tuple[int, int, int, int] | None:
     pick is by COUNT instead: the webcam is the face that is there most often.
     """
     return face_rect(path, samples=VOD_SAMPLES, min_hit=VOD_MIN_HIT, by_count=True)
+
+
+GAMEPLAY_MOVING = 0.3
+
+
+def content_moving(path, cam) -> float:
+    """Share of the frame OUTSIDE the facecam that changes between consecutive
+    frames: the lower pane's content, as the viewer will see it.
+
+    It is bimodal. Measured on 19 clips: a browser page (a tweet, a roster
+    board) 0.006-0.020; gameplay or a broadcast playing 0.64-0.98. So over
+    GAMEPLAY_MOVING the clip is someone playing, whatever its genre.
+    """
+    sd, n, _ = _motion(path, bursts=8)
+    if n < 3:
+        return 0.0
+    h, w = sd.shape
+    keep = np.ones_like(sd, bool)
+    if cam:
+        x0, y0, x1, y1 = (int(cam[0] * w / 1920), int(cam[1] * h / 1080),
+                          int(cam[2] * w / 1920), int(cam[3] * h / 1080))
+        keep[max(y0 - 3, 0):y1 + 3, max(x0 - 3, 0):x1 + 3] = False
+    return float((sd[keep] >= 0.15).mean())
