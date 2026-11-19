@@ -919,8 +919,9 @@ def stage_cut(clip, ch, st):
     sidx = _shot_index([k.length for k in kp])
     nshots = sidx[-1] + 1 if sidx else 1
     st["shot_index"] = sidx
-    rects = framings(nshots, _cam(clip, ch, st))
-    crects = content_framings(nshots, chrome=ch.chrome)
+    rects = framings(nshots, _cam(clip, ch, st), **({} if clip.reframe else {"cycle": (0.0,)}))
+    crects = content_framings(nshots, chrome=ch.chrome,
+                              **({} if clip.reframe else {"cycle": ((0.50, 1.00),)}))
     for trk, rl, pane in ((1, crects, (0, seam_y, 1080, 1920)),
                           (2, rects, (0, 0, 1080, seam_y))):
         items = sorted(tl.GetItemListInTrack("video", trk) or [],
@@ -995,6 +996,9 @@ def stage_captions(clip, ch, st):
     cap_fill, cap_emph = _captions(clip)
     shown = [{"start": c.start, "end": c.end, "text": c.text,
               "words": c.words, "emph": c.emphasis} for c in out]
+    if not clip.captions:
+        log(f"  captions off for this clip: {len(shown)} card(s) not shown")
+        shown = []
     if clip.caption_style == "pop":
         if clip.title:
             # The title owns the caption slot until TITLE_S: a card that ends
@@ -1986,7 +1990,7 @@ def stage_punch(clip, ch, st):
     pieces, sidx, nshots = _punch_plan(clip, ch, st)
     tl.DeleteClips(v2)
     canvas = Frame(1080, 1920, 1920, 1080)
-    rects = framings(nshots, _cam(clip, ch, st))
+    rects = framings(nshots, _cam(clip, ch, st), **({} if clip.reframe else {"cycle": (0.0,)}))
     ents = [{"mediaPoolItem": item, "startFrame": round(s0 * ch.fps),
              "endFrame": round(s0 * ch.fps) + round(d * ch.fps),
              "recordFrame": start + round(o0 * ch.fps),

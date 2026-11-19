@@ -75,7 +75,15 @@ def remap_card(start: float, end: float, keep: list[Span]) -> tuple[float, float
     s = remap(start, keep)
     e = remap(end, keep)
     if s is None:
-        s = remap(next((k.start for k in keep if k.start >= start), None) or 0.0, keep)
+        # A card that starts after the last kept span is past the out-point.
+        # This used to fall back to 0.0, so the card ran from the first frame
+        # to the end and the renderer showed it in every gap between the real
+        # cards: a word from after the clip "waiting" on screen while he
+        # played (yayster clip 1, "actually," over a whole 4k).
+        nxt = next((k.start for k in keep if k.start >= start), None)
+        if nxt is None:
+            return None
+        s = remap(nxt, keep)
     if e is None:
         prev = [k.end for k in keep if k.end <= end]
         e = remap(max(prev) - 1e-4, keep) if prev else None

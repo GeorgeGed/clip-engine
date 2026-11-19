@@ -34,7 +34,7 @@ def test_kill_clips_rank_as_frag_with_lead_and_tail(tmp_path, monkeypatch):
     four, ace = c
     assert four["genre"] == "frag" and four["has_clip"]
     assert four["in_point"] == 5460.5 - core.KILL_LEAD
-    assert four["out_point"] == 5466.5 + core.KILL_TAIL
+    assert four["out_point"] == 5466.5 + core.STRONG_TAIL
     assert four["subject"].startswith("4K")
     assert ace["subject"].startswith("ACE") and ace["strength"] == core.ACE_STRENGTH
     assert json.loads((tmp_path / "kills.json").read_text())["kills"][0] == 5460.5
@@ -54,3 +54,17 @@ def test_kill_clips_take_three_of_ten_or_five_when_strong():
 
 def test_no_kills_file_no_kill_clips(tmp_path):
     assert core._kill_clips(tmp_path) == []
+
+
+def test_strong_kill_clip_grows_the_facecam_for_the_reaction(tmp_path, monkeypatch):
+    monkeypatch.setattr(kills, "tag_pairs", lambda path, s: [])
+    core.save_kills(tmp_path, [100, 101, 102, 110, 500, 501, 502])
+    four, three = core._kill_clips(tmp_path)
+    (tmp_path / "channel").mkdir()
+    ch = {"name": "x", "cam": None}
+    specs = core.specs(tmp_path, [four, three], ch, "1", {})
+    a = json.loads(specs[0].read_text())["clip"]
+    b = json.loads(specs[1].read_text())["clip"]
+    assert a["captions"] is False and a["reframe"] is False and a["chat_mode"] == "off"
+    assert a["big_cam"] == [[110 - 98 + core.REACTION_DELAY, 110 + core.STRONG_TAIL - 98]]
+    assert b["big_cam"] is None and b["captions"] is False

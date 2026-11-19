@@ -136,6 +136,13 @@ class Clip:
     # A per-word zoom that followed his voice was tried first and rejected:
     # "I don't want that shit".
     big_cam: str | list | None = None
+    # A GAMEPLAY CLIP IS LEFT ALONE. Jatin: "i honestly don't need any zoom
+    # ins during the gameplay clips and the subtitles during the gameplay
+    # clips". `captions: False` burns no subtitle cards (a title still shows);
+    # `reframe: False` holds one framing for both panes instead of the
+    # per-shot inset/zoom cycle (cuts.framings, cuts.content_framings).
+    captions: bool = True
+    reframe: bool = True
     # Hand-picked chat: [vod_offset, author, output_t]. Each names one real
     # message by its VOD second and author (offsets are whole seconds, so
     # several messages share one) and the output second it lands at, so the
