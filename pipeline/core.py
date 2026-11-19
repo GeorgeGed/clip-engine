@@ -290,6 +290,20 @@ def _slug(s: str, n: int = 40) -> str:
 
 TAIL = 1.0   # seconds of source kept past the ranked out-point, for the snap
 
+# AT MOST A THIRD OF A JOB IS KILL CLIPS. They rank above nearly every talk
+# clip, so a stream with a dozen multi-kills would otherwise come back as all
+# gameplay. Jatin's split: 3 of 10, best first; the commentary keeps the rest,
+# and extra kill clips only fill slots the commentary cannot.
+KILL_SHARE = 1 / 3
+
+
+def _pick(clips: list[dict], n: int) -> list[dict]:
+    """The top `n` of `clips` (strongest first) with kill clips capped."""
+    kills = [c for c in clips if c.get("kills")]
+    cap = round(n * KILL_SHARE)
+    keep = kills[:cap] + [c for c in clips if not c.get("kills")] + kills[cap:]
+    return sorted(keep[:n], key=lambda c: next(i for i, x in enumerate(clips) if x is c))
+
 
 def cut_sections(job: Path, n_top: int, url: str) -> list[dict]:
     """ranked.json, and each clip's 1080p60 source in clips_1080/.
@@ -301,7 +315,7 @@ def cut_sections(job: Path, n_top: int, url: str) -> list[dict]:
     The cut is always 1920x1080: every crop in the engine is in those source
     pixels, so a lower rendition kept for local iteration (a 480p VOD is 1.7
     GB against 10.2 GB) is scaled up here rather than breaking the layout."""
-    clips = json.loads((job / "clips.json").read_text())[:n_top]
+    clips = _pick(json.loads((job / "clips.json").read_text()), n_top)
     (job / "ranked.json").write_text(json.dumps(clips, indent=1))
     out = job / "clips_1080"
     out.mkdir(exist_ok=True)

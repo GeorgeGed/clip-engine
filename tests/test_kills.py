@@ -40,5 +40,14 @@ def test_kill_clips_rank_as_frag_with_lead_and_tail(tmp_path, monkeypatch):
     assert json.loads((tmp_path / "kills.json").read_text())["kills"][0] == 5460.5
 
 
+def test_at_most_a_third_of_a_job_is_kill_clips():
+    ks = [{"kills": 5 - i % 2, "n": f"k{i}"} for i in range(6)]
+    talk = [{"n": f"t{i}"} for i in range(9)]
+    picked = [c["n"] for c in core._pick(ks + talk, 10)]
+    assert picked == ["k0", "k1", "k2"] + [f"t{i}" for i in range(7)]
+    few = [c["n"] for c in core._pick(ks + talk[:2], 6)]
+    assert few == ["k0", "k1", "k2", "k3", "t0", "t1"]
+
+
 def test_no_kills_file_no_kill_clips(tmp_path):
     assert core._kill_clips(tmp_path) == []
