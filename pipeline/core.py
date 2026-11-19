@@ -452,8 +452,14 @@ def specs(job: Path, ranked: list[dict], ch: dict, vod_id: str, tl: dict,
         # middle of the action on the first chat-hype frag clips.
         if c.get("genre") == "frag":
             clip["chat_mode"] = "off"
-            # ...and no subtitles and no zoom-ins: Jatin wants the play itself.
-            clip.update(captions=False, reframe=False, big_cam=None)
+            # ...and no zoom-ins: Jatin wants the play itself.
+            clip.update(reframe=False, big_cam=None)
+            # SUBTITLES OFF ONLY ON HIS OWN KILL CLIPS. A Tier 3 "frag" clip
+            # is often the streamer REACTING to a match he is watching, and
+            # there his commentary is the clip: "FNS here is reacting to
+            # gameplay rather than playing himself so i need his subtitles".
+            if c.get("kills"):
+                clip["captions"] = False
             if c.get("kills", 0) >= STRONG_KILLS:
                 clip["big_cam"] = [[round(c["last_kill"] - c["in_point"] + REACTION_DELAY, 2),
                                     clip["out_point"]]]

@@ -68,3 +68,12 @@ def test_strong_kill_clip_grows_the_facecam_for_the_reaction(tmp_path, monkeypat
     assert a["captions"] is False and a["reframe"] is False and a["chat_mode"] == "off"
     assert a["big_cam"] == [[110 - 98 + core.REACTION_DELAY, 110 + core.STRONG_TAIL - 98]]
     assert b["big_cam"] is None and b["captions"] is False
+
+
+def test_a_reaction_frag_clip_keeps_its_subtitles(tmp_path):
+    react = {"genre": "frag", "in_point": 10.0, "out_point": 40.0, "subject": "FNS reacts",
+             "strength": 0.6}
+    spec = core.specs(tmp_path, [react], {"name": "x", "cam": None}, "1", {})[0]
+    clip = json.loads(spec.read_text())["clip"]
+    assert clip.get("captions", True) is True
+    assert clip["reframe"] is False and clip["big_cam"] is None and clip["chat_mode"] == "off"
