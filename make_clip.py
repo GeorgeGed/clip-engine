@@ -1244,8 +1244,19 @@ def stage_chat(clip, ch, st):
     # default. `chat_mode: "off"` in the spec is how a clip opts out, which
     # is the case clip 6 actually needed: its chat was 4% on subject and 29%
     # about an unrelated transfer, and that number still prints here.
-    if clip.chat_mode == "off":
-        log("  chat off by the spec")
+    # GAMEPLAY GETS NO CHAT, WHATEVER THE GENRE. The spec turns chat off for
+    # `frag` clips, but on s0mcs (VOD 2889934935) four clips tagged `take`
+    # and `receipts` were him ranting mid-match, and the panel sat over the
+    # game for the whole clip. What decides it is what the lower pane shows.
+    off = clip.chat_mode == "off"
+    if not off and clip.chat_mode != "force":
+        moving = facecam.content_moving(clip.source(ROOT), _cam(clip, ch, st))
+        if moving >= facecam.GAMEPLAY_MOVING:
+            log(f"  chat off: the content pane is gameplay ({moving:.0%} of it moving)")
+            off = True
+    if off:
+        if clip.chat_mode == "off":
+            log("  chat off by the spec")
         st["chat_windows"] = []
         (PUBLIC / "chat_windows.json").write_text("[]")
         # AND THE CLIP'S OWN COPY, which this branch never wrote. PUBLIC is
