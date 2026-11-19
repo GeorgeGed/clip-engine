@@ -290,18 +290,23 @@ def _slug(s: str, n: int = 40) -> str:
 
 TAIL = 1.0   # seconds of source kept past the ranked out-point, for the snap
 
-# AT MOST A THIRD OF A JOB IS KILL CLIPS. They rank above nearly every talk
-# clip, so a stream with a dozen multi-kills would otherwise come back as all
-# gameplay. Jatin's split: 3 of 10, best first; the commentary keeps the rest,
-# and extra kill clips only fill slots the commentary cannot.
+# KILL CLIPS ARE CAPPED. They rank above nearly every talk clip, so a stream
+# with a dozen multi-kills would otherwise come back as all gameplay. Jatin's
+# split: 3 of 10, and up to 5 of 10 when the extras are strong (a 4k or an
+# ace), best first; the commentary keeps the rest, and further kill clips
+# only fill slots the commentary cannot.
 KILL_SHARE = 1 / 3
+STRONG_KILL_SHARE = 1 / 2
+STRONG_KILLS = 4
 
 
 def _pick(clips: list[dict], n: int) -> list[dict]:
     """The top `n` of `clips` (strongest first) with kill clips capped."""
     kills = [c for c in clips if c.get("kills")]
     cap = round(n * KILL_SHARE)
-    keep = kills[:cap] + [c for c in clips if not c.get("kills")] + kills[cap:]
+    strong = [c for c in kills[cap:] if c["kills"] >= STRONG_KILLS]
+    first = kills[:cap] + strong[:max(0, round(n * STRONG_KILL_SHARE) - cap)]
+    keep = first + [c for c in clips if not c.get("kills")] + [c for c in kills if c not in first]
     return sorted(keep[:n], key=lambda c: next(i for i, x in enumerate(clips) if x is c))
 
 

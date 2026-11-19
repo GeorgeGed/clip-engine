@@ -40,12 +40,15 @@ def test_kill_clips_rank_as_frag_with_lead_and_tail(tmp_path, monkeypatch):
     assert json.loads((tmp_path / "kills.json").read_text())["kills"][0] == 5460.5
 
 
-def test_at_most_a_third_of_a_job_is_kill_clips():
-    ks = [{"kills": 5 - i % 2, "n": f"k{i}"} for i in range(6)]
+def test_kill_clips_take_three_of_ten_or_five_when_strong():
     talk = [{"n": f"t{i}"} for i in range(9)]
-    picked = [c["n"] for c in core._pick(ks + talk, 10)]
-    assert picked == ["k0", "k1", "k2"] + [f"t{i}" for i in range(7)]
-    few = [c["n"] for c in core._pick(ks + talk[:2], 6)]
+    threes = [{"kills": 3, "n": f"k{i}"} for i in range(6)]
+    assert [c["n"] for c in core._pick(threes + talk, 10)] == \
+        ["k0", "k1", "k2"] + [f"t{i}" for i in range(7)]
+    mixed = [{"kills": k, "n": f"k{i}"} for i, k in enumerate([5, 4, 4, 4, 3, 4, 4])]
+    assert [c["n"] for c in core._pick(mixed + talk, 10)] == \
+        ["k0", "k1", "k2", "k3", "k5"] + [f"t{i}" for i in range(5)]
+    few = [c["n"] for c in core._pick(threes + talk[:2], 6)]
     assert few == ["k0", "k1", "k2", "k3", "t0", "t1"]
 
 
