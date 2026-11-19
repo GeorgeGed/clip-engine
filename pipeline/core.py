@@ -448,6 +448,8 @@ def specs(job: Path, ranked: list[dict], ch: dict, vod_id: str, tl: dict,
         # middle of the action on the first chat-hype frag clips.
         if c.get("genre") == "frag":
             clip["chat_mode"] = "off"
+            # ...and no subtitles and no zoom-ins: Jatin wants the play itself.
+            clip.update(captions=False, reframe=False, big_cam=None)
         clip["caption_fill"] = caption_fill or clip["caption_fill"]
         clip["caption_emph"] = caption_emph or clip["caption_emph"]
         p = sd / f"{n:02d}.json"

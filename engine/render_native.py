@@ -95,7 +95,8 @@ def plan(clip, ch, st=None) -> dict:
     sched = mc._overlay_schedule(clip, ch, st, st["total"])
     return {"src": pl["src"], "keeps": keeps, "shot_of": shot_of, "cam": cam,
             "out_dur": st["out_dur"], "total": st["total"], "schedule": sched,
-            "overlays": overlays, "n_shots": max(shot_of) + 1 if shot_of else 0}
+            "overlays": overlays, "n_shots": max(shot_of) + 1 if shot_of else 0,
+            "reframe": clip.reframe}
 
 
 def cut_graph(keeps, *, fps: float, src: str = "0:v", out: str = "cut",
@@ -148,7 +149,9 @@ def segments(p: dict, ch, punches: list[float] | None = None):
         PUNCH_HOLD, PUNCH_INSET = 2.20, 0.12
     fps = float(ch.fps)
 
-    n = max(1, p["n_shots"])
+    # One framing for every shot when the clip asks not to be reframed: the
+    # first cycle entry of each pane is the plain, unzoomed one.
+    n = max(1, p["n_shots"]) if p.get("reframe", True) else 1
     unit = framings(n, (0.0, 0.0, 1.0, 1.0))
     cam_cycle = [2 * r[0] for r in unit]
     content_cycle = content_framings(n)
