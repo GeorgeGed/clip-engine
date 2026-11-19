@@ -15,6 +15,7 @@ VOD submitted twice reuses everything already done for it.
         clips.json        kept clips, strongest first
         ranked.json       the top N that get built (make_clip reads it)
         cam.json          the streamer's webcam over the whole VOD
+        kills.json        his own kills from the kill feed, and the multi-kills
         clips_1080/NN_*.mp4, words/NN.json, titles.json, specs/NN.json
 
 ANY CHANNEL IS ACCEPTED. A channel with a file in `channels/` gets its own
@@ -158,6 +159,47 @@ def _with_chat(regs: list[dict], spikes: list[dict]) -> list[dict]:
     return out
 
 
+def save_kills(job: Path, kills: list[float]) -> list[dict]:
+    """kills.json: the marked player's kills (engine/kills.scan) and the
+    multi-kills among them from the streamer's own games. The scan runs
+    wherever the caller runs it: the hosted path splits it over containers
+    while the transcript is made."""
+    from engine import kills as K
+    kills = sorted(kills)
+    streaks = K.multikills(job / "source.mp4", kills)
+    (job / "kills.json").write_text(json.dumps({"kills": kills, "streaks": streaks}))
+    return streaks
+
+
+# A kill clip opens this long before the first kill reaches the feed, so the
+# viewer sees the fight start, and holds this long past the last one.
+KILL_LEAD = 2.0
+KILL_TAIL = 2.5
+# Where a multi-kill ranks against Tier 3's talk clips (0-1). A 4k or an ace is
+# rarer and better than nearly anything said on stream, so it ranks above.
+KILL_STRENGTH = {3: 0.80, 4: 0.92}
+ACE_STRENGTH = 1.0
+
+
+def _kill_clips(job: Path) -> list[dict]:
+    """One clip per multi-kill in kills.json, shaped like a Tier 3 verdict."""
+    p = job / "kills.json"
+    if not p.exists():
+        return []
+    out = []
+    for s in json.loads(p.read_text())["streaks"]:
+        n = s["kills"]
+        label = "ACE" if n >= 5 else f"{n}K"
+        out.append({"has_clip": True, "genre": "frag", "kills": n,
+                    "in_point": round(max(0.0, s["start"] - KILL_LEAD), 2),
+                    "out_point": round(s["end"] + KILL_TAIL, 2),
+                    "subject": f"{label}: {n} kills in {s['end'] - s['start']:.0f} seconds",
+                    "claim": "", "setup": "", "consequence": "",
+                    "strength": ACE_STRENGTH if n >= 5 else KILL_STRENGTH[n],
+                    "why": "kill feed", "chat_score": 0.0})
+    return out
+
+
 # A chat-backed clip ranks as if this much stronger at full chat score, so a
 # moment the room exploded over makes the cut against an equal monologue.
 # 0.15 -> 0.30 on George's ask for chat to count for more: on job 3njkcnn5wd
@@ -231,7 +273,7 @@ def rank(job: Path, *, log=print) -> list[dict]:
                 + (" | ".join(f"{ts(v['in_point'])} {v['out_point'] - v['in_point']:.0f}s"
                               for v in got) or "none"))
     clips, taken = [], []
-    for d in sorted((d for d in done if d.get("has_clip")),
+    for d in sorted([d for d in done if d.get("has_clip")] + _kill_clips(job),
                     key=lambda d: -(d["strength"] + CHAT_BOOST * d.get("chat_score", 0.0))):
         span = (d["in_point"], d["out_point"])
         if any(min(span[1], b) - max(span[0], s) > 3.0 for s, b in taken):

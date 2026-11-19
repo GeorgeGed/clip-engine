@@ -61,7 +61,7 @@ from engine.resolve_driver import connect, blocking_dialog       # noqa: E402
 from engine.resolve_layout import Frame, plan, apply             # noqa: E402
 from engine.resolve_captions import background, cards, emphasis_keys, mark_emphasis, snap_words  # noqa: E402
 from engine.cuts import framings, content_framings               # noqa: E402
-from engine.tighten import removals, keeps, remap_card, joins    # noqa: E402
+from engine.tighten import Span, removals, keeps, remap_card, joins  # noqa: E402
 from engine import caption_colour                                # noqa: E402
 from engine import captions_video, twitch_chat                   # noqa: E402
 from engine import chat_reaction as cr                           # noqa: E402
@@ -2488,21 +2488,32 @@ def _plan_only(clip, ch, st):
     # room tone. A fixed dBFS floor means something different on every clip
     # because raw VOD audio runs ~7 dB under target, so `quiet_runs` measures
     # against the speaker's own level.
-    absent = qc.dead_audio(src, min_run=0.3)["runs"]
-    quiet = qc.quiet_runs(src, min_run=MIN_DEAD)["runs"]
     words = [w for u in json.loads(clip.words(ROOT).read_text())["utterances"]
              for w in u["words"]]
-    # ORDER MATTERS. Skip the uncaptionable word FIRST, then snap onto the new
-    # word's onset, then take the lead-in — snapping before skipping would
-    # refine a point we are about to abandon.
-    ip0, skipped = _open_on_captionable(words, clip.in_point,
-                                        qc.dead_audio(src, min_run=0.1)["runs"])
-    ip, snap = _snap_in_point(src, ip0)
-    ip, lead, lead_absent = _lead_in(src, ip)
-    op, osnap = _snap_out_point(words, clip.out_point, absent, src=src)
-    dead = sorted([r for r in absent + quiet if r[0] >= ip])
-    spans = removals(dead, src_dur, min_remove=MIN_DEAD, beat=BEAT)
-    kp = _clamp_out_point(_clamp_in_point(keeps(spans, src_dur), ip), op)
+    if st["meta"].get("kills"):
+        # A KILL CLIP PLAYS STRAIGHT THROUGH. Its in- and out-points come from
+        # the kill feed (engine/kills), not from speech, and the fight between
+        # kills is gameplay audio that reads as "quiet" against his voice: the
+        # dead-space cut would splice the fight together and the word snaps
+        # would move the in-point past the first kill.
+        ip, op = clip.in_point, min(clip.out_point, src_dur)
+        snap = osnap = skipped = None
+        lead, lead_absent, spans = None, False, []
+        kp = [Span(round(ip, 3), round(op, 3))]
+    else:
+        absent = qc.dead_audio(src, min_run=0.3)["runs"]
+        quiet = qc.quiet_runs(src, min_run=MIN_DEAD)["runs"]
+        # ORDER MATTERS. Skip the uncaptionable word FIRST, then snap onto the
+        # new word's onset, then take the lead-in — snapping before skipping
+        # would refine a point we are about to abandon.
+        ip0, skipped = _open_on_captionable(words, clip.in_point,
+                                            qc.dead_audio(src, min_run=0.1)["runs"])
+        ip, snap = _snap_in_point(src, ip0)
+        ip, lead, lead_absent = _lead_in(src, ip)
+        op, osnap = _snap_out_point(words, clip.out_point, absent, src=src)
+        dead = sorted([r for r in absent + quiet if r[0] >= ip])
+        spans = removals(dead, src_dur, min_remove=MIN_DEAD, beat=BEAT)
+        kp = _clamp_out_point(_clamp_in_point(keeps(spans, src_dur), ip), op)
     st["keeps"] = kp
     st["out_dur"] = sum(k.length for k in kp)
     # THE PICTURE IS THE SUM OF EACH KEEP'S OWN ROUNDED SPAN, not
