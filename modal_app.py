@@ -38,7 +38,9 @@ image = (
     # CUDA + cuDNN 9 for faster-whisper on the GPU; the CPU functions share the
     # image so there is one thing to build.
     modal.Image.from_registry("nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04", add_python="3.12")
-    .apt_install("curl", "xz-utils", "fonts-noto-color-emoji", "libsndfile1")
+    # tesseract: engine/kills reads team tags in the kill feed to tell a
+    # broadcast he is watching from his own game.
+    .apt_install("curl", "xz-utils", "fonts-noto-color-emoji", "libsndfile1", "tesseract-ocr")
     # A current static ffmpeg: Ubuntu 22.04's is 4.4, older than anything the
     # engine was measured on.
     .run_commands(
@@ -98,7 +100,9 @@ def _r2():
         aws_secret_access_key=os.environ["R2_SECRET_ACCESS_KEY"])
 
 
-@app.function(gpu="L4", volumes=VOL, secrets=[secret], timeout=3 * 3600)
+# Any of these GPUs will do. Job kphkbkal2z sat in transcribe waiting on an
+# L4 after a restart; the clip builds already take the same list.
+@app.function(gpu=["L4", "A10G", "L40S"], volumes=VOL, secrets=[secret], timeout=3 * 3600)
 def transcribe(job_name: str) -> None:
     _setup()
     data.reload()
@@ -154,6 +158,20 @@ def build_clip(n: int, job_name: str, job_id: str, callback_base: str) -> dict:
     return body
 
 
+# KILL CLIPS COST NO WAITING. The kill feed is read at 2 fps from the VOD
+# already on the Volume, in KILL_CHUNK pieces on their own containers, while
+# the GPU transcribes; a 2h50m VOD scanned in about 2 minutes, well inside its
+# transcription.
+KILL_CHUNK = 900
+
+
+@app.function(cpu=4, memory=4096, volumes=VOL, timeout=1800)
+def kill_chunk(job_name: str, start: float) -> list[float]:
+    _setup()
+    from engine import kills
+    return kills.scan(Path(REPO, "jobs", job_name, "source.mp4"), start=start, dur=KILL_CHUNK)
+
+
 RENDER_BUDGET = 45 * 60
 
 
@@ -172,7 +190,12 @@ def _free_vod(job: Path) -> None:
     data.commit()
 
 
-@app.function(cpu=4, memory=8192, volumes=VOL, secrets=[secret], timeout=8 * 3600)
+# NON-PREEMPTIBLE. Modal may restart a preemptible container at any time, and
+# a restarted run_job starts the job again from the top (kphkbkal2z went back
+# through download into transcribe). This container only orchestrates, so
+# the higher non-preemptible rate is on 4 mostly idle CPUs.
+@app.function(cpu=4, memory=8192, volumes=VOL, secrets=[secret], timeout=8 * 3600,
+              nonpreemptible=True)
 def run_job(job_id: str, vod_url: str, clips: int, callback_base: str,
             caption_font: str | None = None, caption_fill: str | None = None,
             caption_emph: str | None = None) -> None:
@@ -201,8 +224,18 @@ def run_job(job_id: str, vod_url: str, clips: int, callback_base: str,
         import threading
         chat = threading.Thread(target=core.chat, args=(job,), daemon=True)
         chat.start()
+        scans = [] if (job / "kills.json").exists() else [
+            kill_chunk.spawn(job.name, float(s))
+            for s in range(0, int(meta.get("duration") or 0), KILL_CHUNK)]
         transcribe.remote(job.name)
         chat.join()
+        if scans:
+            # A failed scan costs the kill clips, never the job.
+            try:
+                kt = [k for fc in scans for k in fc.get(timeout=1800)]
+                print(f"kills: {len(kt)}, multi-kills: {core.save_kills(job, kt)}", flush=True)
+            except Exception as e:                        # noqa: BLE001
+                print(f"kill scan failed: {type(e).__name__}: {e}", flush=True)
         data.commit()
         data.reload()
         progress("rank", "Finding and ranking clips", 0.45)

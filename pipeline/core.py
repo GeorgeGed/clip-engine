@@ -15,6 +15,7 @@ VOD submitted twice reuses everything already done for it.
         clips.json        kept clips, strongest first
         ranked.json       the top N that get built (make_clip reads it)
         cam.json          the streamer's webcam over the whole VOD
+        kills.json        his own kills from the kill feed, and the multi-kills
         clips_1080/NN_*.mp4, words/NN.json, titles.json, specs/NN.json
 
 ANY CHANNEL IS ACCEPTED. A channel with a file in `channels/` gets its own
@@ -158,6 +159,47 @@ def _with_chat(regs: list[dict], spikes: list[dict]) -> list[dict]:
     return out
 
 
+def save_kills(job: Path, kills: list[float]) -> list[dict]:
+    """kills.json: the marked player's kills (engine/kills.scan) and the
+    multi-kills among them from the streamer's own games. The scan runs
+    wherever the caller runs it: the hosted path splits it over containers
+    while the transcript is made."""
+    from engine import kills as K
+    kills = sorted(kills)
+    streaks = K.multikills(job / "source.mp4", kills)
+    (job / "kills.json").write_text(json.dumps({"kills": kills, "streaks": streaks}))
+    return streaks
+
+
+# A kill clip opens this long before the first kill reaches the feed, so the
+# viewer sees the fight start, and holds this long past the last one.
+KILL_LEAD = 2.0
+KILL_TAIL = 2.5
+# Where a multi-kill ranks against Tier 3's talk clips (0-1). A 4k or an ace is
+# rarer and better than nearly anything said on stream, so it ranks above.
+KILL_STRENGTH = {3: 0.80, 4: 0.92}
+ACE_STRENGTH = 1.0
+
+
+def _kill_clips(job: Path) -> list[dict]:
+    """One clip per multi-kill in kills.json, shaped like a Tier 3 verdict."""
+    p = job / "kills.json"
+    if not p.exists():
+        return []
+    out = []
+    for s in json.loads(p.read_text())["streaks"]:
+        n = s["kills"]
+        label = "ACE" if n >= 5 else f"{n}K"
+        out.append({"has_clip": True, "genre": "frag", "kills": n,
+                    "in_point": round(max(0.0, s["start"] - KILL_LEAD), 2),
+                    "out_point": round(s["end"] + KILL_TAIL, 2),
+                    "subject": f"{label}: {n} kills in {s['end'] - s['start']:.0f} seconds",
+                    "claim": "", "setup": "", "consequence": "",
+                    "strength": ACE_STRENGTH if n >= 5 else KILL_STRENGTH[n],
+                    "why": "kill feed", "chat_score": 0.0})
+    return out
+
+
 # A chat-backed clip ranks as if this much stronger at full chat score, so a
 # moment the room exploded over makes the cut against an equal monologue.
 # 0.15 -> 0.30 on George's ask for chat to count for more: on job 3njkcnn5wd
@@ -231,7 +273,7 @@ def rank(job: Path, *, log=print) -> list[dict]:
                 + (" | ".join(f"{ts(v['in_point'])} {v['out_point'] - v['in_point']:.0f}s"
                               for v in got) or "none"))
     clips, taken = [], []
-    for d in sorted((d for d in done if d.get("has_clip")),
+    for d in sorted([d for d in done if d.get("has_clip")] + _kill_clips(job),
                     key=lambda d: -(d["strength"] + CHAT_BOOST * d.get("chat_score", 0.0))):
         span = (d["in_point"], d["out_point"])
         if any(min(span[1], b) - max(span[0], s) > 3.0 for s, b in taken):
@@ -248,6 +290,25 @@ def _slug(s: str, n: int = 40) -> str:
 
 TAIL = 1.0   # seconds of source kept past the ranked out-point, for the snap
 
+# KILL CLIPS ARE CAPPED. They rank above nearly every talk clip, so a stream
+# with a dozen multi-kills would otherwise come back as all gameplay. Jatin's
+# split: 3 of 10, and up to 5 of 10 when the extras are strong (a 4k or an
+# ace), best first; the commentary keeps the rest, and further kill clips
+# only fill slots the commentary cannot.
+KILL_SHARE = 1 / 3
+STRONG_KILL_SHARE = 1 / 2
+STRONG_KILLS = 4
+
+
+def _pick(clips: list[dict], n: int) -> list[dict]:
+    """The top `n` of `clips` (strongest first) with kill clips capped."""
+    kills = [c for c in clips if c.get("kills")]
+    cap = round(n * KILL_SHARE)
+    strong = [c for c in kills[cap:] if c["kills"] >= STRONG_KILLS]
+    first = kills[:cap] + strong[:max(0, round(n * STRONG_KILL_SHARE) - cap)]
+    keep = first + [c for c in clips if not c.get("kills")] + [c for c in kills if c not in first]
+    return sorted(keep[:n], key=lambda c: next(i for i, x in enumerate(clips) if x is c))
+
 
 def cut_sections(job: Path, n_top: int, url: str) -> list[dict]:
     """ranked.json, and each clip's 1080p60 source in clips_1080/.
@@ -259,7 +320,7 @@ def cut_sections(job: Path, n_top: int, url: str) -> list[dict]:
     The cut is always 1920x1080: every crop in the engine is in those source
     pixels, so a lower rendition kept for local iteration (a 480p VOD is 1.7
     GB against 10.2 GB) is scaled up here rather than breaking the layout."""
-    clips = json.loads((job / "clips.json").read_text())[:n_top]
+    clips = _pick(json.loads((job / "clips.json").read_text()), n_top)
     (job / "ranked.json").write_text(json.dumps(clips, indent=1))
     out = job / "clips_1080"
     out.mkdir(exist_ok=True)
