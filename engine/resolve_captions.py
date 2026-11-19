@@ -132,6 +132,55 @@ def snap_words(words: list[dict], db, hop_s: float) -> list[dict]:
     return out
 
 
+BG_DROP_DB = 7.0            # this far under the clip's loud speech is someone else
+BG_MIN_WORDS = 6            # and only a run this long, so one soft word is kept
+HEARD_DB = -60.0            # under this a word is muted, not quiet
+
+
+def background(words: list[dict], db, hop_s: float) -> list[bool]:
+    """Which words are a background voice: a caster, the game, a teammate.
+
+    THE STREAMER IS THE LOUDEST VOICE. His mic sits in front of him; the
+    broadcast, the game and his teammates come in under it. So a word's level
+    is the 90th percentile of `db` across it, the reference is the 90th
+    percentile over the clip's words, and a run of BG_MIN_WORDS or more that
+    sits BG_DROP_DB under it is someone else. Muted words (Twitch DMCA holes)
+    join whichever run they sit in rather than splitting it.
+
+    Measured on FNS clips: the 2885323336 hype clip 1 loses the casters'
+    play-by-play ("he's gonna backpedal away", "full flash connecting ... wraps
+    up the rendezvous") and keeps "this is so risky chat" and "oh my god that
+    is beautiful work". It cannot split voices at the same level: on hype clip
+    2 the casters open as loud as FNS and stay in.
+    """
+    import numpy as np
+
+    lv = []
+    for w in words:
+        a = int(float(w["start"]) / hop_s)
+        seg = db[a:max(int(float(w["end"]) / hop_s), a + 3)]
+        lv.append(float(np.percentile(seg, 90)) if len(seg) else HEARD_DB - 1)
+    L = np.array(lv)
+    heard = L > HEARD_DB
+    if heard.sum() < BG_MIN_WORDS:
+        return [False] * len(words)
+    ref = np.percentile(L[heard], 90)
+    lab = np.where(heard, L < ref - BG_DROP_DB, -1).astype(int)
+    bg = [False] * len(words)
+    i = 0
+    while i < len(words):
+        if lab[i] != 1:
+            i += 1
+            continue
+        j = i
+        while j + 1 < len(words) and lab[j + 1] != 0:
+            j += 1
+        if (lab[i:j + 1] == 1).sum() >= BG_MIN_WORDS:
+            bg[i:j + 1] = [True] * (j + 1 - i)
+        i = j + 1
+    return bg
+
+
 def cards(words: list[dict], *, max_words: int = MAX_WORDS,
           max_card_s: float = MAX_CARD_S, gap_break_s: float = GAP_BREAK_S,
           upper: bool = True) -> list[Card]:
