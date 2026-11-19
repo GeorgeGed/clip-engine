@@ -75,6 +75,63 @@ def mask_profanity(word: str) -> str:
     return PROFANITY.sub(repl, word)
 
 
+SNAP_MIN_S = 0.6            # a word longer than this is checked against the audio
+SNAP_DROP_DB = 12.0         # under the word's own peak by this much is a pause
+SNAP_QUIET_S = 0.3          # the pause inside a word that makes it stretched
+SNAP_LEAD_S = 0.2           # a word's onset is softer than its peak; start this early
+
+
+def snap_words(words: list[dict], db, hop_s: float) -> list[dict]:
+    """Pull stretched word timings back onto the speech they cover.
+
+    WHISPER GIVES A PAUSE TO THE NEXT WORD. When FNS stops talking to watch,
+    the word he says next often starts exactly where the previous one ended,
+    1-2s before he says it (measured on the 2885323336 hype clip: "and" runs
+    7.62-8.56 and is silent, -56 dB, until 8.5). A card starts on its first
+    word, so the next word sat on screen through the pause, waiting.
+
+    `db` is the source's loudness every `hop_s` seconds. A word longer than
+    SNAP_MIN_S that holds a SNAP_QUIET_S pause (SNAP_DROP_DB under its own peak)
+    is cut down to one run of speech: the LAST run when whisper glued the
+    word to the one before (the pause went to the wrong word), else the first
+    (the word was said, then held over silence).
+
+    Checked against a second Whisper pass on the cut-out audio: "He's" snaps
+    22.56 -> 23.25 (second pass 23.24), "and" 7.62 -> 8.30 (8.20).
+    """
+    out, prev_end = [], None
+    for w in words:
+        s, e = float(w["start"]), float(w["end"])
+        glued = prev_end is not None and s - prev_end < 0.05
+        prev_end = e
+        a, b = int(s / hop_s), int(e / hop_s)
+        seg = db[a:b]
+        if e - s <= SNAP_MIN_S or len(seg) < 3:
+            out.append(w)
+            continue
+        live = seg >= seg.max() - SNAP_DROP_DB
+        runs, i = [], 0
+        while i < len(live):
+            if live[i]:
+                j = i
+                while j < len(live) and live[j]:
+                    j += 1
+                runs.append((i, j))
+                i = j
+            else:
+                i += 1
+        gaps = [runs[k + 1][0] - runs[k][1] for k in range(len(runs) - 1)]
+        lead, tail = runs[0][0], len(live) - runs[-1][1]
+        if max(gaps + [lead, tail]) * hop_s < SNAP_QUIET_S:
+            out.append(w)
+            continue
+        r0, r1 = runs[-1] if glued else runs[0]
+        ns = max(s, s + r0 * hop_s - SNAP_LEAD_S)
+        ne = min(e, s + r1 * hop_s + 0.1)
+        out.append(dict(w, start=round(ns, 3), end=round(max(ne, ns + 0.1), 3)))
+    return out
+
+
 def cards(words: list[dict], *, max_words: int = MAX_WORDS,
           max_card_s: float = MAX_CARD_S, gap_break_s: float = GAP_BREAK_S,
           upper: bool = True) -> list[Card]:
