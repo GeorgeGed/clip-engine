@@ -757,7 +757,7 @@ def _cam(clip, ch, st):
         log(f"  facecam {face} from the face detector")
         return face
     f = facecam.detect(clip.source(ROOT))
-    if f is None:
+    if f is None or f.coverage > 0.5:
         st["cam"] = ch.cam
         log(f"  facecam NOT DETECTED — falling back to the channel's "
             f"{ch.cam}. Check the frame.")

@@ -36,6 +36,7 @@ from __future__ import annotations
 
 import subprocess
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 
@@ -169,6 +170,10 @@ FACE_SAMPLES = 40
 FACE_MIN_HIT = 0.3
 FACE_STILL = 0.10
 FACE_WILD = 1.0
+LIVE_DELTA, LIVE_MAX = 0.1, 5.0
+YUNET_STILL, YUNET_WILD, YUNET_MIN_HIT = 0.03, 1.0, 0.6
+YUNET_TO_HAAR = 0.85
+YUNET = Path(__file__).parent / "models" / "face_detection_yunet_2023mar.onnx"
 
 
 def _border(profile, lo, hi):
@@ -187,7 +192,7 @@ def _border(profile, lo, hi):
     return lo + k
 
 
-def _live_face(hits, samples):
+def _live_face(hits, samples, still=FACE_STILL, wild=FACE_WILD, min_hit=FACE_MIN_HIT):
     """The hits of the one cluster that is a live face, or None.
 
     A LIVE FACE MOVES; A POSTER DOES NOT. On clip 08 the haar cascade
@@ -207,20 +212,38 @@ def _live_face(hits, samples):
     so the toy won by one hit and the whole clip showed his shelf. Hence
     0.10, and ties go to the bigger face (toy 67px, face 77px). Players on a
     watchparty broadcast drift 2.5-2.9 face heights, so anything over
-    FACE_WILD is the stream content, not the webcam.
+    FACE_WILD is the stream content, not the webcam. These bounds are for
+    haar boxes; YuNet's are steadier, so `face_rect` passes its own.
+
+    A WEBCAM NEVER HOLDS STILL BETWEEN TWO FRAMES. The game is full of faces:
+    agent portraits on the select screen, the scoreboard icons along the top,
+    the kill feed. On job 7vukl5woyj they won clip 4 and clip 9 outright. Those
+    are drawn by the game and are pixel-identical from one frame to the next
+    for most of their life, while sensor noise alone moves a webcam. A hit's
+    4th column, when given, is the mean grey-level change inside its box
+    between two consecutive frames; a cluster whose median is under
+    LIVE_DELTA is not the webcam. Measured: webcams 0.19-1.2 (FNS, a quiet
+    camera) and 1.3-2.1 (s0mcs), still game and room faces 0.01-0.09. An
+    animated agent on the select screen runs 10-17, so over LIVE_MAX is game.
+    Liveness also weights the pick: a photo on FNS's page sits as still as
+    his face in drift (0.07 against 0.06) but changes 0.06-0.4 a frame
+    against his 0.22-1.19.
     """
     a = np.array(hits) if len(hits) else np.zeros((0, 3))
-    best = None
+    best, top = None, 0.0
     for p in a:
         near = a[(abs(a[:, 0] - p[0]) < p[2]) & (abs(a[:, 1] - p[1]) < p[2])]
-        if len(near) < samples * FACE_MIN_HIT:
+        if len(near) < samples * min_hit:
             continue
         h = np.median(near[:, 2])
         drift = near[:, 0].std() + near[:, 1].std()
-        if not FACE_STILL * h <= drift <= FACE_WILD * h:
+        if not still * h <= drift <= wild * h:
             continue
-        if best is None or len(near) * h > len(best) * np.median(best[:, 2]):
-            best = near
+        live = np.median(near[:, 3]) if a.shape[1] > 3 else 1.0
+        if not (a.shape[1] <= 3 or LIVE_DELTA <= live <= LIVE_MAX):
+            continue
+        if len(near) * h * live > top:
+            best, top = near, len(near) * h * live
     return best
 
 
@@ -237,30 +260,53 @@ def face_rect(path, *, samples=FACE_SAMPLES) -> tuple[int, int, int, int] | None
     borders are hard lines that never move, so they show up in the MEDIAN of
     the sampled frames while the room and the person blur out; the crop is
     pulled inside them and narrowed to keep its aspect.
+
+    YUNET FIRST, HAAR AS FALLBACK. Haar missed a small, dark webcam on s0mcs
+    (VOD 2920544899) almost entirely and fired on gameplay texture instead;
+    YuNet found it in 33-58 of 40 frames. YuNet misses FNS turned side-on on
+    some clips, where haar still finds him, so haar stays as the fallback.
+
+    A WEBCAM IS IN EVERY FRAME. YuNet is good enough that the webcam lands in
+    33-41 of 40 samples, while the faces that beat it come and go: players on
+    a watchparty broadcast 12-20, an animated agent 13-22. Hence the higher
+    YUNET_MIN_HIT. YuNet's box is taller than haar's for the same face, and
+    the crop ratios below were measured off haar: on 12 FNS clips the old
+    crop was a median 0.855 of the YuNet-sized one, hence YUNET_TO_HAAR.
     """
     import cv2                                           # noqa: PLC0415
-    casc = cv2.CascadeClassifier(cv2.data.haarcascades
-                                 + "haarcascade_frontalface_default.xml")
     cap = cv2.VideoCapture(str(path))
     n = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) or 1920
     H = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) or 1080
-    hits, grays = [], []
+    yunet = cv2.FaceDetectorYN.create(str(YUNET), "", (W, H), 0.6, 0.3, 5000)
+    casc = cv2.CascadeClassifier(cv2.data.haarcascades
+                                 + "haarcascade_frontalface_default.xml")
+    yhits, hhits, grays = [], [], []
     for i in np.linspace(n * 0.05, n * 0.95, samples).astype(int):
         cap.set(cv2.CAP_PROP_POS_FRAMES, int(i))
         ok, fr = cap.read()
-        if not ok:
+        ok2, nxt = cap.read()
+        if not (ok and ok2):
             continue
         g = cv2.cvtColor(fr, cv2.COLOR_BGR2GRAY)
+        d = np.abs(g.astype(np.float32) - cv2.cvtColor(nxt, cv2.COLOR_BGR2GRAY))
         if len(grays) < 15:
             grays.append(g)
-        fs = casc.detectMultiScale(g, 1.1, 6, minSize=(40, 40))
-        hits += [(x + w / 2, y + h / 2, h) for x, y, w, h in fs]
+        _, fs = yunet.detect(fr)
+        for into, boxes in ((yhits, fs[:, :4] if fs is not None else []),
+                            (hhits, casc.detectMultiScale(g, 1.1, 6, minSize=(40, 40)))):
+            for x, y, w, h in boxes:
+                box = d[max(int(y), 0):int(y + h), max(int(x), 0):int(x + w)]
+                into.append((x + w / 2, y + h / 2, h, float(box.mean()) if box.size else 0.0))
     cap.release()
-    best = _live_face(hits, samples)
+    best = _live_face(yhits, samples, YUNET_STILL, YUNET_WILD, YUNET_MIN_HIT)
+    scale = YUNET_TO_HAAR
+    if best is None:
+        best, scale = _live_face(hhits, samples), 1.0
     if best is None:
         return None
-    cx, cy, fh = np.median(best, axis=0)
+    cx, cy, fh = np.median(best[:, :3], axis=0)
+    fh *= scale
     # Wider than the top pane (1080x768 = 1.406), or the native renderer's
     # axis guard refuses it: the overflow has to be horizontal.
     aspect = 1.42
