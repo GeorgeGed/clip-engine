@@ -59,7 +59,7 @@ from engine.clipspec import load                                 # noqa: E402
 from engine import facecam                                       # noqa: E402
 from engine.resolve_driver import connect, blocking_dialog       # noqa: E402
 from engine.resolve_layout import Frame, plan, apply             # noqa: E402
-from engine.resolve_captions import cards, emphasis_keys, mark_emphasis  # noqa: E402
+from engine.resolve_captions import cards, emphasis_keys, mark_emphasis, snap_words  # noqa: E402
 from engine.cuts import framings, content_framings               # noqa: E402
 from engine.tighten import removals, keeps, remap_card, joins    # noqa: E402
 from engine import caption_colour                                # noqa: E402
@@ -937,12 +937,28 @@ def stage_cut(clip, ch, st):
 
 
 # ----------------------------------------------------------- captions ----
+def _loudness_db(src):
+    """The source's loudness in dB every 10 ms, over a 25 ms window."""
+    import numpy as np
+    pcm = subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-i", str(src), "-ac", "1",
+                          "-ar", "16000", "-f", "f32le", "-"], capture_output=True).stdout
+    a = np.frombuffer(pcm, dtype="<f4")
+    ms = np.convolve(a * a, np.ones(400) / 400, "same")[::160]
+    return 10 * np.log10(ms + 1e-12)
+
+
 def stage_captions(clip, ch, st):
     tr = json.loads(clip.words(ROOT).read_text())
     words = [w for u in tr["utterances"] for w in u["words"]]
     st["words"] = words
     meta = st["meta"]
-    cs = cards(words, upper=clip.caption_case == "upper")
+    snapped = snap_words(words, _loudness_db(clip.source(ROOT)), 0.01)
+    moved = [(a, b) for a, b in zip(words, snapped) if a is not b]
+    if moved:
+        log(f"  {len(moved)} stretched word(s) pulled onto their speech: "
+            + ", ".join(f"{a['text'].strip()!r} {a['start']:.2f}->{b['start']:.2f}"
+                        for a, b in moved[:5]))
+    cs = cards(snapped, upper=clip.caption_case == "upper")
     absent = qc.dead_audio(clip.source(ROOT), min_run=0.1)["runs"]
     cs, dropped = _drop_hallucinated(cs, absent)
     if dropped:
