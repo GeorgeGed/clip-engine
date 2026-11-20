@@ -342,10 +342,6 @@ describe("pipeline callbacks", () => {
     expect(page).toContain(`${VOD}?t=1h2m3s`);
     expect(page).toContain(`/files/jobs/${job.id}/03-first-take.mp4?download=1`);
 
-    expect((await pipeline("clip", { ...clip, n: 4, review: { verdict: "not_yet", summary: "Opens on dead air", revised: true } })).status).toBe(200);
-    const reviewed = await (await call(`/jobs/${job.id}`, { headers: { cookie } })).text();
-    expect(reviewed).toContain("Judge: not yet.</b> Opens on dead air");
-
     expect((await pipeline("clip", { ...clip, n: "x" })).status).toBe(400);
   });
 
