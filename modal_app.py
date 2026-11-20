@@ -119,7 +119,7 @@ def transcribe(job_name: str) -> None:
 # so 10 clips rendered mostly one after another.
 # A clip normally builds in a few minutes. The timeout is what a lost or
 # runaway build costs before `run_job` gives up on it; see RENDER_BUDGET.
-@app.function(gpu=["L4", "A10G", "L40S"], cpu=8, memory=16384, volumes=VOL, secrets=[secret], timeout=1200,
+@app.function(gpu=["L4", "A10G", "L40S"], cpu=8, memory=16384, volumes=VOL, secrets=[secret], timeout=2400,
               retries=modal.Retries(max_retries=1))
 def build_clip(n: int, job_name: str, job_id: str, callback_base: str) -> dict:
     _setup()
@@ -128,15 +128,15 @@ def build_clip(n: int, job_name: str, job_id: str, callback_base: str) -> dict:
     from pipeline import core
     job = Path(REPO, "jobs", job_name)
     spec = job / "specs" / f"{n:02d}.json"
-    clip = json.loads(spec.read_text())["clip"]
     c = json.loads((job / "ranked.json").read_text())[n - 1]
     try:
-        out = core.build(spec, log_path=job / "specs" / f"{n:02d}.log")
+        out, review = core.build_reviewed(job, n)
     except RuntimeError as e:
         # A build or QC failure is deterministic: a retry renders the same
         # file again and fails the same way. Retries are for lost containers.
         data.commit()
         return {"n": n, "error": str(e)}
+    clip = json.loads(spec.read_text())["clip"]
     prev, thumb = core.preview_and_thumb(out)
     data.commit()
     base = f"jobs/{job_id}/{n:02d}-{core._slug(clip.get('title') or c['subject'], 50)}"
@@ -150,7 +150,8 @@ def build_clip(n: int, job_name: str, job_id: str, callback_base: str) -> dict:
     body = {"job_id": job_id, "n": n, "title": clip.get("title") or c["subject"],
             "emoji": clip.get("emoji"), "keyword": clip.get("title_keyword"),
             "subject": c["subject"], "score": c["strength"], "duration": core.duration(out),
-            "vod_start": c["in_point"], **keys}
+            "vod_start": c["in_point"] + float(clip.get("in_point") or 0.0),
+            "review": {k: review[k] for k in ("verdict", "summary", "revised")}, **keys}
     for path in (out, prev, thumb):
         Path(path).unlink(missing_ok=True)
     data.commit()

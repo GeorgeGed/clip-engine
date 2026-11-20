@@ -48,6 +48,7 @@ export interface Clip {
   preview_key: string | null;
   thumb_key: string | null;
   created_at: string;
+  review?: string | null;
 }
 
 export interface JobEvent {

@@ -287,12 +287,12 @@ async function pipelineClip(env: Env, body: Record<string, unknown>): Promise<Re
   if (!videoKey) return json({ error: "video_key is required" }, 400);
 
   await env.DB.prepare(
-    `INSERT INTO clips (job_id, n, title, emoji, keyword, subject, score, duration, vod_start, video_key, preview_key, thumb_key, created_at)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)
+    `INSERT INTO clips (job_id, n, title, emoji, keyword, subject, score, duration, vod_start, video_key, preview_key, thumb_key, created_at, review)
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)
      ON CONFLICT (job_id, n) DO UPDATE SET
        title = excluded.title, emoji = excluded.emoji, keyword = excluded.keyword, subject = excluded.subject,
        score = excluded.score, duration = excluded.duration, vod_start = excluded.vod_start,
-       video_key = excluded.video_key, preview_key = excluded.preview_key, thumb_key = excluded.thumb_key`,
+       video_key = excluded.video_key, preview_key = excluded.preview_key, thumb_key = excluded.thumb_key, review = excluded.review`,
   )
     .bind(
       id,
@@ -308,6 +308,7 @@ async function pipelineClip(env: Env, body: Record<string, unknown>): Promise<Re
       str(body.preview_key),
       str(body.thumb_key),
       now(),
+      body.review && typeof body.review === "object" ? JSON.stringify(body.review) : null,
     )
     .run();
   await env.DB.prepare("UPDATE jobs SET updated_at = ? WHERE id = ?").bind(now(), id).run();
