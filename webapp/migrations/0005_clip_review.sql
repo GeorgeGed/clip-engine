@@ -1,1 +1,0 @@
-ALTER TABLE clips ADD COLUMN review TEXT;

@@ -220,8 +220,6 @@ button{font:inherit;color:inherit}
 .thumb:hover .playi{opacity:1;transform:none}
 @media(hover:none){.thumb .playi{opacity:1;transform:none;width:42px;height:42px;margin:-21px 0 0 -21px}}
 .clip h3{font-size:14px;font-weight:500;line-height:1.3;letter-spacing:-.01em;margin:10px 2px 10px;min-height:2.6em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
-.rv{font-size:12px;line-height:1.35;color:var(--muted);margin:-4px 2px 10px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.rv b{font-weight:550}.rv .ok{color:var(--ok)}.rv .warn{color:#b7791f}
 .clip .actions{display:flex;gap:6px;margin:auto 2px 0}
 .clip .actions .btn{flex:1}
 .clip .actions .btn.icon{flex:none;width:34px;padding:0}
@@ -531,16 +529,6 @@ function clipTitle(clip: Clip): string {
   return (clip.emoji ? clip.emoji + " " : "") + (clip.title || `Clip ${clip.n}`);
 }
 
-function reviewNote(clip: Clip): string {
-  let r: { verdict?: string; summary?: string; revised?: boolean } = {};
-  try {
-    r = JSON.parse(clip.review ?? "{}");
-  } catch {}
-  if (r.verdict === "pass") return `<p class="rv" title="${esc(r.summary)}"><b class="ok">Judge passed</b>${r.revised ? " after one fix" : ""}</p>`;
-  if (r.verdict === "not_yet") return `<p class="rv" title="${esc(r.summary)}"><b class="warn">Judge: not yet.</b> ${esc(r.summary)}</p>`;
-  return "";
-}
-
 function clipCard(job: Job, clip: Clip): string {
   const key = [clip.n, clip.video_key, clip.preview_key, clip.thumb_key, clip.title].join("|");
   const download = fileUrl(clip.video_key) + "?download=1";
@@ -557,7 +545,6 @@ function clipCard(job: Job, clip: Clip): string {
     <span class="playi">${icon("play")}</span>
   </button>
   <h3 title="${esc(clipTitle(clip))}">${esc(clipTitle(clip))}</h3>
-  ${reviewNote(clip)}
   <div class="actions">
     <a class="btn dark sm" href="${esc(download)}" download>${icon("download")}Download</a>
     ${twitch ? `<a class="btn sm icon" href="${esc(twitch)}" target="_blank" rel="noopener" title="Open on Twitch at ${clock(clip.vod_start!)}" aria-label="Open on Twitch">${icon("external")}</a>` : ""}

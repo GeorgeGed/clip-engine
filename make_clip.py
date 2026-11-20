@@ -2519,10 +2519,6 @@ def _plan_only(clip, ch, st):
         spans = removals(dead, src_dur, min_remove=MIN_DEAD, beat=BEAT)
         kp = _clamp_out_point(_clamp_in_point(keeps(spans, src_dur), ip), op)
     st["keeps"] = kp
-    # The review (engine/review) maps what the critics see back to the cut
-    # file through these, because the cut is shorter than the span it covers.
-    st["overlays"].mkdir(parents=True, exist_ok=True)
-    (st["overlays"] / "keeps.json").write_text(json.dumps([[k.start, k.end] for k in kp]))
     st["out_dur"] = sum(k.length for k in kp)
     # THE PICTURE IS THE SUM OF EACH KEEP'S OWN ROUNDED SPAN, not
     # `round(out_dur * fps)`. Resolve is handed `round(k.start*fps)` and
