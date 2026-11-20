@@ -80,11 +80,8 @@ button{font:inherit;color:inherit}
 .spacer{flex:1}
 .muted{color:var(--muted)}
 .content{min-width:0}
-.topbar{display:flex;align-items:center;gap:8px;padding:22px 40px;background:var(--canvas)}
-.search{display:flex;align-items:center;gap:12px;flex:1;min-width:0;color:var(--muted)}
-.search input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:15px;color:var(--text);outline:0;padding:8px 0}
-.search input::placeholder{color:var(--faint)}
-.tlink{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;font-size:15px;color:var(--text);background:none;border:0;cursor:pointer;white-space:nowrap}
+.topbar{display:flex;align-items:center;gap:8px;padding:14px 32px;background:var(--canvas)}
+.tlink{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;font-size:14px;color:var(--text);background:none;border:0;cursor:pointer;white-space:nowrap}
 .tlink:hover{background:rgba(0,0,0,.04)}
 .tlink.danger{color:var(--bad)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:12px;border:1px solid var(--line2);background:var(--bg);color:var(--text);font-weight:500;font-size:15px;cursor:pointer;white-space:nowrap}
@@ -93,77 +90,72 @@ button{font:inherit;color:inherit}
 .btn.dark:hover{background:var(--ink2)}
 .btn.sm{min-height:34px;padding:0 12px;font-size:13px;border-radius:9px}
 .btn:disabled{opacity:.5;cursor:default}
-.band{background:var(--canvas);padding:8px 40px 34px;border-bottom:1px solid var(--line)}
-.composer{display:flex;gap:10px;align-items:stretch;margin-bottom:30px}
+.band{background:var(--canvas);padding:20px 32px;border-bottom:1px solid var(--line)}
+.band h1.ttl{font-size:20px;font-weight:550;letter-spacing:-.02em;margin:0 0 14px}
+.composer{display:flex;gap:10px;align-items:stretch}
 .url{flex:1;min-width:0;display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:0 14px;color:var(--faint)}
 .url:focus-within{border-color:var(--ink)}
-.url input{flex:1;min-width:0;height:48px;border:0;background:transparent;color:var(--text);font:inherit;font-size:15px;outline:0}
+.url input{flex:1;min-width:0;height:46px;border:0;background:transparent;color:var(--text);font:inherit;font-size:15px;outline:0}
 .url input::placeholder{color:var(--faint)}
 .count{display:flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px}
 .count span{font-size:13px;color:var(--muted);padding:0 4px 0 10px}
-.count button{width:34px;height:40px;border:0;border-radius:9px;background:transparent;font-size:18px;color:var(--text);cursor:pointer}
+.count button{width:34px;height:38px;border:0;border-radius:9px;background:transparent;font-size:18px;color:var(--text);cursor:pointer}
 .count button:hover{background:var(--soft)}
 .count input{width:30px;border:0;background:transparent;font:inherit;font-size:15px;font-weight:550;text-align:center;color:var(--text);outline:0;-moz-appearance:textfield}
-.font{display:flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px 6px 3px 0}
-.font span{font-size:13px;color:var(--muted);padding:0 6px 0 10px}
-.font-preview{margin:-18px 0 22px;display:flex;flex-wrap:wrap;align-items:center;gap:12px}
-.cap{position:relative;width:360px;max-width:100%;aspect-ratio:720/150;border-radius:10px;border:1px solid var(--line);background:#1c2026;overflow:hidden}
-.cap i{position:absolute;inset:0;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
-.cap .stroke{background:#000}
-.font select{border:0;background:transparent;font:inherit;font-size:15px;font-weight:550;color:var(--text);outline:0;height:40px;cursor:pointer}
 .count input::-webkit-inner-spin-button,.count input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
-.error{color:var(--bad);font-size:13px;margin:-20px 0 18px}
+.capopts{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:10px}
+.font{display:flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:2px 6px 2px 0}
+.font span{font-size:13px;color:var(--muted);padding:0 6px 0 10px;white-space:nowrap}
+.font select{border:0;background:transparent;font:inherit;font-size:14px;font-weight:550;color:var(--text);outline:0;height:38px;cursor:pointer;min-width:0}
+.cap{position:relative;width:206px;aspect-ratio:720/150;border-radius:10px;border:1px solid var(--line);background:#1c2026;overflow:hidden;flex:none}
+.cap i{position:absolute;inset:0;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-position:center;mask-position:center;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
+.cap .stroke{background:#000}
+.error{color:var(--bad);font-size:13px;margin:10px 0 0}
 .error:empty{display:none}
-.stats{display:grid;grid-template-columns:minmax(260px,1.3fr) minmax(220px,1fr) .8fr .8fr;gap:32px;align-items:end}
-.stat-title{font-size:16px;font-weight:500;margin:0 0 14px}
-.chart{display:grid;grid-template-columns:22px 1fr;gap:6px;height:150px}
-.yax{display:flex;flex-direction:column;justify-content:space-between;font-size:11px;color:var(--text);padding-bottom:22px}
-.bars{display:grid;grid-template-columns:repeat(7,1fr);gap:14px;align-items:end;min-width:0}
-.bar-col{display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;min-width:0}
-.bar-col i{display:block;width:100%;max-width:22px;background:var(--ink);border-radius:1px}
-.bar-col i.zero{height:6px!important;background:repeating-linear-gradient(135deg,var(--line2) 0 2px,transparent 2px 5px)}
-.bar-col i.ghost{background:repeating-linear-gradient(135deg,var(--faint) 0 1.5px,transparent 1.5px 4.5px)}
-.bar-col span{font-size:11px;color:var(--text);height:16px}
-.gauge{display:flex;flex-direction:column;align-items:center;position:relative}
-.gauge svg{width:100%;max-width:280px;height:auto;display:block}
-.gauge .gv{position:absolute;left:0;right:0;bottom:4px;text-align:center}
-.gauge .gv b{display:block;font-size:30px;font-weight:500;letter-spacing:-.02em;line-height:1.1}
-.gauge .gv span{font-size:13px;color:var(--text)}
-.num{display:flex;flex-direction:column;justify-content:space-between;height:130px;padding-bottom:6px}
-.num b{font-size:34px;font-weight:500;letter-spacing:-.02em;line-height:1}
-.num .lab{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;font-size:13px;color:var(--text);line-height:1.35}
-.num .lab .ico{width:20px;height:20px}
-.page{padding:32px 40px 60px}
-.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;align-items:start}
-.col-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-.col-head h2{font-size:21px;font-weight:450;letter-spacing:-.01em;margin:0}
-.chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 10px;border:1px solid var(--line2);border-radius:9px;font-size:14px;background:var(--bg);color:var(--text);white-space:nowrap}
-.col-list{display:flex;flex-direction:column;gap:14px}
-.card{display:block;background:var(--bg);border:1px solid var(--line2);border-radius:var(--r);padding:20px 20px 16px;transition:box-shadow .15s,border-color .15s}
-a.card:hover{box-shadow:0 6px 24px rgba(0,0,0,.06);border-color:var(--faint)}
-.card h3{font-size:17px;font-weight:500;line-height:1.3;margin:0 0 10px;letter-spacing:-.01em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
-.card p{font-size:14px;line-height:1.4;margin:0 0 16px;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
-.card .foot{display:flex;align-items:center;gap:10px}
-.mini{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 9px;border:1px solid var(--line2);border-radius:8px;font-size:12px;white-space:nowrap}
-.mini .ico{width:15px;height:15px}
-.cnt{display:inline-flex;align-items:center;gap:4px;font-size:13px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px}
+.kpi{display:flex;align-items:baseline;gap:10px;min-width:0;padding:10px 14px;background:var(--bg);border:1px solid var(--line);border-radius:12px}
+.kpi b{font-size:22px;font-weight:550;letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi span{max-width:100%;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.page{padding:20px 32px 48px}
+.listbar{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.tabs{display:flex;gap:2px;padding:3px;background:var(--soft);border-radius:11px;min-width:0;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:0;border-radius:8px;background:transparent;font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tabs button:hover{color:var(--text)}
+.tabs button.on{background:var(--bg);color:var(--text);font-weight:550;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.tabs .c{color:var(--faint);font-variant-numeric:tabular-nums;font-weight:450}
+.search{display:flex;align-items:center;gap:8px;margin-left:auto;width:260px;min-width:0;padding:0 10px;border:1px solid var(--line2);border-radius:10px;color:var(--faint)}
+.search:focus-within{border-color:var(--ink)}
+.search .ico{width:16px;height:16px}
+.search input{flex:1;min-width:0;height:34px;border:0;background:transparent;font:inherit;font-size:14px;color:var(--text);outline:0;padding:0}
+.search input::placeholder{color:var(--faint)}
+.jobs{border:1px solid var(--line2);border-radius:var(--r);overflow:hidden;background:var(--bg)}
+.row{display:grid;grid-template-columns:auto minmax(0,1fr) 112px 64px 16px;gap:16px;align-items:center;padding:10px 16px;border-top:1px solid var(--line)}
+.row:first-child,.row[hidden]+.row:not([hidden]){border-top:0}
+.row[hidden]{display:none}
+.row:hover{background:#faf9f6}
+.rs{display:contents}
+.covers{display:flex;gap:3px}
+.covers img,.covers i{display:block;width:27px;height:48px;border-radius:5px;object-fit:cover;background:var(--soft)}
+.rt{min-width:0}
+.rt h3{font-size:15px;font-weight:500;letter-spacing:-.01em;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rt p{margin:3px 0 0;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rt .err{color:var(--bad)}
+.row.running h3:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--run);margin:0 8px 2px 0;animation:blink 1.2s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+.cnt{display:inline-flex;align-items:center;justify-content:flex-end;gap:4px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
 .cnt .ico{width:16px;height:16px}
-.thumbs{display:flex;gap:6px;margin:0 0 16px}
-.thumbs img{width:40px;height:71px;object-fit:cover;border-radius:6px;background:var(--soft)}
-.card.dark{background:var(--ink);border-color:var(--ink);color:#fff}
-.card.dark p{color:rgba(255,255,255,.88)}
-.card.dark .mini{border-color:rgba(255,255,255,.25)}
-.card.dark .meta-line{color:rgba(255,255,255,.8)}
-.meta-line{display:flex;align-items:center;gap:8px;font-size:13px;margin:-4px 0 14px;min-width:0}
-.meta-line span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.meta-line .ico{width:16px;height:16px}
-.pbar{height:3px;border-radius:3px;background:rgba(255,255,255,.18);overflow:hidden;margin:0 0 16px}
-.pbar span{display:block;height:100%;background:#fff;transition:width .5s}
+.chev{color:var(--faint);display:grid}
+.chev .ico{width:16px;height:16px}
+.pbar{height:3px;max-width:360px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:7px}
+.pbar span{display:block;height:100%;background:var(--run);transition:width .5s}
 .pbar.indet span{width:35%;animation:indet 1.3s ease-in-out infinite}
 @keyframes indet{0%{transform:translateX(-100%)}100%{transform:translateX(300%)}}
-.card.failed{border-color:rgba(214,69,69,.35)}
-.card .err{color:var(--bad)}
-.empty-col{border:1px dashed var(--line2);border-radius:var(--r);padding:22px;text-align:center;color:var(--faint);font-size:13px}
+.nomatch{padding:28px 16px;text-align:center;color:var(--faint);font-size:14px}
+.nomatch[hidden]{display:none}
+.mini{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 9px;border:1px solid var(--line2);border-radius:8px;font-size:12px;white-space:nowrap}
+.mini .ico{width:15px;height:15px}
+.chip{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 9px;border:1px solid var(--line2);border-radius:8px;font-size:13px;background:var(--bg);color:var(--text);white-space:nowrap}
 .empty{color:var(--muted);text-align:center;padding:40px 16px;border:1px dashed var(--line2);border-radius:var(--r);margin:0}
 
 /* job page */
@@ -171,15 +163,18 @@ a.card:hover{box-shadow:0 6px 24px rgba(0,0,0,.06);border-color:var(--faint)}
 .crumbs a:hover{color:var(--text)}
 .crumbs .ico{width:14px;height:14px;color:var(--faint)}
 .crumbs b{font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.jstats{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(220px,1fr) .7fr .7fr;gap:32px;align-items:end;padding-top:20px}
-.jhead .pill{margin-bottom:12px}
-.jhead h1{font-size:28px;font-weight:500;line-height:1.2;letter-spacing:-.02em;margin:0 0 10px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
-.jsub{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px;color:var(--muted)}
+.jhead{display:flex;align-items:flex-start;gap:24px}
+.jtitle{flex:1;min-width:0}
+.jtitle h1{font-size:24px;font-weight:550;line-height:1.25;letter-spacing:-.02em;margin:0 0 8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.jsub{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:14px;color:var(--muted)}
 .jsub a{display:inline-flex;align-items:center;gap:5px;color:var(--text)}
 .jsub a:hover{text-decoration:underline}
 .jsub .ico{width:15px;height:15px}
-.pill{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 10px;border:1px solid var(--line2);border-radius:8px;font-size:13px;background:var(--bg);white-space:nowrap}
-.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;list-style:none;margin:30px 0 0;padding:0}
+.jnums{display:flex;gap:10px;flex:none}
+.jnums .kpi{flex-direction:column;align-items:flex-start;gap:2px;min-width:104px}
+.jnums .kpi small{font-size:15px;color:var(--muted);font-weight:450}
+.pill{display:inline-flex;align-items:center;gap:7px;height:26px;padding:0 9px;border:1px solid var(--line2);border-radius:8px;font-size:13px;background:var(--bg);color:var(--text);white-space:nowrap}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;list-style:none;margin:18px 0 0;padding:0}
 .steps li{display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--faint)}
 .steps li:before{content:"";height:4px;border-radius:2px;background:var(--line)}
 .steps li.done{color:var(--muted)}
@@ -187,8 +182,8 @@ a.card:hover{box-shadow:0 6px 24px rgba(0,0,0,.06);border-color:var(--faint)}
 .steps li.now{color:var(--text);font-weight:500}
 .steps li.now:before{background:repeating-linear-gradient(135deg,var(--ink) 0 3px,var(--line2) 3px 6px);background-size:8.5px 8.5px;animation:march .6s linear infinite}
 @keyframes march{to{background-position:8.5px 0}}
-.stage-msg{margin:12px 0 0;font-size:14px;color:var(--muted)}
-.run{margin-top:28px;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(240px,1fr);gap:24px;background:var(--bg);border:1px solid var(--line2);border-radius:var(--r);padding:20px 22px}
+.stage-msg{margin:10px 0 0;font-size:14px;color:var(--muted)}
+.run{margin-top:8px;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(240px,1fr);gap:24px;background:var(--bg);border:1px solid var(--line2);border-radius:var(--r);padding:18px 20px}
 .run h3{font-size:16px;font-weight:500;margin:0 0 14px}
 .tl{list-style:none;margin:0;padding:0}
 .tl li{display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:12px;align-items:start;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
@@ -207,28 +202,29 @@ a.card:hover{box-shadow:0 6px 24px rgba(0,0,0,.06);border-color:var(--faint)}
 .kv dd{margin:0;min-width:0;word-break:break-all;font-variant-numeric:tabular-nums}
 .kv code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace}
 .kv a{text-decoration:underline}
-.failbox{margin-top:24px;background:var(--bg);border:1px solid rgba(214,69,69,.35);border-radius:var(--r);padding:18px 20px}
+.failbox{margin-top:18px;background:var(--bg);border:1px solid rgba(214,69,69,.35);border-radius:var(--r);padding:16px 18px}
 .failbox h3{margin:0 0 8px;font-size:16px;font-weight:500;color:var(--bad)}
 .errtext{font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text);white-space:pre-wrap;word-break:break-word;margin:0 0 14px;max-height:200px;overflow:auto}
-.section-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 18px}
-.section-head h2{font-size:21px;font-weight:450;letter-spacing:-.01em;margin:0}
-.clips{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
-.clip{display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--line2);border-radius:var(--r);padding:12px 12px 14px;min-width:0;transition:box-shadow .15s}
+.section-head{display:flex;align-items:center;gap:10px;margin:0 0 14px}
+.section-head h2{font-size:18px;font-weight:550;letter-spacing:-.01em;margin:0}
+.clips{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:16px}
+.clip{display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--line2);border-radius:var(--r);padding:8px 8px 10px;min-width:0;transition:box-shadow .15s}
 .clip:hover{box-shadow:0 6px 24px rgba(0,0,0,.06)}
-.thumb{position:relative;display:block;width:100%;aspect-ratio:9/16;border:0;padding:0;border-radius:10px;overflow:hidden;background:var(--soft);cursor:pointer}
+.thumb{position:relative;display:block;width:100%;aspect-ratio:9/16;border:0;padding:0;border-radius:9px;overflow:hidden;background:var(--soft);cursor:pointer}
 .thumb img,.thumb video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.thumb .rank{position:absolute;top:8px;left:8px;z-index:1;height:26px;min-width:26px;padding:0 8px;display:grid;place-items:center;border-radius:7px;background:var(--bg);color:var(--text);font-size:12px;font-weight:550}
+.thumb .rank{position:absolute;top:7px;left:7px;z-index:1;height:24px;min-width:24px;padding:0 7px;display:grid;place-items:center;border-radius:7px;background:var(--bg);color:var(--text);font-size:12px;font-weight:550}
 .thumb .rank.top{background:var(--ink);color:#fff}
+.thumb .dur{position:absolute;right:7px;bottom:7px;z-index:1;padding:2px 6px;border-radius:6px;background:rgba(0,0,0,.65);color:#fff;font-size:12px;font-weight:550;font-variant-numeric:tabular-nums}
 .thumb .playi{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;display:grid;place-items:center;border-radius:50%;background:rgba(255,255,255,.92);color:var(--ink);opacity:0;transform:scale(.9);transition:.2s}
 .thumb .playi .ico{width:20px;height:20px;margin-left:3px}
 .thumb:hover .playi{opacity:1;transform:none}
 @media(hover:none){.thumb .playi{opacity:1;transform:none;width:42px;height:42px;margin:-21px 0 0 -21px}}
-.clip h3{font-size:16px;font-weight:500;line-height:1.3;letter-spacing:-.01em;margin:14px 4px 12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
-.clip .foot{display:flex;align-items:center;gap:8px;margin:0 4px 12px;flex-wrap:wrap}
-.clip .actions{display:flex;gap:8px;margin:auto 4px 0}
+.clip h3{font-size:14px;font-weight:500;line-height:1.3;letter-spacing:-.01em;margin:10px 2px 10px;min-height:2.6em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.clip .actions{display:flex;gap:6px;margin:auto 2px 0}
 .clip .actions .btn{flex:1}
-.clip .actions .btn.icon{flex:none;width:40px;padding:0}
-details{margin-top:40px;border-top:1px solid var(--line);padding-top:12px}
+.clip .actions .btn.icon{flex:none;width:34px;padding:0}
+details{margin-top:28px;border-top:1px solid var(--line);padding-top:6px}
+details+details{margin-top:0}
 details summary{cursor:pointer;color:var(--muted);font-size:14px;padding:8px 0;list-style:none}
 details summary::-webkit-details-marker{display:none}
 details summary:after{content:" +"}
@@ -278,39 +274,49 @@ body.locked{overflow:hidden}
 .login .error{margin:10px 0 0}
 .login .btn{width:100%;margin-top:16px;min-height:48px}
 
-@media(max-width:1180px){.stats{grid-template-columns:1fr 1fr}.board{grid-template-columns:repeat(2,minmax(0,1fr))}.jstats{grid-template-columns:1fr 1fr}.jhead{grid-column:1/-1}}
+@media(max-width:1180px){.jhead{flex-direction:column;gap:14px}}
 @media(max-width:860px){
 .run{grid-template-columns:minmax(0,1fr);padding:16px}
 .shell{display:block}
 .side{display:none}
-.mtop{display:flex;align-items:center;gap:10px;padding:14px 16px;padding-top:max(14px,env(safe-area-inset-top));background:var(--bg);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.mtop{display:flex;align-items:center;gap:10px;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));background:var(--bg);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
 .mtop .brand{margin:0;padding:0;font-size:17px}
-.topbar{padding:14px 16px}
-.band{padding:4px 16px 24px}
-.page{padding:24px 16px 48px}
-.composer{flex-wrap:wrap;margin-bottom:24px}
+.topbar{padding:10px 12px}
+.band{padding:14px 16px 16px}
+.band h1.ttl{display:none}
+.page{padding:16px 16px 40px}
+.composer{flex-wrap:wrap;gap:8px}
 .url{flex-basis:100%}
 .composer .btn{flex:1}
-.stats{grid-template-columns:1fr 1fr;gap:22px 16px}
-.stats .chart-box{grid-column:1/-1}
-.stats .gauge{grid-column:1/-1}
-.num{height:auto;gap:12px}
-.num b{font-size:28px}
-.board{grid-template-columns:minmax(0,1fr);gap:28px}
-.col.is-empty{display:none}
-.jstats{grid-template-columns:1fr 1fr;gap:22px 16px}
-.jstats .gauge{grid-column:1/-1}
-.jhead h1{font-size:22px}
+.capopts{gap:8px}
+.capopts .cap{width:100%;aspect-ratio:auto;height:44px}
+.capopts .font{flex:1 1 150px}
+.capopts .font select{flex:1}
+.kpis,.jnums{gap:6px;margin-top:12px}
+.kpi{flex-direction:column;align-items:flex-start;gap:0;padding:8px 10px}
+.kpi b{font-size:18px}
+.kpi span{font-size:11px}
+.jnums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:0}
+.jnums .kpi{min-width:0}
+.listbar{flex-wrap:wrap;gap:8px}
+.search{order:-1;width:100%;margin:0}
+.row{grid-template-columns:auto minmax(0,1fr) 16px;gap:4px 12px;padding:10px 12px}
+.covers{grid-row:span 2}
+.covers img:nth-child(n+2),.covers i:nth-child(n+2){display:none}
+.covers img,.covers i{width:36px;height:64px}
+.rs{display:flex;align-items:center;gap:10px;grid-column:2}
+.row.done .rs{display:none}
+.row .pill{height:22px;font-size:12px}
+.rt h3{font-size:14px}
+.chev{grid-column:3;grid-row:1/span 2}
+.rt h3{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.jtitle h1{font-size:20px}
 .steps{gap:6px}.steps li{font-size:11px}
-.clips{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.clip{padding:8px 8px 10px}
-.clip h3{font-size:14px;margin:10px 2px 8px}
-.clip .foot{margin:0 2px 10px;gap:6px}
-.clip .foot .mini:nth-child(n+3){display:none}
-.clip .actions{margin:auto 2px 0}
-.clip .actions .btn{min-height:38px;font-size:13px;padding:0 8px}
-.clip .actions .btn.icon{width:38px}
-.mini{height:26px;font-size:11px;padding:0 7px}
+.clips{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.clip{padding:6px 6px 8px}
+.clip h3{font-size:13px;margin:8px 2px}
+.clip .actions .btn{min-height:36px;font-size:13px;padding:0 8px}
+.clip .actions .btn.icon{width:36px}
 .topbar .tlink .lbl{display:none}
 }
 `;
@@ -401,129 +407,106 @@ function pct(job: Job): number | null {
   return Math.round(Math.min(1, Math.max(0, job.progress)) * 100);
 }
 
-function gauge(value: number, label: string, shown = `${value}%`): string {
-  const n = 44;
-  const lit = Math.round((Math.min(100, Math.max(0, value)) / 100) * n);
-  const ticks = Array.from({ length: n }, (_, i) => {
-    const a = Math.PI - (Math.PI * i) / (n - 1);
-    const c = Math.cos(a), s = Math.sin(a);
-    return `<line x1="${(140 + 96 * c).toFixed(1)}" y1="${(132 - 96 * s).toFixed(1)}" x2="${(140 + 126 * c).toFixed(1)}" y2="${(132 - 126 * s).toFixed(1)}" stroke="${i < lit ? "#1c1c1c" : "#d6d3cb"}" stroke-width="2" stroke-linecap="round"/>`;
-  }).join("");
-  return `<div class="gauge"><svg viewBox="0 0 280 136" aria-hidden="true">${ticks}</svg><div class="gv"><b>${shown}</b><span>${esc(label)}</span></div></div>`;
-}
-
 const DAY = 86_400_000;
 
-function clipsChart(jobs: Job[]): string {
-  const today = Math.floor(Date.now() / DAY);
-  const days = Array.from({ length: 7 }, (_, i) => today - 6 + i);
-  const made = days.map(() => 0);
-  const pending = days.map(() => 0);
-  for (const j of jobs) {
-    const i = Math.floor(Date.parse(j.created_at) / DAY) - days[0];
-    if (i < 0 || i > 6) continue;
-    made[i] += j.clip_count ?? 0;
-    if (active(j)) pending[i] += Math.max(0, j.clips_wanted - (j.clip_count ?? 0));
-  }
-  const top = Math.max(4, ...made.map((m, i) => m + pending[i]));
-  const max = Math.ceil(top / 2) * 2;
-  const name = (d: number) => new Date(d * DAY).toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" });
-  return `<div class="chart-box"><h3 class="stat-title">Clips this week</h3><div class="chart"><div class="yax"><span>${max}</span><span>${max / 2}</span><span>0</span></div><div class="bars">${days
-    .map((d, i) => {
-      const h = (v: number) => ((v / max) * 112).toFixed(1);
-      const bars = made[i] || pending[i]
-        ? `${pending[i] ? `<i class="ghost" style="height:${h(pending[i])}px" title="${pending[i]} on the way"></i>` : ""}${made[i] ? `<i style="height:${h(made[i])}px" title="${made[i]} clips"></i>` : ""}`
-        : `<i class="zero"></i>`;
-      return `<div class="bar-col" style="gap:0">${bars}<span style="margin-top:6px">${name(d)}</span></div>`;
-    })
-    .join("")}</div></div></div>`;
-}
-
-function numStat(value: string | number, label: string, href?: string): string {
-  return `<div class="num"><b>${value}</b><div class="lab"><span>${label}</span>${href ? `<a href="${href}" aria-label="${esc(label.replace(/<[^>]+>/g, " "))}">${icon("arrow")}</a>` : ""}</div></div>`;
+function kpi(value: string | number, label: string): string {
+  return `<div class="kpi"><b>${value}</b><span>${label}</span></div>`;
 }
 
 function homeStats(jobs: Job[]): string {
   const finished = jobs.filter((j) => j.status === "done" || j.status === "failed");
   const ok = finished.filter((j) => j.status === "done").length;
-  const rate = finished.length ? Math.round((ok / finished.length) * 100) : 0;
   const clips = jobs.reduce((n, j) => n + (j.clip_count ?? 0), 0);
-  return `${clipsChart(jobs)}
-${gauge(rate, "Successful jobs", finished.length ? `${rate}%` : "–")}
-${numStat(jobs.filter(active).length, "Jobs<br>in progress")}
-${numStat(clips, "Clips ready<br>to download")}`;
+  const week = jobs.filter((j) => Date.now() - Date.parse(j.created_at) < 7 * DAY).reduce((n, j) => n + (j.clip_count ?? 0), 0);
+  return [
+    kpi(jobs.filter(active).length, "In progress"),
+    kpi(clips, "Clips ready"),
+    kpi(week, "Clips this week"),
+    kpi(finished.length ? Math.round((ok / finished.length) * 100) + "%" : "–", "Success rate"),
+  ].join("");
 }
 
-function jobCard(job: Job): string {
-  const count = job.clip_count ?? 0;
-  const thumbs = (job.covers ?? "").split("|").filter(Boolean).slice(0, 3);
-  const running = job.status === "running";
-  const p = pct(job);
-  const desc =
-    job.status === "failed"
-      ? `<p class="err">${esc((job.error ?? "Failed").split("\n")[0].slice(0, 160))}</p>`
-      : active(job)
-        ? `<p>${esc(job.message || (job.status === "queued" ? "Waiting for Modal to pick it up" : "Starting"))}</p>`
-        : `<p>${count} vertical clip${count === 1 ? "" : "s"} ready to download.</p>`;
-  return `<a class="card ${running ? "dark" : ""} ${job.status === "failed" ? "failed" : ""}" href="/jobs/${esc(job.id)}" data-search="${esc((vodLabel(job) + " " + (job.channel ?? "")).toLowerCase())}"${active(job) ? " data-active" : ""}>
-  <h3>${esc(vodLabel(job))}</h3>
-  ${job.channel ? `<div class="meta-line">${icon("film")}<span>${esc(job.channel)}</span></div>` : ""}
-  ${desc}
-  ${running ? `<div class="pbar${p == null ? " indet" : ""}"><span style="width:${p ?? 0}%"></span></div>` : ""}
-  ${thumbs.length ? `<div class="thumbs">${thumbs.map((k) => `<img src="${esc(fileUrl(k))}" alt="" loading="lazy">`).join("")}</div>` : ""}
-  <div class="foot"><span class="mini">${icon("calendar")}<time data-day datetime="${esc(job.created_at)}">${esc(job.created_at.slice(0, 10))}</time></span><span class="spacer"></span><span class="cnt" title="Clips">${icon("clips")}${count}/${job.clips_wanted}</span>${running && p != null ? `<span class="cnt">${p}%</span>` : ""}</div>
-</a>`;
-}
-
-const COLUMNS: [string, string][] = [
-  ["queued", "Queued"],
-  ["running", "In progress"],
+const GROUPS: [string, string][] = [
+  ["all", "All"],
+  ["active", "In progress"],
   ["done", "Ready"],
   ["failed", "Failed"],
 ];
 
+const group = (job: Job) => (active(job) ? "active" : job.status);
+
+function jobTabs(jobs: Job[]): string {
+  return GROUPS.map(
+    ([g, label]) =>
+      `<button type="button" data-tab="${g}"${g === "all" ? ' class="on"' : ""}>${label}<span class="c">${g === "all" ? jobs.length : jobs.filter((j) => group(j) === g).length}</span></button>`,
+  ).join("");
+}
+
+function jobRow(job: Job): string {
+  const count = job.clip_count ?? 0;
+  const covers = (job.covers ?? "").split("|").filter(Boolean);
+  const p = pct(job);
+  const note =
+    job.status === "failed"
+      ? `<span class="err">${esc((job.error ?? "Failed").split("\n")[0].slice(0, 160))}</span>`
+      : active(job)
+        ? esc(job.message || (job.status === "queued" ? "Waiting for Modal to pick it up" : "Starting"))
+        : `${count} clip${count === 1 ? "" : "s"} ready`;
+  const sub = [job.channel && esc(job.channel), `<time data-day datetime="${esc(job.created_at)}">${esc(job.created_at.slice(0, 10))}</time>`, note]
+    .filter(Boolean)
+    .join(" · ");
+  return `<a class="row ${esc(job.status)}" href="/jobs/${esc(job.id)}" data-group="${group(job)}" data-search="${esc((vodLabel(job) + " " + (job.channel ?? "")).toLowerCase())}"${active(job) ? " data-active" : ""}>
+  <span class="covers">${[0, 1, 2].map((i) => (covers[i] ? `<img src="${esc(fileUrl(covers[i]))}" alt="" loading="lazy">` : "<i></i>")).join("")}</span>
+  <div class="rt"><h3>${esc(vodLabel(job))}</h3><p>${sub}</p>${job.status === "running" ? `<div class="pbar${p == null ? " indet" : ""}" title="${p ?? 0}%"><span style="width:${p ?? 0}%"></span></div>` : ""}</div>
+  <span class="rs">${pill(job.status)}<span class="cnt" title="Clips">${icon("clips")}${count}/${job.clips_wanted}</span></span>
+  <span class="chev">${icon("chevron")}</span>
+</a>`;
+}
+
 export function jobList(jobs: Job[]): string {
-  if (!jobs.length) return `<p class="empty" style="grid-column:1/-1">No VODs yet. Paste a Twitch VOD link above and the clips land here.</p>`;
-  return COLUMNS.map(([status, label]) => {
-    const list = jobs.filter((j) => j.status === status);
-    return `<section class="col${list.length ? "" : " is-empty"}"><div class="col-head"><h2>${label}</h2><span class="chip">${list.length}</span></div><div class="col-list">${
-      list.length ? list.map(jobCard).join("\n") : `<div class="empty-col">Nothing here</div>`
-    }</div></section>`;
-  }).join("\n");
+  if (!jobs.length) return `<p class="empty">No VODs yet. Paste a Twitch VOD link above and the clips land here.</p>`;
+  const ordered = [...jobs.filter(active), ...jobs.filter((j) => !active(j))];
+  return `<div class="jobs">${ordered.map(jobRow).join("\n")}<p id="nomatch" class="nomatch" hidden>Nothing here.</p></div>`;
 }
 
 export function homePage(jobs: Job[]): string {
   return layout(
     "Clip Engine",
-    `<div class="topbar"><label class="search">${icon("search")}<input id="q" type="search" placeholder="Search VODs…" aria-label="Search VODs" autocomplete="off"></label></div>
-<section class="band">
+    `<section class="band">
+  <h1 class="ttl">New clips</h1>
   <form id="new-job" class="composer" method="post" action="/api/jobs">
     <label class="url">${icon("link")}<input id="vod_url" name="vod_url" type="url" inputmode="url" placeholder="Paste a Twitch VOD link, like twitch.tv/videos/…" aria-label="Twitch VOD link" autocomplete="off" required></label>
     <div class="count"><span>Clips</span><button type="button" data-step="-1" aria-label="Fewer">−</button><input id="clips" name="clips" type="number" inputmode="numeric" min="1" max="30" value="10" aria-label="Number of clips" required><button type="button" data-step="1" aria-label="More">+</button></div>
-    <label class="font"><span>Captions</span><select id="caption_font" name="caption_font" aria-label="Caption font">${CAPTION_FONTS.map((f) => `<option value="${f.key}"${f.key === DEFAULT_CAPTION_FONT ? " selected" : ""}>${esc(f.label)}</option>`).join("")}</select></label>
     <button class="btn dark" type="submit">${icon("plus")}Make clips</button>
   </form>
-  <div class="font-preview">
-    <div id="cap-preview" class="cap" role="img" aria-label="How the captions will look"><i class="stroke"></i><i class="body"></i><i class="emph"></i></div>
+  <div class="capopts">
+    <label class="font"><span>Captions</span><select id="caption_font" name="caption_font" form="new-job" aria-label="Caption font">${CAPTION_FONTS.map((f) => `<option value="${f.key}"${f.key === DEFAULT_CAPTION_FONT ? " selected" : ""}>${esc(f.label)}</option>`).join("")}</select></label>
     <label class="font"><span>Text</span><select id="caption_fill" name="caption_fill" form="new-job" aria-label="Caption text colour">${CAPTION_COLOURS.map((c) => `<option value="${c.key}"${c.key === DEFAULT_CAPTION_FILL ? " selected" : ""}>${esc(c.label)}</option>`).join("")}</select></label>
     <label class="font"><span>Highlight</span><select id="caption_emph" name="caption_emph" form="new-job" aria-label="Caption highlight colour">${CAPTION_COLOURS.map((c) => `<option value="${c.key}"${c.key === DEFAULT_CAPTION_EMPH ? " selected" : ""}>${esc(c.label)}</option>`).join("")}</select></label>
+    <div id="cap-preview" class="cap" role="img" aria-label="How the captions will look"><i class="stroke"></i><i class="body"></i><i class="emph"></i></div>
   </div>
   <p id="form-error" class="error"></p>
-  <div id="stats" class="stats">${homeStats(jobs)}</div>
+  <div id="stats" class="kpis">${homeStats(jobs)}</div>
 </section>
-<main class="page"><div id="jobs" class="board">${jobList(jobs)}</div></main>`,
+<main class="page">
+  <div class="listbar"><div id="tabs" class="tabs">${jobTabs(jobs)}</div><label class="search">${icon("search")}<input id="q" type="search" placeholder="Search VODs…" aria-label="Search VODs" autocomplete="off"></label></div>
+  <div id="jobs">${jobList(jobs)}</div>
+</main>`,
     `
-var form=document.getElementById('new-job'),q=document.getElementById('q');
-var HEX=${JSON.stringify(Object.fromEntries(CAPTION_COLOURS.map((c) => [c.key, c.hex])))},fill=document.getElementById('caption_fill'),emph=document.getElementById('caption_emph');
-function preview(){document.querySelectorAll('#cap-preview i').forEach(function(l){var u='url(/font-preview/'+form.caption_font.value+'/'+l.className+'.png)';l.style.webkitMaskImage=u;l.style.maskImage=u;});
+var form=document.getElementById('new-job'),q=document.getElementById('q'),tab='all';
+var HEX=${JSON.stringify(Object.fromEntries(CAPTION_COLOURS.map((c) => [c.key, c.hex])))},font=document.getElementById('caption_font'),fill=document.getElementById('caption_fill'),emph=document.getElementById('caption_emph');
+function preview(){document.querySelectorAll('#cap-preview i').forEach(function(l){var u='url(/font-preview/'+font.value+'/'+l.className+'.png)';l.style.webkitMaskImage=u;l.style.maskImage=u;});
 document.querySelector('#cap-preview .body').style.background=HEX[fill.value];document.querySelector('#cap-preview .emph').style.background=HEX[emph.value];}
-[form.caption_font,fill,emph].forEach(function(s){s.addEventListener('change',preview);});preview();
+[font,fill,emph].forEach(function(s){s.addEventListener('change',preview);});preview();
 form.querySelectorAll('[data-step]').forEach(function(b){b.addEventListener('click',function(){var n=Number(form.clips.value)||10;form.clips.value=Math.min(30,Math.max(1,n+Number(b.dataset.step)));});});
 form.addEventListener('submit',async function(e){e.preventDefault();var btn=form.querySelector('[type=submit]'),err=document.getElementById('form-error');btn.disabled=true;err.textContent='';
-try{var r=await fetch('/api/jobs',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({vod_url:form.vod_url.value,clips:Number(form.clips.value),caption_font:form.caption_font.value,caption_fill:fill.value,caption_emph:emph.value})});var d=await r.json();if(!r.ok)throw new Error(d.error||'Request failed');location.href='/jobs/'+d.id;}catch(x){err.textContent=x.message;btn.disabled=false;}});
-function filter(){var v=q.value.trim().toLowerCase();document.querySelectorAll('#jobs .card').forEach(function(c){c.hidden=!!v&&c.dataset.search.indexOf(v)<0;});}
+try{var r=await fetch('/api/jobs',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({vod_url:form.vod_url.value,clips:Number(form.clips.value),caption_font:font.value,caption_fill:fill.value,caption_emph:emph.value})});var d=await r.json();if(!r.ok)throw new Error(d.error||'Request failed');location.href='/jobs/'+d.id;}catch(x){err.textContent=x.message;btn.disabled=false;}});
+function filter(){var v=q.value.trim().toLowerCase(),shown=0;document.querySelectorAll('#tabs [data-tab]').forEach(function(b){b.classList.toggle('on',b.dataset.tab===tab);});
+document.querySelectorAll('#jobs .row').forEach(function(c){c.hidden=(tab!=='all'&&c.dataset.group!==tab)||(!!v&&c.dataset.search.indexOf(v)<0);if(!c.hidden)shown++;});
+var nm=document.getElementById('nomatch');if(nm)nm.hidden=shown>0;}
+document.getElementById('tabs').addEventListener('click',function(e){var b=e.target.closest('[data-tab]');if(!b)return;tab=b.dataset.tab;filter();});
 q.addEventListener('input',filter);
-poll(function(){return !!document.querySelector('#jobs [data-active]');},function(doc){['jobs','stats'].forEach(function(id){var n=doc.getElementById(id);if(n)document.getElementById(id).innerHTML=n.innerHTML;});filter();});
+poll(function(){return !!document.querySelector('#jobs [data-active]');},function(doc){['jobs','stats','tabs'].forEach(function(id){var n=doc.getElementById(id);if(n)document.getElementById(id).innerHTML=n.innerHTML;});filter();});
 `,
     { recent: jobs, current: null },
   );
@@ -558,14 +541,10 @@ function clipCard(job: Job, clip: Clip): string {
   return `<article class="clip" data-key="${esc(key)}" data-src="${esc(fileUrl(clip.preview_key || clip.video_key))}" data-poster="${clip.thumb_key ? esc(fileUrl(clip.thumb_key)) : ""}" data-title="${esc(clipTitle(clip))}" data-meta="${esc(meta.join(" · "))}" data-download="${esc(download)}" data-twitch="${esc(twitch)}">
   <button class="thumb" type="button" data-open aria-label="Play ${esc(clipTitle(clip))}">
     ${clip.thumb_key ? `<img src="${esc(fileUrl(clip.thumb_key))}" alt="" loading="lazy">` : `<video src="${esc(fileUrl(clip.preview_key || clip.video_key))}#t=1" preload="metadata" muted playsinline></video>`}
-    <span class="rank${clip.n === 1 ? " top" : ""}">#${clip.n}</span>
+    <span class="rank${clip.n === 1 ? " top" : ""}">#${clip.n}</span>${clip.duration != null ? `<span class="dur">${clock(clip.duration)}</span>` : ""}
     <span class="playi">${icon("play")}</span>
   </button>
-  <h3>${esc(clipTitle(clip))}</h3>
-  <div class="foot">
-    ${clip.duration != null ? `<span class="mini">${icon("clock")}${clock(clip.duration)}</span>` : ""}
-    ${clip.vod_start != null ? `<span class="mini" title="Position in the VOD">${icon("film")}${clock(clip.vod_start)}</span>` : ""}
-  </div>
+  <h3 title="${esc(clipTitle(clip))}">${esc(clipTitle(clip))}</h3>
   <div class="actions">
     <a class="btn dark sm" href="${esc(download)}" download>${icon("download")}Download</a>
     ${twitch ? `<a class="btn sm icon" href="${esc(twitch)}" target="_blank" rel="noopener" title="Open on Twitch at ${clock(clip.vod_start!)}" aria-label="Open on Twitch">${icon("external")}</a>` : ""}
@@ -573,30 +552,34 @@ function clipCard(job: Job, clip: Clip): string {
 </article>`;
 }
 
-function jobSummary(job: Job, clips: Clip[], events: JobEvent[], modalUrl: string | null): string {
+function attemptOf(events: JobEvent[]): { earlier: number; attempt: JobEvent[] } {
+  const retry = events.findLastIndex((e) => e.stage === "queued" && e.message === "Retry requested");
+  return {
+    earlier: retry > 0 ? events.slice(0, retry).filter((e) => e.stage === "failed").length : 0,
+    attempt: retry > 0 ? events.slice(retry) : events,
+  };
+}
+
+function jobSummary(job: Job, clips: Clip[], events: JobEvent[]): string {
   const p = pct(job);
   const runtime = clips.reduce((t, c) => t + (c.duration ?? 0), 0);
-  return `<div class="jstats">
-  <div class="jhead">
-    ${pill(job.status)}
-    <h1>${esc(vodLabel(job))}</h1>
-    <div class="jsub">${job.channel ? `<span>${esc(job.channel)}</span>` : ""}<time datetime="${esc(job.created_at)}">${esc(job.created_at.slice(0, 16).replace("T", " "))}</time><a href="${esc(job.vod_url)}" target="_blank" rel="noopener">${icon("external")}Open VOD</a></div>
+  const started = attemptOf(events).attempt[0]?.at ?? job.created_at;
+  const third = active(job)
+    ? kpi(p == null ? "…" : `${p}%`, job.status === "queued" ? "Queued" : "Progress")
+    : kpi(job.finished_at ? dur(Date.parse(job.finished_at) - Date.parse(started)) : "–", "Run time");
+  return `<div class="jhead">
+  <div class="jtitle">
+    <h1 title="${esc(vodLabel(job))}">${esc(vodLabel(job))}</h1>
+    <div class="jsub">${pill(job.status)}${job.channel ? `<span>${esc(job.channel)}</span>` : ""}<time datetime="${esc(job.created_at)}">${esc(job.created_at.slice(0, 16).replace("T", " "))}</time><a href="${esc(job.vod_url)}" target="_blank" rel="noopener">${icon("external")}Open VOD</a></div>
   </div>
-  ${
-    job.status === "failed"
-      ? gauge(p ?? 0, "Stopped", "–")
-      : gauge(p ?? 0, job.status === "done" ? "Complete" : job.status === "queued" ? "Queued" : "Progress", p == null ? "…" : `${p}%`)
-  }
-  ${numStat(`${clips.length}<span class="muted" style="font-size:20px">/${job.clips_wanted}</span>`, "Clips<br>ready")}
-  ${numStat(runtime ? clock(runtime) : "–", "Total<br>runtime")}
+  <div class="jnums">${kpi(`${clips.length}<small>/${job.clips_wanted}</small>`, "Clips ready")}${kpi(runtime ? clock(runtime) : "–", "Total length")}${third}</div>
 </div>
 ${active(job) ? `${stepper(job)}<p class="stage-msg">${esc(job.message || (job.status === "queued" ? "Waiting for Modal to pick this up" : "Starting"))}</p>` : ""}
 ${
   job.status === "failed"
     ? `<div class="failbox"><h3>This job failed${job.stage && job.stage !== "failed" ? ` during ${esc(job.stage)}` : ""}</h3><pre class="errtext">${esc(job.error || job.message || "Unknown error")}</pre><button class="btn dark sm" type="button" data-action="retry">${icon("retry")}Retry</button></div>`
     : ""
-}
-${runPanel(job, events, modalUrl)}`;
+}`;
 }
 
 const STAGE_LABEL: Record<string, string> = {
@@ -620,9 +603,7 @@ function dur(ms: number): string {
 }
 
 function runPanel(job: Job, events: JobEvent[], modalUrl: string | null): string {
-  const retry = events.findLastIndex((e) => e.stage === "queued" && e.message === "Retry requested");
-  const earlier = retry > 0 ? events.slice(0, retry).filter((e) => e.stage === "failed").length : 0;
-  const attempt = retry > 0 ? events.slice(retry) : events;
+  const { earlier, attempt } = attemptOf(events);
   const rows: { stage: string; at: string; message: string | null }[] = [];
   for (const e of attempt) {
     const last = rows.at(-1);
@@ -649,7 +630,7 @@ function runPanel(job: Job, events: JobEvent[], modalUrl: string | null): string
     : `<span data-since="${esc(started)}">${dur(Date.now() - Date.parse(started))}</span>`;
   const stamp = (t: string) => `<time datetime="${esc(t)}">${esc(t.slice(0, 16).replace("T", " "))}</time>`;
   return `<div class="run">
-  <div><h3>Run timeline</h3><ol class="tl">${items}</ol>${earlier ? `<p class="stage-msg">${earlier} earlier attempt${earlier === 1 ? "" : "s"} failed. The full history is in the activity log below.</p>` : ""}</div>
+  <div><h3>Run timeline</h3><ol class="tl">${items}</ol>${earlier ? `<p class="stage-msg">${earlier} earlier attempt${earlier === 1 ? "" : "s"} failed. The full history is in the activity log.</p>` : ""}</div>
   <div><h3>Run details</h3><dl class="kv">
     <dt>Run ID</dt><dd><code>${esc(job.id)}</code></dd>
     ${earlier ? `<dt>Attempt</dt><dd>${earlier + 1}</dd>` : ""}
@@ -691,10 +672,11 @@ export function jobPage(
   return layout(
     `${vodLabel(job)} · Clip Engine`,
     `<div class="topbar"><nav class="crumbs"><a href="/">Dashboard</a>${icon("chevron")}<b>${esc(vodLabel(job))}</b></nav><a class="tlink" href="${esc(job.vod_url)}" target="_blank" rel="noopener">${icon("external")}<span class="lbl">Twitch</span></a><button class="tlink danger" type="button" data-action="delete">${icon("trash")}<span class="lbl">Delete</span></button></div>
-<section class="band"><div id="summary" data-id="${esc(job.id)}"${active(job) ? " data-active" : ""}>${jobSummary(job, clips, events, modalUrl)}</div></section>
+<section class="band"><div id="summary" data-id="${esc(job.id)}"${active(job) ? " data-active" : ""}>${jobSummary(job, clips, events)}</div></section>
 <main class="page">
 <div id="clips-head">${clipsHead(job, clips)}</div>
 <div id="clips" class="clips">${clips.map((c) => clipCard(job, c)).join("\n")}</div>
+<details id="run-box"${active(job) || job.status === "failed" ? " open" : ""}><summary>Run details</summary><div id="run">${runPanel(job, events, modalUrl)}</div></details>
 <details id="events">${eventLog(events)}</details>
 </main>
 <div id="player" class="player" hidden><div class="ptop"><button class="iconbtn" type="button" data-close aria-label="Close">${icon("close")}</button><span class="ctr"></span><span class="spacer"></span><button class="btn sm unmute" type="button" data-unmute>${icon("sound")}Tap for sound</button></div><div class="feed"></div></div>
@@ -735,7 +717,7 @@ if(fresh.length===grid.children.length&&fresh.every(function(c){return cur[c.dat
 grid.replaceChildren.apply(grid,fresh.map(function(c){return cur[c.dataset.key]||document.importNode(c,true);}));}
 poll(function(){return document.getElementById('summary').hasAttribute('data-active');},function(doc){
 var s=doc.getElementById('summary');if(!s)return;var cur=document.getElementById('summary');cur.innerHTML=s.innerHTML;if(s.hasAttribute('data-active'))cur.setAttribute('data-active','');else cur.removeAttribute('data-active');
-document.getElementById('clips-head').innerHTML=doc.getElementById('clips-head').innerHTML;document.getElementById('events').innerHTML=doc.getElementById('events').innerHTML;mergeClips(doc);});
+document.getElementById('clips-head').innerHTML=doc.getElementById('clips-head').innerHTML;document.getElementById('run').innerHTML=doc.getElementById('run').innerHTML;document.getElementById('events').innerHTML=doc.getElementById('events').innerHTML;mergeClips(doc);});
 `,
     { recent, current: job.id },
   );
