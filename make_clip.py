@@ -751,6 +751,17 @@ def _cam(clip, ch, st):
         st["cam"] = tuple(clip.cam)
         log(f"  facecam {st['cam']} (from the spec)")
         return st["cam"]
+    # LOOK WHERE THE WEBCAM IS FIRST. A watchparty close-up holds one player
+    # on screen for a whole clip, and a face that size outscores the webcam:
+    # FNS 2885323336 clip 5 put a T1 player in BOTH panes for 58s while FNS
+    # sat at (1572, 279) the entire time. `ch.cam` is the webcam measured over
+    # the whole VOD (core.vod_cam), so a live face near it is preferred, and
+    # the open search runs only when there is none (the streamer moved it).
+    face = facecam.face_rect(clip.source(ROOT), within=ch.cam) if ch.cam else None
+    if face:
+        st["cam"] = face
+        log(f"  facecam {face} from the face detector, near the VOD's webcam {tuple(ch.cam)}")
+        return face
     face = facecam.face_rect(clip.source(ROOT))
     if face:
         st["cam"] = face

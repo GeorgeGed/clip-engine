@@ -249,8 +249,20 @@ def _live_face(hits, samples, still=FACE_STILL, wild=FACE_WILD, min_hit=FACE_MIN
     return best
 
 
+NEAR_PAD = 0.5   # how far past the VOD's webcam a face may sit, in rect sizes
+
+
+def near(hits, rect, pad=NEAR_PAD):
+    """The hits whose centre lies in `rect` grown by `pad` of its size."""
+    if rect is None:
+        return list(hits)
+    x0, y0, x1, y1 = rect
+    px, py = (x1 - x0) * pad, (y1 - y0) * pad
+    return [h for h in hits if x0 - px <= h[0] <= x1 + px and y0 - py <= h[1] <= y1 + py]
+
+
 def face_rect(path, *, samples=FACE_SAMPLES, min_hit=YUNET_MIN_HIT,
-              by_count=False) -> tuple[int, int, int, int] | None:
+              by_count=False, within=None) -> tuple[int, int, int, int] | None:
     """The house facecam crop, found by a FACE DETECTOR rather than motion.
 
     `detect` reads motion, and a page that plays video moves too: on FNS VOD
@@ -278,6 +290,9 @@ def face_rect(path, *, samples=FACE_SAMPLES, min_hit=YUNET_MIN_HIT,
 
     `min_hit` is lowered and `by_count` set for a whole VOD (`vod_rect`),
     where the webcam can sit in a different place in each scene.
+
+    `within` keeps only faces near that rect (see `near`): make_clip passes
+    the VOD's webcam so a broadcast close-up cannot outscore it.
     """
     import cv2                                           # noqa: PLC0415
     cap = cv2.VideoCapture(str(path))
@@ -305,6 +320,7 @@ def face_rect(path, *, samples=FACE_SAMPLES, min_hit=YUNET_MIN_HIT,
                 box = d[max(int(y), 0):int(y + h), max(int(x), 0):int(x + w)]
                 into.append((x + w / 2, y + h / 2, h, float(box.mean()) if box.size else 0.0))
     cap.release()
+    yhits, hhits = near(yhits, within), near(hhits, within)
     best = _live_face(yhits, samples, YUNET_STILL, YUNET_WILD, min_hit, by_count)
     scale = YUNET_TO_HAAR
     if best is None:
