@@ -250,6 +250,24 @@ def _live_face(hits, samples, still=FACE_STILL, wild=FACE_WILD, min_hit=FACE_MIN
 
 
 NEAR_PAD = 0.5   # how far past the VOD's webcam a face may sit, in rect sizes
+MIN_FACE = 0.8   # a clip's face at least this share of the VOD webcam's face
+
+
+def face_h(rect) -> float:
+    """The YuNet face height a crop of `rect` was sized from (see face_rect).
+    A border trim can only shrink the crop, so this never overstates it."""
+    return (rect[3] - rect[1]) / (FACE_H * YUNET_TO_HAAR)
+
+
+def at_least(hits, min_h):
+    """The hits whose face is at least `min_h` tall.
+
+    THE GAME'S FACES ARE SMALLER THAN HIS. On VOD 2920606211 the webcam face
+    measured 79-81px, while the agent card bottom-left ran 52-60px and the
+    scoreboard portraits 21-40px. The agent card sat near where his webcam is
+    in other scenes and won clip 2; a top-right portrait won clip 3. Both
+    are under 0.8 of the webcam's face, which no real webcam face was."""
+    return list(hits) if not min_h else [h for h in hits if h[2] >= min_h]
 
 
 def near(hits, rect, pad=NEAR_PAD):
@@ -262,7 +280,7 @@ def near(hits, rect, pad=NEAR_PAD):
 
 
 def face_rect(path, *, samples=FACE_SAMPLES, min_hit=YUNET_MIN_HIT,
-              by_count=False, within=None) -> tuple[int, int, int, int] | None:
+              by_count=False, within=None, min_h=None) -> tuple[int, int, int, int] | None:
     """The house facecam crop, found by a FACE DETECTOR rather than motion.
 
     `detect` reads motion, and a page that plays video moves too: on FNS VOD
@@ -292,7 +310,8 @@ def face_rect(path, *, samples=FACE_SAMPLES, min_hit=YUNET_MIN_HIT,
     where the webcam can sit in a different place in each scene.
 
     `within` keeps only faces near that rect (see `near`): make_clip passes
-    the VOD's webcam so a broadcast close-up cannot outscore it.
+    the VOD's webcam so a broadcast close-up cannot outscore it. `min_h`
+    drops faces shorter than it (see `at_least`).
     """
     import cv2                                           # noqa: PLC0415
     cap = cv2.VideoCapture(str(path))
@@ -320,7 +339,8 @@ def face_rect(path, *, samples=FACE_SAMPLES, min_hit=YUNET_MIN_HIT,
                 box = d[max(int(y), 0):int(y + h), max(int(x), 0):int(x + w)]
                 into.append((x + w / 2, y + h / 2, h, float(box.mean()) if box.size else 0.0))
     cap.release()
-    yhits, hhits = near(yhits, within), near(hhits, within)
+    yhits = at_least(near(yhits, within), min_h)
+    hhits = at_least(near(hhits, within), min_h and min_h * YUNET_TO_HAAR)
     best = _live_face(yhits, samples, YUNET_STILL, YUNET_WILD, min_hit, by_count)
     scale = YUNET_TO_HAAR
     if best is None:

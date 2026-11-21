@@ -758,16 +758,23 @@ def _cam(clip, ch, st):
     # sat at (1572, 279) the entire time. `ch.cam` is the webcam measured over
     # the whole VOD (core.vod_cam), so a live face near it is preferred, and
     # the open search runs only when there is none (the streamer moved it).
-    face = facecam.face_rect(clip.source(ROOT), within=ch.cam) if ch.cam else None
-    if face:
-        st["cam"] = face
-        log(f"  facecam {face} from the face detector, near the VOD's webcam {tuple(ch.cam)}")
-        return face
-    face = facecam.face_rect(clip.source(ROOT))
-    if face:
-        st["cam"] = face
-        log(f"  facecam {face} from the face detector")
-        return face
+    # AND HIS FACE IS THE SIZE IT IS ON THE REST OF THE VOD. The game draws
+    # faces too, smaller ones (facecam.at_least), and a webcam that moves
+    # between scenes leaves the near-search with only those: VOD 2920606211
+    # got an agent card on clip 2 and a scoreboard portrait on clip 3.
+    src = clip.source(ROOT)
+    min_h = facecam.MIN_FACE * facecam.face_h(ch.cam) if ch.cam else None
+    tries = ([("near the VOD's webcam, his size", dict(within=ch.cam, min_h=min_h)),
+              ("his size", dict(min_h=min_h)),
+              ("near the VOD's webcam", dict(within=ch.cam))] if ch.cam else []) \
+        + [("anywhere", {})]
+    for how, kw in tries:
+        face = facecam.face_rect(src, **kw)
+        if face:
+            st["cam"] = face
+            log(f"  facecam {face} from the face detector: {how}"
+                + (f" (VOD webcam {tuple(ch.cam)})" if ch.cam else ""))
+            return face
     f = facecam.detect(clip.source(ROOT))
     if f is None or f.coverage > 0.5:
         st["cam"] = ch.cam
@@ -1235,17 +1242,32 @@ def stage_chat(clip, ch, st):
         return
     t0, t1 = clip.region
     cache = ROOT / f"jobs/{clip.job}/chat_{clip.index:02d}.json"
+    unavailable = False
     if cache.exists():
         raw = json.loads(cache.read_text())
         log(f"  {len(raw)} messages from cache")
+    elif clip.chat_mode == "off":
+        raw = []
     else:
         # Context either side, because the RESTING RATE has to come from
         # outside the clip: a 20s ace clip is hype end to end and would read
         # as flat against its own mean.
-        msgs = twitch_chat.fetch(ch.vod_id, t0 - cr.CONTEXT_PAD, t1 + cr.CONTEXT_PAD)
-        twitch_chat.to_json(msgs, cache)
-        raw = json.loads(cache.read_text())
-        log(f"  fetched {len(raw)} (clip +/- {cr.CONTEXT_PAD:.0f}s of context)")
+        # A CHAT THAT CANNOT BE FETCHED COSTS THE CHAT, NOT THE CLIP, after
+        # twitch_chat's own retries. Nothing is cached, so the next build tries
+        # again.
+        try:
+            vj = ROOT / f"jobs/{clip.job}/vod.json"
+            vod_s = json.loads(vj.read_text()).get("duration") if vj.exists() else None
+            msgs = twitch_chat.fetch(ch.vod_id, t0 - cr.CONTEXT_PAD, t1 + cr.CONTEXT_PAD,
+                                     duration=vod_s)
+        except Exception as e:                                   # noqa: BLE001
+            log(f"  chat unavailable, building without it: {type(e).__name__}: {str(e)[:160]}")
+            msgs, unavailable = None, True
+        if msgs is not None:
+            twitch_chat.to_json(msgs, cache)
+        raw = json.loads(cache.read_text()) if msgs is not None else []
+        if not unavailable:
+            log(f"  fetched {len(raw)} (clip +/- {cr.CONTEXT_PAD:.0f}s of context)")
     for m in raw:
         m.setdefault("frags", m.get("fragments", []))
 
@@ -1278,10 +1300,12 @@ def stage_chat(clip, ch, st):
               and remap(m["offset"] - t0) is not None]
     meta = st["meta"]
     subject = f"{meta.get('subject','')} {meta.get('claim','')}"
-    safe, why, topic = cr.chat_is_safe(on_cut, subject)
-    log(f"  topicality: {why} ({topic['n']} messages on the cut"
-        + (f", {topic['notices']} sub notices not scored"
-           if topic.get("notices") else "") + ")")
+    safe, why, topic = (True, "", {"n": 0}) if unavailable or clip.chat_mode == "off" \
+        else cr.chat_is_safe(on_cut, subject)
+    if why:
+        log(f"  topicality: {why} ({topic['n']} messages on the cut"
+            + (f", {topic['notices']} sub notices not scored"
+               if topic.get("notices") else "") + ")")
     if not safe and clip.chat_mode != "off":
         log("  ^ below the floor, but chat is ON — set chat_mode \"off\" on "
             "this clip's spec if the room is talking about something else")
@@ -1296,7 +1320,7 @@ def stage_chat(clip, ch, st):
     # `frag` clips, but on s0mcs (VOD 2889934935) four clips tagged `take`
     # and `receipts` were him ranting mid-match, and the panel sat over the
     # game for the whole clip. What decides it is what the lower pane shows.
-    off = clip.chat_mode == "off"
+    off = clip.chat_mode == "off" or unavailable
     if not off and clip.chat_mode != "force":
         moving = facecam.content_moving(clip.source(ROOT), _cam(clip, ch, st))
         if moving >= facecam.GAMEPLAY_MOVING:
@@ -2395,18 +2419,23 @@ def _stamp(clip, ch, st):
     s = plan_mod.stamp(clip.plan, st.get("words") or [])
     rm = s and remap_card(s["at"], s["at"] + finish.STAMP_S, st["keeps"])
     total = st["total"] / ch.fps
-    if rm and rm[0] >= TITLE_S and rm[0] + finish.STAMP_S <= total:
+    hold = min(finish.STAMP_S, total - rm[0]) if rm else 0.0
+    if rm and rm[0] >= TITLE_S and hold >= finish.STAMP_MIN_S:
+        # A gameplay payoff is often the last second of the clip ("insane
+        # rocket" on VOD 2920606211 clip 1): the freeze then holds to the end,
+        # which is the freeze-frame ending, rather than being dropped.
         _fill, emph = _captions(clip)
         _w, h = titles.stamp(s["word"], d / "stamp_0.png", font_key=clip.caption_font,
                              fill=emph)
         top, bottom, _e = nl.pane_split(ch.seam)
-        ov.exhibit_reveal(d / "stamp_0.png", d / "stamp_0.mov", dur=finish.STAMP_S,
+        ov.exhibit_reveal(d / "stamp_0.png", d / "stamp_0.mov", dur=hold,
                           y=top + int(bottom * 0.42) - h // 2, grow_in=0.16,
                           start_scale=1.35, fade_out=0.18, blur_px=4.0, hold_drift=4)
-        out.append({"word": s["word"], "at": round(rm[0], 3), "dur": finish.STAMP_S})
-        log(f"  stamp {s['word']!r} at {rm[0]:.2f}s")
+        out.append({"word": s["word"], "at": round(rm[0], 3), "dur": round(hold, 3)})
+        log(f"  stamp {s['word']!r} at {rm[0]:.2f}s for {hold:.2f}s")
     elif s:
-        log(f"  stamp {s['word']!r} skipped: it would land outside the clip or under the title")
+        log(f"  stamp {s['word']!r} skipped: it would land under the title or in the last "
+            f"{finish.STAMP_MIN_S}s")
     (d / "stamp.json").write_text(json.dumps(out, indent=1))
 
 

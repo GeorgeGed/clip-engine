@@ -91,6 +91,15 @@ def _post(body: list) -> list:
         return json.load(r)
 
 
+# Chat is worth waiting for: a page gets about a minute and a half of retries
+# (2, 4, 8, 16, 30, 30s) before the clip is built without it.
+TRIES = 7
+
+
+def _backoff(attempt: int) -> float:
+    return min(2.0 * 2 ** attempt, 30.0)
+
+
 def _page(video_id: str, offset: float):
     """One page, addressed BY OFFSET.
 
@@ -107,14 +116,21 @@ def _page(video_id: str, offset: float):
                            "contentOffsetSeconds": int(offset)},
              "extensions": {"persistedQuery": {"version": 1,
                                                "sha256Hash": QUERY_HASH}}}]
-    for attempt in range(4):
+    for attempt in range(TRIES):
         try:
             d = _post(body)
-            break
         except urllib.error.HTTPError:
-            if attempt == 3:
+            if attempt == TRIES - 1:
                 raise
-            time.sleep(1.5 * (attempt + 1))
+            time.sleep(_backoff(attempt))
+            continue
+        # "service error" is Twitch having a moment, not a rotated hash:
+        # it killed clip 10 of VOD 2920606211 once and is worth a retry.
+        transient = any("service error" in str(e.get("message", "")).lower()
+                        for e in d[0].get("errors") or [])
+        if not transient or attempt == TRIES - 1:
+            break
+        time.sleep(_backoff(attempt))
     errs = d[0].get("errors")
     if errs:
         raise RuntimeError(
@@ -127,11 +143,18 @@ def _page(video_id: str, offset: float):
 STEP = 40.0
 
 
-def fetch(video_id: str, start: float, end: float, *, pause: float = 0.6) -> list[Message]:
-    """Every chat message between `start` and `end` seconds into the VOD."""
+def fetch(video_id: str, start: float, end: float, *, pause: float = 0.6,
+          duration: float | None = None) -> list[Message]:
+    """Every chat message between `start` and `end` seconds into the VOD.
+
+    NEVER ASK PAST THE VOD'S END. Twitch answers an offset after the last
+    second with "service error", every time: clip 10 of VOD 2920606211
+    (4248s) ended at 4225s, its context pad asked for 4280s, and the clip
+    failed. With `duration` the paging stops at the end."""
     out: dict[str, Message] = {}
     off = max(0.0, start - 10)
-    while off < end + STEP:
+    last = end + STEP if duration is None else min(end + STEP, duration)
+    while off < last:
         for e in _page(video_id, off)["edges"]:
             n = e["node"]
             t = float(n["contentOffsetSeconds"])

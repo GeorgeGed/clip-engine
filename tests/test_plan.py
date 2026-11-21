@@ -206,3 +206,19 @@ def test_the_rules_file_reaches_the_prompt():
     frag = pl.system("frag")
     assert "(allowed here: none, stamp)" in frag and "(allowed here: none, banner)" in frag
     assert "Allowed here: straight." in pl.system("receipts")
+
+
+def test_a_plan_that_only_fails_on_decoration_keeps_its_story():
+    bad = _good()
+    bad["beats"][2]["stamp"] = "needs to disband"         # three words, twice
+    r = pl.write(FACTS, client=_Client(json.dumps(bad), json.dumps(bad)))
+    assert r["plan"] and r["salvaged"] == ["beat 3 stamp dropped"]
+    assert r["plan"]["beats"][2]["treatment"] == "none"
+    assert r["plan"]["beats"][0]["banner"] == "SENTINELS ROSTER"
+
+
+def test_a_story_fault_is_never_salvaged():
+    bad = _good()
+    bad["beats"][2]["role"] = "escalation"                # no payoff
+    r = pl.write(FACTS, client=_Client(json.dumps(bad), json.dumps(bad)))
+    assert r["plan"] is None and r["errors"]

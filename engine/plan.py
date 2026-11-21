@@ -371,8 +371,38 @@ def write(facts: dict, *, client, model: str = MODEL_DEFAULT) -> dict:
         messages += [{"role": "assistant", "content": raw},
                      {"role": "user", "content": "That plan fails these checks:\n- "
                       + "\n- ".join(errs) + "\nReturn the corrected JSON only."}]
+    plan, why = _salvage(d, facts, errs)
+    if plan:
+        return {"v": VERSION, "plan": plan, "drop": None, "errors": [], "attempts": 2,
+                "salvaged": why}
     return {"v": VERSION, "plan": None, "drop": None, "errors": errs, "attempts": 2,
             "raw": raw[-1500:]}
+
+
+def _salvage(d: dict | None, facts: dict, errs: list[str]) -> tuple[dict | None, list[str]]:
+    """A plan whose story is sound but whose decoration fails twice keeps the
+    story: the failing treatments go to "none" and a failing cold open to
+    "straight". Clip 6 of VOD 2920606211 lost its whole plan to a stamp
+    three words long, written twice. A story fault (beats, roles, payoff
+    words, logline) is never salvaged."""
+    if not isinstance(d, dict) or not isinstance(d.get("beats"), list):
+        return None, []
+    d = json.loads(json.dumps(d))
+    named = {int(k) for k in re.findall(r"^beat (\d+):", "\n".join(errs), re.M)}
+    if any(re.search(r"graphics|at most one banner|big_cam covers", e) for e in errs):
+        named |= {k for k, b in enumerate(d["beats"], 1) if b.get("role") != "payoff"}
+    why = []
+    for k, b in enumerate(d["beats"], 1):
+        if k in named and isinstance(b, dict) and b.get("treatment", "none") != "none":
+            why.append(f"beat {k} {b['treatment']} dropped")
+            b["treatment"] = "none"
+    if any("cold open" in e for e in errs):
+        d["open"] = {"style": "straight", "why": "the cold open failed its checks"}
+        why.append("cold open dropped")
+    if not why:
+        return None, []
+    plan, _drop, left = validate(d, facts)
+    return (plan, why) if plan else (None, [])
 
 
 def beats_with(plan: dict | None, treatment: str) -> list[dict]:

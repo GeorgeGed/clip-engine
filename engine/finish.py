@@ -20,6 +20,7 @@ import subprocess
 from pathlib import Path
 
 STAMP_S = 1.2            # how long the pane holds still
+STAMP_MIN_S = 0.5        # shorter, at the very end of a clip, and it is not worth it
 STAMP_SAT = 0.0          # grey
 STAMP_DIM = -0.10        # and a touch darker, so the word reads over anything
 JOIN_FADE = 0.02         # an audio fade at each join, so a cut is not a click
