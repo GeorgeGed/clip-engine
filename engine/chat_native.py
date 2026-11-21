@@ -77,8 +77,11 @@ def _message(m: dict, *, bold, regular, badges: dict, emotes: Path) -> Image.Ima
     lh = round(SIZE * LINE)
     # tokens: (kind, payload, font, colour)
     toks = []
+    # A BADGE IS A GARNISH. v18 was deployed from a checkout without the
+    # (then gitignored) badge PNGs, and the first badged message would have
+    # crashed the whole clip. A missing file now costs only the badge.
     for b in m.get("badges", [])[:2]:
-        if b in badges:
+        if b in badges and (PUBLIC / badges[b]).exists():
             im = Image.open(PUBLIC / badges[b]).convert("RGBA").resize((BADGE, BADGE), Image.LANCZOS)
             toks.append(("img", im, 7, 4))
     toks.append(("text", m["author"], bold, _rgba(m.get("display") or m.get("colour"))))
