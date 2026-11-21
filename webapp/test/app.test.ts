@@ -342,6 +342,15 @@ describe("pipeline callbacks", () => {
     expect(page).toContain(`${VOD}?t=1h2m3s`);
     expect(page).toContain(`/files/jobs/${job.id}/03-first-take.mp4?download=1`);
 
+    const plan = { logline: "FNS says the roster should disband", beats: [
+      { role: "setup", feeling: "curiosity", treatment: "banner", why: "names it" },
+      { role: "payoff", feeling: "outrage", treatment: "none", why: "" }] };
+    expect((await pipeline("clip", { ...clip, n: 4, plan })).status).toBe(200);
+    const planned = await (await call(`/jobs/${job.id}`, { headers: { cookie } })).text();
+    expect(planned).toContain("FNS says the roster should disband</p>");
+    expect(planned).toContain("<b>setup</b> curiosity · banner</li>");
+    expect(planned).toContain("<b>payoff</b> outrage</li>");
+
     expect((await pipeline("clip", { ...clip, n: "x" })).status).toBe(400);
   });
 

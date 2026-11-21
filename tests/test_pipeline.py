@@ -68,3 +68,89 @@ def test_specs_take_the_best_title(tmp_path):
     (p,) = core.specs(tmp_path, ranked, ch, "123", tl, caption_fill="white", caption_emph="red")
     assert json.loads(p.read_text())["clip"]["chat_mode"] == "off"
     assert load(p)[0].caption_fill == "white" and load(p)[0].caption_emph == "red"
+
+
+def _planning_job(tmp_path):
+    words, utt = [], []
+    for k, a in enumerate((100.0, 200.0, 300.0)):
+        ws = [{"start": a + i, "end": a + i + 0.6, "text": f"w{k}{i}" + ("." if i % 3 == 2 else ""),
+               "prob": 1} for i in range(9)]
+        utt.append({"start": a, "end": a + 9, "text": "", "words": ws})
+    (tmp_path / "transcript.json").write_text(json.dumps({"utterances": utt}))
+    clips = [{"in_point": a, "out_point": a + 9, "genre": "take", "subject": f"clip {k}",
+              "strength": 0.9 - k / 10} for k, a in enumerate((100.0, 200.0, 300.0))]
+    (tmp_path / "clips.json").write_text(json.dumps(clips))
+    return clips
+
+
+class _Planner:
+    """Drops 'clip 0', plans the rest; counts calls."""
+    def __init__(self):
+        from types import SimpleNamespace
+        self.calls = 0
+        self.messages = SimpleNamespace(create=self.create)
+
+    def create(self, **kw):
+        from types import SimpleNamespace
+        self.calls += 1
+        facts = kw["messages"][0]["content"]
+        if "clip 0" in facts:
+            reply = {"drop": "no payoff"}
+        else:
+            reply = {"logline": "a story", "beats": [
+                {"from": "s1", "to": "s2", "role": "setup", "feeling": "curiosity", "treatment": "none"},
+                {"from": "s3", "to": "s3", "role": "payoff", "feeling": "outrage", "treatment": "none"}]}
+        return SimpleNamespace(content=[SimpleNamespace(type="text", text=json.dumps(reply))])
+
+
+def test_a_dropped_clip_frees_its_slot_for_the_next(tmp_path, monkeypatch):
+    _planning_job(tmp_path)
+    fake = _Planner()
+    monkeypatch.setattr(core, "_client", lambda: fake)
+    found = core.plan(tmp_path, 2, {"name": "fns"}, log=lambda *a: None)
+    assert [c["subject"] for c in found] == ["clip 1", "clip 2"]
+    assert all(c["plan"]["logline"] == "a story" for c in found)
+    assert found[0]["plan"]["beats"][1]["start"] == 0.0 + 6.0
+    assert fake.calls == 3
+    again = core.plan(tmp_path, 2, {"name": "fns"}, log=lambda *a: None)
+    assert fake.calls == 3 and [c["subject"] for c in again] == ["clip 1", "clip 2"]
+
+
+def test_a_planner_fault_ships_the_clip_unplanned(tmp_path, monkeypatch):
+    _planning_job(tmp_path)
+
+    class Broken:
+        def __init__(self):
+            from types import SimpleNamespace
+            self.messages = SimpleNamespace(create=self.create)
+
+        def create(self, **kw):
+            raise ConnectionError("down")
+    monkeypatch.setattr(core, "_client", Broken)
+    found = core.plan(tmp_path, 2, {"name": "fns"}, log=lambda *a: None)
+    assert len(found) == 3 and not any("plan" in c for c in found)
+
+
+def test_specs_carry_the_plan_and_titles_use_its_logline(tmp_path):
+    ranked = _job(tmp_path)
+    ranked[0]["plan"] = {"logline": "the story", "beats": [
+        {"start": 0.0, "end": 2.0, "text": "setup line", "role": "setup", "treatment": "none"},
+        {"start": 2.0, "end": 5.0, "text": "the payoff line", "role": "payoff", "treatment": "none"}]}
+    core.clip_words(tmp_path, ranked)
+    seen = {}
+
+    def fake(todo, handle):
+        seen.update(todo[0])
+        return {"1": {"options": [{"title": "T", "keyword": "T", "emoji": "x"}], "best": 0}}
+    import engine.titler
+    orig = engine.titler.suggest_many
+    engine.titler.suggest_many = fake
+    try:
+        tl = core.titles(tmp_path, ranked, handle="FNS")
+    finally:
+        engine.titler.suggest_many = orig
+    assert seen["subject"] == "the story" and seen["claim"] == "the payoff line"
+    ch = core.channel_for({"uploader_id": "GoFNS"})
+    sp = core.specs(tmp_path, ranked, ch, "1", tl)
+    clip = json.loads(sp[0].read_text())["clip"]
+    assert clip["plan"]["logline"] == "the story" and clip["notes"] == "Plan: the story"

@@ -220,6 +220,11 @@ button{font:inherit;color:inherit}
 .thumb:hover .playi{opacity:1;transform:none}
 @media(hover:none){.thumb .playi{opacity:1;transform:none;width:42px;height:42px;margin:-21px 0 0 -21px}}
 .clip h3{font-size:14px;font-weight:500;line-height:1.3;letter-spacing:-.01em;margin:10px 2px 10px;min-height:2.6em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.plan{font-size:12px;line-height:1.35;color:var(--muted);margin:-4px 2px 10px}
+.plan p{margin:0 0 4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.plan ol{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:3px}
+.plan li{font-size:11px;padding:1px 6px;border:1px solid var(--line);border-radius:999px;white-space:nowrap}
+.plan li b{font-weight:550}
 .clip .actions{display:flex;gap:6px;margin:auto 2px 0}
 .clip .actions .btn{flex:1}
 .clip .actions .btn.icon{flex:none;width:34px;padding:0}
@@ -529,6 +534,22 @@ function clipTitle(clip: Clip): string {
   return (clip.emoji ? clip.emoji + " " : "") + (clip.title || `Clip ${clip.n}`);
 }
 
+function planNote(clip: Clip): string {
+  let p: { logline?: string; beats?: { role?: string; feeling?: string; treatment?: string; why?: string }[] } = {};
+  try {
+    p = JSON.parse(clip.plan ?? "{}");
+  } catch {}
+  if (!p.logline) return "";
+  const beats = (p.beats ?? [])
+    .map((b) => {
+      const tip = [b.role, b.feeling, b.treatment !== "none" ? b.treatment : "", b.why].filter(Boolean).join(" · ");
+      const shown = b.treatment && b.treatment !== "none" ? ` · ${esc(b.treatment.replace("_", " "))}` : "";
+      return `<li title="${esc(tip)}"><b>${esc(b.role)}</b> ${esc(b.feeling)}${shown}</li>`;
+    })
+    .join("");
+  return `<div class="plan"><p title="${esc(p.logline)}">${esc(p.logline)}</p><ol>${beats}</ol></div>`;
+}
+
 function clipCard(job: Job, clip: Clip): string {
   const key = [clip.n, clip.video_key, clip.preview_key, clip.thumb_key, clip.title].join("|");
   const download = fileUrl(clip.video_key) + "?download=1";
@@ -545,6 +566,7 @@ function clipCard(job: Job, clip: Clip): string {
     <span class="playi">${icon("play")}</span>
   </button>
   <h3 title="${esc(clipTitle(clip))}">${esc(clipTitle(clip))}</h3>
+  ${planNote(clip)}
   <div class="actions">
     <a class="btn dark sm" href="${esc(download)}" download>${icon("download")}Download</a>
     ${twitch ? `<a class="btn sm icon" href="${esc(twitch)}" target="_blank" rel="noopener" title="Open on Twitch at ${clock(clip.vod_start!)}" aria-label="Open on Twitch">${icon("external")}</a>` : ""}

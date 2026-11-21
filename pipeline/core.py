@@ -288,6 +288,64 @@ def rank(job: Path, *, log=print) -> list[dict]:
     return clips
 
 
+PLAN_SPARE = 4   # clips planned past the ask, to stand in for ones the planner drops
+
+
+def _plan_key(c: dict) -> str:
+    return f"{c['in_point']:.2f}-{c['out_point']:.2f}"
+
+
+def plan(job: Path, n: int, ch: dict, *, log=print) -> list[dict]:
+    """clips.json in rank order, each talk clip carrying its story plan
+    (engine/plan), and without the clips the planner dropped.
+
+    Planning follows `_pick`'s order, so the clips that will ship are planned
+    first; a drop frees its slot and the next clip in line is planned, up to
+    PLAN_SPARE past the ask. Kill clips are not planned: their edit is
+    settled. Results are cached in plans.json by in/out, so a retry or a
+    resubmitted VOD reuses them whatever number a clip ends up with."""
+    from concurrent.futures import ThreadPoolExecutor
+    from engine import facts as fx
+    from engine import plan as pl
+    pool = json.loads((job / "clips.json").read_text())
+    p = job / "plans.json"
+    done = json.loads(p.read_text()) if p.exists() else {}
+    utt = json.loads((job / "transcript.json").read_text())["utterances"]
+    sp = job / "chat_spikes.json"
+    spikes = json.loads(sp.read_text()) if sp.exists() else []
+    src = job / "source.mp4"
+    client = _client()
+
+    def one(c: dict) -> dict:
+        try:
+            db = fx.levels(src, c["in_point"], c["out_point"]) if src.exists() else None
+            facts = fx.build(c, utt, streamer=ch.get("handle", ch["name"]), spikes=spikes, db=db)
+            return pl.write(facts, client=client)
+        except Exception as e:  # a planner fault never costs a clip
+            return {"plan": None, "drop": None, "errors": [f"{type(e).__name__}: {e}"]}
+
+    budget = n + PLAN_SPARE
+    while True:
+        pool = [c for c in pool if not (done.get(_plan_key(c)) or {}).get("drop")]
+        todo = [c for c in _pick(pool, n) if not c.get("kills") and _plan_key(c) not in done]
+        todo = todo[:max(0, budget - len(done))]
+        if not todo:
+            break
+        with ThreadPoolExecutor(RANK_WORKERS) as ex:
+            for c, r in zip(todo, ex.map(one, todo)):
+                done[_plan_key(c)] = r
+                log(f"  {ts(c['in_point'])} " + (
+                    f"planned: {r['plan']['logline']}" if r.get("plan") else
+                    f"DROPPED: {r['drop']}" if r.get("drop") else
+                    f"unplanned: {'; '.join(r.get('errors', []))[:200]}"))
+        p.write_text(json.dumps(done, indent=1, ensure_ascii=False))
+    for c in pool:
+        got = (done.get(_plan_key(c)) or {}).get("plan")
+        if got:
+            c["plan"] = got
+    return pool
+
+
 def _slug(s: str, n: int = 40) -> str:
     return re.sub(r"[^a-z0-9]+", "-", s.lower())[:n].strip("-")
 
@@ -314,7 +372,7 @@ def _pick(clips: list[dict], n: int) -> list[dict]:
     return sorted(keep[:n], key=lambda c: next(i for i, x in enumerate(clips) if x is c))
 
 
-def cut_sections(job: Path, n_top: int, url: str) -> list[dict]:
+def cut_sections(job: Path, n_top: int, url: str, found: list[dict] | None = None) -> list[dict]:
     """ranked.json, and each clip's 1080p60 source in clips_1080/.
 
     From source.mp4 when the whole VOD is here (a re-encode, so the cut is
@@ -323,8 +381,11 @@ def cut_sections(job: Path, n_top: int, url: str) -> list[dict]:
 
     The cut is always 1920x1080: every crop in the engine is in those source
     pixels, so a lower rendition kept for local iteration (a 480p VOD is 1.7
-    GB against 10.2 GB) is scaled up here rather than breaking the layout."""
-    clips = _pick(json.loads((job / "clips.json").read_text()), n_top)
+    GB against 10.2 GB) is scaled up here rather than breaking the layout.
+
+    `found` is the clip list to pick from, `plan()`'s when it ran; by
+    default clips.json."""
+    clips = _pick(found if found is not None else json.loads((job / "clips.json").read_text()), n_top)
     (job / "ranked.json").write_text(json.dumps(clips, indent=1))
     out = job / "clips_1080"
     out.mkdir(exist_ok=True)
@@ -405,8 +466,12 @@ def popups(job: Path, ranked: list[dict], ch: dict, *, log=print) -> None:
 def titles(job: Path, ranked: list[dict], handle: str) -> dict:
     p = job / "titles.json"
     have = json.loads(p.read_text()) if p.exists() else {}
+    # A planned clip is titled from its logline and its payoff, so the title
+    # names the story the edit tells rather than what the selector saw.
     todo = [{"n": n, "words": json.loads((job / "words" / f"{n:02d}.json").read_text()),
-             "subject": c["subject"], "claim": c.get("claim", "")}
+             "subject": c["plan"]["logline"] if c.get("plan") else c["subject"],
+             "claim": next((b["text"] for b in c["plan"]["beats"] if b["role"] == "payoff"),
+                           c.get("claim", "")) if c.get("plan") else c.get("claim", "")}
             for n, c in enumerate(ranked, 1) if "options" not in have.get(str(n), {})]
     if todo:
         from engine.titler import suggest_many
@@ -463,6 +528,9 @@ def specs(job: Path, ranked: list[dict], ch: dict, vod_id: str, tl: dict,
             if c.get("kills", 0) >= STRONG_KILLS:
                 clip["big_cam"] = [[round(c["last_kill"] - c["in_point"] + REACTION_DELAY, 2),
                                     clip["out_point"]]]
+        if c.get("plan"):
+            clip["plan"] = c["plan"]
+            clip["notes"] = f"Plan: {c['plan']['logline']}"
         clip["caption_fill"] = caption_fill or clip["caption_fill"]
         clip["caption_emph"] = caption_emph or clip["caption_emph"]
         p = sd / f"{n:02d}.json"

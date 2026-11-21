@@ -195,6 +195,11 @@ class Clip:
     # was missing. A card that names real people and cannot be turned off is
     # the wrong default on a quote desk.
     stories: str = "auto"
+    # engine/plan's story plan: beats in CLIP-FILE seconds, each with one
+    # treatment. When present it decides the grown facecam, which pop-ups
+    # show, the banner and the payoff's caption emphasis; None is the edit
+    # as it was before plans.
+    plan: dict | None = None
     notes: str = ""
 
     def source(self, root: Path) -> Path:
