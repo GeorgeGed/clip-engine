@@ -1,5 +1,6 @@
 """pipeline/core.py: the rights gate, the transcript slicing, the specs."""
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -73,7 +74,7 @@ def test_specs_take_the_best_title(tmp_path):
 def _planning_job(tmp_path):
     words, utt = [], []
     for k, a in enumerate((100.0, 200.0, 300.0)):
-        ws = [{"start": a + i, "end": a + i + 0.6, "text": f"w{k}{i}" + ("." if i % 3 == 2 else ""),
+        ws = [{"start": a + i, "end": a + i + 0.6, "text": f"word{'abc'[k]}{'abcdefghi'[i]}" + ("." if i % 3 == 2 else ""),
                "prob": 1} for i in range(9)]
         utt.append({"start": a, "end": a + 9, "text": "", "words": ws})
     (tmp_path / "transcript.json").write_text(json.dumps({"utterances": utt}))
@@ -99,7 +100,8 @@ class _Planner:
         else:
             reply = {"logline": "a story", "beats": [
                 {"from": "s1", "to": "s2", "role": "setup", "feeling": "curiosity", "treatment": "none"},
-                {"from": "s3", "to": "s3", "role": "payoff", "feeling": "outrage", "treatment": "none"}]}
+                {"from": "s3", "to": "s3", "role": "payoff", "feeling": "outrage", "treatment": "none"}],
+                "payoff_words": [re.search(r"s3\b[^\n]*?\b(word[a-z]+)", facts).group(1)]}
         return SimpleNamespace(content=[SimpleNamespace(type="text", text=json.dumps(reply))])
 
 

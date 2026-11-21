@@ -33,12 +33,18 @@ WHITE = (255, 255, 255, 255)
 STROKE = (0, 0, 0, 240)
 
 
-def _font(size: int):
+def _font(size: int, key: str | None = None):
+    """The caption face when a job picked one, else the house stack. The
+    stack lives in ~/Library/Fonts, which a Modal worker does not have, and
+    falling through to PIL's bitmap default put a banner in the wrong font."""
+    from engine import caption_fonts
+    if key:
+        return caption_fonts.face(key, size)
     for name in FONT_STACK:
         p = FONT_DIR / name
         if p.exists():
             return ImageFont.truetype(str(p), size)
-    return ImageFont.load_default(size)
+    return caption_fonts.face(None, size)
 
 
 def hook(lines, out: Path, *, width=1080, cap_px=140, accent_words=()):
@@ -63,9 +69,10 @@ def hook(lines, out: Path, *, width=1080, cap_px=140, accent_words=()):
     return img.size
 
 
-def banner(text: str, out: Path, *, width=1080, size=46, pad_x=30, pad_y=16):
+def banner(text: str, out: Path, *, width=1080, size=46, pad_x=30, pad_y=16,
+           font_key: str | None = None):
     """R2/R4's persistent headline. Boxed so it reads over any content."""
-    font = _font(size)
+    font = _font(size, font_key)
     probe = ImageDraw.Draw(Image.new("RGBA", (8, 8)))
     tw = probe.textlength(text.upper(), font=font)
     bw, bh = int(tw) + pad_x * 2, int(size * 1.5) + pad_y
@@ -75,6 +82,29 @@ def banner(text: str, out: Path, *, width=1080, size=46, pad_x=30, pad_y=16):
     d.rounded_rectangle([0, 0, bw - 1, bh - 1], radius=8, outline=ACCENT, width=3)
     d.text(((bw - tw) / 2, (bh - size * 1.22) / 2), text.upper(),
            font=font, fill=WHITE)
+    img.save(out)
+    return img.size
+
+
+def stamp(text: str, out: Path, *, font_key: str | None = None, fill=ACCENT,
+          size: int = 200, max_w: int = 940, tilt: float = -4.0):
+    """The payoff hit: one or two words he said, huge, in the caption face and
+    the caption accent, so it reads as the captions landing rather than as a
+    new graphic. Shrinks to fit one line, then tilts a few degrees."""
+    text = text.upper()
+    probe = ImageDraw.Draw(Image.new("RGBA", (8, 8)))
+    while True:
+        font = _font(size, font_key)
+        sw = max(6, size // 11)
+        l, t, r, b = probe.textbbox((0, 0), text, font=font, stroke_width=sw)
+        if r - l <= max_w or size <= 90:
+            break
+        size -= 8
+    pad = sw + 12
+    img = Image.new("RGBA", (r - l + 2 * pad, b - t + 2 * pad), (0, 0, 0, 0))
+    ImageDraw.Draw(img).text((pad - l, pad - t), text, font=font, fill=tuple(fill),
+                             stroke_width=sw, stroke_fill=STROKE)
+    img = img.rotate(tilt, resample=Image.BICUBIC, expand=True)
     img.save(out)
     return img.size
 

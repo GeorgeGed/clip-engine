@@ -146,11 +146,14 @@ def build(clip: dict, utterances: list[dict], *, streamer: str,
     us = slice_words(utterances, a, b)
     sents = sentences(us)
     speakers(sents, us, db)
+    flat = _flat(us)
+    for s in sents:
+        s["words"] = [[w["start"], w["end"], w["text"].strip()] for w in flat[s["first"]:s["last"] + 1]]
     return {"genre": clip.get("genre", "take"), "duration": round(b - a, 2),
             "streamer": streamer, "subject": clip.get("subject", ""),
             "setup": clip.get("setup", ""), "claim": clip.get("claim", ""),
             "consequence": clip.get("consequence", ""),
-            "sentences": [{k: s[k] for k in ("id", "start", "end", "text", "speaker") if k in s}
+            "sentences": [{k: s[k] for k in ("id", "start", "end", "text", "speaker", "words") if k in s}
                           for s in sents],
             "quiet": quiet(us), "chat": chat_near(spikes or [], a, b)}
 

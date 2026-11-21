@@ -535,7 +535,7 @@ function clipTitle(clip: Clip): string {
 }
 
 function planNote(clip: Clip): string {
-  let p: { logline?: string; beats?: { role?: string; feeling?: string; treatment?: string; why?: string }[] } = {};
+  let p: { logline?: string; open?: string; beats?: { role?: string; feeling?: string; treatment?: string; why?: string }[] } = {};
   try {
     p = JSON.parse(clip.plan ?? "{}");
   } catch {}
@@ -547,7 +547,8 @@ function planNote(clip: Clip): string {
       return `<li title="${esc(tip)}"><b>${esc(b.role)}</b> ${esc(b.feeling)}${shown}</li>`;
     })
     .join("");
-  return `<div class="plan"><p title="${esc(p.logline)}">${esc(p.logline)}</p><ol>${beats}</ol></div>`;
+  const cold = p.open === "cold" ? `<li title="the payoff plays first, then the clip from the top"><b>cold open</b></li>` : "";
+  return `<div class="plan"><p title="${esc(p.logline)}">${esc(p.logline)}</p><ol>${cold}${beats}</ol></div>`;
 }
 
 function clipCard(job: Job, clip: Clip): string {

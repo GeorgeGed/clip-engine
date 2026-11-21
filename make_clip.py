@@ -986,16 +986,14 @@ def stage_captions(clip, ch, st):
             log(f"     {c.start:6.2f}-{c.end:6.2f}  {c.text!r}  ({share:.0%} silence)")
     mark_emphasis(cs, emphasis_keys(meta.get("claim", ""),
                                     meta.get("consequence", "")))
-    # A PLANNED EMPHASIS REPLACES THE CLAIM-WIDE ONE. Lit everywhere the
-    # claim's words recur, the accent marks nothing in particular; the plan
-    # names the payoff's own words and lights them only inside that beat.
-    keys, spans = plan_mod.emphasis(clip.plan)
+    # A PLANNED EMPHASIS REPLACES THE CLAIM-WIDE ONE. The plan names the
+    # payoff's own words, and they light up wherever he says them, so the
+    # setup's mentions point at the line the clip is built around.
+    keys = plan_mod.emphasis(clip.plan)
     if keys:
         for c in cs:
             c.emphasis = False
         mark_emphasis(cs, keys)
-        for c in cs:
-            c.emphasis = c.emphasis and any(a - 0.05 <= c.start < b for a, b in spans)
         log(f"  emphasis from the plan: {sorted(keys)} -> "
             f"{sum(1 for c in cs if c.emphasis)} card(s)")
     out = []
@@ -1726,6 +1724,9 @@ def _overlay_schedule(clip, ch, st, total: int) -> list[dict]:
     bj = st["overlays"] / "banners.json"
     for i, b in enumerate(json.loads(bj.read_text()) if bj.exists() else []):
         add(f"ban_{i}.mov", b["at"], b["dur"], 4)
+    sj = st["overlays"] / "stamp.json"
+    for i, s in enumerate(json.loads(sj.read_text()) if sj.exists() else []):
+        add(f"stamp_{i}.mov", s["at"], s["dur"], 5)
     if clip.hook:
         add("rm_Bait.mov", 0.8, min(BAIT_SECONDS, total / fps - 0.8), 5)
     add("cap_kin.mov", 0.0, total / fps, 6)
@@ -2214,6 +2215,9 @@ def _gate(clip, ch, st, out):
         r = _remap(c.start, c.end, st["keeps"])
         if r:
             placed.append({"start": r[0], "end": r[1], "text": c.text})
+    if st.get("cold"):
+        from engine.finish import shift_cards
+        placed = shift_cards(placed, start=st["cold"][0], end=st["cold"][1])
     rep = deliver_qc.check(out, cards=placed or None, absent=[] if placed else None,
                            chat_expected=chat_expected(clip, st["overlays"]),
                            seam=ch.seam)
@@ -2310,6 +2314,7 @@ def stage_assemble_native(clip, ch, st):
     _sfx_bed(clip, ch, st, st["total"])
     _popups(clip, ch, st)
     _banners(clip, ch, st)
+    _stamp(clip, ch, st)
 
 
 def _popups(clip, ch, st):
@@ -2367,11 +2372,42 @@ def _banners(clip, ch, st):
         dur = min(max(rm[1] - a, BANNER_MIN_S), BANNER_MAX_S, total - a)
         if dur < BANNER_MIN_S:
             continue
-        titles.banner(b["banner"], d / f"ban_{i}.png")
+        titles.banner(b["banner"], d / f"ban_{i}.png", font_key=clip.caption_font)
         ov.exhibit_reveal(d / f"ban_{i}.png", d / f"ban_{i}.mov", dur=dur, y=pp.TOP)
         out.append({"text": b["banner"], "at": round(a, 3), "dur": round(dur, 3)})
         log(f"  banner {b['banner']!r} at {a:.2f}s for {dur:.1f}s")
     (d / "banners.json").write_text(json.dumps(out, indent=1))
+
+
+def _stamp(clip, ch, st):
+    """The payoff stamp: when he says the plan's stamp word, the content pane
+    freezes and greys for STAMP_S (render_native, from stamp.json) and the
+    word lands on it in the caption face and accent. Native renderer only.
+    Rewritten on every build, empty included."""
+    from engine import finish
+    from engine import native_layout as nl
+    from engine import overlays as ov
+    from engine import titles
+    d = st["overlays"]
+    for f in d.glob("stamp_*"):
+        f.unlink()
+    out = []
+    s = plan_mod.stamp(clip.plan, st.get("words") or [])
+    rm = s and remap_card(s["at"], s["at"] + finish.STAMP_S, st["keeps"])
+    total = st["total"] / ch.fps
+    if rm and rm[0] >= TITLE_S and rm[0] + finish.STAMP_S <= total:
+        _fill, emph = _captions(clip)
+        _w, h = titles.stamp(s["word"], d / "stamp_0.png", font_key=clip.caption_font,
+                             fill=emph)
+        top, bottom, _e = nl.pane_split(ch.seam)
+        ov.exhibit_reveal(d / "stamp_0.png", d / "stamp_0.mov", dur=finish.STAMP_S,
+                          y=top + int(bottom * 0.42) - h // 2, grow_in=0.16,
+                          start_scale=1.35, fade_out=0.18, blur_px=4.0, hold_drift=4)
+        out.append({"word": s["word"], "at": round(rm[0], 3), "dur": finish.STAMP_S})
+        log(f"  stamp {s['word']!r} at {rm[0]:.2f}s")
+    elif s:
+        log(f"  stamp {s['word']!r} skipped: it would land outside the clip or under the title")
+    (d / "stamp.json").write_text(json.dumps(out, indent=1))
 
 
 BIG_MIN, BIG_MAX = 3.0, 7.0     # a big stretch is a phrase or two, not a word
@@ -2468,7 +2504,29 @@ def stage_render_native(clip, ch, st):
                     "-c", "copy", "-movflags", "+faststart", str(out)],
                    check=True)
     master.unlink(missing_ok=True)
+    _cold_open(clip, ch, st, out)
     _gate(clip, ch, st, out)
+
+
+def _cold_open(clip, ch, st, out):
+    """The plan's cold open: its payoff sentences play first, then the clip
+    from the top. Cut from the finished file, before the gate measures it."""
+    from engine import finish
+    st["cold"] = None
+    op = (clip.plan or {}).get("open") or {}
+    if op.get("style") != "cold":
+        return
+    rm = remap_card(op["start"], op["end"], st["keeps"])
+    if not rm or not plan_mod.COLD_MIN_S <= rm[1] - rm[0] <= plan_mod.COLD_MAX_S + 0.1:
+        log(f"  cold open skipped: {op['start']:.2f}-{op['end']:.2f} is "
+            f"{'cut away' if not rm else f'{rm[1] - rm[0]:.1f}s after the cut'}")
+        return
+    tmp = out.with_name(out.stem + "_cold.mp4")
+    tease = finish.cold_open(out, tmp, start=rm[0], end=rm[1], fps=ch.fps)
+    tmp.replace(out)
+    st["cold"] = (rm[0], rm[0] + tease)
+    log(f"  cold open: {rm[0]:.2f}-{rm[0] + tease:.2f}s of the payoff plays first "
+        f"({op.get('why', '')[:80]})")
 
 
 RENDERERS = ("native", "resolve")

@@ -25,9 +25,11 @@ def _good():
                 {"from": "s2", "to": "s2", "role": "turn", "feeling": "disbelief",
                  "treatment": "card", "card": "TenZ", "why": "who is wasted"},
                 {"from": "s3", "to": "s3", "role": "payoff", "feeling": "outrage",
-                 "treatment": "emphasis", "words": ["disband"], "why": "the quote"},
+                 "treatment": "stamp", "stamp": "disband", "why": "the quote"},
                 {"from": "s4", "to": "s4", "role": "button", "feeling": "deadpan",
-                 "treatment": "none", "why": ""}]}
+                 "treatment": "none", "why": ""}],
+            "payoff_words": ["disband"],
+            "open": {"style": "straight", "why": "the setup hooks"}}
 
 
 def test_a_good_plan_becomes_times():
@@ -74,18 +76,69 @@ def test_a_card_must_name_someone_said_in_its_beat():
     assert any("not said" in e for e in _errs(**{"1__card": "Aspas"}))
 
 
-def test_emphasis_words_come_from_the_beat_and_carry_meaning():
-    assert any("not in this beat" in e for e in _errs(**{"2__words": ["champions"]}))
-    assert any("content word" in e for e in _errs(**{"2__words": ["to"]}))
-    p = pl.validate(_good(), FACTS)[0]
-    p["beats"][2]["words"] = ["needs to disband"]
-    assert pl.emphasis(p)[0] == {"NEEDS", "DISBAND"}
+def test_payoff_words_come_from_the_payoff_and_carry_meaning():
+    g = _good(); g["payoff_words"] = ["sentinels"]
+    assert any("not said in the payoff" in e for e in pl.validate(g, FACTS)[2])
+    g["payoff_words"] = ["to"]
+    assert any("content word" in e for e in pl.validate(g, FACTS)[2])
+    g["payoff_words"] = []
+    assert any("1 to 3" in e for e in pl.validate(g, FACTS)[2])
+    g["payoff_words"] = ["needs to disband"]
+    assert pl.emphasis(pl.validate(g, FACTS)[0]) == {"NEEDS", "DISBAND"}
 
 
-def test_a_treatment_needs_a_why_and_at_most_three_are_used():
+def test_a_treatment_needs_a_why_and_graphics_are_capped():
     assert any("needs a why" in e for e in _errs(**{"0__why": ""}))
-    errs = _errs(**{"3__treatment": "big_cam", "3__why": "his face"})
-    assert any("at most 3" in e for e in errs)
+    g = _good()
+    g["beats"][3].update(treatment="card", card="us", why="who")
+    g["beats"][3]["card"] = "sentinels"
+    g["beats"][3]["role"] = "escalation"
+    assert any("at most 2" in e for e in pl.validate(g, FACTS)[2])
+
+
+def test_the_stamp_is_his_own_word_and_only_on_the_payoff():
+    assert any("must be words he says" in e for e in _errs(**{"2__stamp": "busted"}))
+    assert any("one or two words" in e for e in _errs(**{"2__stamp": "needs to disband"}))
+    assert any("not allowed" in e for e in _errs(**{"0__treatment": "stamp", "0__stamp": "roster"}))
+    p = pl.validate(_good(), FACTS)[0]
+    words = [{"start": 12.6, "text": "that"}, {"start": 13.9, "text": "Disband,"},
+             {"start": 23.0, "text": "disband"}]
+    assert pl.stamp(p, words) == {"word": "DISBAND", "at": 13.9}
+    assert pl.stamp(None, words) is None
+
+
+def _worded():
+    facts = json.loads(json.dumps(FACTS))
+    for s in facts["sentences"]:
+        ws = s["text"].split()
+        step = (s["end"] - s["start"]) / len(ws)
+        s["words"] = [[round(s["start"] + k * step, 3), round(s["start"] + (k + 1) * step, 3), w]
+                      for k, w in enumerate(ws)]
+    return facts
+
+
+def test_a_cold_open_is_a_short_quote_from_the_payoff():
+    facts = _worded()                               # s3: 7 words over 12.5-22.0
+    g = _good(); g["open"] = {"style": "cold", "quote": "to Disband,", "why": "tease"}
+    p, _d, errs = pl.validate(g, facts)
+    assert errs == [] and p["open"] == {"style": "cold", "why": "tease", "quote": "to Disband,",
+                                        "start": 16.571, "end": 19.286}
+    g["open"]["quote"] = "that roster needs to disband straight up"
+    assert any("quote fewer words" in e for e in pl.validate(g, facts)[2])
+    g["open"]["quote"] = "roster disband"                 # not consecutive
+    assert any("not words said, in order" in e for e in pl.validate(g, facts)[2])
+    g["open"]["quote"] = "sentinels just announced"       # said, but in the setup
+    assert any("not words said, in order" in e for e in pl.validate(g, facts)[2])
+    g["open"]["quote"] = "to disband"
+    assert any("open 'cold' is not allowed" in e
+               for e in pl.validate(g, dict(facts, genre="receipts"))[2])
+
+
+def test_the_reply_is_found_past_braces_in_prose():
+    good = json.dumps(_good())
+    assert pl._json("Plan for {s1}: " + good + " done")["logline"].startswith("FNS")
+    assert pl._json('{"logline": "a\nb", "beats": []}')["logline"] == "a\nb"
+    assert pl._json("no json here") is None
 
 
 def test_big_cam_has_a_budget_and_never_on_gameplay():
@@ -95,7 +148,9 @@ def test_big_cam_has_a_budget_and_never_on_gameplay():
     g["beats"][1] = {"from": "s2", "to": "s2", "role": "turn", "feeling": "outrage",
                      "treatment": "big_cam", "why": "face"}
     assert any("under 40%" in e for e in pl.validate(g, FACTS)[2])
-    assert any("not allowed" in e for e in pl.validate(_good(), dict(FACTS, genre="frag"))[2])
+    errs = pl.validate(_good(), dict(FACTS, genre="frag"))[2]
+    assert any("'card' is not allowed" in e for e in errs)
+    assert not any("'stamp' is not allowed" in e for e in errs)
 
 
 def test_and_then_is_two_clips():
@@ -134,16 +189,20 @@ def test_treatments_reach_the_edit():
     keeps = [Span(0.0, 10.0), Span(14.0, 30.0)]       # 4s cut out of beat 2
     p["beats"][3]["treatment"] = "big_cam"
     assert pl.output_spans(p, "big_cam", keeps) == [(18.5, 26.0)]
-    keys, spans = pl.emphasis(p)
-    assert keys == {"DISBAND"} and spans == [(12.5, 22.0)]
+    assert pl.emphasis(p) == {"DISBAND"}
     found = [{"name": "TenZ", "spoken": "tenzz", "at": 6.0},
              {"name": "Sentinels", "spoken": "sentinels", "at": 1.0}]
     assert [e["name"] for e in pl.allowed_popups(found, p)] == ["TenZ"]
     assert pl.allowed_popups(found, None) == []
     s = pl.summary(p)
+    assert s["open"] == "straight"
     assert s["logline"].startswith("FNS says") and s["beats"][0] == {
         "role": "setup", "feeling": "curiosity", "treatment": "banner", "why": "names it"}
 
 
 def test_the_rules_file_reaches_the_prompt():
-    assert "Story first" in pl.system("take") and "big_cam" not in pl.system("frag").split("Allowed for this clip:")[1].split(".")[0]
+    rules = [ln for ln in pl.RULES.read_text().splitlines() if ln.startswith("- ")]
+    assert rules and rules[0] in pl.system("take")
+    frag = pl.system("frag")
+    assert "(allowed here: none, stamp)" in frag and "(allowed here: none, banner)" in frag
+    assert "Allowed here: straight." in pl.system("receipts")

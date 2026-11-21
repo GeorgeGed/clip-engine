@@ -310,6 +310,7 @@ def plan(job: Path, n: int, ch: dict, *, log=print) -> list[dict]:
     pool = json.loads((job / "clips.json").read_text())
     p = job / "plans.json"
     done = json.loads(p.read_text()) if p.exists() else {}
+    done = {k: v for k, v in done.items() if v.get("v") == pl.VERSION}
     utt = json.loads((job / "transcript.json").read_text())["utterances"]
     sp = job / "chat_spikes.json"
     spikes = json.loads(sp.read_text()) if sp.exists() else []
@@ -322,7 +323,8 @@ def plan(job: Path, n: int, ch: dict, *, log=print) -> list[dict]:
             facts = fx.build(c, utt, streamer=ch.get("handle", ch["name"]), spikes=spikes, db=db)
             return pl.write(facts, client=client)
         except Exception as e:  # a planner fault never costs a clip
-            return {"plan": None, "drop": None, "errors": [f"{type(e).__name__}: {e}"]}
+            return {"v": pl.VERSION, "plan": None, "drop": None,
+                    "errors": [f"{type(e).__name__}: {e}"]}
 
     budget = n + PLAN_SPARE
     while True:
