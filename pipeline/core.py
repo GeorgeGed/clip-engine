@@ -314,6 +314,41 @@ def _pick(clips: list[dict], n: int) -> list[dict]:
     return sorted(keep[:n], key=lambda c: next(i for i, x in enumerate(clips) if x is c))
 
 
+def forget_renumbered(job: Path, clips: list[dict]) -> list[int]:
+    """Delete everything cached under a clip NUMBER whose clip has changed.
+
+    Words, pop-ups, titles, chat, story photos, overlays, specs and the cut
+    are all stored as NN and reused when present. A VOD submitted again with
+    a different clip count re-ranks (`_pick` caps kill clips by count), so
+    NN can name a different clip and every one of those caches is wrong for
+    it. Yayster 2932930718 resubmitted for 5 clips shipped clip 3, the wish
+    strategy rant, titled "3 kills in 10 seconds" and captioned from another
+    part of the stream (0.12 cards/s), and clip 5 failed QC the same way.
+
+    Compares against the previous ranked.json; returns the numbers forgotten."""
+    import shutil
+    p = job / "ranked.json"
+    old = json.loads(p.read_text()) if p.exists() else []
+    gone = []
+    for n, c in enumerate(clips, 1):
+        o = old[n - 1] if n <= len(old) else None
+        if o and (o["in_point"], o["out_point"]) == (c["in_point"], c["out_point"]):
+            continue
+        gone.append(n)
+        nn = f"{n:02d}"
+        for f in [job / "words" / f"{nn}.json", job / "popups" / f"{nn}.json",
+                  job / f"chat_{nn}.json", job / "photos" / f"stories_{nn}.json",
+                  *(job / "specs").glob(f"{nn}.*"), *(job / "clips_1080").glob(f"{nn}_*.mp4")]:
+            f.unlink(missing_ok=True)
+        shutil.rmtree(job / f"overlays_{nn}", ignore_errors=True)
+    tp = job / "titles.json"
+    if gone and tp.exists():
+        tl = json.loads(tp.read_text())
+        tp.write_text(json.dumps({k: v for k, v in tl.items() if int(k) not in gone},
+                                 indent=1, ensure_ascii=False))
+    return gone
+
+
 def cut_sections(job: Path, n_top: int, url: str) -> list[dict]:
     """ranked.json, and each clip's 1080p60 source in clips_1080/.
 
@@ -325,6 +360,7 @@ def cut_sections(job: Path, n_top: int, url: str) -> list[dict]:
     pixels, so a lower rendition kept for local iteration (a 480p VOD is 1.7
     GB against 10.2 GB) is scaled up here rather than breaking the layout."""
     clips = _pick(json.loads((job / "clips.json").read_text()), n_top)
+    forget_renumbered(job, clips)
     (job / "ranked.json").write_text(json.dumps(clips, indent=1))
     out = job / "clips_1080"
     out.mkdir(exist_ok=True)
