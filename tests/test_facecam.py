@@ -67,3 +67,31 @@ def test_a_broadcast_closeup_cannot_outscore_the_webcam_near_it():
     assert abs(np.median(open_pick[:, 0]) - 1065) < 60
     pick = _live_face(near(cam + player, (1572, 279, 1888, 502)), 40, 0.03, 1.0, 0.75)
     assert abs(np.median(pick[:, 0]) - 1730) < 20
+
+
+def test_the_games_smaller_faces_lose_to_his():
+    from engine.facecam import at_least, face_h, MIN_FACE
+    cam = (69, 863, 332, 1047)                      # VOD 2920606211's webcam
+    assert round(face_h(cam)) == 78
+    min_h = MIN_FACE * face_h(cam)
+    webcam = [(183, 633, 81, 0.14)] * 40            # clip 2: his face, moved up
+    card = [(70, 840, 60, 0.14)] * 36               # the agent card where the cam was
+    hud = [(1865, 116, 40, 0.21)] * 23              # a scoreboard portrait
+    assert at_least(webcam + card + hud, min_h) == webcam
+    assert at_least(card, None) == card
+
+
+def test_make_clip_tries_his_size_before_any_face(monkeypatch):
+    import make_clip as mc
+    from types import SimpleNamespace
+    seen = []
+
+    def fake(src, **kw):
+        seen.append(kw)
+        return (48, 529, 318, 719) if kw == {"min_h": seen[0]["min_h"]} else None
+    monkeypatch.setattr(mc.facecam, "face_rect", fake)
+    clip = SimpleNamespace(cam=None, source=lambda root: "clip.mp4")
+    ch = SimpleNamespace(cam=(69, 863, 332, 1047))
+    st = {}
+    assert mc._cam(clip, ch, st) == (48, 529, 318, 719)
+    assert [sorted(k) for k in seen] == [["min_h", "within"], ["min_h"]]
