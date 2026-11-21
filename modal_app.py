@@ -125,6 +125,7 @@ def build_clip(n: int, job_name: str, job_id: str, callback_base: str) -> dict:
     _setup()
     data.reload()
     import json
+    from engine.plan import summary
     from pipeline import core
     job = Path(REPO, "jobs", job_name)
     spec = job / "specs" / f"{n:02d}.json"
@@ -150,7 +151,7 @@ def build_clip(n: int, job_name: str, job_id: str, callback_base: str) -> dict:
     body = {"job_id": job_id, "n": n, "title": clip.get("title") or c["subject"],
             "emoji": clip.get("emoji"), "keyword": clip.get("title_keyword"),
             "subject": c["subject"], "score": c["strength"], "duration": core.duration(out),
-            "vod_start": c["in_point"], **keys}
+            "vod_start": c["in_point"], "plan": summary(clip.get("plan")), **keys}
     for path in (out, prev, thumb):
         Path(path).unlink(missing_ok=True)
     data.commit()
@@ -242,7 +243,11 @@ def run_job(job_id: str, vod_url: str, clips: int, callback_base: str,
         found = core.rank(job)
         if not found:
             raise RuntimeError("no clips found in this VOD")
-        ranked = core.cut_sections(job, min(clips, len(found)), vod_url)
+        progress("plan", "Planning each clip's story", 0.55)
+        found = core.plan(job, min(clips, len(found)), ch)
+        if not found:
+            raise RuntimeError("the planner dropped every clip in this VOD")
+        ranked = core.cut_sections(job, min(clips, len(found)), vod_url, found)
         core.clip_words(job, ranked)
         core.popups(job, ranked, ch)
         progress("title", f"Writing titles for {len(ranked)} clips", 0.6)

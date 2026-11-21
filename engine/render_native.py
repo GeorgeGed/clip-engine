@@ -38,6 +38,7 @@ own opinion.
 """
 from __future__ import annotations
 
+import dataclasses
 import json
 import subprocess
 import sys
@@ -247,6 +248,10 @@ def big_cam_rect(cam, seam: float, big_seam: float = BIG_SEAM,
     return (bx0, by0, bx0 + int(w) + 2, int(round(by0 + h)))
 
 
+def picture_frames(segs, ch) -> int:
+    return round(segs[-1].end * ch.fps)
+
+
 def render(clip, ch, out: str | Path, *, punches: list[float] | None = None,
            big: list[tuple[float, float]] | None = None,
            crf: int = 17, log=print, st=None) -> dict:
@@ -286,7 +291,6 @@ def render(clip, ch, out: str | Path, *, punches: list[float] | None = None,
         # the same shots, so the switch is a hard cut with nothing else
         # moving. The second graph's internal labels are renamed because
         # `two_pane` names its pads by shot index.
-        import dataclasses
         import re
         small = nl.two_pane(ch, segs, cam=p["cam"], src="rn_cutS",
                             out="baseS", top_filters=grade,
@@ -305,7 +309,28 @@ def render(clip, ch, out: str | Path, *, punches: list[float] | None = None,
             f"{len(big)} stretch(es): "
             + ", ".join(f"{a:.2f}-{b:.2f}" for a, b in big))
 
+    base_label = "[base]"
     ovs = overlay_list(p)
+    sj = p["overlays"] / "stamp.json"
+    for s in (json.loads(sj.read_text()) if sj.exists() else [])[:1]:
+        from engine import finish
+        top, bottom, _e = nl.pane_split(ch.seam)
+        f0 = round(s["at"] * ch.fps)
+        n = min(picture_frames(segs, ch) - f0, round(s["dur"] * ch.fps))
+        still = p["overlays"] / "stamp_pane.png"
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(p["src"]), "-filter_complex",
+                        ";".join([base, finish.still_graph("base", "fz_still", frame=f0,
+                                                           top=top, height=bottom)]),
+                        "-map", "[fz_still]", "-frames:v", "1", str(still)], check=True)
+        base = ";".join([base, finish.hold_graph("base", "basez", still=still, first=f0,
+                                                 frames=n, top=top, fps=ch.fps)])
+        base_label = "[basez]"
+        # The chat box sits on the frozen pane and kept scrolling in colour
+        # under the word on the probe; the stamp owns the pane while it holds.
+        hide = (f0 / ch.fps, (f0 + n) / ch.fps)
+        ovs = [dataclasses.replace(o, hide=hide) if o.track == nc.TRACK_CHAT else o for o in ovs]
+        log(f"  stamp: content pane frozen and grey, frames {f0}-{f0 + n - 1} ({s['word']!r}), "
+            f"chat off")
     log(f"  overlays: " + ", ".join(f"{o.path.name}(V{o.track})" for o in ovs))
     nc.check_schedule(ovs, fps=ch.fps)
 
@@ -316,7 +341,7 @@ def render(clip, ch, out: str | Path, *, punches: list[float] | None = None,
     # last 6 frames carry picture with no overlays. Reproduced rather than
     # corrected: the gate compares two renderers, and silently lengthening
     # the picture here would be a different clip, not a parity failure.
-    picture = round(segs[-1].end * ch.fps)
+    picture = picture_frames(segs, ch)
     sfx = p["overlays"] / "sfx.wav"
     raw = out.with_name(out.stem + "_raw.mov")
     # THE DELIVERED SPEECH IS THE SOURCE'S OWN AUDIO: stereo, 48 kHz, no EQ.
@@ -333,7 +358,7 @@ def render(clip, ch, out: str | Path, *, punches: list[float] | None = None,
                     f"concat=n={len(p['keeps'])}:v=0:a=1[o]",
                     "-map", "[o]", "-ac", "2", "-ar", "48000", str(hq)], check=True)
     res = nc.composite(
-        base_source=p["src"], base_graph=base, base_label="[base]",
+        base_source=p["src"], base_graph=base, base_label=base_label,
         overlays=ovs, sfx=sfx, out=raw, speech_source=hq,
         fps=ch.fps, dur=picture / ch.fps, crf=crf)
     # The loudness finish is `render_ffmpeg._finish_audio` — two-pass

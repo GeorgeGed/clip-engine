@@ -241,6 +241,7 @@ class Overlay:
     track: int = TRACK_CARDS
     x: int = 0
     y: int = 0
+    hide: tuple[float, float] | None = None   # output seconds it is off
 
     @property
     def name(self) -> str:
@@ -351,10 +352,13 @@ def video_graph(base: str, overlays: Sequence[Overlay], *,
         if dur is None:
             n = file_frames(o.path)
             dur = (n / fps) if n else None
-        if dur is not None:
-            opts.append(f"enable='between(t,{o.at:.3f},{o.at + dur:.3f})'")
-        elif o.at > 0:
-            opts.append(f"enable='gte(t,{o.at:.3f})'")
+        on = (f"between(t,{o.at:.3f},{o.at + dur:.3f})" if dur is not None
+              else f"gte(t,{o.at:.3f})" if o.at > 0 else None)
+        if o.hide:
+            off = f"not(between(t,{o.hide[0]:.3f},{o.hide[1]:.3f}))"
+            on = f"{on}*{off}" if on else off
+        if on:
+            opts.append(f"enable='{on}'")
         parts.append(f"[{last}][nc_o{i}]overlay={':'.join(opts)}[nc_s{i}]")
         last = f"nc_s{i}"
 

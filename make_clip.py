@@ -63,6 +63,7 @@ from engine.resolve_captions import background, cards, emphasis_keys, mark_empha
 from engine.cuts import framings, content_framings               # noqa: E402
 from engine.tighten import Span, removals, keeps, remap_card, joins  # noqa: E402
 from engine import caption_colour                                # noqa: E402
+from engine import plan as plan_mod                              # noqa: E402
 from engine import captions_video, twitch_chat                   # noqa: E402
 from engine import chat_reaction as cr                           # noqa: E402
 from engine.sfx import Cue, bed, cue_gain, cue_gain_peak, perceptual_lead                   # noqa: E402
@@ -751,6 +752,17 @@ def _cam(clip, ch, st):
         st["cam"] = tuple(clip.cam)
         log(f"  facecam {st['cam']} (from the spec)")
         return st["cam"]
+    # LOOK WHERE THE WEBCAM IS FIRST. A watchparty close-up holds one player
+    # on screen for a whole clip, and a face that size outscores the webcam:
+    # FNS 2885323336 clip 5 put a T1 player in BOTH panes for 58s while FNS
+    # sat at (1572, 279) the entire time. `ch.cam` is the webcam measured over
+    # the whole VOD (core.vod_cam), so a live face near it is preferred, and
+    # the open search runs only when there is none (the streamer moved it).
+    face = facecam.face_rect(clip.source(ROOT), within=ch.cam) if ch.cam else None
+    if face:
+        st["cam"] = face
+        log(f"  facecam {face} from the face detector, near the VOD's webcam {tuple(ch.cam)}")
+        return face
     face = facecam.face_rect(clip.source(ROOT))
     if face:
         st["cam"] = face
@@ -974,6 +986,16 @@ def stage_captions(clip, ch, st):
             log(f"     {c.start:6.2f}-{c.end:6.2f}  {c.text!r}  ({share:.0%} silence)")
     mark_emphasis(cs, emphasis_keys(meta.get("claim", ""),
                                     meta.get("consequence", "")))
+    # A PLANNED EMPHASIS REPLACES THE CLAIM-WIDE ONE. The plan names the
+    # payoff's own words, and they light up wherever he says them, so the
+    # setup's mentions point at the line the clip is built around.
+    keys = plan_mod.emphasis(clip.plan)
+    if keys:
+        for c in cs:
+            c.emphasis = False
+        mark_emphasis(cs, keys)
+        log(f"  emphasis from the plan: {sorted(keys)} -> "
+            f"{sum(1 for c in cs if c.emphasis)} card(s)")
     out = []
     for c in cs:
         rm = remap_card(c.start, c.end, st["keeps"])
@@ -1699,6 +1721,12 @@ def _overlay_schedule(clip, ch, st, total: int) -> list[dict]:
     pj = st["overlays"] / "popups.json"
     for i, p in enumerate(json.loads(pj.read_text()) if pj.exists() else []):
         add(f"pop_{i}.mov", p["at"], p["dur"], 4)
+    bj = st["overlays"] / "banners.json"
+    for i, b in enumerate(json.loads(bj.read_text()) if bj.exists() else []):
+        add(f"ban_{i}.mov", b["at"], b["dur"], 4)
+    sj = st["overlays"] / "stamp.json"
+    for i, s in enumerate(json.loads(sj.read_text()) if sj.exists() else []):
+        add(f"stamp_{i}.mov", s["at"], s["dur"], 5)
     if clip.hook:
         add("rm_Bait.mov", 0.8, min(BAIT_SECONDS, total / fps - 0.8), 5)
     add("cap_kin.mov", 0.0, total / fps, 6)
@@ -1827,6 +1855,7 @@ def stage_assemble(clip, ch, st):
 
     _sfx_bed(clip, ch, st, total)
     _popups(clip, ch, st)
+    _banners(clip, ch, st)
 
     sched = _overlay_schedule(clip, ch, st, total)
     have = [e["name"] for e in sched]
@@ -2186,6 +2215,9 @@ def _gate(clip, ch, st, out):
         r = _remap(c.start, c.end, st["keeps"])
         if r:
             placed.append({"start": r[0], "end": r[1], "text": c.text})
+    if st.get("cold"):
+        from engine.finish import shift_cards
+        placed = shift_cards(placed, start=st["cold"][0], end=st["cold"][1])
     rep = deliver_qc.check(out, cards=placed or None, absent=[] if placed else None,
                            chat_expected=chat_expected(clip, st["overlays"]),
                            seam=ch.seam)
@@ -2281,6 +2313,8 @@ def stage_assemble_native(clip, ch, st):
     renderer itself, from the same `_overlay_schedule` the Resolve path places."""
     _sfx_bed(clip, ch, st, st["total"])
     _popups(clip, ch, st)
+    _banners(clip, ch, st)
+    _stamp(clip, ch, st)
 
 
 def _popups(clip, ch, st):
@@ -2296,6 +2330,12 @@ def _popups(clip, ch, st):
         f.unlink()
     src = ROOT / f"jobs/{clip.job}/popups/{clip.index:02d}.json"
     found = json.loads(src.read_text()) if src.exists() else []
+    if clip.plan:
+        kept = plan_mod.allowed_popups(found, clip.plan)
+        if len(kept) < len(found):
+            log(f"  pop-ups no card beat asked for: "
+                f"{', '.join(e['name'] for e in found if e not in kept)}")
+        found = kept
     placed = pp.schedule(found, _remap_fn(st["keeps"]), st["total"] / ch.fps)
     font = ROOT / "fonts" / "TikTokSans[opsz,slnt,wdth,wght].ttf"
     out = []
@@ -2306,6 +2346,68 @@ def _popups(clip, ch, st):
         out.append({"name": p["name"], "at": p["at"], "dur": pp.DUR, "source": p["source"]})
         log(f"  pop-up {p['name']} at {p['at']:.2f}s")
     (d / "popups.json").write_text(json.dumps(out, indent=1))
+
+
+BANNER_MIN_S, BANNER_MAX_S = 2.0, 5.0
+
+
+def _banners(clip, ch, st):
+    """The plan's banner: what the viewer is watching, over the beat that
+    needs it. Placed and moved like a pop-up, in the same lower-pane slot,
+    which a pop-up never shares because a beat has one treatment. Holds for
+    its beat, 2-5s, and starts after the title. Rewritten on every build."""
+    from engine import overlays as ov
+    from engine import popups as pp
+    from engine import titles
+    d = st["overlays"]
+    for f in d.glob("ban_*"):
+        f.unlink()
+    total = st["total"] / ch.fps
+    out = []
+    for i, b in enumerate(plan_mod.beats_with(clip.plan, "banner")):
+        rm = remap_card(b["start"], b["end"], st["keeps"])
+        if not rm:
+            continue
+        a = max(rm[0], TITLE_S)
+        dur = min(max(rm[1] - a, BANNER_MIN_S), BANNER_MAX_S, total - a)
+        if dur < BANNER_MIN_S:
+            continue
+        titles.banner(b["banner"], d / f"ban_{i}.png", font_key=clip.caption_font)
+        ov.exhibit_reveal(d / f"ban_{i}.png", d / f"ban_{i}.mov", dur=dur, y=pp.TOP)
+        out.append({"text": b["banner"], "at": round(a, 3), "dur": round(dur, 3)})
+        log(f"  banner {b['banner']!r} at {a:.2f}s for {dur:.1f}s")
+    (d / "banners.json").write_text(json.dumps(out, indent=1))
+
+
+def _stamp(clip, ch, st):
+    """The payoff stamp: when he says the plan's stamp word, the content pane
+    freezes and greys for STAMP_S (render_native, from stamp.json) and the
+    word lands on it in the caption face and accent. Native renderer only.
+    Rewritten on every build, empty included."""
+    from engine import finish
+    from engine import native_layout as nl
+    from engine import overlays as ov
+    from engine import titles
+    d = st["overlays"]
+    for f in d.glob("stamp_*"):
+        f.unlink()
+    out = []
+    s = plan_mod.stamp(clip.plan, st.get("words") or [])
+    rm = s and remap_card(s["at"], s["at"] + finish.STAMP_S, st["keeps"])
+    total = st["total"] / ch.fps
+    if rm and rm[0] >= TITLE_S and rm[0] + finish.STAMP_S <= total:
+        _fill, emph = _captions(clip)
+        _w, h = titles.stamp(s["word"], d / "stamp_0.png", font_key=clip.caption_font,
+                             fill=emph)
+        top, bottom, _e = nl.pane_split(ch.seam)
+        ov.exhibit_reveal(d / "stamp_0.png", d / "stamp_0.mov", dur=finish.STAMP_S,
+                          y=top + int(bottom * 0.42) - h // 2, grow_in=0.16,
+                          start_scale=1.35, fade_out=0.18, blur_px=4.0, hold_drift=4)
+        out.append({"word": s["word"], "at": round(rm[0], 3), "dur": finish.STAMP_S})
+        log(f"  stamp {s['word']!r} at {rm[0]:.2f}s")
+    elif s:
+        log(f"  stamp {s['word']!r} skipped: it would land outside the clip or under the title")
+    (d / "stamp.json").write_text(json.dumps(out, indent=1))
 
 
 BIG_MIN, BIG_MAX = 3.0, 7.0     # a big stretch is a phrase or two, not a word
@@ -2325,6 +2427,12 @@ def _big_cam_plan(clip, ch, st):
     stretch wins by being loud OR by carrying the clip's point. The head is
     left alone while the hook title is up.
     """
+    if clip.plan:
+        picks = [(max(a, TITLE_S), b) for a, b in
+                 plan_mod.output_spans(clip.plan, "big_cam", st["keeps"]) if b - max(a, TITLE_S) >= 1.0]
+        for a, b in picks:
+            log(f"     big {a:6.2f}-{b:6.2f}  (planned)")
+        return picks
     if not clip.big_cam:
         return []
     if clip.big_cam != "auto":
@@ -2396,7 +2504,29 @@ def stage_render_native(clip, ch, st):
                     "-c", "copy", "-movflags", "+faststart", str(out)],
                    check=True)
     master.unlink(missing_ok=True)
+    _cold_open(clip, ch, st, out)
     _gate(clip, ch, st, out)
+
+
+def _cold_open(clip, ch, st, out):
+    """The plan's cold open: its payoff sentences play first, then the clip
+    from the top. Cut from the finished file, before the gate measures it."""
+    from engine import finish
+    st["cold"] = None
+    op = (clip.plan or {}).get("open") or {}
+    if op.get("style") != "cold":
+        return
+    rm = remap_card(op["start"], op["end"], st["keeps"])
+    if not rm or not plan_mod.COLD_MIN_S <= rm[1] - rm[0] <= plan_mod.COLD_MAX_S + 0.1:
+        log(f"  cold open skipped: {op['start']:.2f}-{op['end']:.2f} is "
+            f"{'cut away' if not rm else f'{rm[1] - rm[0]:.1f}s after the cut'}")
+        return
+    tmp = out.with_name(out.stem + "_cold.mp4")
+    tease = finish.cold_open(out, tmp, start=rm[0], end=rm[1], fps=ch.fps)
+    tmp.replace(out)
+    st["cold"] = (rm[0], rm[0] + tease)
+    log(f"  cold open: {rm[0]:.2f}-{rm[0] + tease:.2f}s of the payoff plays first "
+        f"({op.get('why', '')[:80]})")
 
 
 RENDERERS = ("native", "resolve")
