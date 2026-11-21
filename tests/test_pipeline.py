@@ -68,3 +68,37 @@ def test_specs_take_the_best_title(tmp_path):
     (p,) = core.specs(tmp_path, ranked, ch, "123", tl, caption_fill="white", caption_emph="red")
     assert json.loads(p.read_text())["clip"]["chat_mode"] == "off"
     assert load(p)[0].caption_fill == "white" and load(p)[0].caption_emph == "red"
+
+
+def test_a_renumbered_clip_forgets_what_was_cached_under_its_number(tmp_path):
+    old = [{"in_point": 10.0, "out_point": 40.0}, {"in_point": 100.0, "out_point": 130.0},
+           {"in_point": 200.0, "out_point": 260.0}]
+    (tmp_path / "ranked.json").write_text(json.dumps(old))
+    for d in ("words", "popups", "specs", "clips_1080", "photos", "overlays_01", "overlays_02"):
+        (tmp_path / d).mkdir()
+    for n in ("01", "02", "03"):
+        (tmp_path / "words" / f"{n}.json").write_text("{}")
+        (tmp_path / "popups" / f"{n}.json").write_text("[]")
+        (tmp_path / f"chat_{n}.json").write_text("[]")
+        (tmp_path / "specs" / f"{n}.json").write_text("{}")
+        (tmp_path / "specs" / f"{n}.log").write_text("")
+    (tmp_path / "clips_1080" / "02_0h01m40s_x.mp4").write_text("")
+    (tmp_path / "photos" / "stories_02.json").write_text("[]")
+    (tmp_path / "overlays_02" / "keeps.json").write_text("[]")
+    (tmp_path / "titles.json").write_text(json.dumps({"1": {"options": []}, "2": {"options": []}}))
+    new = [old[0], {"in_point": 300.0, "out_point": 330.0}]
+    assert core.forget_renumbered(tmp_path, new) == [2]
+    assert (tmp_path / "words" / "01.json").exists() and (tmp_path / "overlays_01").exists()
+    assert not (tmp_path / "words" / "02.json").exists()
+    assert not (tmp_path / "popups" / "02.json").exists()
+    assert not (tmp_path / "chat_02.json").exists()
+    assert not list((tmp_path / "specs").glob("02.*"))
+    assert not list((tmp_path / "clips_1080").glob("02_*"))
+    assert not (tmp_path / "photos" / "stories_02.json").exists()
+    assert not (tmp_path / "overlays_02").exists()
+    assert json.loads((tmp_path / "titles.json").read_text()).keys() == {"1"}
+    assert (tmp_path / "words" / "03.json").exists()
+
+
+def test_a_first_run_forgets_every_number(tmp_path):
+    assert core.forget_renumbered(tmp_path, [{"in_point": 1.0, "out_point": 2.0}]) == [1]
