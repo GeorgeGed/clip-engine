@@ -35,7 +35,6 @@ vendor/remotion-clip08/public/p_*.jpg
 # `src/Root.tsx` imports chat.json, so run build_chat.py before a render.
 jobs/*/chat_*.json
 vendor/remotion-clip08/public/chat.json
-vendor/remotion-clip08/public/badges/
 jobs/*/overlays_*/
 jobs/*/retail/
 web/factory.db

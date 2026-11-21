@@ -1,7 +1,7 @@
 """engine.facecam._live_face: which haar cluster is the streamer."""
 import numpy as np
 
-from engine.facecam import _live_face
+from engine.facecam import _live_face, near
 
 
 def _cluster(rng, n, cx, cy, h, jitter):
@@ -48,3 +48,22 @@ def test_over_a_vod_the_most_frequent_live_face_wins():
     player = _live(rng, 50, 860, 400, 160, 60.0, 2.5)
     assert abs(np.median(_live_face(cam + player, 120, 0.03, 1.0, 0.25, by_count=True)[:, 0]) - 1710) < 20
     assert abs(np.median(_live_face(cam + player, 120, 0.03, 1.0, 0.25)[:, 0]) - 860) < 60
+
+
+def test_near_keeps_only_faces_around_the_webcam():
+    hits = [(1730, 390, 90, 0.9), (860, 400, 160, 2.5), (1900, 560, 80, 1.0)]
+    cam = (1572, 279, 1888, 502)
+    assert [h[0] for h in near(hits, cam)] == [1730, 1900]
+    assert near(hits, None) == hits
+
+
+def test_a_broadcast_closeup_cannot_outscore_the_webcam_near_it():
+    # FNS 2885323336 clip 5: a T1 player held in close-up for the whole clip
+    # is bigger and livelier than the webcam, so the open search picks him.
+    rng = np.random.default_rng(4)
+    cam = _live(rng, 38, 1730, 390, 70, 6.0, 0.6)
+    player = _live(rng, 40, 1065, 385, 260, 30.0, 2.0)
+    open_pick = _live_face(cam + player, 40, 0.03, 1.0, 0.75)
+    assert abs(np.median(open_pick[:, 0]) - 1065) < 60
+    pick = _live_face(near(cam + player, (1572, 279, 1888, 502)), 40, 0.03, 1.0, 0.75)
+    assert abs(np.median(pick[:, 0]) - 1730) < 20
